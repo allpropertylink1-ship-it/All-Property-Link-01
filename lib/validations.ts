@@ -1,0 +1,58 @@
+import { z } from "zod";
+
+export const propertySchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  price: z.coerce.number().positive("Price must be positive"),
+  currency: z.string().default("KES"),
+  propertyType: z.enum(["APARTMENT", "HOUSE", "LAND", "COMMERCIAL"]),
+  status: z.enum(["AVAILABLE", "SOLD", "RENTED"]).default("AVAILABLE"),
+  address: z.string().min(1, "Address is required"),
+  city: z.string().min(1, "City is required"),
+  region: z.string().min(1, "Region is required"),
+  country: z.string().default("Kenya"),
+  bedrooms: z.preprocess(
+    (v) => (v === "" || v === undefined ? undefined : Number(v)),
+    z.number().int().optional()
+  ),
+  bathrooms: z.preprocess(
+    (v) => (v === "" || v === undefined ? undefined : Number(v)),
+    z.number().int().optional()
+  ),
+  area: z.preprocess(
+    (v) => (v === "" || v === undefined ? undefined : Number(v)),
+    z.number().int().optional()
+  ),
+  latitude: z.preprocess(
+    (v) => (v === "" || v === undefined ? undefined : Number(v)),
+    z.number().optional()
+  ),
+  longitude: z.preprocess(
+    (v) => (v === "" || v === undefined ? undefined : Number(v)),
+    z.number().optional()
+  ),
+  features: z.array(z.string()).optional(),
+  images: z.array(z.object({ url: z.string() })).optional(),
+  seoTitle: z.string().optional(),
+  seoDescription: z.string().optional(),
+});
+
+export type PropertyInput = z.infer<typeof propertySchema>;
+
+export const inquirySchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email"),
+  phone: z.string().optional(),
+  message: z.string().min(1, "Message is required"),
+});
+
+export type InquiryInput = z.infer<typeof inquirySchema>;
+
+export const registerSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+export type RegisterInput = z.infer<typeof registerSchema>;
