@@ -59,7 +59,7 @@ export async function respondToInquiry(id: string, responseMessage: string, resp
   });
   if (!inquiry) return { success: false, error: "Inquiry not found" };
 
-  if (inquiry.property.agentId !== (session.user as { id: string }).id) {
+  if (!inquiry.property || inquiry.property.agentId !== (session.user as { id: string }).id) {
     return { success: false, error: "Unauthorized" };
   }
 
@@ -97,7 +97,7 @@ export async function closeInquiry(id: string) {
   });
   if (!inquiry) return { success: false, error: "Inquiry not found" };
 
-  if (inquiry.property.agentId !== (session.user as { id: string }).id) {
+  if (!inquiry.property || inquiry.property.agentId !== (session.user as { id: string }).id) {
     return { success: false, error: "Unauthorized" };
   }
 

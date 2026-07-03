@@ -190,7 +190,7 @@ model Property {
 
 model Inquiry {
   id          String        @id @default(uuid())
-  propertyId  String
+  propertyId  String?
   userId      String?
   name        String
   email       String
@@ -204,7 +204,7 @@ model Inquiry {
 
   createdAt DateTime @default(now())
 
-  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   user     User?    @relation(fields: [userId], references: [id])
 
   @@index([propertyId])

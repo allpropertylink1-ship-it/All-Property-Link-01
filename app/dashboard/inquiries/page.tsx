@@ -54,9 +54,9 @@ export default async function InquiriesPage() {
                 <td className="px-4 py-3 text-text-secondary">
                   {inquiry.email}
                 </td>
-                <td className="px-4 py-3 text-text-secondary">
-                  {inquiry.property.title}
-                </td>
+<td className="px-4 py-3 text-text-secondary">
+                    {inquiry.property?.title || "General inquiry"}
+                  </td>
                 <td className="px-4 py-3">
                   <span
                     className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
