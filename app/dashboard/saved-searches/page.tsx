@@ -3,6 +3,33 @@ import { prisma } from "@/lib/prisma";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { DeleteSearchButton } from "./DeleteSearchButton";
 
+function formatFilters(filters: Record<string, unknown>): string {
+  const labels: Record<string, string> = {
+    city: "City",
+    propertyType: "Type",
+    minPrice: "Min Price",
+    maxPrice: "Max Price",
+    minBedrooms: "Bedrooms",
+    maxBedrooms: "Bedrooms",
+    minArea: "Min Area",
+    maxArea: "Max Area",
+    listingType: "Listing Type",
+    status: "Status",
+    furnished: "Furnished",
+    keyword: "Keyword",
+  };
+
+  const parts: string[] = [];
+
+  for (const [key, value] of Object.entries(filters)) {
+    if (value === undefined || value === null || value === "") continue;
+    const label = labels[key] || key;
+    parts.push(`${label}: ${value}`);
+  }
+
+  return parts.join(" | ") || "No filters";
+}
+
 export default async function SavedSearchesPage() {
   const session = await requireAuth();
   const userId = (session.user as { id: string }).id;
@@ -41,7 +68,7 @@ export default async function SavedSearchesPage() {
             <div>
               <h3 className="font-medium text-text-primary">{search.name}</h3>
               <p className="mt-1 text-sm text-text-secondary">
-                {JSON.stringify(search.filters)}
+                {formatFilters(search.filters as Record<string, unknown>)}
               </p>
               <p className="mt-0.5 text-xs text-text-secondary">
                 Saved on {search.createdAt.toLocaleDateString()}

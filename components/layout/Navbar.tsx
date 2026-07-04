@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getSession } from "@/lib/auth-utils";
+import { MobileMenu } from "./MobileMenu";
 
 export async function Navbar() {
   const session = await getSession();
@@ -21,21 +22,24 @@ export async function Navbar() {
           >
             Browse
           </Link>
-          {user ? (
-            <Link
-              href="/dashboard"
-              className="touch-target inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-text-on-primary hover:bg-primary-700"
-            >
-              Dashboard
-            </Link>
-          ) : (
-            <Link
-              href="/auth/login"
-              className="touch-target inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-text-on-primary hover:bg-primary-700"
-            >
-              Sign in
-            </Link>
-          )}
+          <div className="hidden sm:flex sm:items-center sm:gap-4">
+            {user ? (
+              <Link
+                href="/dashboard"
+                className="touch-target inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-text-on-primary hover:bg-primary-700"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/auth/login"
+                className="touch-target inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-text-on-primary hover:bg-primary-700"
+              >
+                Sign in
+              </Link>
+            )}
+          </div>
+          <MobileMenu user={!!user} />
         </div>
       </div>
     </nav>

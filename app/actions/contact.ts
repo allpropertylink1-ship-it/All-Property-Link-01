@@ -22,8 +22,6 @@ export async function sendContactMessage(formData: FormData) {
         phone: phone || undefined,
         message: `[${subject || "General"}] ${message}`,
         status: "PENDING",
-        propertyId: undefined,
-        userId: undefined,
       },
     });
 

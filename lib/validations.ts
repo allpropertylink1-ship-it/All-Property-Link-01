@@ -32,7 +32,7 @@ export const propertySchema = z.object({
     z.number().optional()
   ),
   features: z.array(z.string()).optional(),
-  images: z.array(z.object({ url: z.string() })).optional(),
+  images: z.array(z.string()).optional(),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
 });

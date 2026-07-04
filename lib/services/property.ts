@@ -12,13 +12,6 @@ export interface PropertyFilters {
   pageSize?: number;
 }
 
-export interface PropertyImage {
-  url: string;
-  alt?: string;
-  order?: number;
-  isPrimary?: boolean;
-}
-
 export async function getProperties(filters: PropertyFilters = {}) {
   const page = filters.page || 1;
   const pageSize = filters.pageSize || 20;

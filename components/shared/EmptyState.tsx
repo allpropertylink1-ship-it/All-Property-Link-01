@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 interface EmptyStateProps {
   title: string;
   description: string;
@@ -18,12 +20,12 @@ export function EmptyState({ title, description, action }: EmptyStateProps) {
         {description}
       </p>
       {action && (
-        <a
+        <Link
           href={action.href}
           className="touch-target inline-flex items-center rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-text-on-primary transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
         >
           {action.label}
-        </a>
+        </Link>
       )}
     </div>
   );

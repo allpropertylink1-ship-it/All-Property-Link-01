@@ -1,15 +1,29 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { updateProperty } from "@/app/actions/properties";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createProperty } from "@/app/actions/properties";
 import PropertyImageUploader from "@/components/property/PropertyImageUploader";
+
+interface PropertyData {
+  title: string;
+  description: string;
+  price: number;
+  propertyType: string;
+  city: string;
+  region: string;
+  address: string;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  area?: number | null;
+  features?: string[];
+  images?: string[];
+}
 
 const listingSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -25,28 +39,39 @@ const listingSchema = z.object({
   features: z.string().optional(),
 });
 
-type ListingFormData = z.infer<typeof listingSchema>;
-
-export function ListingForm() {
+export default function EditListingForm({ propertyId, property }: { propertyId: string; property: PropertyData }) {
   const router = useRouter();
   const [error, setError] = useState("");
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ListingFormData>({
+  const [imageUrls, setImageUrls] = useState<string[]>(property.images || []);
+
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(listingSchema),
+    defaultValues: {
+      title: property.title,
+      description: property.description,
+      price: property.price,
+      propertyType: property.propertyType,
+      city: property.city,
+      region: property.region,
+      address: property.address,
+      bedrooms: property.bedrooms,
+      bathrooms: property.bathrooms,
+      area: property.area,
+      features: property.features?.join(", ") || "",
+    },
   });
 
-  async function onSubmit(data: ListingFormData) {
+  async function onSubmit(data: z.infer<typeof listingSchema>) {
     setError("");
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) formData.append(key, String(value));
     });
-    // Add images
     if (imageUrls.length > 0) {
       formData.append("images", JSON.stringify(imageUrls));
     }
-    const result = await createProperty(formData);
-    if (result?.error) setError("Failed to create listing. Please check your inputs.");
+    const result = await updateProperty(propertyId, formData);
+    if (result?.error) setError("Failed to update listing. Please check your inputs.");
   }
 
   const handleImageUploadComplete = (urls: string[]) => {
@@ -128,7 +153,7 @@ export function ListingForm() {
       </div>
       <div className="flex items-center gap-4 pt-2">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creating..." : "Create listing"}
+          {isSubmitting ? "Updating..." : "Update listing"}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
       </div>

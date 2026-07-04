@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { PropertyImage } from "@/lib/services/property";
+import Image from "next/image";
 
 interface PropertyCardProps {
   slug: string;
@@ -34,10 +34,8 @@ export function PropertyCard({
   images,
   isFeatured,
 }: PropertyCardProps) {
-  const imageList = (Array.isArray(images) ? images : []) as unknown as PropertyImage[];
-  const imageUrl = imageList.length > 0
-    ? imageList[0]?.url || "/placeholder.jpg"
-    : "/placeholder.jpg";
+  const imageUrls = Array.isArray(images) ? images : [];
+  const imageUrl = imageUrls.length > 0 ? imageUrls[0] : "/placeholder.jpg";
 
   return (
     <Link
@@ -50,9 +48,11 @@ export function PropertyCard({
             Featured
           </span>
         )}
-        <img
+        <Image
           src={imageUrl}
           alt={title}
+          width={400}
+          height={300}
           className="h-full w-full object-cover transition-transform group-hover:scale-105"
         />
         <span className="absolute bottom-2 left-2 rounded-lg bg-primary-600 px-3 py-1.5 text-sm font-semibold text-text-on-primary">
@@ -67,9 +67,9 @@ export function PropertyCard({
           {region}, {city}
         </p>
         <div className="flex items-center gap-4 text-xs text-text-secondary">
-          {bedrooms && <span>{bedrooms} beds</span>}
-          {bathrooms && <span>{bathrooms} baths</span>}
-          {area && <span>{area} sqft</span>}
+          {bedrooms != null && bedrooms > 0 && <span>{bedrooms} beds</span>}
+          {bathrooms != null && bathrooms > 0 && <span>{bathrooms} baths</span>}
+          {area != null && area > 0 && <span>{area} sqft</span>}
           <span className="capitalize">{propertyType.toLowerCase()}</span>
         </div>
       </div>

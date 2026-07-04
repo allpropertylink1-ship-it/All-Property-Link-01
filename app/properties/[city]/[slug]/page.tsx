@@ -1,6 +1,6 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getPropertyBySlug } from "@/lib/services/property";
-import type { PropertyImage } from "@/lib/services/property";
 
 interface Props {
   params: { slug: string };
@@ -10,16 +10,18 @@ export default async function PropertyDetailPage({ params }: Props) {
   const property = await getPropertyBySlug(params.slug);
   if (!property) notFound();
 
-  const images = (Array.isArray(property.images) ? property.images : []) as unknown as PropertyImage[];
+  const imageUrls = Array.isArray(property.images) ? property.images : [];
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="mb-8 grid gap-4 sm:grid-cols-2">
-        {images.slice(0, 4).map((img, i) => (
+        {imageUrls.slice(0, 4).map((url, i) => (
           <div key={i} className="aspect-[4/3] overflow-hidden rounded-xl bg-surface-secondary">
-            <img
-              src={img.url || "/placeholder.jpg"}
-              alt={img.alt || property.title}
+            <Image
+              src={url}
+              alt={property.title}
+              width={400}
+              height={300}
               className="h-full w-full object-cover"
             />
           </div>
@@ -98,7 +100,7 @@ export default async function PropertyDetailPage({ params }: Props) {
               </p>
             )}
             <a
-              href={`/properties/${property.city.toLowerCase()}/${property.slug}/inquiry`}
+              href={`/contact?property=${encodeURIComponent(property.title)}`}
               className="touch-target mt-4 flex w-full items-center justify-center rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-text-on-primary hover:bg-primary-700"
             >
               Send inquiry

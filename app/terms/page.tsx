@@ -17,8 +17,7 @@ export default function TermsPage() {
   });
 
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-surface text-text-primary font-body antialiased">
+    <>
         <Navbar />
         <main className="min-h-[calc(100vh-4rem)] flex flex-col">
           <article className="flex-1 w-full max-w-[65ch] mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
@@ -376,7 +375,6 @@ export default function TermsPage() {
           </article>
         </main>
         <Footer />
-      </body>
-    </html>
+    </>
   );
 }
