@@ -2,9 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
 
-export function MobileMenu({ user }: { user: boolean }) {
+const menuItems = [
+  { href: "/", label: "Home" },
+  { href: "/properties", label: "Properties" },
+  { href: "#", label: "Airbnbs" },
+  { href: "#", label: "Fundis" },
+  { href: "#", label: "Services" },
+  { href: "/properties?type=LAND", label: "Plots & Land" },
+  { href: "/about", label: "About" },
+];
+
+export function MobileMenu() {
   const [open, setOpen] = useState(false);
 
   return (
@@ -12,48 +21,70 @@ export function MobileMenu({ user }: { user: boolean }) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="touch-target inline-flex items-center justify-center rounded-lg p-2 text-text-secondary hover:text-text-primary sm:hidden"
+        className="touch-target relative inline-flex items-center justify-center rounded-lg text-secondary md:hidden"
         aria-label={open ? "Close menu" : "Open menu"}
       >
-        {open ? <X size={24} /> : <Menu size={24} />}
+        <div className="flex w-6 flex-col items-center gap-[5px]">
+          <span
+            className={`block h-[2px] w-5 rounded-full bg-current transition-all duration-300 ${
+              open ? "translate-y-[7px] rotate-45" : ""
+            }`}
+          />
+          <span
+            className={`block h-[2px] w-5 rounded-full bg-current transition-all duration-300 ${
+              open ? "opacity-0" : ""
+            }`}
+          />
+          <span
+            className={`block h-[2px] w-5 rounded-full bg-current transition-all duration-300 ${
+              open ? "-translate-y-[7px] -rotate-45" : ""
+            }`}
+          />
+        </div>
       </button>
 
-      {open && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/20 sm:hidden"
+      <div
+        className={`fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 md:hidden ${
+          open ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        onClick={() => setOpen(false)}
+      />
+
+      <div
+        className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-surface-secondary transition-opacity duration-300 md:hidden ${
+          open ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <nav className="flex flex-col items-center gap-6">
+          {menuItems.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              onClick={() => setOpen(false)}
+              className="text-lg font-medium text-secondary transition-colors hover:text-primary"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="absolute bottom-12 flex flex-col items-center gap-4">
+          <Link
+            href="/auth/login"
             onClick={() => setOpen(false)}
-          />
-          <div className="absolute left-0 right-0 top-16 z-50 border-b border-border bg-surface px-4 pb-4 pt-2 shadow-lg sm:hidden">
-            <div className="flex flex-col gap-3">
-              <Link
-                href="/properties"
-                onClick={() => setOpen(false)}
-                className="touch-target rounded-lg px-3 py-2 text-sm font-medium text-text-secondary hover:bg-surface-secondary hover:text-text-primary"
-              >
-                Browse
-              </Link>
-              {user ? (
-                <Link
-                  href="/dashboard"
-                  onClick={() => setOpen(false)}
-                  className="touch-target inline-flex items-center justify-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-text-on-primary hover:bg-primary-700"
-                >
-                  Dashboard
-                </Link>
-              ) : (
-                <Link
-                  href="/auth/login"
-                  onClick={() => setOpen(false)}
-                  className="touch-target inline-flex items-center justify-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-text-on-primary hover:bg-primary-700"
-                >
-                  Sign in
-                </Link>
-              )}
-            </div>
-          </div>
-        </>
-      )}
+            className="text-sm font-medium text-secondary transition-colors hover:text-primary"
+          >
+            Log in
+          </Link>
+          <Link
+            href="/auth/register"
+            onClick={() => setOpen(false)}
+            className="inline-flex items-center justify-center rounded-lg bg-accent-300 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+          >
+            Register
+          </Link>
+        </div>
+      </div>
     </>
   );
 }

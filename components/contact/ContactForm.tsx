@@ -67,8 +67,8 @@ export default function ContactForm() {
             placeholder="Your name"
             {...register('name')}
             className={errors.name
-              ? "border-error-500 focus:border-error-500"
-              : "border-border focus:border-primary-500"}
+              ? "border-error-500 focus:border-error-500 focus:ring-error-500/20"
+              : "border-border focus:border-accent-300 focus:ring-accent-300/20"}
           />
           {errors.name && (
             <p className="mt-1 text-sm text-error-500">{errors.name.message}</p>
@@ -82,8 +82,8 @@ export default function ContactForm() {
             placeholder="you@example.com"
             {...register('email')}
             className={errors.email
-              ? "border-error-500 focus:border-error-500"
-              : "border-border focus:border-primary-500"}
+              ? "border-error-500 focus:border-error-500 focus:ring-error-500/20"
+              : "border-border focus:border-accent-300 focus:ring-accent-300/20"}
           />
           {errors.email && (
             <p className="mt-1 text-sm text-error-500">{errors.email.message}</p>
@@ -98,7 +98,7 @@ export default function ContactForm() {
           type="tel"
           placeholder="Your phone number"
           {...register('phone')}
-          className="border-border focus:border-primary-500"
+          className="border-border focus:border-accent-300 focus:ring-accent-300/20"
         />
       </div>
 
@@ -108,7 +108,7 @@ export default function ContactForm() {
           id="subject"
           placeholder="How can we help you?"
           {...register('subject')}
-          className="border-border focus:border-primary-500"
+          className="border-border focus:border-accent-300 focus:ring-accent-300/20"
         />
       </div>
 
@@ -119,8 +119,8 @@ export default function ContactForm() {
           placeholder="Tell us what you're looking for..."
           {...register('message')}
           className={errors.message
-            ? "border-error-500 focus:border-error-500"
-            : "border-border focus:border-primary-500"}
+            ? "border-error-500 focus:border-error-500 focus:ring-error-500/20"
+            : "border-border focus:border-accent-300 focus:ring-accent-300/20"}
           minRows={5}
         />
         {errors.message && (
@@ -131,22 +131,22 @@ export default function ContactForm() {
       <Button
         type="submit"
         disabled={isSubmitting || !isValid}
-        className="w-full"
+        className="w-full bg-accent-300 text-white hover:bg-accent-400"
       >
         {isSubmitting ? "Sending..." : "Send Message"}
       </Button>
 
       {isSuccess && (
-        <div className="mt-4 p-4 bg-success-50 rounded-lg border border-success-200">
-          <p className="text-success-700">
-            Your message has been sent! We'll get back to you soon.
+        <div className="mt-4 rounded-lg border border-success-500/20 bg-success-50 p-4">
+          <p className="text-sm text-success-700">
+            Your message has been sent! We&apos;ll get back to you soon.
           </p>
         </div>
       )}
 
       {error && (
-        <div className="mt-4 p-4 bg-error-50 rounded-lg border border-error-200">
-          <p className="text-error-700">{error}</p>
+        <div className="mt-4 rounded-lg border border-error-500/20 bg-error-50 p-4">
+          <p className="text-sm text-error-700">{error}</p>
         </div>
       )}
     </form>

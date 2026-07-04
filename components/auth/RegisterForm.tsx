@@ -53,7 +53,7 @@ export function RegisterForm() {
       )}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="firstName" className="block text-sm font-medium text-text-primary">
+          <label htmlFor="firstName" className="block text-sm font-medium text-primary">
             First name
           </label>
           <input
@@ -61,11 +61,12 @@ export function RegisterForm() {
             name="firstName"
             type="text"
             required
-            className="mt-1 block w-full rounded-lg border border-border px-4 py-3 text-text-primary placeholder-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-primary placeholder-secondary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+            style={{ fontSize: "16px" }}
           />
         </div>
         <div>
-          <label htmlFor="lastName" className="block text-sm font-medium text-text-primary">
+          <label htmlFor="lastName" className="block text-sm font-medium text-primary">
             Last name
           </label>
           <input
@@ -73,12 +74,13 @@ export function RegisterForm() {
             name="lastName"
             type="text"
             required
-            className="mt-1 block w-full rounded-lg border border-border px-4 py-3 text-text-primary placeholder-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-primary placeholder-secondary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+            style={{ fontSize: "16px" }}
           />
         </div>
       </div>
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-text-primary">
+        <label htmlFor="email" className="block text-sm font-medium text-primary">
           Email
         </label>
         <input
@@ -87,11 +89,12 @@ export function RegisterForm() {
           type="email"
           autoComplete="email"
           required
-          className="mt-1 block w-full rounded-lg border border-border px-4 py-3 text-text-primary placeholder-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+          className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-primary placeholder-secondary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          style={{ fontSize: "16px" }}
         />
       </div>
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-text-primary">
+        <label htmlFor="password" className="block text-sm font-medium text-primary">
           Password
         </label>
         <input
@@ -101,11 +104,12 @@ export function RegisterForm() {
           autoComplete="new-password"
           required
           minLength={8}
-          className="mt-1 block w-full rounded-lg border border-border px-4 py-3 text-text-primary placeholder-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+          className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-primary placeholder-secondary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          style={{ fontSize: "16px" }}
         />
       </div>
       <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-text-primary">
+        <label htmlFor="confirmPassword" className="block text-sm font-medium text-primary">
           Confirm password
         </label>
         <input
@@ -115,19 +119,20 @@ export function RegisterForm() {
           autoComplete="new-password"
           required
           minLength={8}
-          className="mt-1 block w-full rounded-lg border border-border px-4 py-3 text-text-primary placeholder-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+          className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-primary placeholder-secondary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          style={{ fontSize: "16px" }}
         />
       </div>
       <button
         type="submit"
         disabled={loading}
-        className="touch-target w-full rounded-lg bg-primary-600 px-4 py-3 font-medium text-text-on-primary transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+        className="touch-target w-full rounded-sm bg-accent px-4 py-3 font-medium text-white transition-colors hover:bg-accent-600 focus:outline-none focus:ring-2 focus:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? "Creating account..." : "Create account"}
       </button>
-      <p className="text-center text-sm text-text-secondary">
+      <p className="text-center text-sm text-secondary">
         Already have an account?{" "}
-        <a href="/auth/login" className="font-medium text-primary-600 hover:text-primary-500">
+        <a href="/auth/login" className="font-medium text-accent hover:text-accent-600">
           Sign in
         </a>
       </p>

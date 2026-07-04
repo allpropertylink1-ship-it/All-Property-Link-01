@@ -16,20 +16,30 @@ interface PropertyGridProps {
     images: unknown;
     isFeatured: boolean;
     createdAt: Date;
+    isRent?: boolean;
+    urgencyText?: "Trending" | "Just listed" | "Popular";
+    isVerified?: boolean;
   }[];
+  viewToggle?: "grid" | "list";
 }
 
-export function PropertyGrid({ properties }: PropertyGridProps) {
+export function PropertyGrid({ properties, viewToggle = "grid" }: PropertyGridProps) {
   if (properties.length === 0) {
     return (
       <div className="py-16 text-center">
-        <p className="text-text-secondary">No properties found matching your criteria.</p>
+        <p className="text-text-secondary">No properties found</p>
       </div>
     );
   }
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div
+      className={
+        viewToggle === "grid"
+          ? "grid gap-6 sm:grid-cols-1 lg:grid-cols-2"
+          : "flex flex-col gap-4"
+      }
+    >
       {properties.map((property) => (
         <PropertyCard key={property.id} {...property} />
       ))}

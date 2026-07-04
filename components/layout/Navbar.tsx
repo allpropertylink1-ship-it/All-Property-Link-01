@@ -1,46 +1,55 @@
 import Link from "next/link";
-import { getSession } from "@/lib/auth-utils";
 import { MobileMenu } from "./MobileMenu";
 
-export async function Navbar() {
-  const session = await getSession();
-  const user = session?.user as { name?: string; role?: string } | undefined;
+const navLinks = [
+  { href: "/", label: "Home" },
+  { href: "/properties", label: "Properties" },
+  { href: "#", label: "Airbnbs" },
+  { href: "#", label: "Fundis" },
+  { href: "/properties?type=LAND", label: "Plots & Land" },
+  { href: "/about", label: "About" },
+];
 
+export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-surface/95 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+      <div className="mx-auto flex h-16 max-w-content items-center justify-between px-4">
         <Link
           href="/"
-          className="touch-target font-heading text-xl font-bold text-primary-600"
+          className="font-heading text-xl font-bold tracking-tight text-primary"
         >
-          All Property Link
+          All Property{" "}
+          <span className="text-accent-300">Link</span>
         </Link>
-        <div className="flex items-center gap-4">
-          <Link
-            href="/properties"
-            className="touch-target hidden text-sm font-medium text-text-secondary hover:text-text-primary sm:inline-flex"
-          >
-            Browse
-          </Link>
-          <div className="hidden sm:flex sm:items-center sm:gap-4">
-            {user ? (
-              <Link
-                href="/dashboard"
-                className="touch-target inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-text-on-primary hover:bg-primary-700"
-              >
-                Dashboard
-              </Link>
-            ) : (
-              <Link
-                href="/auth/login"
-                className="touch-target inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-text-on-primary hover:bg-primary-700"
-              >
-                Sign in
-              </Link>
-            )}
-          </div>
-          <MobileMenu user={!!user} />
+
+        <div className="hidden items-center gap-6 md:flex">
+          {navLinks.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              className="text-sm font-medium text-secondary transition-colors hover:text-primary"
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
+
+        <div className="hidden items-center gap-3 md:flex">
+          <Link
+            href="/auth/login"
+            className="touch-target inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-secondary transition-colors hover:text-primary"
+          >
+            Log in
+          </Link>
+          <Link
+            href="/auth/register"
+            className="touch-target inline-flex items-center justify-center rounded-lg bg-accent-300 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+          >
+            Register
+          </Link>
+        </div>
+
+        <MobileMenu />
       </div>
     </nav>
   );
