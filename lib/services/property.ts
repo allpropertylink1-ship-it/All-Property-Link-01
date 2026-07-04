@@ -193,7 +193,7 @@ export async function approveProperty(id: string, reviewerId: string) {
       where: { id: property.agentId },
       select: { email: true },
     });
-    if (agent) {
+    if (agent?.email) {
       await sendEmail(
         agent.email,
         `Your property "${property.title}" has been approved`,
@@ -226,7 +226,7 @@ export async function rejectProperty(id: string, reason: string, reviewerId: str
       where: { id: property.agentId },
       select: { email: true },
     });
-    if (agent) {
+    if (agent?.email) {
       await sendEmail(
         agent.email,
         `Update on "${property.title}"`,
@@ -253,7 +253,7 @@ export async function publishProperty(id: string) {
       where: { id: property.agentId },
       select: { email: true },
     });
-    if (agent) {
+    if (agent?.email) {
       await sendEmail(
         agent.email,
         `Your property "${property.title}" is now live`,

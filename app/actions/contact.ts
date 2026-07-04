@@ -32,11 +32,13 @@ export async function sendContactMessage(formData: FormData) {
     });
 
     const admins = await prisma.user.findMany({
-      where: { role: "ADMIN" },
+      where: { role: "ADMIN", email: { not: null } },
       select: { email: true },
     });
     for (const admin of admins) {
-      await sendEmail(admin.email, "Contact Form Submission", contactFormEmail({ name, email, phone, subject, message }));
+      if (admin.email) {
+        await sendEmail(admin.email, "Contact Form Submission", contactFormEmail({ name, email, phone, subject, message }));
+      }
     }
 
     revalidatePath("/contact");

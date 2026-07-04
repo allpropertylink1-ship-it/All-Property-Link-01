@@ -37,7 +37,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error("[forgot-password] Exception:", error);
     return NextResponse.json({ error: "Failed to send reset email" }, { status: 500 });
   }
 }

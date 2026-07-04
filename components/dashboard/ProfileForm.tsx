@@ -10,7 +10,7 @@ interface ProfileFormProps {
   user: {
     firstName: string;
     lastName: string;
-    email: string;
+    email: string | null;
     phone: string | null;
     avatar: string | null;
   };
@@ -99,7 +99,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         <Input
           id="email"
           name="email"
-          defaultValue={user.email}
+          defaultValue={user.email || ""}
           disabled
           className="cursor-not-allowed opacity-60"
         />

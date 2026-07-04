@@ -41,7 +41,7 @@ export async function sendInquiry(
       where: { id: property.agentId },
       select: { email: true, firstName: true },
     });
-    if (agent) {
+    if (agent?.email) {
       await sendEmail(
         agent.email,
         `New inquiry about ${property.title}`,
@@ -93,7 +93,7 @@ export async function respondToInquiry(
       where: { id: inquiry.userId },
       select: { email: true },
     });
-    if (inquirer) {
+    if (inquirer?.email) {
       await sendEmail(
         inquirer.email,
         `Response to your inquiry about ${inquiry.property.title}`,

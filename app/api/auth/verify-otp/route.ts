@@ -79,7 +79,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error("[verify-otp] Exception:", error);
     return NextResponse.json(
       { error: "Verification failed" },
       { status: 500 }

@@ -12,7 +12,7 @@ interface UserRow {
   id: string;
   firstName: string;
   lastName: string;
-  email: string;
+  email: string | null;
   role: string;
   emailVerified: Date | null;
   phoneVerified: boolean;
@@ -179,10 +179,10 @@ export default function AdminUsersPage() {
                           {user.role === "ADMIN" ? "Make User" : "Make Admin"}
                         </button>
                         <button
-                          onClick={() => toggleUserStatus(user.id, !!user.emailVerified)}
+                          onClick={() => toggleUserStatus(user.id, !!(user.emailVerified || user.phoneVerified))}
                           className="touch-target flex items-center gap-1 rounded-lg bg-warning-500 px-3 py-2 text-sm font-medium text-white hover:bg-warning-600"
                         >
-                          {user.emailVerified ? "Suspend" : "Activate"}
+                          {user.emailVerified || user.phoneVerified ? "Suspend" : "Activate"}
                         </button>
                         <ConfirmDialog
                           trigger={
@@ -191,7 +191,7 @@ export default function AdminUsersPage() {
                             </button>
                           }
                           title="Delete User"
-                          description={`Delete ${user.firstName} ${user.lastName} (${user.email})? This action cannot be undone.`}
+                          description={`Delete ${user.firstName} ${user.lastName}${user.email ? ` (${user.email})` : ""}? This action cannot be undone.`}
                           confirmLabel="Delete"
                           confirmVariant="destructive"
                           onConfirm={() => deleteUser(user.id)}

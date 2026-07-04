@@ -53,7 +53,8 @@ export async function POST(req: Request) {
     );
 
     return NextResponse.json({ success: true, message: "Magic link sent" });
-  } catch {
+  } catch (error) {
+    console.error("[magic-link] Exception:", error);
     return NextResponse.json(
       { error: "Failed to send magic link" },
       { status: 500 }

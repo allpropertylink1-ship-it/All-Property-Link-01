@@ -163,7 +163,7 @@ export async function POST(req: Request) {
         email: email || null,
         phone: phone || null,
         passwordHash,
-        emailVerified: email ? null : new Date(),
+        emailVerified: email ? null : undefined,
         phoneVerified: !phone,
       },
     });
