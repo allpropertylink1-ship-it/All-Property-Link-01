@@ -129,6 +129,18 @@ export function resetPasswordEmail(props: { resetUrl: string }) {
   `);
 }
 
+export function otpEmail(props: { otp: string; destination: string }) {
+  return baseHtml(`
+    <h2 style="margin:0 0 12px;font-family:Sora,Inter,sans-serif;font-size:18px;font-weight:600;color:#286255">Verify your email</h2>
+    <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#2D2A25">Use the code below to verify your email address on All Property Link.</p>
+    <div style="background:#F6F4EF;border-radius:8px;padding:20px;text-align:center;margin:0 0 20px">
+      <span style="font-family:monospace;font-size:32px;font-weight:700;color:#286255;letter-spacing:8px">${props.otp}</span>
+    </div>
+    <p style="margin:0 0 8px;font-size:13px;color:#75716B">This code expires in 10 minutes.</p>
+    <p style="margin:0;font-size:13px;color:#75716B">If you didn&rsquo;t create an account, please ignore this email.</p>
+  `);
+}
+
 export function propertyRejectedEmail(props: { title: string; reason?: string }) {
   return baseHtml(`
     <h2 style="margin:0 0 12px;font-family:Sora,Inter,sans-serif;font-size:18px;font-weight:600;color:#286255">Property Update</h2>

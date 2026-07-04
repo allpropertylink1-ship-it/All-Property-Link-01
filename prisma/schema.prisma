@@ -294,3 +294,21 @@ model PasswordResetToken {
 
   @@map("password_reset_tokens")
 }
+
+enum OtpType {
+  EMAIL_VERIFICATION
+  PHONE_VERIFICATION
+}
+
+model OtpToken {
+  id        String   @id @default(uuid())
+  identifier String  // email or phone number
+  token     String   // 6-digit code
+  type      OtpType
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([identifier, type])
+  @@map("otp_tokens")
+}
