@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const categories = [
@@ -5,28 +6,28 @@ const categories = [
     title: "Properties",
     slug: "/properties",
     count: "1,200+ listings",
-    image: "/categories/properties.jpg",
+    image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&q=80",
     gradient: "from-primary-900/80 via-primary-800/60 to-transparent",
   },
   {
     title: "Airbnbs",
     slug: "#",
     count: "300+ stays",
-    image: "/categories/airbnbs.jpg",
+    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80",
     gradient: "from-primary-900/80 via-primary-800/60 to-transparent",
   },
   {
     title: "Fundis",
     slug: "#",
     count: "500+ professionals",
-    image: "/categories/fundis.jpg",
+    image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80",
     gradient: "from-primary-900/80 via-primary-800/60 to-transparent",
   },
   {
     title: "Plots & Land",
     slug: "/properties?type=LAND",
     count: "400+ plots",
-    image: "/categories/plots.jpg",
+    image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80",
     gradient: "from-primary-900/80 via-primary-800/60 to-transparent",
   },
 ];
@@ -39,7 +40,7 @@ const featuredProperties = [
     badge: "Sale",
     urgency: "Hot Deal",
     verified: true,
-    image: "/featured/property-1.jpg",
+    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&q=80",
   },
   {
     title: "Spacious 4-Bedroom Villa",
@@ -48,7 +49,7 @@ const featuredProperties = [
     badge: "Sale",
     urgency: null,
     verified: true,
-    image: "/featured/property-2.jpg",
+    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80",
   },
   {
     title: "Cozy 2-Bedroom Furnished Unit",
@@ -57,7 +58,7 @@ const featuredProperties = [
     badge: "Rent",
     urgency: "New",
     verified: true,
-    image: "/featured/property-3.jpg",
+    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&q=80",
   },
   {
     title: "Commercial Space on Mombasa Road",
@@ -66,7 +67,7 @@ const featuredProperties = [
     badge: "Rent",
     urgency: null,
     verified: false,
-    image: "/featured/property-4.jpg",
+    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80",
   },
 ];
 
@@ -242,6 +243,13 @@ export default function HomePage() {
                 href={cat.slug}
                 className="reveal group relative flex h-64 items-end overflow-hidden rounded-xl"
               >
+                <Image
+                  src={cat.image}
+                  alt={cat.title}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                />
                 <div
                   className={`absolute inset-0 bg-gradient-to-t ${cat.gradient}`}
                 />
@@ -321,9 +329,13 @@ export default function HomePage() {
                 className="reveal group overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-lg"
               >
                 <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <ImagePlaceholderIcon className="h-10 w-10 text-text-secondary/40" />
-                  </div>
+                  <Image
+                    src={prop.image}
+                    alt={prop.title}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
                   <div className="absolute left-2 top-2 z-10 flex gap-2">
                     <span className="rounded-full bg-accent-300 px-3 py-1 text-xs font-semibold text-white">
                       {prop.badge}
