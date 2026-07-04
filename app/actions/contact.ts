@@ -2,8 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { withRateLimit } from "@/lib/rate-limiter";
 
 export async function sendContactMessage(formData: FormData) {
+  const { allowed } = await withRateLimit({ max: 3, windowMs: 300_000 });
+  if (!allowed) return { success: false, error: "Too many requests. Try again later." };
+
   try {
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;

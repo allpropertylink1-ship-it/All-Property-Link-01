@@ -4,6 +4,9 @@ import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limiter";
+
+const loginRateLimiter = rateLimit({ max: 20, windowMs: 60_000 });
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -22,8 +25,12 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) return null;
+
+        const ip = (req?.headers as Record<string, string>)?.["x-forwarded-for"]?.split(",")[0]?.trim() || (req?.headers as Record<string, string>)?.["x-real-ip"] || "unknown";
+        const { allowed } = loginRateLimiter(ip);
+        if (!allowed) throw new Error("RATE_LIMITED");
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },

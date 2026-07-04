@@ -3,6 +3,7 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { inquirySchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
+import { withRateLimit } from "@/lib/rate-limiter";
 import {
   sendInquiry as sendInquiryService,
   respondToInquiry as respondToInquiryService,
@@ -10,6 +11,8 @@ import {
 } from "@/lib/services/inquiries";
 
 export async function sendInquiry(propertyId: string, formData: FormData) {
+  const { allowed } = await withRateLimit({ max: 5, windowMs: 300_000 });
+  if (!allowed) return { success: false, error: "Too many requests. Try again later." };
   const raw: Record<string, unknown> = {};
   Array.from(formData.entries()).forEach(([key, value]) => { raw[key] = value; });
 

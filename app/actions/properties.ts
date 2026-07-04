@@ -3,6 +3,7 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { propertySchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
+import { withRateLimit } from "@/lib/rate-limiter";
 import {
   createProperty as createPropertyService,
   updateProperty as updatePropertyService,
@@ -20,6 +21,8 @@ function parseForm(formData: FormData) {
 }
 
 export async function createProperty(formData: FormData) {
+  const { allowed } = await withRateLimit({ max: 10, windowMs: 60_000 });
+  if (!allowed) return { success: false, error: "Too many requests. Try again later." };
   const session = await requireAuth();
   const userId = (session.user as { id: string }).id;
   const parsed = propertySchema.safeParse(parseForm(formData));
