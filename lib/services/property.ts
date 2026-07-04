@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import type { PropertyInput } from "@/lib/validations";
 
 export interface PropertyFilters {
   city?: string;
@@ -10,6 +11,47 @@ export interface PropertyFilters {
   query?: string;
   page?: number;
   pageSize?: number;
+}
+
+function slugify(title: string) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$|(-)+/g, "$1");
+}
+
+async function uniqueSlug(base: string) {
+  let slug = base, i = 1;
+  while (await prisma.property.findUnique({ where: { slug } })) {
+    slug = `${base}-${i++}`;
+  }
+  return slug;
+}
+
+function dataToCreate(data: PropertyInput, extra: Record<string, unknown>) {
+  return {
+    title: data.title, description: data.description, price: data.price,
+    currency: data.currency, propertyType: data.propertyType, status: data.status,
+    address: data.address, city: data.city, region: data.region, country: data.country,
+    bedrooms: data.bedrooms, bathrooms: data.bathrooms, area: data.area,
+    latitude: data.latitude, longitude: data.longitude,
+    features: data.features ?? [], seoTitle: data.seoTitle, seoDescription: data.seoDescription,
+    images: (data.images ?? []) as Prisma.InputJsonValue,
+    ...extra,
+  } as Prisma.PropertyUncheckedCreateInput;
+}
+
+function dataToUpdate(data: PropertyInput, extra: Record<string, unknown>) {
+  return {
+    title: data.title, description: data.description, price: data.price,
+    currency: data.currency, propertyType: data.propertyType, status: data.status,
+    address: data.address, city: data.city, region: data.region, country: data.country,
+    bedrooms: data.bedrooms, bathrooms: data.bathrooms, area: data.area,
+    latitude: data.latitude, longitude: data.longitude,
+    features: data.features ?? [], seoTitle: data.seoTitle, seoDescription: data.seoDescription,
+    images: (data.images ?? []) as Prisma.InputJsonValue,
+    ...extra,
+  } as Prisma.PropertyUncheckedUpdateInput;
 }
 
 export async function getProperties(filters: PropertyFilters = {}) {
@@ -24,8 +66,7 @@ export async function getProperties(filters: PropertyFilters = {}) {
   };
 
   if (filters.city) where.city = filters.city;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if (filters.propertyType) where.propertyType = filters.propertyType as any;
+  if (filters.propertyType) where.propertyType = filters.propertyType as Prisma.EnumPropertyTypeFilter["equals"];
   if (filters.bedrooms) where.bedrooms = filters.bedrooms;
   if (filters.minPrice || filters.maxPrice) {
     where.price = {};
@@ -48,20 +89,9 @@ export async function getProperties(filters: PropertyFilters = {}) {
       skip,
       take: pageSize,
       select: {
-        id: true,
-        slug: true,
-        title: true,
-        price: true,
-        currency: true,
-        propertyType: true,
-        city: true,
-        region: true,
-        bedrooms: true,
-        bathrooms: true,
-        area: true,
-        images: true,
-        isFeatured: true,
-        createdAt: true,
+        id: true, slug: true, title: true, price: true, currency: true,
+        propertyType: true, city: true, region: true, bedrooms: true,
+        bathrooms: true, area: true, images: true, isFeatured: true, createdAt: true,
       },
     }),
     prisma.property.count({ where }),
@@ -69,9 +99,7 @@ export async function getProperties(filters: PropertyFilters = {}) {
 
   return {
     properties: properties.map((p) => ({ ...p, price: Number(p.price) })),
-    total,
-    page,
-    pageSize,
+    total, page, pageSize,
     totalPages: Math.ceil(total / pageSize),
   };
 }
@@ -91,5 +119,84 @@ export async function getCities() {
     where: { moderationStatus: "APPROVED", isPublished: true, deletedAt: null },
     _count: { city: true },
     orderBy: { _count: { city: "desc" } },
+  });
+}
+
+export async function createProperty(data: PropertyInput, userId: string) {
+  const slug = await uniqueSlug(slugify(data.title));
+  return prisma.property.create({
+    data: dataToCreate(data, {
+      slug, agentId: userId, moderationStatus: "DRAFT", isPublished: false, version: 1,
+    }),
+  });
+}
+
+export async function updateProperty(
+  id: string,
+  data: PropertyInput,
+  userId: string,
+  userRole: string,
+) {
+  const existing = await prisma.property.findUnique({ where: { id } });
+  if (!existing) return { success: false, error: "Property not found" } as const;
+  if (existing.agentId !== userId && userRole !== "ADMIN") {
+    return { success: false, error: "Unauthorized" } as const;
+  }
+
+  try {
+    await prisma.property.update({
+      where: { id, version: existing.version },
+      data: dataToUpdate(data, { version: { increment: 1 } }),
+    });
+    return { success: true } as const;
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
+      return { success: false, error: "Conflict: modified by another user. Refresh and try again." } as const;
+    }
+    throw e;
+  }
+}
+
+export async function deleteProperty(id: string, userId: string, userRole: string) {
+  const existing = await prisma.property.findUnique({ where: { id } });
+  if (!existing) return { success: false, error: "Property not found" } as const;
+  if (existing.agentId !== userId && userRole !== "ADMIN") {
+    return { success: false, error: "Unauthorized" } as const;
+  }
+  await prisma.property.update({ where: { id }, data: { deletedAt: new Date() } });
+  return { success: true } as const;
+}
+
+export async function approveProperty(id: string, reviewerId: string) {
+  await prisma.property.update({
+    where: { id },
+    data: {
+      moderationStatus: "APPROVED",
+      isPublished: true,
+      publishedAt: new Date(),
+      reviewedAt: new Date(),
+      reviewedBy: reviewerId,
+      version: { increment: 1 },
+    },
+  });
+}
+
+export async function rejectProperty(id: string, reason: string, reviewerId: string) {
+  await prisma.property.update({
+    where: { id },
+    data: {
+      moderationStatus: "REJECTED",
+      rejectionReason: reason,
+      reviewedAt: new Date(),
+      reviewedBy: reviewerId,
+      version: { increment: 1 },
+    },
+  });
+}
+
+export async function publishProperty(id: string) {
+  await prisma.property.update({
+    where: { id },
+    data: { isPublished: true, moderationStatus: "APPROVED", publishedAt: new Date() },
   });
 }
