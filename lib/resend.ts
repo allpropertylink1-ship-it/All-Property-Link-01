@@ -1,10 +1,14 @@
 ﻿import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  if (!process.env.RESEND_API_KEY) return null;
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 export async function sendEmail(to: string, subject: string, html: string) {
-  if (!process.env.RESEND_API_KEY) {
-    console.warn('RESEND_API_KEY is not set. Email sending is disabled in development.');
+  const resend = getResend();
+  if (!resend) {
+    console.warn('RESEND_API_KEY is not set. Email sending is disabled.');
     return { success: true, data: null };
   }
 
