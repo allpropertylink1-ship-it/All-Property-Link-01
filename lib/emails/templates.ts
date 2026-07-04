@@ -141,6 +141,21 @@ export function otpEmail(props: { otp: string; destination: string }) {
   `);
 }
 
+export function magicLinkEmail(props: { magicUrl: string }) {
+  return baseHtml(`
+    <h2 style="margin:0 0 12px;font-family:Sora,Inter,sans-serif;font-size:18px;font-weight:600;color:#286255">Sign in to All Property Link</h2>
+    <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#2D2A25">Click the button below to sign in instantly. This link expires in 15 minutes.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px">
+      <tr>
+        <td style="background:#D49A44;border-radius:6px;padding:12px 24px">
+          <a href="${props.magicUrl}" style="color:#fff;text-decoration:none;font-size:14px;font-weight:600;display:inline-block">Sign in to All Property Link</a>
+        </td>
+      </tr>
+    </table>
+    <p style="margin:0;font-size:13px;color:#75716B">If you didn't request this, please ignore this email.</p>
+  `);
+}
+
 export function propertyRejectedEmail(props: { title: string; reason?: string }) {
   return baseHtml(`
     <h2 style="margin:0 0 12px;font-family:Sora,Inter,sans-serif;font-size:18px;font-weight:600;color:#286255">Property Update</h2>

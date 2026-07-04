@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sendEmail } from "@/lib/resend";
+import { welcomeEmail } from "@/lib/emails/templates";
 
 export async function POST(req: Request) {
   try {
@@ -50,8 +52,24 @@ export async function POST(req: Request) {
         where: { email },
         data: { emailVerified: new Date() },
       });
+
+      const user = await prisma.user.findUnique({
+        where: { email },
+        select: { firstName: true },
+      });
+
+      if (user) {
+        sendEmail(
+          email,
+          "Welcome to All Property Link!",
+          welcomeEmail(user.firstName)
+        );
+      }
     } else if (phone) {
-      const user = await prisma.user.findFirst({ where: { phone } });
+      const user = await prisma.user.findFirst({
+        where: { phone },
+        select: { id: true },
+      });
       if (user) {
         await prisma.user.update({
           where: { id: user.id },

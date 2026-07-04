@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRequestIp } from "@/lib/rate-limiter";
 import { sendEmail } from "@/lib/resend";
+import { sendSms } from "@/lib/africastalking";
 import { otpEmail } from "@/lib/emails/templates";
 
 const resendLimiter = rateLimit({ max: 3, windowMs: 60_000 });
@@ -64,6 +65,10 @@ export async function POST(req: Request) {
         "Verify your email - All Property Link",
         otpEmail({ otp, destination: email })
       );
+    }
+
+    if (phone) {
+      await sendSms(phone, `Your All Property Link OTP is: ${otp}`);
     }
 
     return NextResponse.json({ success: true });

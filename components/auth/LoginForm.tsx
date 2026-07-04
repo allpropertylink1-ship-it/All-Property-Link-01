@@ -9,6 +9,9 @@ export function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [magicEmail, setMagicEmail] = useState("");
+  const [magicSent, setMagicSent] = useState(false);
+  const [magicLoading, setMagicLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -40,6 +43,29 @@ export function LoginForm() {
 
     router.push("/dashboard");
     router.refresh();
+  }
+
+  async function handleMagicLink(e: React.FormEvent) {
+    e.preventDefault();
+    if (!magicEmail) return;
+    setMagicLoading(true);
+    setError("");
+
+    const res = await fetch("/api/auth/magic-link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: magicEmail }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      setError(data.error || "Failed to send magic link");
+      setMagicLoading(false);
+      return;
+    }
+
+    setMagicSent(true);
+    setMagicLoading(false);
   }
 
   return (
@@ -105,7 +131,14 @@ export function LoginForm() {
             placeholder="Enter your password"
           />
         </div>
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setMagicSent(false)}
+            className="text-sm font-medium text-accent-300 hover:text-accent-400"
+          >
+            {magicSent ? "Send again" : "Send magic link"}
+          </button>
           <a
             href="/auth/forgot-password"
             className="text-sm font-medium text-accent-300 hover:text-accent-400"
@@ -113,6 +146,31 @@ export function LoginForm() {
             Forgot password?
           </a>
         </div>
+
+        {magicSent ? (
+          <div className="rounded-lg bg-primary-light px-4 py-3 text-sm text-primary">
+            Magic link sent! Check your email inbox.
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <input
+              type="email"
+              value={magicEmail}
+              onChange={(e) => setMagicEmail(e.target.value)}
+              placeholder="your@email.com"
+              className="block flex-1 rounded-sm border border-border px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+            />
+            <button
+              type="button"
+              onClick={handleMagicLink}
+              disabled={magicLoading || !magicEmail}
+              className="touch-target rounded-sm border border-accent-300 px-4 py-3 text-sm font-medium text-accent-300 transition-colors hover:bg-accent-300/10 disabled:opacity-50"
+            >
+              {magicLoading ? "Sending..." : "Send"}
+            </button>
+          </div>
+        )}
+
         <button
           type="submit"
           disabled={loading}

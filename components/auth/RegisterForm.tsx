@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { PasswordStrength } from "./PasswordStrength";
 
 type ContactMethod = "email" | "phone";
 type Step = "form" | "otp";
@@ -17,7 +18,11 @@ export function RegisterForm() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpDestination, setOtpDestination] = useState("");
   const [resending, setResending] = useState(false);
+  const [password, setPassword] = useState("");
+  const [emailValue, setEmailValue] = useState("");
+  const [emailStatus, setEmailStatus] = useState<"idle" | "checking" | "taken" | "available">("idle");
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const emailTimer = useRef<ReturnType<typeof setTimeout>>();
 
   function handleOtpChange(index: number, value: string) {
     if (value && !/^\d$/.test(value)) return;
@@ -35,13 +40,37 @@ export function RegisterForm() {
     }
   }
 
+  const checkEmail = useCallback(async (email: string) => {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailStatus("idle");
+      return;
+    }
+    setEmailStatus("checking");
+    try {
+      const res = await fetch(`/api/auth/check-email?email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      setEmailStatus(data.available ? "available" : "taken");
+    } catch {
+      setEmailStatus("idle");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (emailTimer.current) clearTimeout(emailTimer.current);
+    if (contactMethod === "email" && emailValue) {
+      emailTimer.current = setTimeout(() => checkEmail(emailValue), 400);
+    }
+    return () => {
+      if (emailTimer.current) clearTimeout(emailTimer.current);
+    };
+  }, [emailValue, contactMethod, checkEmail]);
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     const form = new FormData(e.currentTarget);
-    const password = form.get("password") as string;
     const confirmPassword = form.get("confirmPassword") as string;
     const firstName = form.get("firstName") as string;
     const lastName = form.get("lastName") as string;
@@ -90,7 +119,7 @@ export function RegisterForm() {
 
     if (data.requiresOtp) {
       setFormData({ firstName, lastName, email, phone });
-      setOtpDestination(data.maskedDestination || email);
+      setOtpDestination(data.maskedDestination || email || phone);
       setStep("otp");
       setLoading(false);
     } else {
@@ -165,7 +194,7 @@ export function RegisterForm() {
               <path d="M9 3v3" />
             </svg>
           </div>
-          <h2 className="font-heading text-xl font-bold text-text-primary">Verify your email</h2>
+          <h2 className="font-heading text-xl font-bold text-text-primary">Verify your {contactMethod === "email" ? "email" : "phone"}</h2>
           <p className="mt-2 text-sm text-text-secondary">
             Enter the 6-digit code sent to <strong className="text-text-primary">{otpDestination}</strong>
           </p>
@@ -200,7 +229,7 @@ export function RegisterForm() {
           disabled={loading || otp.join("").length !== 6}
           className="touch-target w-full rounded-sm bg-accent-300 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-300/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? "Verifying..." : "Verify email"}
+          {loading ? "Verifying..." : `Verify ${contactMethod === "email" ? "email" : "phone"}`}
         </button>
 
         <p className="text-center text-sm text-text-secondary">
@@ -310,16 +339,31 @@ export function RegisterForm() {
         {contactMethod === "email" ? (
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-text-primary">Email</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
-              style={{ fontSize: "16px" }}
-              placeholder="you@example.com"
-            />
+            <div className="relative mt-1">
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={emailValue}
+                onChange={(e) => setEmailValue(e.target.value)}
+                className="block w-full rounded-sm border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+                style={{ fontSize: "16px" }}
+                placeholder="you@example.com"
+              />
+              {emailStatus === "checking" && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent-300 border-t-transparent inline-block" />
+                </span>
+              )}
+              {emailStatus === "taken" && (
+                <p className="mt-1 text-xs text-error-500">Email already registered</p>
+              )}
+              {emailStatus === "available" && (
+                <p className="mt-1 text-xs text-primary">Email available</p>
+              )}
+            </div>
           </div>
         ) : (
           <div>
@@ -353,9 +397,12 @@ export function RegisterForm() {
             autoComplete="new-password"
             required
             minLength={8}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
             style={{ fontSize: "16px" }}
           />
+          <PasswordStrength password={password} />
         </div>
 
         <div>

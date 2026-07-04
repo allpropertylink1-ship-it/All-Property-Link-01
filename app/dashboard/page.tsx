@@ -1,5 +1,6 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
 import { Home, Building2, MessageSquare, Bookmark } from "lucide-react";
 import Link from "next/link";
 
@@ -55,6 +56,16 @@ const statCards = [
 export default async function DashboardPage() {
   const session = await requireAuth();
   const userId = (session.user as { id: string }).id;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { onboardingComplete: true },
+  });
+
+  if (user && !user.onboardingComplete) {
+    redirect("/dashboard/onboarding");
+  }
+
   const stats = await getStats(userId);
 
   return (

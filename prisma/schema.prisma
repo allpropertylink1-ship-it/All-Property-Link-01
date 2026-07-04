@@ -79,6 +79,14 @@ model User {
   twoFactorSecret   String?
   twoFactorEnabled  Boolean   @default(false)
 
+  location         String?
+  propertyInterest String[]
+  isAgent          Boolean   @default(false)
+  agentLicense     String?
+  agencyName       String?
+  notificationPrefs Json?
+  onboardingComplete Boolean @default(false)
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
@@ -92,6 +100,7 @@ model User {
   notifications    Notification[]
   favorites        Favorite[]
   refreshTokens    RefreshToken[]
+  magicLinkTokens  MagicLinkToken[]
 
   @@map("users")
 }
@@ -311,4 +320,19 @@ model OtpToken {
 
   @@index([identifier, type])
   @@map("otp_tokens")
+}
+
+model MagicLinkToken {
+  id        String    @id @default(uuid())
+  email     String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [email], references: [email])
+
+  @@index([email])
+  @@index([token])
+  @@map("magic_link_tokens")
 }

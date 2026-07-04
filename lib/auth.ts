@@ -36,7 +36,31 @@ export const authOptions: NextAuthOptions = {
           where: { email: credentials.email },
         });
 
-        if (!user || !user.passwordHash) return null;
+        if (!user) return null;
+
+        if (credentials.password === "__MAGIC_LINK__") {
+          const recentToken = await prisma.magicLinkToken.findFirst({
+            where: {
+              email: credentials.email,
+              usedAt: { gt: new Date(Date.now() - 30000) },
+            },
+          });
+          if (!recentToken) return null;
+
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { lastLogin: new Date() },
+          });
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: `${user.firstName} ${user.lastName}`,
+            role: user.role,
+          };
+        }
+
+        if (!user.passwordHash) return null;
         if (user.lockedUntil && user.lockedUntil > new Date()) throw new Error("ACCOUNT_LOCKED");
 
         const isValid = await bcrypt.compare(
