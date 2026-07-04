@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import type { InquiryInput } from "@/lib/validations";
+import { sendEmail } from "@/lib/resend";
+import { newInquiryEmail, inquiryResponseEmail } from "@/lib/emails/templates";
 
 export async function sendInquiry(
   propertyId: string,
@@ -34,6 +36,18 @@ export async function sendInquiry(
         link: `/dashboard/inquiries/${inquiry.id}`,
       } as Prisma.NotificationUncheckedCreateInput,
     });
+
+    const agent = await prisma.user.findUnique({
+      where: { id: property.agentId },
+      select: { email: true, firstName: true },
+    });
+    if (agent) {
+      await sendEmail(
+        agent.email,
+        `New inquiry about ${property.title}`,
+        newInquiryEmail({ propertyTitle: property.title, name: data.name, email: data.email, phone: data.phone, message: data.message }),
+      );
+    }
   }
 
   return { success: true } as const;
@@ -47,7 +61,7 @@ export async function respondToInquiry(
 ) {
   const inquiry = await prisma.inquiry.findUnique({
     where: { id },
-    include: { property: { select: { agentId: true } } },
+    include: { property: { select: { agentId: true, title: true } } },
   });
   if (!inquiry) return { success: false, error: "Inquiry not found" } as const;
   if (!inquiry.property || inquiry.property.agentId !== userId) {
@@ -74,6 +88,18 @@ export async function respondToInquiry(
         link: `/properties/${inquiry.propertyId}`,
       } as Prisma.NotificationUncheckedCreateInput,
     });
+
+    const inquirer = await prisma.user.findUnique({
+      where: { id: inquiry.userId },
+      select: { email: true },
+    });
+    if (inquirer) {
+      await sendEmail(
+        inquirer.email,
+        `Response to your inquiry about ${inquiry.property.title}`,
+        inquiryResponseEmail({ propertyTitle: inquiry.property.title, responseMessage }),
+      );
+    }
   }
 
   return { success: true } as const;

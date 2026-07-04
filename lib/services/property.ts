@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import type { PropertyInput } from "@/lib/validations";
+import { sendEmail } from "@/lib/resend";
+import { propertyApprovedEmail, propertyRejectedEmail } from "@/lib/emails/templates";
 
 export interface PropertyFilters {
   city?: string;
@@ -168,6 +170,12 @@ export async function deleteProperty(id: string, userId: string, userRole: strin
 }
 
 export async function approveProperty(id: string, reviewerId: string) {
+  const property = await prisma.property.findUnique({
+    where: { id },
+    select: { title: true, agentId: true },
+  });
+  if (!property) return;
+
   await prisma.property.update({
     where: { id },
     data: {
@@ -179,9 +187,29 @@ export async function approveProperty(id: string, reviewerId: string) {
       version: { increment: 1 },
     },
   });
+
+  if (property.agentId) {
+    const agent = await prisma.user.findUnique({
+      where: { id: property.agentId },
+      select: { email: true },
+    });
+    if (agent) {
+      await sendEmail(
+        agent.email,
+        `Your property "${property.title}" has been approved`,
+        propertyApprovedEmail({ title: property.title }),
+      );
+    }
+  }
 }
 
 export async function rejectProperty(id: string, reason: string, reviewerId: string) {
+  const property = await prisma.property.findUnique({
+    where: { id },
+    select: { title: true, agentId: true },
+  });
+  if (!property) return;
+
   await prisma.property.update({
     where: { id },
     data: {
@@ -192,11 +220,45 @@ export async function rejectProperty(id: string, reason: string, reviewerId: str
       version: { increment: 1 },
     },
   });
+
+  if (property.agentId) {
+    const agent = await prisma.user.findUnique({
+      where: { id: property.agentId },
+      select: { email: true },
+    });
+    if (agent) {
+      await sendEmail(
+        agent.email,
+        `Update on "${property.title}"`,
+        propertyRejectedEmail({ title: property.title, reason }),
+      );
+    }
+  }
 }
 
 export async function publishProperty(id: string) {
+  const property = await prisma.property.findUnique({
+    where: { id },
+    select: { title: true, agentId: true },
+  });
+  if (!property) return;
+
   await prisma.property.update({
     where: { id },
     data: { isPublished: true, moderationStatus: "APPROVED", publishedAt: new Date() },
   });
+
+  if (property.agentId) {
+    const agent = await prisma.user.findUnique({
+      where: { id: property.agentId },
+      select: { email: true },
+    });
+    if (agent) {
+      await sendEmail(
+        agent.email,
+        `Your property "${property.title}" is now live`,
+        propertyApprovedEmail({ title: property.title }),
+      );
+    }
+  }
 }

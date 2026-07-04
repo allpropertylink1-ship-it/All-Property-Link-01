@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRequestIp } from "@/lib/rate-limiter";
+import { sendEmail } from "@/lib/resend";
+import { welcomeEmail } from "@/lib/emails/templates";
 
 const registerLimiter = rateLimit({ max: 3, windowMs: 60_000 });
 
@@ -45,6 +47,8 @@ export async function POST(req: Request) {
         passwordHash,
       },
     });
+
+    await sendEmail(email, "Welcome to All Property Link", welcomeEmail(firstName));
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch {

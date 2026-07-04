@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { withRateLimit } from "@/lib/rate-limiter";
+import { sendEmail } from "@/lib/resend";
+import { contactFormEmail } from "@/lib/emails/templates";
 
 export async function sendContactMessage(formData: FormData) {
   const { allowed } = await withRateLimit({ max: 3, windowMs: 300_000 });
@@ -28,6 +30,14 @@ export async function sendContactMessage(formData: FormData) {
         status: "PENDING",
       },
     });
+
+    const admins = await prisma.user.findMany({
+      where: { role: "ADMIN" },
+      select: { email: true },
+    });
+    for (const admin of admins) {
+      await sendEmail(admin.email, "Contact Form Submission", contactFormEmail({ name, email, phone, subject, message }));
+    }
 
     revalidatePath("/contact");
     return { success: true };
