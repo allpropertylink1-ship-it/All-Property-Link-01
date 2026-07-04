@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Sora, DM_Sans } from "next/font/google";
 import { Navbar } from "@/components/layout/Navbar";
+import { BottomNav } from "@/components/layout/BottomNav";
 import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
@@ -30,7 +31,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${sora.variable} ${dmSans.variable} flex min-h-screen flex-col antialiased`}>
         <Navbar />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 pb-20 md:pb-0">{children}</main>
+        <BottomNav />
         <Footer />
       </body>
     </html>
