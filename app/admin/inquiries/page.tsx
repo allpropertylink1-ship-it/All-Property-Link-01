@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { getInquiries, respondToInquiry, closeInquiry, viewInquiry } from "./actions";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 
 interface InquiryRow {
   id: string;
@@ -161,21 +162,33 @@ export default function AdminInquiriesPage() {
                             >
                               Respond
                             </button>
-                            <button
-                              onClick={() => closeInquiry(inq.id)}
-                              className="touch-target flex items-center gap-1 rounded-lg bg-error-500 px-3 py-2 text-sm font-medium text-white hover:bg-error-600"
-                            >
-                              Close
-                            </button>
+                            <ConfirmDialog
+                              trigger={
+                                <button className="touch-target flex items-center gap-1 rounded-lg bg-error-500 px-3 py-2 text-sm font-medium text-white hover:bg-error-600">
+                                  Close
+                                </button>
+                              }
+                              title="Close Inquiry"
+                              description={`Close inquiry from ${inq.name}? This action cannot be undone.`}
+                              confirmLabel="Close"
+                              confirmVariant="destructive"
+                              onConfirm={() => closeInquiry(inq.id)}
+                            />
                           </>
                         )}
                         {(inq.status === "READ" || inq.status === "RESPONDED") && (
-                          <button
-                            onClick={() => closeInquiry(inq.id)}
-                            className="touch-target flex items-center gap-1 rounded-lg bg-error-500 px-3 py-2 text-sm font-medium text-white hover:bg-error-600"
-                          >
-                            Close
-                          </button>
+                          <ConfirmDialog
+                            trigger={
+                              <button className="touch-target flex items-center gap-1 rounded-lg bg-error-500 px-3 py-2 text-sm font-medium text-white hover:bg-error-600">
+                                Close
+                              </button>
+                            }
+                            title="Close Inquiry"
+                            description={`Close inquiry from ${inq.name}? This action cannot be undone.`}
+                            confirmLabel="Close"
+                            confirmVariant="destructive"
+                            onConfirm={() => closeInquiry(inq.id)}
+                          />
                         )}
                         <button
                           onClick={() => viewInquiry(inq.id)}

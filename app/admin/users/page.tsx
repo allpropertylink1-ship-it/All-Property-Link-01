@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import Image from "next/image";
 import { getUsers, updateUserRole, toggleUserStatus, deleteUser } from "./actions";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 
 interface UserRow {
   id: string;
@@ -183,12 +184,18 @@ export default function AdminUsersPage() {
                         >
                           {user.emailVerified ? "Suspend" : "Activate"}
                         </button>
-                        <button
-                          onClick={() => deleteUser(user.id)}
-                          className="touch-target flex items-center gap-1 rounded-lg bg-error-500 px-3 py-2 text-sm font-medium text-white hover:bg-error-600"
-                        >
-                          Delete
-                        </button>
+                        <ConfirmDialog
+                          trigger={
+                            <button className="touch-target flex items-center gap-1 rounded-lg bg-error-500 px-3 py-2 text-sm font-medium text-white hover:bg-error-600">
+                              Delete
+                            </button>
+                          }
+                          title="Delete User"
+                          description={`Delete ${user.firstName} ${user.lastName} (${user.email})? This action cannot be undone.`}
+                          confirmLabel="Delete"
+                          confirmVariant="destructive"
+                          onConfirm={() => deleteUser(user.id)}
+                        />
                       </div>
                     </td>
                   </tr>

@@ -6,6 +6,7 @@ import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getProperties, approveProperty, rejectProperty, togglePublish, viewProperty } from "@/lib/admin-actions";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 
 interface PropertyRow {
   id: string;
@@ -206,22 +207,34 @@ export default function AdminListingsPage() {
                             >
                               Approve
                             </button>
-                            <button
-                              onClick={() => rejectProperty(prop.id)}
-                              className="touch-target flex items-center gap-1 rounded-lg bg-error-500 px-3 py-2 text-sm font-medium text-white hover:bg-error-600"
-                            >
-                              Reject
-                            </button>
+                            <ConfirmDialog
+                              trigger={
+                                <button className="touch-target flex items-center gap-1 rounded-lg bg-error-500 px-3 py-2 text-sm font-medium text-white hover:bg-error-600">
+                                  Reject
+                                </button>
+                              }
+                              title="Reject Property"
+                              description={`Are you sure you want to reject "${prop.title}"?`}
+                              confirmLabel="Reject"
+                              confirmVariant="destructive"
+                              onConfirm={() => rejectProperty(prop.id)}
+                            />
                           </>
                         )}
                         {prop.isPublished && (
                           <>
-                            <button
-                              onClick={() => togglePublish(prop.id, false)}
-                              className="touch-target flex items-center gap-1 rounded-lg bg-warning-500 px-3 py-2 text-sm font-medium text-white hover:bg-warning-600"
-                            >
-                              Unpublish
-                            </button>
+                            <ConfirmDialog
+                              trigger={
+                                <button className="touch-target flex items-center gap-1 rounded-lg bg-warning-500 px-3 py-2 text-sm font-medium text-white hover:bg-warning-600">
+                                  Unpublish
+                                </button>
+                              }
+                              title="Unpublish Property"
+                              description={`Are you sure you want to unpublish "${prop.title}"? It will no longer be visible to users.`}
+                              confirmLabel="Unpublish"
+                              confirmVariant="destructive"
+                              onConfirm={() => togglePublish(prop.id, false)}
+                            />
                           </>
                         )}
                         {!prop.isPublished && prop.moderationStatus === "APPROVED" && (
