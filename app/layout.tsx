@@ -19,8 +19,16 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "All Property Link — Kenya's Marketplace",
+  title: { default: "All Property Link — Kenya's Marketplace", template: "%s | All Property Link" },
   description: "Kenya's most reliable marketplace connecting you to properties, short-term stays, trusted fundis, and service providers across the country.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://allpropertylink.vercel.app"),
+  openGraph: {
+    title: "All Property Link — Kenya's Marketplace",
+    description: "Kenya's most reliable marketplace connecting you to properties, short-term stays, trusted fundis, and service providers across the country.",
+    type: "website",
+    locale: "en_KE",
+    siteName: "All Property Link",
+  },
 };
 
 export default function RootLayout({
@@ -36,6 +44,29 @@ export default function RootLayout({
         <CookieConsent />
         <BottomNav />
         <Footer />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "All Property Link",
+              url: "https://allpropertylink.vercel.app",
+              logo: "https://allpropertylink.vercel.app/favicon.ico",
+              description: "Kenya's most reliable marketplace connecting you to properties, short-term stays, trusted fundis, and service providers across the country.",
+              contactPoint: {
+                "@type": "ContactPoint",
+                contactType: "customer service",
+                email: "info@allpropertylink.com",
+              },
+              sameAs: [
+                "https://facebook.com/allpropertylink",
+                "https://twitter.com/allpropertylink",
+                "https://instagram.com/allpropertylink",
+              ],
+            }),
+          }}
+        />
       </body>
     </html>
   );

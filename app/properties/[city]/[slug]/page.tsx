@@ -14,8 +14,34 @@ export default async function PropertyDetailPage({ params }: Props) {
   const rawImages = Array.isArray(property.images) ? property.images : [];
   const imageUrls = rawImages.filter((u): u is string => typeof u === "string");
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    name: property.title,
+    description: property.description,
+    url: `https://allpropertylink.vercel.app/properties/${encodeURIComponent(property.city.toLowerCase())}/${property.slug}`,
+    image: imageUrls[0],
+    offers: {
+      "@type": "Offer",
+      price: Number(property.price),
+      priceCurrency: property.currency,
+      availability: "https://schema.org/InStock",
+    },
+    ...(property.bedrooms && { numberOfBedrooms: property.bedrooms }),
+    ...(property.bathrooms && { numberOfBathrooms: property.bathrooms }),
+    ...(property.area && { floorSize: { "@type": "QuantitativeValue", value: property.area, unitCode: "SQFT" } }),
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: property.city,
+      addressRegion: property.region,
+      addressCountry: property.country,
+    },
+  };
+
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="mb-8 grid gap-4 sm:grid-cols-2">
         {imageUrls.slice(0, 4).map((url, i) => (
           <div key={i} className="aspect-[4/3] overflow-hidden rounded-xl bg-surface-secondary">
@@ -119,5 +145,6 @@ export default async function PropertyDetailPage({ params }: Props) {
         </div>
       </div>
     </div>
+    </>
   );
 }
