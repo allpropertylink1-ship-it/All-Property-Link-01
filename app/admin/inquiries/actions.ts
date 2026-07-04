@@ -1,13 +1,10 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth-utils";
+import { requireRole } from "@/lib/auth-utils";
 
 export async function getInquiries(filter: string, page: number) {
-  const session = await requireAuth();
-  if (session.user.role !== "ADMIN") {
-    return { total: 0, data: [] };
-  }
+  await requireRole(["ADMIN"]);
 
   const where: Record<string, unknown> = {};
 
@@ -49,10 +46,7 @@ export async function getInquiries(filter: string, page: number) {
 }
 
 export async function respondToInquiry(inquiryId: string) {
-  const session = await requireAuth();
-  if (session.user.role !== "ADMIN") {
-    return { success: false, error: "Unauthorized" };
-  }
+  await requireRole(["ADMIN"]);
 
   try {
     await prisma.inquiry.update({
@@ -71,10 +65,7 @@ export async function respondToInquiry(inquiryId: string) {
 }
 
 export async function closeInquiry(inquiryId: string) {
-  const session = await requireAuth();
-  if (session.user.role !== "ADMIN") {
-    return { success: false, error: "Unauthorized" };
-  }
+  await requireRole(["ADMIN"]);
 
   try {
     await prisma.inquiry.update({

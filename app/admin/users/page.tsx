@@ -7,11 +7,23 @@ import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import Image from "next/image";
 import { getUsers, updateUserRole, toggleUserStatus, deleteUser } from "./actions";
 
+interface UserRow {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  emailVerified: Date | null;
+  phoneVerified: boolean;
+  createdAt: Date;
+  avatar: string | null;
+}
+
 export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
-  const [users, setUsers] = useState<unknown[]>([]);
+  const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchUsers = useCallback(async () => {

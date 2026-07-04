@@ -1,13 +1,10 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth-utils";
+import { requireRole } from "@/lib/auth-utils";
 
 export async function getUsers(search: string, page: number) {
-  const session = await requireAuth();
-  if (session.user.role !== "ADMIN") {
-    return { count: 0, users: [], error: "Unauthorized" };
-  }
+  await requireRole(["ADMIN"]);
 
   const where = search
     ? {
@@ -44,10 +41,7 @@ export async function getUsers(search: string, page: number) {
 }
 
 export async function updateUserRole(userId: string, role: string) {
-  const session = await requireAuth();
-  if (session.user.role !== "ADMIN") {
-    return { success: false, error: "Unauthorized" };
-  }
+  await requireRole(["ADMIN"]);
 
   try {
     await prisma.user.update({
@@ -61,16 +55,13 @@ export async function updateUserRole(userId: string, role: string) {
 }
 
 export async function toggleUserStatus(userId: string, suspend: boolean) {
-  const session = await requireAuth();
-  if (session.user.role !== "ADMIN") {
-    return { success: false, error: "Unauthorized" };
-  }
+  await requireRole(["ADMIN"]);
 
   try {
     await prisma.user.update({
       where: { id: userId },
       data: {
-        emailVerified: !suspend,
+        emailVerified: suspend ? null : new Date(),
         phoneVerified: !suspend,
         lockedUntil: suspend ? new Date(Date.now() + 24 * 60 * 60 * 1000) : null,
       },
@@ -82,10 +73,7 @@ export async function toggleUserStatus(userId: string, suspend: boolean) {
 }
 
 export async function deleteUser(userId: string) {
-  const session = await requireAuth();
-  if (session.user.role !== "ADMIN") {
-    return { success: false, error: "Unauthorized" };
-  }
+  await requireRole(["ADMIN"]);
 
   try {
     await prisma.user.update({

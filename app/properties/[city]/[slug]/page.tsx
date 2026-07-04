@@ -10,7 +10,8 @@ export default async function PropertyDetailPage({ params }: Props) {
   const property = await getPropertyBySlug(params.slug);
   if (!property) notFound();
 
-  const imageUrls = Array.isArray(property.images) ? property.images : [];
+  const rawImages = Array.isArray(property.images) ? property.images : [];
+  const imageUrls = rawImages.filter((u): u is string => typeof u === "string");
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">

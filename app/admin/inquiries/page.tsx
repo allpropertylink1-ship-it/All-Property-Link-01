@@ -6,11 +6,22 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { getInquiries, respondToInquiry, closeInquiry, viewInquiry } from "./actions";
 
+interface InquiryRow {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  message: string;
+  status: string;
+  createdAt: Date;
+  property: { title: string; id: string } | null;
+}
+
 export default function AdminInquiriesPage() {
   const [filter, setFilter] = useState<"all" | "pending" | "read" | "responded" | "closed">("all");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [inquiries, setInquiries] = useState<unknown[]>([]);
+  const [inquiries, setInquiries] = useState<InquiryRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchInquiries = useCallback(async () => {
@@ -46,7 +57,7 @@ export default function AdminInquiriesPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          {["all", "pending", "read", "responded", "closed"].map((f) => (
+          {(["all", "pending", "read", "responded", "closed"] as const).map((f) => (
             <button
               key={f}
               onClick={() => handleFilterChange(f)}

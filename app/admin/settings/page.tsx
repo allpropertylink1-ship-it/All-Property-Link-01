@@ -1,4 +1,5 @@
-import { requireRole, requireAuth } from "@/lib/auth-utils";
+import { requireRole } from "@/lib/auth-utils";
+import { saveSettings } from "@/lib/admin-actions";
 
 export default async function AdminSettingsPage() {
   await requireRole(["ADMIN"]);
@@ -125,28 +126,4 @@ export default async function AdminSettingsPage() {
       </form>
     </div>
   );
-}
-
-export async function saveSettings(formData: FormData) {
-  "use server";
-
-  const session = await requireAuth();
-  if (!session?.user || session.user.role !== "ADMIN") {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  const data = {
-    platformName: formData.get("platformName"),
-    platformUrl: formData.get("platformUrl"),
-    contactEmail: formData.get("contactEmail"),
-    fromName: formData.get("fromName"),
-    fromEmail: formData.get("fromEmail"),
-    replyTo: formData.get("replyTo"),
-    businessNumber: formData.get("businessNumber"),
-    responseTime: formData.get("responseTime"),
-  };
-
-  // In a real implementation, this would save to a settings table or update config
-  // For now, we'll just return success
-  return { success: true, data };
 }

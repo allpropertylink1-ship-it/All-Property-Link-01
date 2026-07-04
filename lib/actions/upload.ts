@@ -33,7 +33,7 @@ export async function uploadImage(formData: FormData) {
     const buffer = Buffer.from(bytes);
 
     // Upload to Cloudinary
-    const result = await new Promise((resolve, reject) => {
+    const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: "property-listings",
@@ -45,7 +45,8 @@ export async function uploadImage(formData: FormData) {
         },
         (error, result) => {
           if (error) reject(error);
-          else resolve(result);
+          else if (result) resolve(result);
+          else reject(new Error("Upload failed"));
         }
       );
       uploadStream.end(buffer);

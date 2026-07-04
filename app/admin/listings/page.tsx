@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { getProperties, approveProperty, rejectProperty, togglePublish, viewProperty } from "@/lib/admin-actions";
 
 interface PropertyRow {
   id: string;
@@ -34,7 +35,7 @@ export default function AdminListingsPage() {
       setProperties([]);
       const result = await getProperties(filter, page);
       setTotal(result.total);
-      setProperties(result.properties);
+      setProperties(result.properties as unknown as PropertyRow[]);
       setLoading(false);
     };
     fetchProperties();
@@ -65,7 +66,7 @@ export default function AdminListingsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          {["pending", "approved", "rejected", "expired", "all"].map((f) => (
+          {(["pending", "approved", "rejected", "expired", "all"] as const).map((f) => (
             <button
               key={f}
               onClick={() => handleFilterChange(f)}
@@ -250,149 +251,3 @@ export default function AdminListingsPage() {
   );
 }
 
-// Server Actions for property management
-
-export async function getProperties(filter: string, page: number) {
-  "use server";
-
-  const { prisma } = await import("@/lib/prisma");
-  const { requireAuth } = await import("@/lib/auth-utils");
-
-  const session = await requireAuth();
-  if (!session?.user || session.user.role !== "ADMIN") {
-    return { properties: [], total: 0 };
-  }
-
-  const where: Record<string, unknown> = { deletedAt: null };
-  if (filter === "pending") {
-    where.moderationStatus = "PENDING_REVIEW";
-  } else if (filter === "approved") {
-    where.moderationStatus = "APPROVED";
-    where.isPublished = true;
-  } else if (filter === "rejected") {
-    where.moderationStatus = "REJECTED";
-  } else if (filter === "expired") {
-    where.moderationStatus = "EXPIRED";
-  }
-
-  const [count, data] = await Promise.all([
-    prisma.property.count({ where }),
-    prisma.property.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip: (page - 1) * 20,
-      take: 20,
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        price: true,
-        currency: true,
-        propertyType: true,
-        city: true,
-        moderationStatus: true,
-        isPublished: true,
-        createdAt: true,
-        agent: { select: { firstName: true, lastName: true, avatar: true } },
-      },
-    }),
-  ]);
-
-  return { total: count, properties: data };
-}
-
-export async function approveProperty(propertyId: string) {
-  "use server";
-
-  const { prisma } = await import("@/lib/prisma");
-  const { requireAuth } = await import("@/lib/auth-utils");
-
-  const session = await requireAuth();
-  if (!session?.user || session.user.role !== "ADMIN") {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  try {
-    await prisma.property.update({
-      where: { id: propertyId },
-      data: {
-        moderationStatus: "APPROVED",
-        reviewedAt: new Date(),
-        reviewedBy: session.user.id,
-        isPublished: true,
-        publishedAt: new Date(),
-        version: { increment: 1 },
-      },
-    });
-    return { success: true };
-  } catch {
-    return { success: false, error: "Failed to approve property" };
-  }
-}
-
-export async function rejectProperty(propertyId: string, reason: string = "") {
-  "use server";
-
-  const { prisma } = await import("@/lib/prisma");
-  const { requireAuth } = await import("@/lib/auth-utils");
-
-  const session = await requireAuth();
-  if (!session?.user || session.user.role !== "ADMIN") {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  try {
-    await prisma.property.update({
-      where: { id: propertyId },
-      data: {
-        moderationStatus: "REJECTED",
-        reviewedAt: new Date(),
-        reviewedBy: session.user.id,
-        rejectionReason: reason,
-        version: { increment: 1 },
-      },
-    });
-    return { success: true };
-  } catch {
-    return { success: false, error: "Failed to reject property" };
-  }
-}
-
-export async function togglePublish(propertyId: string, publish: boolean) {
-  "use server";
-
-  const { prisma } = await import("@/lib/prisma");
-  const { requireAuth } = await import("@/lib/auth-utils");
-
-  const session = await requireAuth();
-  if (!session?.user || session.user.role !== "ADMIN") {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  try {
-    await prisma.property.update({
-      where: { id: propertyId },
-      data: {
-        isPublished: publish,
-        publishedAt: publish ? new Date() : undefined,
-        version: { increment: 1 },
-      },
-    });
-    return { success: true };
-  } catch {
-    return { success: false, error: "Failed to update publish status" };
-  }
-}
-
-export async function viewProperty(_propertyId: string) {
-  "use server";
-
-  const { requireAuth } = await import("@/lib/auth-utils");
-
-  const session = await requireAuth();
-  if (!session?.user || session.user.role !== "ADMIN") {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  return { success: true };
-}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { updateProperty } from "@/app/actions/properties";
 import { Button } from "@/components/ui/button";
@@ -14,13 +15,13 @@ interface PropertyData {
   title: string;
   description: string;
   price: number;
-  propertyType: string;
+  propertyType: "APARTMENT" | "HOUSE" | "LAND" | "COMMERCIAL";
   city: string;
   region: string;
   address: string;
-  bedrooms?: number | null;
-  bathrooms?: number | null;
-  area?: number | null;
+  bedrooms?: number;
+  bathrooms?: number;
+  area?: number;
   features?: string[];
   images?: string[];
 }
@@ -44,7 +45,7 @@ export default function EditListingForm({ propertyId, property }: { propertyId: 
   const [error, setError] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>(property.images || []);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
     defaultValues: {
       title: property.title,
@@ -54,9 +55,9 @@ export default function EditListingForm({ propertyId, property }: { propertyId: 
       city: property.city,
       region: property.region,
       address: property.address,
-      bedrooms: property.bedrooms,
-      bathrooms: property.bathrooms,
-      area: property.area,
+      bedrooms: property.bedrooms ?? undefined,
+      bathrooms: property.bathrooms ?? undefined,
+      area: property.area ?? undefined,
       features: property.features?.join(", ") || "",
     },
   });

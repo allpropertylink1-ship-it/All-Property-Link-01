@@ -86,7 +86,7 @@ export default function PropertyImageUploader({
         const errors: string[] = [];
 
         results.forEach((result, index) => {
-          if (result.success) {
+          if (result.success && result.url) {
             urls.push(result.url);
           } else {
             errors.push(result.error || `Failed to upload image ${index + 1}`);
