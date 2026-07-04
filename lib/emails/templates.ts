@@ -114,6 +114,21 @@ export function propertyApprovedEmail(props: { title: string }) {
   `);
 }
 
+export function resetPasswordEmail(props: { resetUrl: string }) {
+  return baseHtml(`
+    <h2 style="margin:0 0 12px;font-family:Sora,Inter,sans-serif;font-size:18px;font-weight:600;color:#286255">Reset Your Password</h2>
+    <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#2D2A25">You requested a password reset. Click the button below to set a new password. This link expires in 1 hour.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px">
+      <tr>
+        <td style="background:#D49A44;border-radius:6px;padding:12px 24px">
+          <a href="${props.resetUrl}" style="color:#fff;text-decoration:none;font-size:14px;font-weight:600;display:inline-block">Reset Password</a>
+        </td>
+      </tr>
+    </table>
+    <p style="margin:0;font-size:13px;color:#75716B">If you didn't request this, please ignore this email.</p>
+  `);
+}
+
 export function propertyRejectedEmail(props: { title: string; reason?: string }) {
   return baseHtml(`
     <h2 style="margin:0 0 12px;font-family:Sora,Inter,sans-serif;font-size:18px;font-weight:600;color:#286255">Property Update</h2>

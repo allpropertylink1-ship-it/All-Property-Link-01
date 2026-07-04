@@ -10,7 +10,7 @@ export async function sendEmail(to: string, subject: string, html: string) {
 
   try {
     const data = await resend.emails.send({
-      from: 'AllPropertyLink <noreply@allpropertylink.co.ke>',
+      from: 'AllPropertyLink <onboarding@resend.dev>',
       to,
       subject,
       html,
