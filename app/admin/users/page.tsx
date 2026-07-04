@@ -18,6 +18,7 @@ interface UserRow {
   phoneVerified: boolean;
   createdAt: Date;
   avatar: string | null;
+  kycStatus: string;
 }
 
 export default function AdminUsersPage() {
@@ -115,6 +116,7 @@ export default function AdminUsersPage() {
                   <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium">Email</th>
                   <th className="px-4 py-3 font-medium">Role</th>
+                  <th className="px-4 py-3 font-medium">KYC</th>
                   <th className="px-4 py-3 font-medium">Verified</th>
                   <th className="px-4 py-3 font-medium">Joined</th>
                   <th className="px-4 py-3 font-medium">Actions</th>
@@ -151,6 +153,19 @@ export default function AdminUsersPage() {
                             : "bg-surface-secondary text-text-secondary"
                       }`}>
                         {user.role === "ADMIN" ? "Admin" : user.role === "AGENT" ? "Agent" : "User"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                        user.kycStatus === "VERIFIED"
+                          ? "bg-success-500/10 text-success-600"
+                          : user.kycStatus === "PENDING"
+                            ? "bg-warning-500/10 text-warning-500"
+                            : user.kycStatus === "REJECTED"
+                              ? "bg-error-500/10 text-error-500"
+                              : "bg-surface-secondary text-text-secondary"
+                      }`}>
+                        {user.kycStatus === "VERIFIED" ? "Verified" : user.kycStatus === "PENDING" ? "Pending" : user.kycStatus === "REJECTED" ? "Rejected" : "None"}
                       </span>
                     </td>
                     <td className="px-4 py-3">

@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
-export async function PUT(request: Request) {
+export async function DELETE(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -12,38 +13,37 @@ export async function PUT(request: Request) {
 
     const userId = (session.user as { id: string }).id;
     const body = await request.json();
+    const { password } = body;
 
-    const {
-      firstName,
-      lastName,
-      phone,
-      location,
-      address,
-      city,
-      gender,
-      dateOfBirth,
-      nationality,
-    } = body;
-
-    if (!firstName || !lastName) {
+    if (!password) {
       return NextResponse.json(
-        { error: "First and last name are required" },
+        { error: "Password is required to delete your account" },
         { status: 400 }
       );
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { passwordHash: true },
+    });
+
+    if (user?.passwordHash) {
+      const isValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isValid) {
+        return NextResponse.json(
+          { error: "Password is incorrect" },
+          { status: 400 }
+        );
+      }
     }
 
     await prisma.user.update({
       where: { id: userId },
       data: {
-        firstName,
-        lastName,
-        phone: phone || null,
-        location: location || null,
-        address: address || null,
-        city: city || null,
-        gender: gender || null,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
-        nationality: nationality || null,
+        deletedAt: new Date(),
+        email: `deleted-${userId}@placeholder.com`,
+        firstName: "Deleted",
+        lastName: "User",
       },
     });
 

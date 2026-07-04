@@ -1,18 +1,29 @@
 import { requireAuth } from "@/lib/auth-utils";
+import { prisma } from "@/lib/prisma";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
+import { DashboardBanner } from "@/components/dashboard/DashboardBanner";
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await requireAuth();
+  const session = await requireAuth();
+  const userId = (session.user as { id: string }).id;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { accountStatus: true, onboardingComplete: true },
+  });
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)]">
       <DashboardNav />
-      <main className="flex-1 bg-surface-secondary p-6 lg:p-8">
-        <div className="mx-auto max-w-7xl">{children}</div>
+      <main className="flex-1 bg-surface-secondary">
+        {user && <DashboardBanner accountStatus={user.accountStatus} onboardingComplete={user.onboardingComplete} />}
+        <div className="p-6 lg:p-8">
+          <div className="mx-auto max-w-7xl">{children}</div>
+        </div>
       </main>
     </div>
   );

@@ -12,6 +12,8 @@ export default async function AdminDashboard() {
     pendingProperties,
     totalInquiries,
     pendingInquiries,
+    pendingKyc,
+    pendingApprovals,
     recentProperties,
     recentInquiries,
   ] = await Promise.all([
@@ -21,6 +23,8 @@ export default async function AdminDashboard() {
     prisma.property.count({ where: { moderationStatus: "PENDING_REVIEW", deletedAt: null } }),
     prisma.inquiry.count(),
     prisma.inquiry.count({ where: { status: "PENDING" } }),
+    prisma.user.count({ where: { kycStatus: "PENDING" } }),
+    prisma.user.count({ where: { accountStatus: "PENDING_APPROVAL", deletedAt: null } }),
     prisma.property.findMany({
       where: { moderationStatus: "PENDING_REVIEW", deletedAt: null },
       orderBy: { createdAt: "desc" },
@@ -39,6 +43,8 @@ export default async function AdminDashboard() {
     { label: "Agents", value: totalAgents, icon: "Agen" },
     { label: "Properties", value: totalProperties, icon: "Prop" },
     { label: "Pending Approval", value: pendingProperties, icon: "Pend" },
+    { label: "Pending Approval", value: pendingApprovals, icon: "Appr" },
+    { label: "KYC Pending", value: pendingKyc, icon: "KYC" },
     { label: "Total Inquiries", value: totalInquiries, icon: "Inq" },
     { label: "Pending Inquiries", value: pendingInquiries, icon: "P.I" },
   ];

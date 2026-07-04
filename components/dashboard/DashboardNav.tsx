@@ -10,6 +10,9 @@ import {
   MessageSquare,
   Bookmark,
   User,
+  Heart,
+  Bell,
+  Shield,
   LogOut,
   Menu,
   X,
@@ -19,8 +22,11 @@ import { cn } from "@/lib/utils";
 const links = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/dashboard/listings", label: "My Listings", icon: Building2 },
+  { href: "/dashboard/favorites", label: "Favorites", icon: Heart },
   { href: "/dashboard/inquiries", label: "Inquiries", icon: MessageSquare },
   { href: "/dashboard/saved-searches", label: "Saved Searches", icon: Bookmark },
+  { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
+  { href: "/dashboard/kyc", label: "KYC Verification", icon: Shield },
   { href: "/dashboard/profile", label: "Profile", icon: User },
 ];
 
@@ -58,7 +64,7 @@ export function DashboardNav() {
           </Link>
         </div>
 
-        <nav className="flex-1 space-y-1 p-4">
+        <nav className="flex-1 space-y-1 overflow-y-auto p-4">
           {links.map((link) => {
             const Icon = link.icon;
             const isActive =
@@ -86,6 +92,13 @@ export function DashboardNav() {
         </nav>
 
         <div className="border-t border-border p-4">
+          <Link
+            href="/"
+            className="touch-target mb-2 flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-secondary hover:text-text-primary"
+          >
+            <Home size={20} />
+            Back to site
+          </Link>
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: "/" })}

@@ -8,10 +8,12 @@ import {
   Users,
   Building2,
   MessageSquare,
+  Shield,
   Settings,
   LogOut,
   Menu,
   X,
+  UserCheck,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -21,6 +23,8 @@ const navItems = [
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/listings", label: "Listings", icon: Building2 },
   { href: "/admin/inquiries", label: "Inquiries", icon: MessageSquare },
+  { href: "/admin/approvals", label: "Approvals", icon: UserCheck },
+  { href: "/admin/kyc", label: "KYC Verification", icon: Shield },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

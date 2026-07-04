@@ -56,6 +56,8 @@ enum NotificationType {
   PRICE_DROP
   SAVED_SEARCH_MATCH
   SYSTEM
+  KYC_VERIFIED
+  KYC_REJECTED
 }
 
 model User {
@@ -87,6 +89,30 @@ model User {
   notificationPrefs Json?
   onboardingComplete Boolean @default(false)
 
+  kycStatus        String    @default("NONE")
+  accountStatus    String    @default("PENDING_APPROVAL")
+  approvedAt       DateTime?
+  approvedBy       String?
+
+  companyName      String?
+  contactPerson    String?
+  category         String?
+  specialties      String[]
+  website          String?
+  estateSubLocation String?
+  aplRepName       String?
+  aplRepPhone      String?
+  refereeName      String?
+  refereePhone     String?
+  refereeLocation  String?
+
+  dateOfBirth      DateTime?
+  gender           String?
+  nationality      String?
+  address          String?
+  city             String?
+  postalCode       String?
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
@@ -101,8 +127,30 @@ model User {
   favorites        Favorite[]
   refreshTokens    RefreshToken[]
   magicLinkTokens  MagicLinkToken[]
+  kycDocuments     KycDocument[]
 
   @@map("users")
+}
+
+model KycDocument {
+  id              String    @id @default(uuid())
+  userId          String
+  documentType    String
+  documentNumber  String?
+  status          String    @default("PENDING")
+  frontImage      String?
+  backImage       String?
+  rejectionReason String?
+  verifiedAt      DateTime?
+  verifiedBy      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("kyc_documents")
 }
 
 model Account {

@@ -9,11 +9,19 @@ export default async function ProfilePage() {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
+      id: true,
       firstName: true,
       lastName: true,
       email: true,
       phone: true,
       avatar: true,
+      location: true,
+      address: true,
+      city: true,
+      gender: true,
+      dateOfBirth: true,
+      nationality: true,
+      kycStatus: true,
     },
   });
 
@@ -30,8 +38,13 @@ export default async function ProfilePage() {
       <h1 className="mb-8 font-heading text-2xl font-bold text-text-primary">
         Profile
       </h1>
-      <div className="mx-auto max-w-lg rounded-xl border border-border bg-surface p-6">
-        <ProfileForm user={user} />
+      <div className="mx-auto max-w-2xl rounded-xl border border-border bg-surface p-6">
+        <ProfileForm
+          user={{
+            ...user,
+            dateOfBirth: user.dateOfBirth?.toISOString().split("T")[0] || null,
+          }}
+        />
       </div>
     </div>
   );

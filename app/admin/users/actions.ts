@@ -33,6 +33,7 @@ export async function getUsers(search: string, page: number) {
         phoneVerified: true,
         createdAt: true,
         avatar: true,
+        kycStatus: true,
       },
     }),
   ]);
