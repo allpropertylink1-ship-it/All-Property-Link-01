@@ -59,20 +59,38 @@ export async function POST(req: Request) {
       },
     });
 
+    let emailFailed = false;
+    let emailError: string | undefined;
+
     if (email) {
-      await sendEmail(
+      const emailResult = await sendEmail(
         email,
         "Verify your email - All Property Link",
         otpEmail({ otp, destination: email })
       );
+
+      if (!emailResult.success) {
+        console.error("[resend-otp] Email delivery failed:", emailResult.error);
+        emailFailed = true;
+        emailError = emailResult.error;
+      }
     }
 
     if (phone) {
-      await sendSms(phone, `Your All Property Link OTP is: ${otp}`);
+      const smsResult = await sendSms(phone, `Your All Property Link OTP is: ${otp}`);
+      if (!smsResult.success) {
+        console.error("[resend-otp] SMS delivery failed");
+      }
     }
 
-    return NextResponse.json({ success: true });
-  } catch {
+    return NextResponse.json({
+      success: true,
+      emailFailed,
+      emailError,
+      otpFallback: emailFailed ? otp : undefined,
+    });
+  } catch (error) {
+    console.error("[resend-otp] Exception:", error);
     return NextResponse.json(
       { error: "Failed to resend code" },
       { status: 500 }

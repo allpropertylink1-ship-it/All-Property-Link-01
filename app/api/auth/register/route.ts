@@ -13,6 +13,14 @@ function generateOtp(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
 
+function maskEmail(email: string): string {
+  return email.replace(/(.{2})(.*)(@.*)/, "$1***$3");
+}
+
+function maskPhone(phone: string): string {
+  return phone.replace(/(.{5})(.*)/, "$1***");
+}
+
 export async function POST(req: Request) {
   try {
     const { allowed } = registerLimiter(getRequestIp(req));
@@ -77,11 +85,15 @@ export async function POST(req: Request) {
           },
         });
 
-        await sendEmail(
+        const emailResult = await sendEmail(
           email,
           "Verify your email - All Property Link",
           otpEmail({ otp, destination: email })
         );
+
+        if (!emailResult.success) {
+          console.error("[register] Email delivery failed for existing user:", emailResult.error);
+        }
 
         return NextResponse.json(
           {
@@ -90,7 +102,10 @@ export async function POST(req: Request) {
             existingUser: true,
             userId: existing.id,
             destination: "email",
-            maskedDestination: email.replace(/(.{2})(.*)(@.*)/, "$1***$3"),
+            maskedDestination: maskEmail(email),
+            emailFailed: !emailResult.success,
+            emailError: emailResult.success ? undefined : emailResult.error,
+            otpFallback: !emailResult.success ? otp : undefined,
           },
           { status: 200 }
         );
@@ -121,7 +136,7 @@ export async function POST(req: Request) {
           },
         });
 
-        await sendSms(phone, `Your All Property Link OTP is: ${otp}`);
+        const smsResult = await sendSms(phone, `Your All Property Link OTP is: ${otp}`);
 
         return NextResponse.json(
           {
@@ -130,7 +145,9 @@ export async function POST(req: Request) {
             existingUser: true,
             userId: existingPhone.id,
             destination: "phone",
-            maskedDestination: phone.replace(/(.{5})(.*)/, "$1***"),
+            maskedDestination: maskPhone(phone),
+            smsFailed: !smsResult.success,
+            otpFallback: !smsResult.success ? otp : undefined,
           },
           { status: 200 }
         );
@@ -151,6 +168,10 @@ export async function POST(req: Request) {
       },
     });
 
+    let emailFailed = false;
+    let emailError: string | undefined;
+    let otpFallback: string | undefined;
+
     if (email) {
       const otp = generateOtp();
       await prisma.otpToken.create({
@@ -162,11 +183,18 @@ export async function POST(req: Request) {
         },
       });
 
-      await sendEmail(
+      const emailResult = await sendEmail(
         email,
         "Verify your email - All Property Link",
         otpEmail({ otp, destination: email })
       );
+
+      if (!emailResult.success) {
+        console.error("[register] Email delivery failed:", emailResult.error);
+        emailFailed = true;
+        emailError = emailResult.error;
+        otpFallback = otp;
+      }
     }
 
     if (phone) {
@@ -180,7 +208,12 @@ export async function POST(req: Request) {
         },
       });
 
-      await sendSms(phone, `Your All Property Link OTP is: ${otp}`);
+      const smsResult = await sendSms(phone, `Your All Property Link OTP is: ${otp}`);
+
+      if (!smsResult.success) {
+        console.error("[register] SMS delivery failed");
+        otpFallback = otp;
+      }
     }
 
     return NextResponse.json(
@@ -189,13 +222,15 @@ export async function POST(req: Request) {
         requiresOtp: !!email || !!phone,
         userId: user.id,
         destination: email ? "email" : "phone",
-        maskedDestination: email
-          ? email.replace(/(.{2})(.*)(@.*)/, "$1***$3")
-          : phone?.replace(/(.{5})(.*)/, "$1***"),
+        maskedDestination: email ? maskEmail(email) : phone ? maskPhone(phone) : "",
+        emailFailed,
+        emailError,
+        otpFallback,
       },
       { status: 201 }
     );
-  } catch {
+  } catch (error) {
+    console.error("[register] Exception:", error);
     return NextResponse.json(
       { error: "Registration failed" },
       { status: 500 }

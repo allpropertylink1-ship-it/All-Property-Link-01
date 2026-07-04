@@ -19,6 +19,8 @@ export function RegisterForm() {
   const [otpDestination, setOtpDestination] = useState("");
   const [resending, setResending] = useState(false);
   const [password, setPassword] = useState("");
+  const [emailFailed, setEmailFailed] = useState(false);
+  const [otpFallback, setOtpFallback] = useState("");
   const [emailValue, setEmailValue] = useState("");
   const [emailStatus, setEmailStatus] = useState<"idle" | "checking" | "taken" | "available">("idle");
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -120,6 +122,8 @@ export function RegisterForm() {
     if (data.requiresOtp) {
       setFormData({ firstName, lastName, email, phone });
       setOtpDestination(data.maskedDestination || email || phone);
+      setEmailFailed(data.emailFailed || false);
+      setOtpFallback(data.otpFallback || "");
       setStep("otp");
       setLoading(false);
     } else {
@@ -172,11 +176,17 @@ export function RegisterForm() {
       body.phone = formData.phone;
     }
 
-    await fetch("/api/auth/resend-otp", {
+    const res = await fetch("/api/auth/resend-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
+
+    if (res.ok) {
+      const data = await res.json();
+      setEmailFailed(data.emailFailed || false);
+      setOtpFallback(data.otpFallback || "");
+    }
 
     setOtp(["", "", "", "", "", ""]);
     otpRefs.current[0]?.focus();
@@ -199,6 +209,14 @@ export function RegisterForm() {
             Enter the 6-digit code sent to <strong className="text-text-primary">{otpDestination}</strong>
           </p>
         </div>
+
+        {emailFailed && otpFallback && (
+          <div className="rounded-lg border border-accent-300/30 bg-accent-300/10 px-4 py-3 text-center">
+            <p className="mb-1 text-xs font-medium text-accent-300">Email delivery temporarily unavailable</p>
+            <p className="text-xs text-text-secondary">Use this code to verify:</p>
+            <p className="mt-1 font-mono text-2xl font-bold tracking-[0.3em] text-accent-300">{otpFallback}</p>
+          </div>
+        )}
 
         {error && (
           <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">
