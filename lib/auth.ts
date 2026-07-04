@@ -30,7 +30,7 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user || !user.passwordHash) return null;
-        if (user.lockedUntil && user.lockedUntil > new Date()) return null;
+        if (user.lockedUntil && user.lockedUntil > new Date()) throw new Error("ACCOUNT_LOCKED");
 
         const isValid = await bcrypt.compare(
           credentials.password,
@@ -38,14 +38,15 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!isValid) {
+          const newAttempts = user.failedLoginAttempts + 1;
           await prisma.user.update({
             where: { id: user.id },
             data: {
-              failedLoginAttempts: { increment: 1 },
+              failedLoginAttempts: newAttempts,
               lastFailedLogin: new Date(),
               lockedUntil:
-                user.failedLoginAttempts >= 4
-                  ? new Date(Date.now() + 30 * 60 * 1000)
+                newAttempts >= 5
+                  ? new Date(Date.now() + 15 * 60 * 1000)
                   : undefined,
             },
           });

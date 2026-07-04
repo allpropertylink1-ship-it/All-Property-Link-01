@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { checkAccountLocked } from "@/lib/actions/auth";
 
 export function LoginForm() {
   const router = useRouter();
@@ -15,9 +16,19 @@ export function LoginForm() {
     setError("");
 
     const form = new FormData(e.currentTarget);
+    const email = form.get("email") as string;
+    const password = form.get("password") as string;
+
+    const lockStatus = await checkAccountLocked(email);
+    if (lockStatus.locked) {
+      setError(`Account locked. Try again in ${lockStatus.minutesRemaining} minute${lockStatus.minutesRemaining !== 1 ? "s" : ""}.`);
+      setLoading(false);
+      return;
+    }
+
     const result = await signIn("credentials", {
-      email: form.get("email") as string,
-      password: form.get("password") as string,
+      email,
+      password,
       redirect: false,
     });
 
