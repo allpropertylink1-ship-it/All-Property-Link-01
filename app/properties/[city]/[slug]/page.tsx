@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getPropertyBySlug } from "@/lib/services/property";
+import { WhatsAppShare, WhatsAppContact } from "@/components/shared/WhatsAppShare";
 
 interface Props {
   params: { slug: string };
@@ -31,15 +32,20 @@ export default async function PropertyDetailPage({ params }: Props) {
 
       <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
         <div>
-          <h1 className="font-heading text-3xl font-bold text-text-primary">
-            {property.title}
-          </h1>
-          <p className="mt-2 text-lg text-text-secondary">
-            {property.region}, {property.city}, {property.country}
-          </p>
-          <p className="mt-4 font-heading text-2xl font-bold text-primary-600">
-            {property.currency} {Number(property.price).toLocaleString()}
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h1 className="font-heading text-3xl font-bold text-text-primary">
+                {property.title}
+              </h1>
+              <p className="mt-2 text-lg text-text-secondary">
+                {property.region}, {property.city}, {property.country}
+              </p>
+              <p className="mt-4 font-heading text-2xl font-bold text-primary-600">
+                {property.currency} {Number(property.price).toLocaleString()}
+              </p>
+            </div>
+            <WhatsAppShare title={property.title} />
+          </div>
 
           <div className="mt-6 flex flex-wrap gap-4 border-y border-border py-4">
             {property.bedrooms && (
@@ -106,6 +112,9 @@ export default async function PropertyDetailPage({ params }: Props) {
             >
               Send inquiry
             </a>
+            {property.agent?.phone && (
+              <WhatsAppContact phone={property.agent.phone} title={property.title} />
+            )}
           </div>
         </div>
       </div>
