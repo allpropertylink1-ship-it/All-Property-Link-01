@@ -1,10 +1,15 @@
 ﻿import Link from "next/link";
 import ContactForm from "@/components/contact/ContactForm";
 
+export const metadata = {
+  title: "Contact Us",
+  description: "Get in touch with All Property Link. Contact our team for support, inquiries, or partnership opportunities.",
+};
+
 export default function ContactPage() {
   return (
     <>
-      <main className="min-h-[calc(100vh-80px)] bg-surface">
+      <main className="min-h-[calc(100vh-80px)] bg-surface" id="main-content">
         <section className="mx-auto max-w-7xl px-4 py-12">
           <div className="mb-12 text-center">
             <h1 className="font-heading text-3xl font-bold text-text-primary">

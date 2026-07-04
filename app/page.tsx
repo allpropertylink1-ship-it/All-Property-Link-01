@@ -133,16 +133,6 @@ function VerifiedIcon({ className }: { className?: string }) {
   );
 }
 
-function ImagePlaceholderIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-      <circle cx="8.5" cy="8.5" r="1.5" />
-      <polyline points="21 15 16 10 5 21" />
-    </svg>
-  );
-}
-
 function ArrowRightIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -194,19 +184,24 @@ export default function HomePage() {
           <p className="mx-auto mt-5 max-w-2xl text-base text-primary-100 md:text-lg">
             Find a home, book a stay, hire a fundi, or offer your services.
           </p>
-          <div className="mx-auto mt-10 flex w-full max-w-xl items-center gap-2 rounded-xl bg-white/10 p-1.5 backdrop-blur-sm">
+          <form
+            action="/properties/search"
+            method="GET"
+            className="mx-auto mt-10 flex w-full max-w-xl items-center gap-2 rounded-xl bg-white/10 p-1.5 backdrop-blur-sm"
+          >
             <div className="flex flex-1 items-center gap-2 rounded-lg bg-white/10 px-4 py-3">
               <SearchIcon className="h-5 w-5 shrink-0 text-primary-100" />
               <input
                 type="text"
+                name="q"
                 placeholder="Search properties, fundis, services..."
                 className="w-full bg-transparent text-sm text-text-onPrimary placeholder-primary-100 outline-none"
               />
             </div>
-            <button className="touch-target shrink-0 rounded-lg bg-accent-300 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-400">
+            <button type="submit" className="touch-target shrink-0 rounded-lg bg-accent-300 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-400">
               Search
             </button>
-          </div>
+          </form>
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               href="/properties"

@@ -146,14 +146,14 @@
 }
 
 .reveal {
-  opacity: 0;
-  transform: translateY(20px);
+  opacity: 1;
+  transform: none;
   transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
 }
 
 .reveal--visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -163,11 +163,4 @@
   }
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; }
-}
-
-@media (min-width: 768px) {
-  .reveal {
-    transform: translateY(30px);
-    transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
-  }
 }

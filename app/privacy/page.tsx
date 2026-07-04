@@ -1,12 +1,13 @@
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
-
 const LAST_UPDATED = "July 3, 2026";
+
+export const metadata = {
+  title: "Privacy Policy",
+  description: "All Property Link privacy policy - how we collect, use, and protect your personal data in compliance with the Kenya Data Protection Act, 2019.",
+};
 
 export default function PrivacyPage() {
   return (
     <>
-      <Navbar />
       <main className="min-h-[calc(100vh-80px)] bg-surface">
         <section className="mx-auto max-w-text px-4 py-10 sm:py-14">
           <header className="mb-8 text-center">
@@ -154,7 +155,6 @@ export default function PrivacyPage() {
           </section>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

@@ -1,10 +1,7 @@
-import { Metadata } from "next";
 import Link from "next/link";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
 
-export const metadata: Metadata = {
-  title: "Terms of Service | All Property Link Kenya",
+export const metadata = {
+  title: "Terms of Service",
   description: "Terms of Service for All Property Link Kenya - Terms and conditions governing the use of our real estate platform for buyers, sellers, and agents in Kenya.",
   robots: "index, follow",
 };
@@ -18,7 +15,6 @@ export default function TermsPage() {
 
   return (
     <>
-        <Navbar />
         <main className="min-h-[calc(100vh-4rem)] flex flex-col">
           <article className="flex-1 w-full max-w-[65ch] mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
             <header className="mb-10 sm:mb-14 text-center">
@@ -374,7 +370,6 @@ export default function TermsPage() {
             </div>
           </article>
         </main>
-        <Footer />
     </>
   );
 }

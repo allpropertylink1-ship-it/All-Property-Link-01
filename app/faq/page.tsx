@@ -1,10 +1,8 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
+import { FaqSearch } from "@/components/faq/FaqSearch";
 
-export const metadata: Metadata = {
-  title: "Frequently Asked Questions | All Property Link",
+export const metadata = {
+  title: "Frequently Asked Questions",
   description: "Find answers to common questions about buying, selling, and renting property in Kenya on All Property Link.",
 };
 
@@ -111,7 +109,7 @@ const faqCategories: FAQCategory[] = [
       },
       {
         question: "How do I upgrade to an agency account?",
-        answer: "From your dashboard, go to 'Account Settings' → 'Upgrade to Agency'. Provide your company registration certificate and EARB agency license. Agency accounts support multiple agents under one dashboard.",
+        answer: "From your dashboard, go to 'Account Settings' -> 'Upgrade to Agency'. Provide your company registration certificate and EARB agency license. Agency accounts support multiple agents under one dashboard.",
       },
     ],
   },
@@ -144,211 +142,43 @@ const faqCategories: FAQCategory[] = [
 
 export default function FAQPage() {
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen bg-surface">
-        <section className="bg-primary-600 text-text-on-primary py-16 sm:py-24">
-          <div className="mx-auto max-w-7xl px-4 text-center">
-            <h1 className="font-heading text-4xl sm:text-5xl font-bold tracking-tight mb-4">
-              Frequently Asked Questions
-            </h1>
-            <p className="text-lg sm:text-xl text-primary-100 max-w-2xl mx-auto text-balance">
-              Find answers to common questions about buying, selling, renting, and listing properties on Kenya's trusted real estate marketplace.
+    <div className="min-h-screen bg-surface">
+      <section className="bg-primary-600 py-16 text-center text-text-on-primary sm:py-24">
+        <div className="mx-auto max-w-7xl px-4">
+          <h1 className="mb-4 font-heading text-4xl font-bold tracking-tight sm:text-5xl">
+            Frequently Asked Questions
+          </h1>
+          <p className="mx-auto max-w-2xl text-balance text-lg text-primary-100 sm:text-xl">
+            Find answers to common questions about buying, selling, renting, and listing properties on Kenya&apos;s trusted real estate marketplace.
+          </p>
+        </div>
+      </section>
+
+      <section className="py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4">
+          <FaqSearch categories={faqCategories} />
+
+          <div className="mt-16 border-t border-border pt-8 text-center">
+            <p className="mb-4 text-text-secondary">
+              Didn&apos;t find what you&apos;re looking for?
             </p>
-          </div>
-        </section>
-
-        <section className="py-12 sm:py-16">
-          <div className="mx-auto max-w-7xl px-4">
-            <div className="mb-8">
-              <label htmlFor="faq-search" className="sr-only">
-                Search FAQs
-              </label>
-              <div className="relative max-w-xl mx-auto">
-                <input
-                  id="faq-search"
-                  type="search"
-                  placeholder="Search questions..."
-                  className="w-full pl-12 pr-4 py-3 text-lg border-border focus:ring-2 focus:ring-primary-500/20"
-                  autoComplete="off"
-                />
-                <svg
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  aria-hidden="true"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="M21 21l-4.35-4.35" />
-                </svg>
-              </div>
-            </div>
-
-            <nav className="mb-8 overflow-x-auto pb-4" aria-label="FAQ categories">
-              <ul className="flex gap-2 min-w-max">
-                {faqCategories.map((cat) => (
-                  <li key={cat.category}>
-                    <button
-                      type="button"
-                      data-category={cat.category}
-                      className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary whitespace-nowrap rounded-full bg-surface-secondary hover:bg-border transition-colors"
-                    >
-                      {cat.category}
-                    </button>
-                  </li>
-                ))}
-                <li>
-                  <button
-                    type="button"
-                    data-category="all"
-                    className="px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 rounded-full whitespace-nowrap"
-                  >
-                    All
-                  </button>
-                </li>
-              </ul>
-            </nav>
-
-            <div className="space-y-4" id="faq-list">
-              {faqCategories.map((cat) => (
-                <section
-                  key={cat.category}
-                  id={`faq-${cat.category.toLowerCase().replace(/\s&/g, "").replace(/\s+/g, "-")}`}
-                  className="faq-category"
-                  data-category={cat.category}
-                >
-                  <h2 className="font-heading text-xl font-semibold text-text-primary mb-4 pb-2 border-b border-border">
-                    {cat.category}
-                  </h2>
-                  <div className="space-y-3">
-                    {cat.faqs.map((faq, index) => (
-                      <details
-                        key={`${cat.category}-${index}`}
-                        className="group bg-surface border border-border rounded-xl overflow-hidden transition-all duration-200 hover:border-primary-200"
-                      >
-                        <summary
-                          className="flex items-center justify-between p-5 cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/20 focus-visible:ring-offset-2"
-                          aria-expanded="false"
-                        >
-                          <h3 className="font-heading text-base font-semibold text-text-primary pr-4 text-balance">
-                            {faq.question}
-                          </h3>
-                          <svg
-                            className="flex-shrink-0 w-5 h-5 text-text-secondary transition-transform duration-200 group-open:rotate-180"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            aria-hidden="true"
-                          >
-                            <path d="M6 9l6 6 6-6" />
-                          </svg>
-                        </summary>
-                        <div className="px-5 pb-5 pt-0">
-                          <p className="text-text-secondary leading-relaxed">{faq.answer}</p>
-                        </div>
-                      </details>
-                    ))}
-                  </div>
-                </section>
-              ))}
-            </div>
-
-            <div className="mt-16 pt-8 border-t border-border text-center">
-              <p className="text-text-secondary mb-4">
-                Didn&apos;t find what you&apos;re looking for?
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/contact"
-                  className="touch-target inline-flex items-center justify-center rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-text-on-primary hover:bg-primary-700 transition-colors"
-                >
-                  Contact Support
-                </Link>
-                <Link
-                  href="/auth/login"
-                  className="touch-target inline-flex items-center justify-center rounded-lg border border-border bg-surface px-6 py-3 text-sm font-medium text-text-primary hover:bg-surface-secondary transition-colors"
-                >
-                  Sign In to Ask
-                </Link>
-              </div>
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+              <Link
+                href="/contact"
+                className="touch-target inline-flex items-center justify-center rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-text-on-primary transition-colors hover:bg-primary-700"
+              >
+                Contact Support
+              </Link>
+              <Link
+                href="/auth/login"
+                className="touch-target inline-flex items-center justify-center rounded-lg border border-border bg-surface px-6 py-3 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary"
+              >
+                Sign In to Ask
+              </Link>
             </div>
           </div>
-        </section>
-
-        <script
-          type="module"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (() => {
-                const searchInput = document.getElementById('faq-search');
-                const categoryButtons = document.querySelectorAll('[data-category]');
-                const faqCategories = document.querySelectorAll('.faq-category');
-                const faqItems = document.querySelectorAll('#faq-list details');
-                const noResults = document.createElement('div');
-                noResults.className = 'text-center py-12 text-text-secondary hidden';
-                noResults.innerHTML = '<p class="text-lg">No questions match your search.</p>';
-                document.getElementById('faq-list').appendChild(noResults);
-
-                let activeCategory = 'all';
-                let searchTerm = '';
-
-                function filterFAQs() {
-                  let visibleCount = 0;
-                  faqItems.forEach((item) => {
-                    const question = item.querySelector('h3')?.textContent?.toLowerCase() || '';
-                    const answer = item.querySelector('p')?.textContent?.toLowerCase() || '';
-                    const category = item.closest('.faq-category')?.dataset.category || '';
-                    const matchesSearch = question.includes(searchTerm) || answer.includes(searchTerm);
-                    const matchesCategory = activeCategory === 'all' || category === activeCategory;
-                    const shouldShow = matchesSearch && matchesCategory;
-                    item.style.display = shouldShow ? '' : 'none';
-                    if (shouldShow) visibleCount++;
-                  });
-
-                  faqCategories.forEach((cat) => {
-                    const catItems = cat.querySelectorAll('details');
-                    const catVisible = Array.from(catItems).some((item) => item.style.display !== 'none');
-                    cat.style.display = catVisible ? '' : 'none';
-                  });
-
-                  noResults.classList.toggle('hidden', visibleCount > 0 || searchTerm === '');
-                }
-
-                searchInput.addEventListener('input', (e) => {
-                  searchTerm = e.target.value.toLowerCase().trim();
-                  filterFAQs();
-                });
-
-                categoryButtons.forEach((btn) => {
-                  btn.addEventListener('click', () => {
-                    activeCategory = btn.dataset.category;
-                    categoryButtons.forEach((b) => {
-                      b.className = 'px-4 py-2 text-sm font-medium whitespace-nowrap rounded-full transition-colors ' +
-                        (b.dataset.category === activeCategory
-                          ? 'text-primary-600 bg-primary-50'
-                          : 'text-text-secondary hover:text-text-primary bg-surface-secondary hover:bg-border');
-                    });
-                    filterFAQs();
-                  });
-                });
-
-                document.addEventListener('keydown', (e) => {
-                  if (e.key === '/' && document.activeElement !== searchInput) {
-                    e.preventDefault();
-                    searchInput.focus();
-                  }
-                });
-              })();
-            `,
-          }}
-        />
-      </div>
-      <Footer />
-    </>
+        </div>
+      </section>
+    </div>
   );
 }

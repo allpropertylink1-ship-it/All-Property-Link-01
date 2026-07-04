@@ -50,7 +50,7 @@ export function LoginForm() {
         </div>
       )}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-primary">
+        <label htmlFor="email" className="block text-sm font-medium text-text-primary">
           Email
         </label>
         <input
@@ -59,13 +59,13 @@ export function LoginForm() {
           type="email"
           autoComplete="email"
           required
-          className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-primary placeholder-secondary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
           style={{ fontSize: "16px" }}
           placeholder="you@example.com"
         />
       </div>
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-primary">
+        <label htmlFor="password" className="block text-sm font-medium text-text-primary">
           Password
         </label>
         <input
@@ -74,7 +74,7 @@ export function LoginForm() {
           type="password"
           autoComplete="current-password"
           required
-          className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-primary placeholder-secondary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
           style={{ fontSize: "16px" }}
           placeholder="Enter your password"
         />
@@ -82,7 +82,7 @@ export function LoginForm() {
       <div className="flex items-center justify-end">
         <a
           href="/auth/forgot-password"
-          className="text-sm font-medium text-accent hover:text-accent-600"
+          className="text-sm font-medium text-accent-300 hover:text-accent-400"
         >
           Forgot password?
         </a>
@@ -90,13 +90,13 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="touch-target w-full rounded-sm bg-accent px-4 py-3 font-medium text-white transition-colors hover:bg-accent-600 focus:outline-none focus:ring-2 focus:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-50"
+        className="touch-target w-full rounded-sm bg-accent-300 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-300/20 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? "Signing in..." : "Sign in"}
       </button>
-      <p className="text-center text-sm text-secondary">
+      <p className="text-center text-sm text-text-secondary">
         Don&apos;t have an account?{" "}
-        <a href="/auth/register" className="font-medium text-accent hover:text-accent-600">
+        <a href="/auth/register" className="font-medium text-accent-300 hover:text-accent-400">
           Register
         </a>
       </p>

@@ -1,17 +1,13 @@
-import { Metadata } from "next";
 import Link from "next/link";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
 
-export const metadata: Metadata = {
-  title: "About Us | All Property Link",
+export const metadata = {
+  title: "About Us",
   description: "All Property Link - Kenya's trusted real estate marketplace. Connecting buyers, renters, and agents across Kenya.",
 };
 
 export default function AboutPage() {
   return (
     <>
-      <Navbar />
       <main className="min-h-[calc(100vh-80px)] bg-surface">
         <section className="bg-gradient-to-br from-primary-800 via-primary-700 to-primary-600 px-4 py-20 text-center text-text-on-primary">
           <h1 className="mx-auto max-w-4xl font-heading text-4xl font-bold leading-tight sm:text-5xl">
@@ -91,7 +87,6 @@ export default function AboutPage() {
           </section>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

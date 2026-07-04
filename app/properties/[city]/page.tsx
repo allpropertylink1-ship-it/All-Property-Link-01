@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getProperties, getCities } from "@/lib/services/property";
 import { PropertyGrid } from "@/components/property/PropertyGrid";
 import { PropertyFilters } from "@/components/property/PropertyFilters";
+import { Pagination } from "@/components/shared/Pagination";
 
 interface Props {
   params: { city: string };
@@ -43,6 +44,12 @@ export default async function CityPage({ params, searchParams }: Props) {
         </aside>
         <div>
           <PropertyGrid properties={data.properties} />
+          <Pagination
+            currentPage={data.page}
+            totalPages={data.totalPages}
+            basePath={`/properties/${params.city}`}
+            searchParams={searchParams}
+          />
         </div>
       </div>
     </div>
