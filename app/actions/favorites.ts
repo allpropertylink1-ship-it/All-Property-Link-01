@@ -9,6 +9,7 @@ import {
 
 export async function toggleFavorite(propertyId: string) {
   const session = await requireAuth();
+  if (!session) return { error: "Authentication required" };
   const userId = (session.user as { id: string }).id;
 
   const result = await toggleFavoriteService(propertyId, userId);
@@ -19,6 +20,7 @@ export async function toggleFavorite(propertyId: string) {
 
 export async function getFavorites() {
   const session = await requireAuth();
+  if (!session) return [];
   const userId = (session.user as { id: string }).id;
 
   return getFavoritesService(userId);

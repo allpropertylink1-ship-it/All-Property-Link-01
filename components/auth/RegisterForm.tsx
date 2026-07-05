@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { useAuth } from "@/lib/auth-context";
 import { PasswordStrength } from "./PasswordStrength";
 
 type ContactMethod = "email" | "phone";
@@ -10,6 +10,7 @@ type Step = "form" | "otp";
 
 export function RegisterForm() {
   const router = useRouter();
+  const { signup } = useAuth();
   const [step, setStep] = useState<Step>("form");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -270,7 +271,7 @@ export function RegisterForm() {
       <div className="mb-6">
         <button
           type="button"
-          onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+          onClick={() => {}}
           className="touch-target flex w-full items-center justify-center gap-3 rounded-sm border border-border bg-surface px-4 py-3 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">

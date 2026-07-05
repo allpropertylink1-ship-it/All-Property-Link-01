@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,6 +29,7 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ user }: ProfileFormProps) {
+  const { logout } = useAuth();
   const router = useRouter();
   const [profileLoading, setProfileLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
@@ -134,7 +135,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         throw new Error(err.error || "Failed to delete account");
       }
 
-      await signOut({ callbackUrl: "/" });
+      await logout();
     } catch (err) {
       setMessage({
         type: "error",

@@ -1,20 +1,54 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
+interface SessionUser {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  name: string
+  role: string
+  avatar?: string | null
+  phone?: string
+  kycStatus?: string
+  accountStatus?: string
+  isAgent?: boolean
+  companyName?: string
+}
+
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
 
 export async function getSession() {
-  return getServerSession(authOptions);
+  try {
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    const token = cookieStore.get("access_token")?.value;
+    if (!token) return null;
+    const res = await fetch(`${BACKEND_URL}/api/auth/me`, {
+      headers: { Cookie: `access_token=${token}` },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.user) return null;
+    const u = data.user as SessionUser
+    return { user: { ...u, name: `${u.firstName || ""} ${u.lastName || ""}`.trim() || u.email } as SessionUser }
+  } catch {
+    return null;
+  }
 }
 
-export async function requireAuth() {
+export async function requireAuth(): Promise<{ user: SessionUser }> {
   const session = await getSession();
-  if (!session?.user) redirect("/auth/login");
-  return session;
+  if (!session) {
+    const { redirect } = await import("next/navigation");
+    redirect("/auth/login");
+    throw new Error("unreachable")
+  }
+  return session
 }
 
-export async function requireRole(roles: string[]) {
+export async function requireRole(roles: string[]): Promise<{ user: SessionUser }> {
   const session = await requireAuth();
-  const userRole = (session.user as { role: string }).role;
-  if (!roles.includes(userRole)) redirect("/");
-  return session;
+  if (!roles.includes(session.user.role)) {
+    const { redirect } = await import("next/navigation");
+    redirect("/");
+  }
+  return session
 }

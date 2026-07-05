@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
 
 export default function VerifyMagicLinkPage() {
   const router = useRouter();
@@ -30,13 +29,13 @@ export default function VerifyMagicLinkPage() {
     const data = await res.json();
     setStatus("signing-in");
 
-    const result = await signIn("credentials", {
-      email: data.email,
-      password: "__MAGIC_LINK__",
-      redirect: false,
+    const loginRes = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: data.email, password: "__MAGIC_LINK__" }),
     });
 
-    if (result?.error) {
+    if (!loginRes.ok) {
       setError("Failed to sign in. Please try again.");
       setStatus("error");
       return;

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/auth-context";
 import { Upload, X, Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -117,7 +117,7 @@ const specialtiesService: { value: string; group: string }[] = [
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { update } = useSession();
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -224,7 +224,6 @@ export default function OnboardingPage() {
         });
       }
 
-      await update();
       setSuccess(true);
       setTimeout(() => router.push("/dashboard"), 2000);
     } catch (err) {

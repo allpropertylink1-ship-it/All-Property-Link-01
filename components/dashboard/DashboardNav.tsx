@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { useAuth } from "@/lib/auth-context";
 import {
   Home,
   Building2,
@@ -31,6 +31,7 @@ const links = [
 ];
 
 export function DashboardNav() {
+  const { logout } = useAuth();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -101,7 +102,7 @@ export function DashboardNav() {
           </Link>
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={() => logout()}
             className="touch-target flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-secondary hover:text-error-500"
           >
             <LogOut size={20} />

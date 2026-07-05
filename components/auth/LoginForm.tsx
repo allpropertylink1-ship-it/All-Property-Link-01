@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { checkAccountLocked } from "@/lib/actions/auth";
+import { useAuth } from "@/lib/auth-context";
 
 export function LoginForm() {
   const router = useRouter();
+  const { login } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [magicEmail, setMagicEmail] = useState("");
@@ -22,21 +22,10 @@ export function LoginForm() {
     const email = form.get("email") as string;
     const password = form.get("password") as string;
 
-    const lockStatus = await checkAccountLocked(email);
-    if (lockStatus.locked) {
-      setError(`Account locked. Try again in ${lockStatus.minutesRemaining} minute${lockStatus.minutesRemaining !== 1 ? "s" : ""}.`);
-      setLoading(false);
-      return;
-    }
-
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    const result = await login(email, password);
 
     if (result?.error) {
-      setError("Invalid email or password");
+      setError(result.error);
       setLoading(false);
       return;
     }
@@ -71,10 +60,11 @@ export function LoginForm() {
   return (
     <>
       <div className="mb-6">
+        {/* Google sign-in temporarily unavailable with the new auth system */}
         <button
           type="button"
-          onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-          className="touch-target flex w-full items-center justify-center gap-3 rounded-sm border border-border bg-surface px-4 py-3 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary"
+          disabled
+          className="touch-target flex w-full items-center justify-center gap-3 rounded-sm border border-border bg-surface px-4 py-3 text-sm font-medium text-text-secondary transition-colors opacity-50 cursor-not-allowed"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />

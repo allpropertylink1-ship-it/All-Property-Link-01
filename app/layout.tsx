@@ -4,6 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { CookieConsent } from "@/components/shared/CookieConsent";
 import { Footer } from "@/components/layout/Footer";
+import { AuthProvider } from "@/lib/auth-context";
 import "./globals.css";
 
 const sora = Sora({
@@ -39,11 +40,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${sora.variable} ${dmSans.variable} flex min-h-screen flex-col antialiased`}>
-        <Navbar />
-        <main className="flex-1 pb-20 md:pb-0">{children}</main>
-        <CookieConsent />
-        <BottomNav />
-        <Footer />
+        <AuthProvider>
+          <Navbar />
+          <main className="flex-1 pb-20 md:pb-0">{children}</main>
+          <CookieConsent />
+          <BottomNav />
+          <Footer />
+        </AuthProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { useAuth } from "@/lib/auth-context";
 import {
   LayoutDashboard,
   Users,
@@ -29,6 +29,7 @@ const navItems = [
 ];
 
 export function AdminNav() {
+  const { logout } = useAuth();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -85,7 +86,7 @@ export function AdminNav() {
 
           <div className="border-t border-border p-4">
             <button
-              onClick={() => signOut({ callbackUrl: "/auth/login" })}
+              onClick={() => logout()}
               className="touch-target flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-text-secondary hover:bg-surface-secondary hover:text-text-primary transition-colors"
             >
               <LogOut className="w-5 h-5 flex-shrink-0" aria-hidden="true" />

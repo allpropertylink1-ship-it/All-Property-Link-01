@@ -1,15 +1,8 @@
 'use server';
 
 import { cloudinary } from "@/lib/cloudinary";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
 export async function uploadImage(formData: FormData) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    throw new Error("Unauthorized");
-  }
-
   const file = formData.get("file") as File;
   if (!file) {
     throw new Error("No file provided");
