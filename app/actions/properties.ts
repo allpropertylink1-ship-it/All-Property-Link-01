@@ -25,6 +25,10 @@ export async function createProperty(formData: FormData) {
   if (!allowed) return { success: false, error: "Too many requests. Try again later." };
   const session = await requireAuth();
   const userId = (session.user as { id: string }).id;
+  const kycStatus = (session.user as { kycStatus?: string }).kycStatus;
+  if (kycStatus !== "VERIFIED") {
+    return { success: false, error: "KYC verification required to post listings. Complete your KYC verification first." };
+  }
   const parsed = propertySchema.safeParse(parseForm(formData));
   if (!parsed.success) return { success: false, error: parsed.error.flatten().fieldErrors as unknown as string };
 

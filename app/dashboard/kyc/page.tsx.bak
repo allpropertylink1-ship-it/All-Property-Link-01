@@ -114,7 +114,7 @@ export default function KycPage() {
         throw new Error("Upload failed");
       }
 
-      const result = await res.json();
+     用 const result = await res.json();
       if (result.url) {
         setUrl(result.url);
       }
@@ -326,6 +326,7 @@ export default function KycPage() {
               </div>
 
               <div className="space-y-4">
+                {/* Front Image */}
                 <div>
                   <label htmlFor="frontImage" className="block text-sm font-medium text-text-primary mb-1">
                     Front Image
@@ -377,6 +378,7 @@ export default function KycPage() {
                   </div>
                 </div>
 
+                {/* Back Image */}
                 <div>
                   <label htmlFor="backImage" className="block text-sm font-medium text-text-primary mb-1">
                     Back Image (Optional)
@@ -484,7 +486,7 @@ export default function KycPage() {
                     <span className={cn(
                       "px-3 py-1 rounded text-xs font-medium",
                       doc.status === "PENDING" && "bg-yellow-500/20 text-yellow-600",
-                      doc.status === "VERIFIED" && "bg-green-500/20 text-green-600",
+                      doc.status === "VERIFIED" && "bg-green-500/20 text-green- dhapper",
                       doc.status === "REJECTED" && "bg-red-500/20 text-red-600"
                     )}>
                       {doc.status === "PENDING" && "Pending Review"}
@@ -535,4 +537,3 @@ export default function KycPage() {
       </div>
     </div>
   );
-}
