@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
 
 const menuItems = [
   { href: "/", label: "Home" },
@@ -14,6 +16,8 @@ const menuItems = [
 ];
 
 export function MobileMenu() {
+  const { user, logout } = useAuth();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
 
   return (
@@ -69,20 +73,61 @@ export function MobileMenu() {
         </nav>
 
         <div className="absolute bottom-12 flex flex-col items-center gap-4">
-          <Link
-            href="/auth/login"
-            onClick={() => setOpen(false)}
-            className="text-sm font-medium text-secondary transition-colors hover:text-primary"
-          >
-            Log in
-          </Link>
-          <Link
-            href="/auth/register"
-            onClick={() => setOpen(false)}
-            className="inline-flex items-center justify-center rounded-lg bg-accent-300 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-400"
-          >
-            Register
-          </Link>
+          {user ? (
+            <>
+              <div className="mb-2 text-center">
+                <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-accent-300 text-lg font-bold text-white">
+                  {(user.firstName || user.email).charAt(0).toUpperCase()}
+                </div>
+                <p className="text-sm font-medium text-text-primary">
+                  {user.firstName} {user.lastName}
+                </p>
+                <p className="text-xs text-text-secondary">{user.email}</p>
+              </div>
+              <Link
+                href="/dashboard"
+                onClick={() => setOpen(false)}
+                className="text-sm font-medium text-accent-300 transition-colors hover:text-accent-400"
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/dashboard/profile"
+                onClick={() => setOpen(false)}
+                className="text-sm font-medium text-accent-300 transition-colors hover:text-accent-400"
+              >
+                My Profile
+              </Link>
+              <button
+                type="button"
+                onClick={async () => {
+                  setOpen(false);
+                  await logout();
+                  router.refresh();
+                }}
+                className="text-sm font-medium text-error-500 transition-colors hover:text-error-400"
+              >
+                Log out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/auth/login"
+                onClick={() => setOpen(false)}
+                className="text-sm font-medium text-secondary transition-colors hover:text-primary"
+              >
+                Log in
+              </Link>
+              <Link
+                href="/auth/register"
+                onClick={() => setOpen(false)}
+                className="inline-flex items-center justify-center rounded-lg bg-accent-300 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+              >
+                Register
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MobileMenu } from "./MobileMenu";
+import { ProfileButton } from "./ProfileButton";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -34,20 +35,7 @@ export function Navbar() {
           ))}
         </div>
 
-        <div className="hidden items-center gap-3 md:flex">
-          <Link
-            href="/auth/login"
-            className="touch-target inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-secondary transition-colors hover:text-primary"
-          >
-            Log in
-          </Link>
-          <Link
-            href="/auth/register"
-            className="touch-target inline-flex items-center justify-center rounded-lg bg-accent-300 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-400"
-          >
-            Register
-          </Link>
-        </div>
+        <ProfileButton />
 
         <MobileMenu />
       </div>
