@@ -1,72 +1,19 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { PasswordStrength } from "./PasswordStrength";
 
 type ContactMethod = "email" | "phone";
-type Step = "form" | "otp";
 
 export function RegisterForm() {
   const router = useRouter();
   const { signup } = useAuth();
-  const [step, setStep] = useState<Step>("form");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [contactMethod, setContactMethod] = useState<ContactMethod>("email");
-  const [formData, setFormData] = useState<Record<string, string>>({});
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [otpDestination, setOtpDestination] = useState("");
-  const [resending, setResending] = useState(false);
   const [password, setPassword] = useState("");
-  const [emailFailed, setEmailFailed] = useState(false);
-  const [otpFallback, setOtpFallback] = useState("");
-  const [emailValue, setEmailValue] = useState("");
-  const [emailStatus, setEmailStatus] = useState<"idle" | "checking" | "taken" | "available">("idle");
-  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const emailTimer = useRef<ReturnType<typeof setTimeout>>();
-
-  function handleOtpChange(index: number, value: string) {
-    if (value && !/^\d$/.test(value)) return;
-    const next = [...otp];
-    next[index] = value;
-    setOtp(next);
-    if (value && index < 5) {
-      otpRefs.current[index + 1]?.focus();
-    }
-  }
-
-  function handleOtpKeyDown(index: number, e: React.KeyboardEvent) {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
-    }
-  }
-
-  const checkEmail = useCallback(async (email: string) => {
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setEmailStatus("idle");
-      return;
-    }
-    setEmailStatus("checking");
-    try {
-      const res = await fetch(`/api/auth/check-email?email=${encodeURIComponent(email)}`);
-      const data = await res.json();
-      setEmailStatus(data.available ? "available" : "taken");
-    } catch {
-      setEmailStatus("idle");
-    }
-  }, []);
-
-  useEffect(() => {
-    if (emailTimer.current) clearTimeout(emailTimer.current);
-    if (contactMethod === "email" && emailValue) {
-      emailTimer.current = setTimeout(() => checkEmail(emailValue), 400);
-    }
-    return () => {
-      if (emailTimer.current) clearTimeout(emailTimer.current);
-    };
-  }, [emailValue, contactMethod, checkEmail]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -93,177 +40,22 @@ export function RegisterForm() {
       return;
     }
 
-    const body: Record<string, string> = { firstName, lastName, password };
-
     if (contactMethod === "email") {
       if (!email) {
         setError("Email is required");
         setLoading(false);
         return;
       }
-      body.email = email;
-    } else {
-      body.phone = phone;
     }
 
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      setError(data.error || "Registration failed");
+    const { error: signupError } = await signup({ firstName, lastName, password, email, phone });
+    if (signupError) {
+      setError(signupError);
       setLoading(false);
       return;
     }
 
-    if (data.requiresOtp) {
-      setFormData({ firstName, lastName, email, phone });
-      setOtpDestination(data.maskedDestination || email || phone);
-      setEmailFailed(data.emailFailed || false);
-      setOtpFallback(data.otpFallback || "");
-      setStep("otp");
-      setLoading(false);
-    } else {
-      router.push("/auth/login?registered=true");
-    }
-  }
-
-  async function handleVerifyOtp() {
-    setLoading(true);
-    setError("");
-
-    const code = otp.join("");
-    if (code.length !== 6) {
-      setError("Please enter the full 6-digit code");
-      setLoading(false);
-      return;
-    }
-
-    const body: Record<string, string> = { otp: code };
-    if (contactMethod === "email") {
-      body.email = formData.email;
-    } else {
-      body.phone = formData.phone;
-    }
-
-    const res = await fetch("/api/auth/verify-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      setError(data.error || "Verification failed");
-      setLoading(false);
-      return;
-    }
-
-    router.push("/auth/login?verified=true");
-  }
-
-  async function handleResend() {
-    setResending(true);
-    setError("");
-
-    const body: Record<string, string> = {};
-    if (contactMethod === "email") {
-      body.email = formData.email;
-    } else {
-      body.phone = formData.phone;
-    }
-
-    const res = await fetch("/api/auth/resend-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      setEmailFailed(data.emailFailed || false);
-      setOtpFallback(data.otpFallback || "");
-    }
-
-    setOtp(["", "", "", "", "", ""]);
-    otpRefs.current[0]?.focus();
-    setResending(false);
-  }
-
-  if (step === "otp") {
-    return (
-      <div className="space-y-6">
-        <div className="text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50">
-            <svg className="h-7 w-7 text-primary-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-              <path d="M3 9h18" />
-              <path d="M9 3v3" />
-            </svg>
-          </div>
-          <h2 className="font-heading text-xl font-bold text-text-primary">Verify your {contactMethod === "email" ? "email" : "phone"}</h2>
-          <p className="mt-2 text-sm text-text-secondary">
-            Enter the 6-digit code sent to <strong className="text-text-primary">{otpDestination}</strong>
-          </p>
-        </div>
-
-        {emailFailed && otpFallback && (
-          <div className="rounded-lg border border-accent-300/30 bg-accent-300/10 px-4 py-3 text-center">
-            <p className="mb-1 text-xs font-medium text-accent-300">Email delivery temporarily unavailable</p>
-            <p className="text-xs text-text-secondary">Use this code to verify:</p>
-            <p className="mt-1 font-mono text-2xl font-bold tracking-[0.3em] text-accent-300">{otpFallback}</p>
-          </div>
-        )}
-
-        {error && (
-          <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">
-            {error}
-          </div>
-        )}
-
-        <div className="flex justify-center gap-2">
-          {otp.map((digit, i) => (
-            <input
-              key={i}
-              ref={(el) => { otpRefs.current[i] = el; }}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              value={digit}
-              onChange={(e) => handleOtpChange(i, e.target.value)}
-              onKeyDown={(e) => handleOtpKeyDown(i, e)}
-              className="h-12 w-10 rounded-lg border border-border text-center font-heading text-xl font-bold text-text-primary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20 sm:h-14 sm:w-12"
-              autoFocus={i === 0}
-            />
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={handleVerifyOtp}
-          disabled={loading || otp.join("").length !== 6}
-          className="touch-target w-full rounded-sm bg-accent-300 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-300/20 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {loading ? "Verifying..." : `Verify ${contactMethod === "email" ? "email" : "phone"}`}
-        </button>
-
-        <p className="text-center text-sm text-text-secondary">
-          Didn&apos;t receive the code?{" "}
-          <button
-            type="button"
-            onClick={handleResend}
-            disabled={resending}
-            className="font-medium text-accent-300 hover:text-accent-400 disabled:opacity-50"
-          >
-            {resending ? "Sending..." : "Resend code"}
-          </button>
-        </p>
-      </div>
-    );
+    router.push("/dashboard");
   }
 
   return (
@@ -365,23 +157,10 @@ export function RegisterForm() {
                 type="email"
                 autoComplete="email"
                 required
-                value={emailValue}
-                onChange={(e) => setEmailValue(e.target.value)}
                 className="block w-full rounded-sm border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
                 style={{ fontSize: "16px" }}
                 placeholder="you@example.com"
               />
-              {emailStatus === "checking" && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent-300 border-t-transparent inline-block" />
-                </span>
-              )}
-              {emailStatus === "taken" && (
-                <p className="mt-1 text-xs text-error-500">Email already registered</p>
-              )}
-              {emailStatus === "available" && (
-                <p className="mt-1 text-xs text-primary">Email available</p>
-              )}
             </div>
           </div>
         ) : (
