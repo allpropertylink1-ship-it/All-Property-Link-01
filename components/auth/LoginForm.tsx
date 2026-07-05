@@ -1,70 +1,57 @@
-"use client";
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth-context";
+"use client"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/lib/auth-context"
+import { PasswordToggle } from "./PasswordToggle"
 
 export function LoginForm() {
-  const router = useRouter();
-  const { login } = useAuth();
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [magicEmail, setMagicEmail] = useState("");
-  const [magicSent, setMagicSent] = useState(false);
-  const [magicLoading, setMagicLoading] = useState(false);
+  const router = useRouter()
+  const { login, sendMagicLink } = useAuth()
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [magicEmail, setMagicEmail] = useState("")
+  const [magicSent, setMagicSent] = useState(false)
+  const [magicError, setMagicError] = useState("")
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+    e.preventDefault()
+    setLoading(true)
+    setError("")
 
-    const form = new FormData(e.currentTarget);
-    const email = form.get("email") as string;
-    const password = form.get("password") as string;
+    const form = new FormData(e.currentTarget)
+    const email = form.get("email") as string
+    const password = form.get("password") as string
 
-    const result = await login(email, password);
+    const result = await login(email, password)
 
     if (result?.error) {
-      setError(result.error);
-      setLoading(false);
-      return;
+      setError(result.error)
+      setLoading(false)
+      return
     }
 
-    router.push("/dashboard");
-    router.refresh();
+    router.push("/dashboard")
+    router.refresh()
   }
 
-  async function handleMagicLink(e: React.FormEvent) {
-    e.preventDefault();
-    if (!magicEmail) return;
-    setMagicLoading(true);
-    setError("");
-
-    const res = await fetch("/api/auth/magic-link", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: magicEmail }),
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      setError(data.error || "Failed to send magic link");
-      setMagicLoading(false);
-      return;
+  async function handleMagicLink() {
+    if (!magicEmail) return
+    setMagicError("")
+    const { error } = await sendMagicLink(magicEmail)
+    if (error) {
+      setMagicError(error)
+      return
     }
-
-    setMagicSent(true);
-    setMagicLoading(false);
+    setMagicSent(true)
   }
 
   return (
     <>
       <div className="mb-6">
-        {/* Google sign-in temporarily unavailable with the new auth system */}
         <button
           type="button"
           disabled
-          className="touch-target flex w-full items-center justify-center gap-3 rounded-sm border border-border bg-surface px-4 py-3 text-sm font-medium text-text-secondary transition-colors opacity-50 cursor-not-allowed"
+          className="touch-target flex w-full items-center justify-center gap-3 rounded-sm border border-border bg-surface px-4 py-3 text-sm font-medium text-text-secondary opacity-50 cursor-not-allowed"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -110,17 +97,17 @@ export function LoginForm() {
           <label htmlFor="password" className="block text-sm font-medium text-text-primary">
             Password
           </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
-            style={{ fontSize: "16px" }}
-            placeholder="Enter your password"
-          />
+          <div className="mt-1">
+            <PasswordToggle
+              id="password"
+              name="password"
+              autoComplete="current-password"
+              required
+              placeholder="Enter your password"
+            />
+          </div>
         </div>
+
         <div className="flex items-center justify-between">
           <button
             type="button"
@@ -153,12 +140,15 @@ export function LoginForm() {
             <button
               type="button"
               onClick={handleMagicLink}
-              disabled={magicLoading || !magicEmail}
+              disabled={!magicEmail}
               className="touch-target rounded-sm border border-accent-300 px-4 py-3 text-sm font-medium text-accent-300 transition-colors hover:bg-accent-300/10 disabled:opacity-50"
             >
-              {magicLoading ? "Sending..." : "Send"}
+              Send
             </button>
           </div>
+        )}
+        {magicError && (
+          <p className="text-xs text-error-500">{magicError}</p>
         )}
 
         <button
@@ -176,5 +166,5 @@ export function LoginForm() {
         </p>
       </form>
     </>
-  );
+  )
 }

@@ -1,32 +1,27 @@
-"use client";
-
-import { useState } from "react";
+"use client"
+import { useState } from "react"
+import { api } from "@/lib/api-client"
 
 export function ForgotPasswordForm() {
-  const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState("")
+  const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+    e.preventDefault()
+    setLoading(true)
+    setError("")
 
-    const res = await fetch("/api/auth/forgot-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-
-    if (!res.ok) {
-      setError("Failed to send reset email");
-      setLoading(false);
-      return;
+    const { error: reqError } = await api.post("/api/auth/forgot-password", { email })
+    if (reqError) {
+      setError(reqError)
+      setLoading(false)
+      return
     }
 
-    setSent(true);
-    setLoading(false);
+    setSent(true)
+    setLoading(false)
   }
 
   if (sent) {
@@ -36,7 +31,7 @@ export function ForgotPasswordForm() {
           If an account exists with that email, we&apos;ve sent a reset link.
         </p>
       </div>
-    );
+    )
   }
 
   return (
@@ -76,5 +71,5 @@ export function ForgotPasswordForm() {
         </a>
       </p>
     </form>
-  );
+  )
 }

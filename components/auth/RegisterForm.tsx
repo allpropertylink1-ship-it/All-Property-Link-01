@@ -1,61 +1,256 @@
-"use client";
+"use client"
+import { useState, useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/lib/auth-context"
+import { PasswordStrength } from "./PasswordStrength"
+import { PasswordToggle } from "./PasswordToggle"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth-context";
-import { PasswordStrength } from "./PasswordStrength";
-
-type ContactMethod = "email" | "phone";
+type ContactMethod = "email" | "phone"
+type Step = "form" | "otp"
 
 export function RegisterForm() {
-  const router = useRouter();
-  const { signup } = useAuth();
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [contactMethod, setContactMethod] = useState<ContactMethod>("email");
-  const [password, setPassword] = useState("");
+  const router = useRouter()
+  const { signup, sendOtp, verifyOtp } = useAuth()
+  const [step, setStep] = useState<Step>("form")
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [contactMethod, setContactMethod] = useState<ContactMethod>("email")
+  const [password, setPassword] = useState("")
+  const [otpIdentifier, setOtpIdentifier] = useState("")
+  const [otpType, setOtpType] = useState<"EMAIL_VERIFICATION" | "PHONE_VERIFICATION">("EMAIL_VERIFICATION")
+  const [otpDestination, setOtpDestination] = useState("")
+  const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""])
+  const [otpLoading, setOtpLoading] = useState(false)
+  const [cooldown, setCooldown] = useState(0)
+  const [otpExpiresIn, setOtpExpiresIn] = useState(600)
+  const otpTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const cooldownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([])
+
+  useEffect(() => {
+    return () => {
+      if (otpTimerRef.current) clearInterval(otpTimerRef.current)
+      if (cooldownTimerRef.current) clearInterval(cooldownTimerRef.current)
+    }
+  }, [])
+
+  function startCooldown(seconds: number) {
+    setCooldown(seconds)
+    if (cooldownTimerRef.current) clearInterval(cooldownTimerRef.current)
+    cooldownTimerRef.current = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev <= 1) {
+          if (cooldownTimerRef.current) clearInterval(cooldownTimerRef.current)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }
+
+  function startExpiryTimer(seconds: number) {
+    setOtpExpiresIn(seconds)
+    if (otpTimerRef.current) clearInterval(otpTimerRef.current)
+    otpTimerRef.current = setInterval(() => {
+      setOtpExpiresIn((prev) => {
+        if (prev <= 1) {
+          if (otpTimerRef.current) clearInterval(otpTimerRef.current)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+    e.preventDefault()
+    setLoading(true)
+    setError("")
 
-    const form = new FormData(e.currentTarget);
-    const confirmPassword = form.get("confirmPassword") as string;
-    const firstName = form.get("firstName") as string;
-    const lastName = form.get("lastName") as string;
-    const email = contactMethod === "email" ? (form.get("email") as string) : "";
-    const phoneRaw = contactMethod === "phone" ? (form.get("phone") as string) : "";
-    const phone = phoneRaw ? `+254${phoneRaw.replace(/\D/g, "")}` : "";
+    const form = new FormData(e.currentTarget)
+    const confirmPassword = form.get("confirmPassword") as string
+    const firstName = form.get("firstName") as string
+    const lastName = form.get("lastName") as string
+    const email = contactMethod === "email" ? (form.get("email") as string) : ""
+    const phoneRaw = contactMethod === "phone" ? (form.get("phone") as string) : ""
+    const phone = phoneRaw ? `+254${phoneRaw.replace(/\D/g, "")}` : ""
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      setLoading(false);
-      return;
+      setError("Passwords do not match")
+      setLoading(false)
+      return
     }
 
     if (contactMethod === "phone" && phoneRaw.replace(/\D/g, "").length !== 9) {
-      setError("Please enter a valid 9-digit Kenyan phone number");
-      setLoading(false);
-      return;
+      setError("Please enter a valid 9-digit Kenyan phone number")
+      setLoading(false)
+      return
     }
 
     if (contactMethod === "email") {
       if (!email) {
-        setError("Email is required");
-        setLoading(false);
-        return;
+        setError("Email is required")
+        setLoading(false)
+        return
       }
     }
 
-    const { error: signupError } = await signup({ firstName, lastName, password, email, phone });
+    const { error: signupError, otp } = await signup({ firstName, lastName, password, email, phone })
     if (signupError) {
-      setError(signupError);
-      setLoading(false);
-      return;
+      setError(signupError)
+      setLoading(false)
+      return
     }
 
-    router.push("/dashboard");
+    if (otp) {
+      setOtpIdentifier(otp.identifier)
+      setOtpType(otp.type)
+      setOtpDestination(otp.otpDestination)
+      startCooldown(otp.retryAfter)
+      startExpiryTimer(otp.expiresIn)
+      setStep("otp")
+    }
+    setLoading(false)
+  }
+
+  async function handleOtpVerify() {
+    const code = otpValues.join("")
+    if (code.length !== 6) {
+      setError("Please enter the complete 6-digit code")
+      return
+    }
+    setOtpLoading(true)
+    setError("")
+
+    const { error: verifyError } = await verifyOtp(otpIdentifier, code, otpType)
+    if (verifyError) {
+      setError(verifyError)
+      setOtpLoading(false)
+      return
+    }
+
+    setOtpLoading(false)
+    router.push("/dashboard")
+  }
+
+  async function handleResendOtp() {
+    if (cooldown > 0) return
+    setError("")
+    const { error: sendError } = await sendOtp(otpIdentifier, otpType)
+    if (sendError) {
+      setError(sendError)
+      return
+    }
+    startCooldown(60)
+    setOtpValues(["", "", "", "", "", ""])
+    otpInputRefs.current[0]?.focus()
+  }
+
+  function handleOtpInput(index: number, value: string) {
+    if (value.length > 1) {
+      const digits = value.replace(/\D/g, "").split("")
+      const newValues = [...otpValues]
+      for (let i = 0; i < 6 && i < digits.length; i++) {
+        newValues[i] = digits[i]
+      }
+      setOtpValues(newValues)
+      const nextIndex = Math.min(digits.length, 5)
+      otpInputRefs.current[nextIndex]?.focus()
+      return
+    }
+    if (!/^\d*$/.test(value)) return
+    const newValues = [...otpValues]
+    newValues[index] = value
+    setOtpValues(newValues)
+    if (value && index < 5) {
+      otpInputRefs.current[index + 1]?.focus()
+    }
+  }
+
+  function handleOtpKeyDown(index: number, e: React.KeyboardEvent) {
+    if (e.key === "Backspace" && !otpValues[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus()
+    }
+  }
+
+  function handleOtpPaste(e: React.ClipboardEvent) {
+    e.preventDefault()
+    const text = e.clipboardData.getData("text").replace(/\D/g, "")
+    const digits = text.split("").slice(0, 6)
+    const newValues = [...otpValues]
+    for (let i = 0; i < 6; i++) {
+      newValues[i] = digits[i] || ""
+    }
+    setOtpValues(newValues)
+    const focusIndex = Math.min(digits.length, 5)
+    otpInputRefs.current[focusIndex]?.focus()
+  }
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${m}:${s.toString().padStart(2, "0")}`
+  }
+
+  if (step === "otp") {
+    return (
+      <div>
+        <h2 className="mb-2 font-heading text-xl font-bold text-text-primary">Verify your {otpType === "EMAIL_VERIFICATION" ? "email" : "phone"}</h2>
+        <p className="mb-6 text-sm text-text-secondary">
+          We sent a code to <strong className="text-text-primary">{otpDestination}</strong>
+        </p>
+
+        {error && (
+          <div className="mb-4 rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{error}</div>
+        )}
+
+        <div className="flex justify-center gap-2 mb-6" onPaste={handleOtpPaste}>
+          {otpValues.map((digit, i) => (
+            <input
+              key={i}
+              ref={(el) => { otpInputRefs.current[i] = el }}
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              value={digit}
+              onChange={(e) => handleOtpInput(i, e.target.value)}
+              onKeyDown={(e) => handleOtpKeyDown(i, e)}
+              autoFocus={i === 0}
+              className="h-14 w-12 rounded-sm border border-border text-center text-xl font-bold text-text-primary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+              style={{ fontSize: "20px" }}
+            />
+          ))}
+        </div>
+
+        <button
+          onClick={handleOtpVerify}
+          disabled={otpLoading || otpValues.join("").length !== 6}
+          className="touch-target w-full rounded-sm bg-accent-300 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-300/20 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {otpLoading ? "Verifying..." : "Verify code"}
+        </button>
+
+        <div className="mt-4 text-center space-y-1">
+          {otpExpiresIn > 0 ? (
+            <p className="text-xs text-text-secondary">Code expires in {formatTime(otpExpiresIn)}</p>
+          ) : (
+            <p className="text-xs text-error-500">Code expired. Request a new one.</p>
+          )}
+          <div>
+            {cooldown > 0 ? (
+              <span className="text-xs text-text-secondary">Resend code in {formatTime(cooldown)}</span>
+            ) : (
+              <button
+                onClick={handleResendOtp}
+                className="text-xs font-medium text-accent-300 hover:text-accent-400"
+              >
+                Resend code
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -118,9 +313,7 @@ export function RegisterForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">
-            Contact method
-          </label>
+          <label className="block text-sm font-medium text-text-primary mb-2">Contact method</label>
           <div className="flex gap-2">
             <button
               type="button"
@@ -188,33 +381,31 @@ export function RegisterForm() {
 
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-text-primary">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            required
-            minLength={8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
-            style={{ fontSize: "16px" }}
-          />
+          <div className="mt-1">
+            <PasswordToggle
+              id="password"
+              name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+              required
+              minLength={8}
+            />
+          </div>
           <PasswordStrength password={password} />
         </div>
 
         <div>
           <label htmlFor="confirmPassword" className="block text-sm font-medium text-text-primary">Confirm password</label>
-          <input
-            id="confirmPassword"
-            name="confirmPassword"
-            type="password"
-            autoComplete="new-password"
-            required
-            minLength={8}
-            className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
-            style={{ fontSize: "16px" }}
-          />
+          <div className="mt-1">
+            <PasswordToggle
+              id="confirmPassword"
+              name="confirmPassword"
+              autoComplete="new-password"
+              required
+              minLength={8}
+            />
+          </div>
         </div>
 
         <button
@@ -231,5 +422,5 @@ export function RegisterForm() {
         </p>
       </form>
     </>
-  );
+  )
 }

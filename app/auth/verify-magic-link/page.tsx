@@ -2,11 +2,12 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { api } from "@/lib/api-client";
 
 export default function VerifyMagicLinkPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState<"verifying" | "signing-in" | "error" | "done">("verifying");
+  const [status, setStatus] = useState<"verifying" | "error" | "done">("verifying");
   const [error, setError] = useState("");
 
   const handleVerification = useCallback(async () => {
@@ -17,33 +18,18 @@ export default function VerifyMagicLinkPage() {
       return;
     }
 
-    setStatus("verifying");
-    const res = await fetch(`/api/auth/verify-magic-link?token=${token}`);
-    if (!res.ok) {
-      const data = await res.json();
-      setError(data.error || "Invalid or expired magic link");
-      setStatus("error");
-      return;
-    }
-
-    const data = await res.json();
-    setStatus("signing-in");
-
-    const loginRes = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: data.email, password: "__MAGIC_LINK__" }),
-    });
-
-    if (!loginRes.ok) {
-      setError("Failed to sign in. Please try again.");
+    const { data, error } = await api.get<{ user: { firstName: string } }>(`/api/auth/verify-magic-link?token=${token}`);
+    if (error || !data) {
+      setError(error || "Invalid or expired magic link");
       setStatus("error");
       return;
     }
 
     setStatus("done");
-    router.push("/dashboard");
-    router.refresh();
+    setTimeout(() => {
+      router.push("/dashboard");
+      router.refresh();
+    }, 1000);
   }, [searchParams, router]);
 
   useEffect(() => {
@@ -53,18 +39,12 @@ export default function VerifyMagicLinkPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface px-4">
       <div className="w-full max-w-sm text-center">
-        {status === "verifying" && (
-          <div className="space-y-4">
-            <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-accent-300 border-t-transparent" />
-            <p className="font-heading text-lg font-semibold text-text-primary">Verifying your link...</p>
-          </div>
-        )}
-        {status === "signing-in" && (
-          <div className="space-y-4">
-            <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-accent-300 border-t-transparent" />
-            <p className="font-heading text-lg font-semibold text-text-primary">Signing you in...</p>
-          </div>
-        )}
+          {status === "verifying" && (
+            <div className="space-y-4">
+              <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-accent-300 border-t-transparent" />
+              <p className="font-heading text-lg font-semibold text-text-primary">Verifying your link...</p>
+            </div>
+          )}
         {status === "done" && (
           <div className="space-y-4">
             <p className="font-heading text-lg font-semibold text-text-primary">Signed in!</p>

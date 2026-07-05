@@ -22,7 +22,7 @@ const faqCategories: FAQCategory[] = [
     faqs: [
       {
         question: "How do I create an account on All Property Link?",
-        answer: "Click 'Sign up' in the top right corner. You can register using your email address or Google account. After verifying your email, you'll have access to saved searches, property alerts, and inquiry history.",
+        answer: "Click 'Sign up' in the top right corner. You can register using your email address. After verifying your email, you'll have access to saved searches, property alerts, and inquiry history.",
       },
       {
         question: "Do I need an account to browse properties?",
