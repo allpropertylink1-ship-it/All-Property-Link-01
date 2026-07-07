@@ -5,6 +5,7 @@ import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, FileText, Trash2,
 import { cn } from "@/lib/utils"
 import ImageCropper from "@/components/kyc/ImageCropper"
 import PdfViewer from "@/components/kyc/PdfViewer"
+import { useUploadThing } from "@/lib/uploadthing"
 
 interface KycDoc {
   id: string
@@ -113,6 +114,8 @@ export default function KycPage() {
   const [croppingFor, setCroppingFor] = useState<"front" | "back" | null>(null)
   const [cropImageUrl, setCropImageUrl] = useState<string | null>(null)
 
+  const { startUpload } = useUploadThing("kycDocument")
+
   const fetchKyc = useCallback(async () => {
     try {
       const res = await fetch("/api/user/kyc")
@@ -133,24 +136,19 @@ export default function KycPage() {
     blob: Blob,
     side: "front" | "back"
   ) => {
-    const formData = new FormData()
-    formData.append("file", blob, `document-${side}.jpg`)
+    const file = new File([blob], `document-${side}.jpg`, { type: "image/jpeg" })
 
     if (side === "front") setUploadingFront(true)
     else setUploadingBack(true)
 
     try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!res.ok) throw new Error("Upload failed")
-
-      const result = await res.json()
-      if (result.url) {
-        if (side === "front") setFrontImageUrl(result.url)
-        else setBackImageUrl(result.url)
+      const result = await startUpload([file])
+      const url = result?.[0]?.url
+      if (url) {
+        if (side === "front") setFrontImageUrl(url)
+        else setBackImageUrl(url)
+      } else {
+        throw new Error("Upload failed")
       }
     } catch {
       setMessage({ type: "error", text: "Failed to upload image" })
@@ -161,14 +159,11 @@ export default function KycPage() {
   }
 
   const uploadPdfDirectly = async (file: File) => {
-    const formData = new FormData()
-    formData.append("file", file)
     setAdditionalUploading(true)
     try {
-      const res = await fetch("/api/upload", { method: "POST", body: formData })
-      if (!res.ok) throw new Error("Upload failed")
-      const result = await res.json()
-      if (result.url) setAdditionalImageUrl(result.url)
+      const result = await startUpload([file])
+      const url = result?.[0]?.url
+      if (url) setAdditionalImageUrl(url)
       else throw new Error("No URL returned")
     } catch {
       setMessage({ type: "error", text: "Failed to upload PDF" })
@@ -211,14 +206,13 @@ export default function KycPage() {
       await uploadCroppedBlob(croppedBlob, side)
       setCroppingFor(null)
     } else if (additionalCropping) {
-      const formData = new FormData()
-      formData.append("file", croppedBlob, "additional-doc.jpg")
+      const file = new File([croppedBlob], "additional-doc.jpg", { type: "image/jpeg" })
       setAdditionalUploading(true)
       try {
-        const res = await fetch("/api/upload", { method: "POST", body: formData })
-        if (!res.ok) throw new Error("Upload failed")
-        const result = await res.json()
-        if (result.url) setAdditionalImageUrl(result.url)
+        const result = await startUpload([file])
+        const url = result?.[0]?.url
+        if (url) setAdditionalImageUrl(url)
+        else throw new Error("Upload failed")
       } catch {
         setMessage({ type: "error", text: "Failed to upload image" })
       } finally {
