@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, FileText } from "lucide-react"
+import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, FileText, Trash2, RefreshCcw } from "lucide-react"
 import { cn } from "@/lib/utils"
 import ImageCropper from "@/components/kyc/ImageCropper"
 
@@ -83,6 +83,7 @@ export default function KycPage() {
   const [additionalImageUrl, setAdditionalImageUrl] = useState("")
   const [additionalUploading, setAdditionalUploading] = useState(false)
   const [additionalSubmitting, setAdditionalSubmitting] = useState(false)
+  const [deleting, setDeleting] = useState<string | null>(null)
   const [additionalCropping, setAdditionalCropping] = useState(false)
   const [additionalIsPdf, setAdditionalIsPdf] = useState(false)
   const [additionalFileName, setAdditionalFileName] = useState("")
@@ -567,16 +568,18 @@ export default function KycPage() {
                   <>
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-semibold text-foreground">{label}</h3>
-                      <span className={cn(
-                        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium",
-                        sub.status === "VERIFIED" && "bg-green-100 text-green-700",
-                        sub.status === "PENDING" && "bg-amber-100 text-amber-700",
-                        sub.status === "REJECTED" && "bg-red-100 text-red-700"
-                      )}>
-                        {sub.status === "VERIFIED" && <><CheckCircle size={10} /> Verified</>}
-                        {sub.status === "PENDING" && <><Clock size={10} /> Pending</>}
-                        {sub.status === "REJECTED" && <><XCircle size={10} /> Rejected</>}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className={cn(
+                          "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium",
+                          sub.status === "VERIFIED" && "bg-green-100 text-green-700",
+                          sub.status === "PENDING" && "bg-amber-100 text-amber-700",
+                          sub.status === "REJECTED" && "bg-red-100 text-red-700"
+                        )}>
+                          {sub.status === "VERIFIED" && <><CheckCircle size={10} /> Verified</>}
+                          {sub.status === "PENDING" && <><Clock size={10} /> Pending</>}
+                          {sub.status === "REJECTED" && <><XCircle size={10} /> Rejected</>}
+                        </span>
+                      </div>
                     </div>
                     {sub.documentNumber && (
                       <p className="mt-2 text-[11px] text-muted">
@@ -601,6 +604,19 @@ export default function KycPage() {
                         <img src={sub.frontImage} alt={label} className="mt-2 h-16 w-full rounded object-cover" />
                       )
                     )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAdditionalDocType(type)
+                        setAdditionalDocNumber(sub.documentNumber || "")
+                        setAdditionalPreview(null)
+                        setAdditionalImageUrl("")
+                        setAdditionalIsPdf(false)
+                      }}
+                      className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-[11px] font-medium text-muted hover:bg-gray-50 hover:text-foreground transition-colors"
+                    >
+                      <RefreshCcw size={12} /> Replace
+                    </button>
                   </>
                 ) : isActive ? (
                   <div className="space-y-3">
@@ -735,8 +751,10 @@ export default function KycPage() {
                             if (!additionalDocNumber.trim()) return
                             setAdditionalSubmitting(true)
                             try {
-                              const res = await fetch("/api/user/kyc", {
-                                method: "POST",
+                              const existingDoc = data?.documents?.find(d => d.documentType === type)
+                              const isUpdate = !!existingDoc
+                              const res = await fetch(`/api/user/kyc${isUpdate ? `/${existingDoc!.id}` : ""}`, {
+                                method: isUpdate ? "PATCH" : "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({
                                   documentType: type,
@@ -752,6 +770,7 @@ export default function KycPage() {
                               setAdditionalPreview(null)
                               setAdditionalImageUrl("")
                               setAdditionalDocNumber("")
+                              setAdditionalIsPdf(false)
                               setMessage({ type: "success", text: `${label} submitted for verification` })
                               fetchKyc()
                             } catch (err) {
@@ -828,18 +847,50 @@ export default function KycPage() {
                   </div>
 
                   <div className="space-y-2 text-right">
-                    <span className={cn(
-                      "px-3 py-1 rounded text-xs font-medium",
-                      doc.status === "PENDING" && "bg-yellow-500/20 text-yellow-600",
-                      doc.status === "VERIFIED" && "bg-green-500/20 text-green-600",
-                      doc.status === "REJECTED" && "bg-red-500/20 text-red-600"
-                    )}>
-                      {doc.status === "PENDING" && "Pending Review"}
-                      {doc.status === "VERIFIED" && "Verified"}
-                      {doc.status === "REJECTED" && "Rejected"}
-                    </span>
+                    <div className="flex items-center justify-end gap-2">
+                      <span className={cn(
+                        "px-3 py-1 rounded text-xs font-medium",
+                        doc.status === "PENDING" && "bg-yellow-500/20 text-yellow-600",
+                        doc.status === "VERIFIED" && "bg-green-500/20 text-green-600",
+                        doc.status === "REJECTED" && "bg-red-500/20 text-red-600"
+                      )}>
+                        {doc.status === "PENDING" && "Pending Review"}
+                        {doc.status === "VERIFIED" && "Verified"}
+                        {doc.status === "REJECTED" && "Rejected"}
+                      </span>
+                      {doc.status === "REJECTED" && (
+                        <button
+                          type="button"
+                          disabled={deleting === doc.id}
+                          onClick={async () => {
+                            if (!confirm("Delete this rejected submission permanently?")) return
+                            setDeleting(doc.id)
+                            try {
+                              const res = await fetch(`/api/user/kyc/${doc.id}`, { method: "DELETE" })
+                              if (!res.ok) {
+                                const err = await res.json()
+                                throw new Error(err.error || "Failed to delete")
+                              }
+                              setMessage({ type: "success", text: "Submission deleted" })
+                              fetchKyc()
+                            } catch (err) {
+                              setMessage({
+                                type: "error",
+                                text: err instanceof Error ? err.message : "Failed to delete",
+                              })
+                            } finally {
+                              setDeleting(null)
+                            }
+                          }}
+                          className="rounded p-1 text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                          title="Delete permanently"
+                        >
+                          {deleting === doc.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                        </button>
+                      )}
+                    </div>
                     {doc.rejectionReason && (
-                      <p className="mt-1 text-xs text-red-500">Reason: {doc.rejectionReason}</p>
+                      <p className="text-xs text-red-500">Reason: {doc.rejectionReason}</p>
                     )}
                   </div>
                 </div>
