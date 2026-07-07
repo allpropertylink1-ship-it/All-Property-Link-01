@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, FileText, Trash2, RefreshCcw, ImageIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import ImageCropper from "@/components/kyc/ImageCropper"
+import PdfViewer from "@/components/kyc/PdfViewer"
 
 interface KycDoc {
   id: string
@@ -36,10 +37,6 @@ const docTypeAspectRatios: Record<string, number> = {
   BUSINESS_PERMIT: 1.42,
   BUSINESS_REGISTRATION: 1.42,
   KRA_PIN: 1.42,
-}
-
-function pdfUrl(url: string) {
-  return url.replace("/image/upload/", "/raw/upload/").replace(/\.pdf$/, "")
 }
 
 const additionalDocTypes = [
@@ -615,12 +612,7 @@ export default function KycPage() {
                     )}
                     {sub.frontImage && (
                       sub.frontImage.match(/\.pdf/i) ? (
-                        <a href={pdfUrl(sub.frontImage)} target="_blank" rel="noopener noreferrer"
-                          className="mt-2 flex h-16 w-full items-center justify-center gap-2 rounded-lg border border-border bg-gray-50 text-xs text-muted hover:bg-gray-100 hover:text-primary transition-colors"
-                        >
-                          <FileText size={16} className="text-red-400" />
-                          View PDF
-                        </a>
+                        <PdfViewer url={sub.frontImage} label={label} compact />
                       ) : (
                         <DocImage src={sub.frontImage} label={label} className="mt-2 h-16 w-full" />
                       )
@@ -924,12 +916,7 @@ export default function KycPage() {
                           {doc.documentType === "BUSINESS_PERMIT" || doc.documentType === "BUSINESS_REGISTRATION" || doc.documentType === "KRA_PIN" ? "Document" : "Front"}
                         </p>
                         {doc.frontImage.match(/\.pdf/i) ? (
-                          <a href={pdfUrl(doc.frontImage)} target="_blank" rel="noopener noreferrer"
-                            className="flex h-20 w-28 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-gray-50 text-xs text-muted hover:bg-gray-100 hover:text-primary transition-colors"
-                          >
-                            <FileText size={20} className="text-red-400" />
-                            View PDF
-                          </a>
+                          <PdfViewer url={doc.frontImage} label={doc.documentType} compact />
                         ) : (
                           <DocImage src={doc.frontImage} label={doc.documentType} />
                         )}
@@ -939,12 +926,7 @@ export default function KycPage() {
                       <div className="space-y-1">
                         <p className="text-xs text-muted">Back</p>
                         {doc.backImage.match(/\.pdf/i) ? (
-                          <a href={pdfUrl(doc.backImage)} target="_blank" rel="noopener noreferrer"
-                            className="flex h-20 w-28 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-gray-50 text-xs text-muted hover:bg-gray-100 hover:text-primary transition-colors"
-                          >
-                            <FileText size={20} className="text-red-400" />
-                            View PDF
-                          </a>
+                          <PdfViewer url={doc.backImage} label="Back" compact />
                         ) : (
                           <DocImage src={doc.backImage} label="Back" />
                         )}
