@@ -1,25 +1,37 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, FileText, Trash2, RefreshCcw, ImageIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { 
+  Shield, CheckCircle, XCircle, Clock, Upload, Loader2, 
+  Trash2, ChevronDown, ChevronRight, ImageIcon, AlertTriangle,
+  FileText, ExternalLink
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import ImageCropper from "@/components/kyc/ImageCropper"
 import PdfViewer from "@/components/kyc/PdfViewer"
 import { useUploadThing } from "@/lib/uploadthing"
+import { resolvePdfUrl } from "@/lib/pdf-utils"
 
 interface KycDoc {
   id: string
   documentType: string
   documentNumber: string | null
-  status: string
   frontImage: string | null
   backImage: string | null
+  status: string
   rejectionReason: string | null
   createdAt: string
 }
 
 interface KycData {
   documents: KycDoc[]
+  kycStatus: string
+}
+
+interface Message {
+  type: "success" | "error"
+  text: string
 }
 
 const docTypeLabels: Record<string, string> = {
@@ -27,11 +39,18 @@ const docTypeLabels: Record<string, string> = {
   DRIVERS_LICENSE: "Driver's License",
   PASSPORT: "Passport",
   BUSINESS_PERMIT: "Business Permit",
-  BUSINESS_REGISTRATION: "Business Registration",
-  KRA_PIN: "KRA PIN",
+  BUSINESS_REGISTRATION": "Business Registration",
+  KRA_PIN": "PIN"
 }
 
-const docTypeAspectRatios: Record<string, number> = {
+const coreTypes = ["NATIONAL_ID", "DRIVERS_LICENSE", "PASSPORT"] as const
+const additionalTypes = [
+  { type: "BUSINESS_PERMIT" as const, label: "Business Permit", desc: "Your valid business permit issued by the county government" },
+  { type: "BUSINESS_REGISTRATION" as const, label: "Business Registration", desc: "Certificate of business registration" },
+  { type: "KRA_PIN" as const, label: "KRA PIN", desc: "Your KRA PIN certificate (usually a single page)" },
+] as const
+
+const aspectRatios: Record<string, number> = {
   NATIONAL_ID: 85.6 / 54,
   DRIVERS_LICENSE: 85.6 / 54,
   PASSPORT: 125 / 88,
@@ -40,28 +59,22 @@ const docTypeAspectRatios: Record<string, number> = {
   KRA_PIN: 1.42,
 }
 
-const additionalDocTypes = [
-  { type: "BUSINESS_PERMIT", label: "Business Permit", desc: "Your valid business permit issued by the county government" },
-  { type: "BUSINESS_REGISTRATION", label: "Business Registration", desc: "Certificate of business registration" },
-  { type: "KRA_PIN", label: "KRA PIN", desc: "Your KRA PIN certificate (usually a single page)" },
-] as const
+const MAX_FILE_SIZE = 10 * 1024 * 1024
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"]
+const ALL_TYPES = [...IMAGE_TYPES, "application/pdf"]
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024
-const ACCEPTED_FILE_TYPES = ["image/jpeg", "image/png", "image/jpg"]
-const ADDITIONAL_ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/jpg", "application/pdf"]
-const ADDITIONAL_MAX_SIZE = 10 * 1024 * 1024
-
-interface StatusInfo {
-  label: string
-  icon: React.ElementType
-  color: string
+const statusConfig: Record<string, { label: string; icon: React.ElementType; color: string; bg: string; border: string }> = {
+  NONE: { label: "Not Verified", icon: Shield, color: "text-muted", bg: "bg-gray-50", border: "border-muted/30" },
+  PENDING: { label: "Pending Review", icon: Clock, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
+  VERIFIED: { label: "Verified", icon: CheckCircle, color: "text-green-600", bg: "bg-green-50", border: "border-green-200" },
+  REJECTED: { label: "Rejected", icon: XCircle, color: "text-red-600", bg: "bg-red-50", border: "border-red-200" },
 }
 
-const statusDisplay: Record<string, StatusInfo> = {
-  NONE: { label: "Not Verified", icon: Shield, color: "text-gray-500" },
-  PENDING: { label: "Pending Review", icon: Clock, color: "text-yellow-500" },
-  VERIFIED: { label: "Verified", icon: CheckCircle, color: "text-green-500" },
-  REJECTED: { label: "Rejected", icon: XCircle, color: "text-red-500" },
+const statusMessages: Record<string, string> = {
+  NONE: "Verify your identity to unlock all platform features. Submit your ID document to get started.",
+  PENDING: "Your documents are under review. An admin will verify them shortly. You can still use other dashboard features.",
+  VERIFIED: "Your identity has been verified. You can now list properties and use all platform features.",
+  REJECTED: "Your documents were not approved. Please correct the issues and re-submit below.",
 }
 
 function DocImage({ src, label, className }: { src: string; label: string; className?: string }) {
@@ -84,858 +97,825 @@ function DocImage({ src, label, className }: { src: string; label: string; class
   )
 }
 
-export default function KycPage() {
-  const [data, setData] = useState<KycData | null>(null)
-  const [submitting, setSubmitting] = useState(false)
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+function StatusBadge({ status }: { status: string }) {
+  const cfg = statusConfig[status]
+  if (!cfg) return null
+  return (
+    <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium", cfg.bg, cfg.color)}>
+      <cfg.icon size={12} />
+      {cfg.label}
+    </span>
+  )
+}
 
-  const [documentType, setDocumentType] = useState("NATIONAL_ID")
-  const [documentNumber, setDocumentNumber] = useState("")
-  const [frontImageUrl, setFrontImageUrl] = useState("")
-  const [backImageUrl, setBackImageUrl] = useState("")
+export default function KycPage() {
+  const router = useRouter()
+  const [data, setData] = useState<KycData | null>(null)
+  const [message, setMessage] = useState<Message | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const { startUpload } = useUploadThing("kycDocument")
+
+  // Form state
+  const [documentType, setDocumentType] = useState<string>("NATIONAL_ID")
+  const [documentNumber, setDocumentNumber] = useState<string>("")
+  const [frontImageUrl, setFrontImageUrl] = useState<string>("")
+  const [backImageUrl, setBackImageUrl] = useState<string>("")
   const [frontPreview, setFrontPreview] = useState<string | null>(null)
   const [backPreview, setBackPreview] = useState<string | null>(null)
   const [uploadingFront, setUploadingFront] = useState(false)
   const [uploadingBack, setUploadingBack] = useState(false)
-
-  // Additional document state
-  const [additionalDocType, setAdditionalDocType] = useState<string | null>(null)
-  const [additionalDocNumber, setAdditionalDocNumber] = useState("")
-  const [additionalPreview, setAdditionalPreview] = useState<string | null>(null)
-  const [additionalImageUrl, setAdditionalImageUrl] = useState("")
-  const [additionalUploading, setAdditionalUploading] = useState(false)
-  const [additionalSubmitting, setAdditionalSubmitting] = useState(false)
-  const [deleting, setDeleting] = useState<string | null>(null)
-  const [additionalCropping, setAdditionalCropping] = useState(false)
-  const [additionalIsPdf, setAdditionalIsPdf] = useState(false)
-  const [additionalFileName, setAdditionalFileName] = useState("")
-
-  // Cropper state
   const [croppingFor, setCroppingFor] = useState<"front" | "back" | null>(null)
-  const [cropImageUrl, setCropImageUrl] = useState<string | null>(null)
+  [cropImageUrl, setCropImageUrl] = useState<string | null>(null)
+  [cropDocType, setCropDocType] = useState<string | null>(null)
 
-  const { startUpload } = useUploadThing("kycDocument")
+  // Additional documents state
+  [additionalDocs, setAdditionalDocs] = useState<Record<string, {
+    documentNumber: string
+    imageUrl: string
+    preview: string | null
+    isPdf: boolean
+    fileName: string
+  }>>({})
 
+  // Form validation helpers
+  const isFormValid = () => {
+    if (!documentNumber.trim()) return false
+    if (!frontImageUrl) return false
+    return true
+  }
+
+  // Fetch KYC data
   const fetchKyc = useCallback(async () => {
     try {
       const res = await fetch("/api/user/kyc")
       if (res.ok) {
         const result = await res.json()
         setData(result)
+        
+        // Pre-fill form if rejected (for re-submit)
+        if (result.kycStatus === "REJECTED" && result.documents?.length > 0) {
+          const rejDoc = result.documents.find(
+            (d: KycDoc) => ["NATIONAL_ID", "DRIVERS_LICENSE", "PASSPORT"].includes(d.documentType) && d.status === "REJECTED"
+          )
+          if (rejDoc) {
+            setDocumentType(rejDoc.documentType)
+            setDocumentNumber(rejDoc.documentNumber || "")
+            setFrontImageUrl(rejDoc.frontImage || "")
+            if (rejDoc.backImage) setBackImageUrl(rejDoc.backImage)
+          }
+        }
       }
-    } catch {
+    } catch (e) {
+      console.error("Failed to fetch KYC data:", e)
       setData(null)
     }
   }, [])
 
-  useEffect(() => {
-    fetchKyc()
-  }, [fetchKyc])
+  useEffect(() => { fetchKyc() }, [fetchKyc])
 
-  const uploadCroppedBlob = async (
-    blob: Blob,
-    side: "front" | "back"
-  ) => {
-    const file = new File([blob], `document-${side}.jpg`, { type: "image/jpeg" })
+  const kycStatus = data?.kycStatus || "NONE"
+  const isReSubmit = kycStatus === "REJECTED"
+  const coreDoc = data?.documents?.find(d => ["NATIONAL_ID", "DRIVERS_LICENSE", "PASSPORT"].includes(d.documentType))
+  const coreDocSubmitted = !!coreDoc
+  const coreDocStatus = coreDoc?.status
+  const coreRejectionReason = coreDoc?.rejectionReason
 
-    if (side === "front") setUploadingFront(true)
-    else setUploadingBack(true)
-
-    try {
-      const result = await startUpload([file])
-      const url = result?.[0]?.url
-      if (url) {
-        if (side === "front") setFrontImageUrl(url)
-        else setBackImageUrl(url)
-      } else {
-        throw new Error("Upload failed")
-      }
-    } catch {
-      setMessage({ type: "error", text: "Failed to upload image" })
-    } finally {
-      if (side === "front") setUploadingFront(false)
-      else setUploadingBack(false)
-    }
-  }
-
-  const uploadPdfDirectly = async (file: File) => {
-    setAdditionalUploading(true)
-    try {
-      const result = await startUpload([file])
-      const url = result?.[0]?.url
-      if (url) setAdditionalImageUrl(url)
-      else throw new Error("No URL returned")
-    } catch {
-      setMessage({ type: "error", text: "Failed to upload PDF" })
-      setAdditionalPreview(null)
-      setAdditionalIsPdf(false)
-    } finally {
-      setAdditionalUploading(false)
-    }
-  }
-
+  // File handlers
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") => {
     const file = e.target.files?.[0]
     if (!file) return
-
-    if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
+    
+    if (!IMAGE_TYPES.includes(file.type)) {
       setMessage({ type: "error", text: "Only JPG and PNG files are allowed" })
       e.target.value = ""
       return
     }
-
     if (file.size > MAX_FILE_SIZE) {
-      setMessage({ type: "error", text: "File size must be under 5MB" })
+      setMessage({ type: "error", text: "File size must be under 10MB" })
       e.target.value = ""
       return
     }
-
+    
+    setMessage(null)
     const previewUrl = URL.createObjectURL(file)
-    if (side === "front") {
-      setFrontPreview(previewUrl)
-    } else {
-      setBackPreview(previewUrl)
-    }
-    setCropImageUrl(previewUrl)
+    if (side === "front") setFrontPreview(previewUrl)
+    else setBackPreview(previewUrl)
     setCroppingFor(side)
+    setCropImageUrl(previewUrl)
+  }
+
+  const handleRemoveImage = (side: "front" | "back") => {
+    if (side === "front") { setFrontImageUrl(""); setFrontPreview(null) }
+    else { setBackImageUrl(""); setBackPreview(null) }
+    setCroppingFor(null)
+    setCropImageUrl(null)
   }
 
   const handleCropComplete = async (croppedBlob: Blob) => {
-    if (croppingFor) {
-      const side = croppingFor
-      await uploadCroppedBlob(croppedBlob, side)
-      setCroppingFor(null)
-    } else if (additionalCropping) {
-      const file = new File([croppedBlob], "additional-doc.jpg", { type: "image/jpeg" })
-      setAdditionalUploading(true)
+    if (croppingFor === "front" || croppingFor === "back") {
+      const side = cormingFor
+      if (side === "front") setUploadingFront(true)
+      else setUploadingBack(true)
+      
       try {
+        const file = new File([croppedBlob], `document-${side}.jpg`, { type: "image/jpeg" })
         const result = await startUpload([file])
         const url = result?.[0]?.url
-        if (url) setAdditionalImageUrl(url)
-        else throw new Error("Upload failed")
-      } catch {
+        if (url) {
+          if (side === "front") setFrontImageUrl(url)
+          else setBackImageUrl(url)
+        } else {
+          throw new Error("Upload failed")
+        }
+      } catch (err) {
         setMessage({ type: "error", text: "Failed to upload image" })
       } finally {
-        setAdditionalUploading(false)
+        if (side === "front") setUploadingFront(false)
+        else setUploadingBack(false)
+        setCroppingFor(null)
+        setCropImageUrl(null)
       }
-      setAdditionalCropping(false)
     }
-    setCropImageUrl(null)
-    setMessage(null)
   }
 
   const handleCropCancel = () => {
-    if (croppingFor) {
-      if (croppingFor === "front") {
-        setFrontPreview(null)
-      } else {
-        setBackPreview(null)
-      }
-      setCroppingFor(null)
-    } else if (additionalCropping) {
-      setAdditionalPreview(null)
-      setAdditionalCropping(false)
-    }
+    setCroppingFor(null)
     setCropImageUrl(null)
   }
 
-  const removeImage = (side: "front" | "back") => {
-    if (side === "front") {
-      setFrontImageUrl("")
-      setFrontPreview(null)
-    } else {
-      setBackImageUrl("")
-      setBackPreview(null)
+  const handleAdditionalFileSelect = (e: React.ChangeEvent<HTMLInputElement>, docType: string) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    if (!["image/jpeg", "image/png", "image/jpg", "application/pdf"].includes(file.type)) {
+      setMessage({ type: "error", text: "Only PDF, JPG, and PNG files are allowed" })
+      e.target.value = ""
+      return
     }
-    const input = document.querySelector(`input[name="${side}Image"]`) as HTMLInputElement
-    if (input) input.value = ""
+    if (file.size > MAX_FILE_SIZE) {
+      setMessage({ type: "error", text: "File size must be under 10MB" })
+      e.target.value = ""
+      return
+    }
+    
+    setMessage(null)
+    const isPdf = file.type === "application/pdf"
+    const previewUrl = URL.createObjectURL(file)
+    
+    setAdditionalDocs(prev => ({
+      ...prev,
+      [docType]: {
+        documentNumber: prev[docType]?.documentNumber || "",
+        imageUrl: "", // Will be set after upload
+        preview: isPdf ? "" : previewUrl,
+        isPdf: isPdf,
+        fileName: file.name
+      }
+    }))
+    
+    // If it's an image, set preview immediately; if PDF, we'll set preview after upload
+    if (!isPdf) {
+      setAdditionalDocs(prev => ({
+        ...prev,
+        [docType]: {
+          ...(prev[docType] || {}),
+          preview: previewUrl
+        }
+      }))
+    }
+    
+    // Upload the file
+    setAdditionalDocs(prev => ({
+      ...prev,
+      [docType]: {
+        ...(prev[docType] || {}),
+        uploading: true
+      }
+    }))
+    
+    const uploadFile = async () => {
+      try {
+        const result = await startUpload([file])
+        const url = result?.[0]?.url
+        if (url) {
+          setAdditionalDocs(prev => ({
+            ...prev,
+            [docType]: {
+              ...(prev[docType] || {}),
+              imageUrl: url,
+              uploading: false,
+              ...(isPdf ? { preview: "" } : {}) // For PDFs, we don't show preview until uploaded
+            }
+          }))
+        } else {
+          throw new Error("Upload failed")
+        }
+      } catch (err) {
+        setMessage({ type: "error", text: "Failed to upload file" })
+        setAdditionalDocs(prev => ({
+          ...prev,
+          [docType]: {
+            ...(prev[docType] || {}),
+            uploading: false
+          }
+        }))
+      }
+    }
+    
+    uploadFile()
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleRemoveAdditionalDoc = (docType: string) => {
+    setAdditionalDocs(prev => {
+      const next = { ...prev }
+      delete next[docType]
+      return next
+    })
+  }
+
+  const handleSubmit = async () => {
     setSubmitting(true)
     setMessage(null)
-
+    
+    // Validation
+    if (!documentNumber.trim()) {
+      setMessage({ type: "error", text: "Please enter your document number" })
+      setSubmitting(false)
+      return
+    }
+    
+    if (!frontImageUrl) {
+      setMessage({ type: "error", text: "Please upload your ID front image" })
+      setSubmitting(false)
+      return
+    }
+    
     try {
-      if (!documentNumber.trim()) {
-        setMessage({ type: "error", text: "Document number is required" })
-        setSubmitting(false)
-        return
+      let operations: Array<() => Promise<Response>> = []
+      
+      // Core document
+      if (coreDocSubmitted && coreDocStatus === "REJECTED" && coreDoc) {
+        // Update existing rejected document
+        operations.push(() => 
+          fetch(`/api/user/kyc/${coreDoc.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              documentNumber: documentNumber.trim(),
+              frontImage: frontImageUrl,
+              ...(backImageUrl ? { backImage: backImageUrl } : {}),
+            }),
+          })
+        )
+      } else if (!coreDocSubmitted || coreDocStatus === "REJECTED") {
+        // Create new document
+        operations.push(() => 
+          fetch("/api/user/kyc", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              documentType,
+              documentNumber: documentNumber.trim(),
+              frontImage: frontImageUrl,
+              ...(backImageUrl ? { backImage: backImageUrl } : {}),
+            }),
+          })
+        )
       }
-
-      if (!frontImageUrl) {
-        setMessage({ type: "error", text: "Front image is required" })
-        setSubmitting(false)
-        return
-      }
-
-      const res = await fetch("/api/user/kyc", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          documentType,
-          documentNumber: documentNumber.trim(),
-          frontImage: frontImageUrl,
-          backImage: backImageUrl || undefined,
-        }),
+      
+      // Additional documents
+      Object.entries(additionalDocs).forEach(([type, doc]) => {
+        if (doc.documentNumber.trim() && doc.imageUrl) {
+          const existing = (data?.documents || []).find(
+            (d: any) => d.documentType === type && d.documentNumber === doc.documentNumber
+          )
+          
+          if (existing) {
+            // Update existing
+            operations.push(() => 
+              fetch(`/api/user/kyc/${existing.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  frontImage: doc.imageUrl,
+                  documentNumber: doc.documentNumber.trim(),
+                }),
+              })
+            )
+          } else {
+            // Create new
+            operations.push(() => 
+              fetch("/api/user/kyc", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  documentType: type,
+                  documentNumber: doc.documentNumber.trim(),
+                  frontImage: doc.imageUrl,
+                }),
+              })
+            )
+          }
+        }
       })
-
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || "Failed to submit KYC documents")
+      
+      if (operations.length === 0) {
+        setMessage({ type: "error", text: "Please complete the required fields before submitting" })
+        setSubmitting(false)
+        return
       }
-
-      setMessage({ type: "success", text: "Documents submitted for verification" })
-      setDocumentType("NATIONAL_ID")
+      
+      // Execute all operations sequentially
+      for (let i = 0; i < operations.length; i++) {
+        const res = await operations[i]()
+        if (!res.ok) {
+          const err = await res.json()
+          throw new Error(err.error || `Operation ${i + 1} failed`)
+        }
+      }
+      
+      setMessage({ 
+        type: "success", 
+        text: operations.length === 1 
+          ? "Document submitted for verification" 
+          : `All ${operations.length} documents submitted for verification` 
+      })
+      
+      // Reset form
       setDocumentNumber("")
       setFrontImageUrl("")
       setBackImageUrl("")
       setFrontPreview(null)
       setBackPreview(null)
+      setAdditionalDocs({})
+      setCroppingFor(null)
+      setCropImageUrl(null)
+      setCropDocType(null)
+      
+      // Refresh data
       fetchKyc()
-    } catch (err) {
-      setMessage({
-        type: "error",
-        text: err instanceof Error ? err.message : "Something went wrong",
+    } catch (err: any) {
+      setMessage({ 
+        type: "error", 
+        text: err instanceof Error ? err.message : "Something went wrong" 
       })
     } finally {
       setSubmitting(false)
     }
   }
 
-  const kycStatus = data?.documents && data.documents.length > 0 ? data.documents[0].status : "NONE"
-  const status: StatusInfo = statusDisplay[kycStatus] || statusDisplay.NONE
-  const StatusIcon = status.icon
+  // Handle delete
+  const handleDelete = async (docId: string) => {
+    setDeleteConfirm(docId)
+  }
 
-  const hasPending = data?.documents?.some((d) => d.status === "PENDING")
-  const lastRejection = data?.documents?.find((d) => d.status === "REJECTED")
+  const handleDeleteConfirm = async (docId: string) => {
+    try {
+      const res = await fetch(`/api/user/kyc/${docId}`, { method: "DELETE" })
+      if (!res.ok) throw new Error("Failed to delete")
+      setMessage({ type: "success", text: "Submission deleted" })
+      setDeleteConfirm(null)
+      fetchKyc()
+    } catch (err) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to delete" })
+    } finally {
+      setDeleteConfirm(null)
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirm(null)
+  }
 
   return (
-    <div className="space-y-8">
-      {cropImageUrl && (croppingFor || (additionalCropping && !additionalIsPdf)) && (
-        <ImageCropper
-          imageUrl={cropImageUrl}
-          aspectRatio={croppingFor ? docTypeAspectRatios[documentType] : 1.42}
-          onCropComplete={handleCropComplete}
-          onCancel={handleCropCancel}
-          sideLabel={croppingFor === "front" ? "Front" : croppingFor === "back" ? "Back" : "Document"}
-        />
-      )}
-
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h1 className="text-2xl font-bold text-text-primary">
-          Identity Verification (KYC)
-        </h1>
-        <div className="flex items-center gap-3">
-          <StatusIcon size={32} className={status.color} />
-          <div>
-            <p className={cn("font-medium", status.color)}>{status.label}</p>
-            {kycStatus === "VERIFIED" && (
-              <p className="text-sm text-text-secondary">
-                Your identity has been verified. You can now list properties and use all features.
-              </p>
-            )}
-            {kycStatus === "PENDING" && (
-              <p className="text-sm text-warning-600">
-                Your documents are under review. An admin will verify them shortly.
-              </p>
-            )}
-            {kycStatus === "REJECTED" && lastRejection?.rejectionReason && (
-              <p className="text-sm text-error-500">
-                Reason: {lastRejection.rejectionReason}
-              </p>
-            )}
-            {kycStatus === "NONE" && (
-              <p className="text-sm text-muted-foreground">
-                Submit your identity documents to unlock platform features.
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {message && (
+    <div className="min-h-screen bg-background px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Status Banner */}
         <div className={cn(
-          "mb-4 px-4 py-3 rounded-lg",
-          message.type === "success"
-            ? "bg-success-500/10 text-success-700"
-            : "bg-error-500/10 text-error-500"
+          "rounded-xl border p-5 transition-all",
+          statusConfig[kycStatus]?.bg, statusConfig[kycStatus]?.border
         )}>
-          {message.text}
-        </div>
-      )}
-
-      {kycStatus === "PENDING" && hasPending && (
-        <div className="rounded-xl border border-warning-200 bg-warning-50 p-6">
-          <div className="flex items-center gap-3">
-            <Clock size={24} className="shrink-0 text-warning-500" />
-            <div>
-              <h2 className="font-heading text-lg font-semibold text-warning-700">Documents Under Review</h2>
-              <p className="text-sm text-warning-600">
-                Your documents have been submitted and are awaiting admin verification. You can already access other dashboard features while you wait.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {kycStatus === "REJECTED" && lastRejection && (
-        <div className="rounded-xl border border-error-200 bg-error-50 p-6">
-          <div className="flex items-start gap-3">
-            <XCircle size={24} className="shrink-0 text-error-500" />
-            <div>
-              <h2 className="font-heading text-lg font-semibold text-error-700">Documents Rejected</h2>
-              {lastRejection.rejectionReason && (
-                <p className="mt-1 text-sm text-error-600">
-                  Reason: {lastRejection.rejectionReason}
-                </p>
-              )}
-              <p className="mt-1 text-sm text-error-600">
-                Please submit new, valid documents for verification.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {kycStatus !== "VERIFIED" && !hasPending && (
-        <div className="rounded-xl border border-border bg-surface p-6">
-          <h2 className="mb-4 font-heading text-xl font-semibold text-text-primary">
-            Submit Your Documents
-          </h2>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="documentType" className="mb-1 block text-sm font-medium text-text-primary">
-                Document type
-              </label>
-              <select
-                id="documentType"
-                value={documentType}
-                onChange={(e) => setDocumentType(e.target.value)}
-                className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              >
-                <option value="NATIONAL_ID">National ID Card</option>
-                <option value="DRIVERS_LICENSE">Driver's License</option>
-                <option value="PASSPORT">Passport</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="documentNumber" className="mb-1 block text-sm font-medium text-text-primary">
-                Document number
-              </label>
-              <input
-                id="documentNumber"
-                value={documentNumber}
-                onChange={(e) => setDocumentNumber(e.target.value)}
-                placeholder="Enter your ID number"
-                className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                required
-              />
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-text-primary">
-                  Front image
-                </label>
-                {frontPreview ? (
-                  <div className="space-y-2">
-                    <div className="relative h-48 rounded-lg border border-dashed border-muted/50 bg-background">
-                      <img
-                        src={frontPreview}
-                        alt="Front preview"
-                        className="h-full w-full rounded-lg object-cover"
-                      />
-                      {uploadingFront && (
-                        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
-                          <Loader2 className="h-6 w-6 animate-spin text-white" />
-                        </div>
-                      )}
-                    </div>
-                    {frontImageUrl && !uploadingFront && (
-                      <button
-                        type="button"
-                        onClick={() => removeImage("front")}
-                        className="text-xs text-error-500 hover:text-error-600"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <label className="flex h-48 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background hover:border-teal-400 hover:bg-teal-50/50">
-                    <Upload className="mb-2 h-6 w-6 text-muted" />
-                    <span className="text-sm text-muted">Click to upload</span>
-                    <span className="mt-1 text-xs text-muted">JPG or PNG, max 5MB</span>
-                    <input
-                      type="file"
-                      name="frontImage"
-                      accept="image/jpeg,image/png,image/jpg"
-                      onChange={(e) => handleFileSelect(e, "front")}
-                      className="hidden"
-                    />
-                  </label>
-                )}
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-text-primary">
-                  Back image <span className="text-muted">(optional)</span>
-                </label>
-                {backPreview ? (
-                  <div className="space-y-2">
-                    <div className="relative h-48 rounded-lg border border-dashed border-muted/50 bg-background">
-                      <img
-                        src={backPreview}
-                        alt="Back preview"
-                        className="h-full w-full rounded-lg object-cover"
-                      />
-                      {uploadingBack && (
-                        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
-                          <Loader2 className="h-6 w-6 animate-spin text-white" />
-                        </div>
-                      )}
-                    </div>
-                    {backImageUrl && !uploadingBack && (
-                      <button
-                        type="button"
-                        onClick={() => removeImage("back")}
-                        className="text-xs text-error-500 hover:text-error-600"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <label className="flex h-48 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background hover:border-teal-400 hover:bg-teal-50/50">
-                    <Upload className="mb-2 h-6 w-6 text-muted" />
-                    <span className="text-sm text-muted">Click to upload</span>
-                    <span className="mt-1 text-xs text-muted">JPG or PNG, max 5MB</span>
-                    <input
-                      type="file"
-                      name="backImage"
-                      accept="image/jpeg,image/png,image/jpg"
-                      onChange={(e) => handleFileSelect(e, "back")}
-                      className="hidden"
-                    />
-                  </label>
-                )}
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={submitting || !documentNumber.trim() || !frontImageUrl}
-              className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  <Upload className="h-4 w-4" />
-                  Submit for Verification
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-      )}
-
-      {/* Additional Documents (Optional) */}
-      <div className="rounded-xl border border-border bg-surface p-6">
-        <div className="mb-5 flex items-start gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-100">
-            <Upload size={16} className="text-teal-600" />
-          </div>
-          <div>
-            <h2 className="font-heading text-lg font-semibold text-text-primary">
-              Additional Documents <span className="text-sm font-normal text-muted">(Optional)</span>
-            </h2>
-            <p className="mt-0.5 text-sm text-teal-600">
-              Uploading these documents is completely optional, but doing so helps an admin verify your identity <strong>faster</strong>.
-            </p>
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-3">
-          {additionalDocTypes.map(({ type, label, desc }) => {
-            const sub = data?.documents?.find((d) => d.documentType === type)
-            const isActive = additionalDocType === type
-
-            return (
-              <div
-                key={type}
-                className={cn(
-                  "rounded-lg border p-4 transition-all",
-                  sub?.status === "VERIFIED" && "border-green-200 bg-green-50/50",
-                  sub?.status === "PENDING" && "border-amber-200 bg-amber-50/50",
-                  sub?.status === "REJECTED" && "border-red-200 bg-red-50/50",
-                  !sub && !isActive && "border-dashed border-muted/50 hover:border-teal-300",
-                  isActive && "border-teal-300 bg-teal-50/30"
-                )}
-              >
-                {sub ? (
+          <div className="flex items-start gap-4">
+            <statusConfig[kycStatus]?.icon size={28} className={cn("shrink-0 mt-0.5", statusConfig[kycStatus]?.color)} />
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl font-bold text-foreground">
+                Identity Verification (KYC)
+                <span className="ml-3">
+                  <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium", statusConfig[kycStatus]?.bg, statusConfig[kycStatus]?.color)}>
+                    <statusConfig[kycStatus]?.icon size={12} />
+                    {statusConfig[kycStatus]?.label}
+                  </span>
+                </span>
+              </h1>
+              <p className={cn("mt-1 text-sm", kycStatus === "REJECTED" ? "text-red-700" : kycStatus === "PENDING" ? "text-amber-700" : kycStatus === "VERIFIED" ? "text-green-700" : "text-muted")}>
+                {coreRejectionReason ? (
                   <>
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-foreground">{label}</h3>
-                      <div className="flex items-center gap-1.5">
-                        <span className={cn(
-                          "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium",
-                          sub.status === "VERIFIED" && "bg-green-100 text-green-700",
-                          sub.status === "PENDING" && "bg-amber-100 text-amber-700",
-                          sub.status === "REJECTED" && "bg-red-100 text-red-700"
-                        )}>
-                          {sub.status === "VERIFIED" && <><CheckCircle size={10} /> Verified</>}
-                          {sub.status === "PENDING" && <><Clock size={10} /> Pending</>}
-                          {sub.status === "REJECTED" && <><XCircle size={10} /> Rejected</>}
-                        </span>
-                      </div>
-                    </div>
-                    {sub.documentNumber && (
-                      <p className="mt-2 text-[11px] text-muted">
-                        {sub.documentNumber}
-                      </p>
-                    )}
-                    {sub.rejectionReason && (
-                      <p className="mt-1 text-[11px] text-red-500">Reason: {sub.rejectionReason}</p>
-                    )}
-                    {sub.frontImage && (
-                      sub.frontImage.match(/\.pdf/i) ? (
-                        <PdfViewer url={sub.frontImage} label={label} compact />
-                      ) : (
-                        <DocImage src={sub.frontImage} label={label} className="mt-2 h-16 w-full" />
-                      )
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAdditionalDocType(type)
-                        setAdditionalDocNumber(sub.documentNumber || "")
-                        setAdditionalPreview(null)
-                        setAdditionalImageUrl("")
-                        setAdditionalIsPdf(false)
-                      }}
-                      className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-[11px] font-medium text-muted hover:bg-gray-50 hover:text-foreground transition-colors"
-                    >
-                      <RefreshCcw size={12} /> Replace
-                    </button>
+                    {statusMessages[kycStatus]}
+                    <p className="mt-1 font-medium">Reason: {coreRejectionReason}</p>
                   </>
-                ) : isActive ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-foreground">{label}</h3>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAdditionalDocType(null)
-                          setAdditionalPreview(null)
-                          setAdditionalImageUrl("")
-                          setAdditionalDocNumber("")
-                        }}
-                        className="text-[11px] text-muted hover:text-foreground"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-muted">{desc}</p>
+                ) : (
+                  statusMessages[kycStatus]
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Message */}
+        {message && (
+          <div className={`mt-6 rounded-lg px-4 py-3 text-sm ${
+            message.type === "success" 
+              ? "bg-green-50 text-green-700 border border-green-200" 
+              : "bg-red-50 text-red-700 border border-red-200"
+          }`}>
+            {message.text}
+          </div>
+        )}
+        
+        {/* Submission Form - only show if not verified or pending approval */}
+        {[() => kycStatus === "NONE", () => kycStatus === "REJECTED"].some(fn => fn()) && (
+          <form className="mt-8 space-y-6" onSubmit={(e) => { e.preventDefault(); handleSubmit() }}>
+            {/* Core Document Form */}
+            <div className="space-y-6">
+              <div className="rounded-xl border border-border bg-surface p-6">
+                <h2 className="mb-4 text-lg font-semibold text-foreground">
+                  {isReSubmit ? "Re-submit Core Document" : "Core Identity Document"}
+                  <span className="ml-2 text-sm font-normal text-muted">(Required)</span>
+                </h2>
 
-                    {additionalPreview ? (
+                <div className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-foreground">Document type</label>
+                      <select
+                        value={documentType}
+                        onChange={e => { setDocumentType(e.target.value); setMessage(null) }}
+                        className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      >
+                        {["NATIONAL_ID", "DRIVERS_LICENSE", "PASSPORT"].map(t => (
+                          <option key={t} value={t}>{docTypeLabels[t]}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-foreground">Document number</label>
+                      <input
+                        value={documentNumber}
+                        onChange={e => setDocumentNumber(e.target.value)}
+                        placeholder="Enter your ID number"
+                        className="block w-full rounded border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-foreground">Front image</label>
                       <div className="space-y-2">
-                        <div className="relative flex h-36 items-center justify-center rounded-lg border border-dashed border-muted/50 bg-background">
-                          {additionalIsPdf ? (
-                            additionalUploading ? (
-                              <div className="flex flex-col items-center gap-2">
-                                <Loader2 className="h-6 w-6 animate-spin text-muted" />
-                                <span className="text-[11px] text-muted">Uploading {additionalFileName}...</span>
+                        {frontPreview && (
+                          <div className="relative h-44 rounded-lg border border-dashed border-muted/50 bg-background">
+                            <img src={frontPreview} alt="Front preview" className="h-full w-full object-cover" />
+                            {uploadingFront && (
+                              <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
+                                <Loader2 className="h-6 w-6 animate-spin text-white" />
                               </div>
-                            ) : additionalImageUrl ? (
-                              <div className="flex flex-col items-center gap-2">
-                                <FileText size={32} className="text-red-500" />
-                                <span className="text-[11px] font-medium text-foreground">{additionalFileName}</span>
-                                <a
-                                  href={additionalImageUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-[11px] text-primary hover:underline"
-                                >
-                                  View PDF
-                                </a>
-                              </div>
+                            )}
+                          </div>
+                        )}
+                        {!frontPreview && frontImageUrl && (
+                          <div className="space-y-2">
+                            {frontImageUrl.match(/\.pdf/i) ? (
+                              <PdfViewer url={frontImageUrl} label="Front" compact />
                             ) : (
-                              <div className="flex flex-col items-center gap-2">
-                                <FileText size={32} className="text-red-400" />
-                                <span className="text-[11px] text-muted">{additionalFileName}</span>
-                              </div>
-                            )
-                          ) : (
-                            <>
-                              <img
-                                src={additionalPreview}
-                                alt="Preview"
-                                className="h-full w-full rounded-lg object-cover"
-                              />
-                              {additionalUploading && (
-                                <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
-                                  <Loader2 className="h-5 w-5 animate-spin text-white" />
-                                </div>
-                              )}
-                            </>
-                          )}
-                        </div>
-                        {additionalImageUrl && !additionalUploading && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setAdditionalImageUrl("")
-                              setAdditionalPreview(null)
-                              setAdditionalIsPdf(false)
-                              setAdditionalFileName("")
-                            }}
-                            className="text-[11px] text-error-500 hover:text-error-600"
-                          >
-                            Remove
-                          </button>
+                              <img src={frontImageUrl} alt="Front ID" className="h-32 w-full rounded object-cover" />
+                            )}
+                            <button onClick={handleRemoveImage("front")} className="text-xs text-red-500 hover:text-red-600">
+                              Remove Front Image
+                            </button>
+                          </div>
+                        )}
+                        {!frontPreview && !frontImageUrl && (
+                          <label className={cn(
+                            "flex h-44 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background transition-colors",
+                            "hover:border-primary/50 hover:bg-primary/5"
+                          )}>
+                            <Upload className="mb-2 h-6 w-6 text-muted" />
+                            <span className="text-sm text-muted">Click to upload front image</span>
+                            <span className="mt-1 text-xs text-muted">JPG or PNG, max 10MB</span>
+                            <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={(e) => handleFileSelect(e, "front")} className="hidden" />
+                          </label>
                         )}
                       </div>
-                    ) : (
-                      <label className="flex h-24 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background hover:border-teal-400 hover:bg-teal-50/50">
-                        <Upload className="mb-1 h-4 w-4 text-muted" />
-                        <span className="text-[11px] text-muted">Click to upload</span>
-                        <span className="text-[10px] text-muted">PDF, JPG, or PNG</span>
-                        <input
-                          type="file"
-                          accept=".pdf,image/jpeg,image/png"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0]
-                            if (!file) return
-                            if (!ADDITIONAL_ACCEPTED_TYPES.includes(file.type)) {
-                              setMessage({ type: "error", text: "Only PDF, JPG, and PNG files are allowed" })
-                              e.target.value = ""
-                              return
-                            }
-                            if (file.size > ADDITIONAL_MAX_SIZE) {
-                              setMessage({ type: "error", text: "File size must be under 10MB" })
-                              e.target.value = ""
-                              return
-                            }
-                            const isPdf = file.type === "application/pdf"
-                            setAdditionalIsPdf(isPdf)
-                            setAdditionalFileName(file.name)
-                            if (isPdf) {
-                              setAdditionalPreview(file.name)
-                              setAdditionalImageUrl("")
-                              setAdditionalUploading(false)
-                              uploadPdfDirectly(file)
-                            } else {
-                              setAdditionalPreview(URL.createObjectURL(file))
-                              setCropImageUrl(URL.createObjectURL(file))
-                              setAdditionalCropping(true)
-                            }
-                          }}
-                          className="hidden"
-                        />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-foreground">
+                        Back image <span className="text-xs text-muted">(optional)</span>
                       </label>
-                    )}
-
-                    {additionalImageUrl && !additionalUploading && (
-                      <>
-                        <input
-                          value={additionalDocNumber}
-                          onChange={(e) => setAdditionalDocNumber(e.target.value)}
-                          placeholder="Document number"
-                          className="block w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                          required
-                        />
-                        <button
-                          type="button"
-                          disabled={additionalSubmitting || !additionalDocNumber.trim()}
-                          onClick={async () => {
-                            if (!additionalDocNumber.trim()) return
-                            setAdditionalSubmitting(true)
-                            try {
-                              const existingDoc = data?.documents?.find(d => d.documentType === type)
-                              const isUpdate = !!existingDoc
-                              const res = await fetch(`/api/user/kyc${isUpdate ? `/${existingDoc!.id}` : ""}`, {
-                                method: isUpdate ? "PATCH" : "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                  documentType: type,
-                                  documentNumber: additionalDocNumber.trim(),
-                                  frontImage: additionalImageUrl,
-                                }),
-                              })
-                              if (!res.ok) {
-                                const err = await res.json()
-                                throw new Error(err.error || "Failed to submit")
-                              }
-                              setAdditionalDocType(null)
-                              setAdditionalPreview(null)
-                              setAdditionalImageUrl("")
-                              setAdditionalDocNumber("")
-                              setAdditionalIsPdf(false)
-                              setMessage({ type: "success", text: `${label} submitted for verification` })
-                              fetchKyc()
-                            } catch (err) {
-                              setMessage({
-                                type: "error",
-                                text: err instanceof Error ? err.message : "Failed to submit",
-                              })
-                            } finally {
-                              setAdditionalSubmitting(false)
-                            }
-                          }}
-                          className="flex w-full items-center justify-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {additionalSubmitting ? (
-                            <><Loader2 className="h-3 w-3 animate-spin" /> Submitting...</>
-                          ) : (
-                            <>Submit {label}</>
-                          )}
-                        </button>
-                      </>
-                    )}
+                      <div className="space-y-2">
+                        {backPreview && (
+                          <div className="relative h-44 rounded-lg border border-dashed border-muted/50 bg-background">
+                            <img src={backPreview} alt="Back preview" className="h-full w-full object-cover" />
+                            {uploadingBack && (
+                              <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
+                                <Loader2 className="h-6 w-6 animate-spin text-white" />
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {!backPreview && backImageUrl && (
+                          <div className="space-y-2">
+                            {backImageUrl.match(/\.pdf/i) ? (
+                              <PdfViewer url={backImageUrl} label="Back" compact />
+                            ) : (
+                              <img src={backImageUrl} alt="Back ID" className="h-32 w-full rounded object-cover" />
+                            )}
+                            <button onClick={handleRemoveImage("back")} className="text-xs text-red-500 hover:text-red-600">
+                              Remove Back Image
+                            </button>
+                          </div>
+                        )}
+                        {!backPreview && !backImageUrl && (
+                          <label className={cn(
+                            "flex h-44 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background transition-colors",
+                            "hover:border-primary/50 hover:bg-primary/5"
+                          )}>
+                            <Upload className="mb-2 h-6 w-6 text-muted" />
+                            <span className="text-sm text-muted">Click to upload back image</span>
+                            <span className="mt-1 text-xs text-muted">JPG or PNG, max 10MB</span>
+                            <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={(e) => handleFileSelect(e, "back")} className="hidden" />
+                          </label>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAdditionalDocType(type)
-                      setAdditionalPreview(null)
-                      setAdditionalImageUrl("")
-                      setAdditionalDocNumber("")
-                    }}
-                    className="w-full text-left"
-                  >
-                    <h3 className="text-sm font-semibold text-foreground">{label}</h3>
-                    <p className="mt-1 text-[11px] text-muted">{desc}</p>
-                    <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-teal-600 hover:text-teal-700">
-                      <Upload size={12} /> Upload
-                    </span>
-                  </button>
+
+                  {/* Cropper - only show if we have a preview and are cropping */}
+                  {cropImageUrl && croppingFor && (
+                    <div className="mt-4">
+                      <ImageCropper
+                        imageUrl={cropImageUrl}
+                        aspectRatio={croppingFor === "additional" && cropDocType
+                          ? (aspectRatios[cropDocType] || 1.42)
+                          : aspectRatios[documentType]}
+                        onCropComplete={handleCropComplete}
+                        onCancel={handleCropCancel}
+                        sideLabel={
+                          croppingFor === "front" ? "Front" :
+                          croppingFor === "back" ? "Back" : "Document"
+                        }
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            {/* Additional Documents - Simplified */}
+            <div className="border-t pt-6">
+              <div className="flex justify-between items-start mb-4">
+                <h2 className="text-lg font-semibold text-foreground">
+                  Additional Documents <span className="text-sm font-normal text-muted">(Optional)</span>
+                </h2>
+                <p className="text-sm text-muted">
+                  Uploading these helps verify your identity faster
+                </p>
+              </div>
+              
+              {/* Document Type Grid */}
+              <div className="grid gap-4 sm:grid-cols-3">
+                {additionalTypes.map(({ type, label, desc }) => {
+                  const doc = additionalDocs[type]
+                  const existing = (data?.documents || []).find((d: any) => d.documentType === type)
+                  const hasExisting = !!existing
+                  const isEditing = !!doc?.imageUrl && !doc.imageUrl.startsWith("http") // preview URL
+                  
+                  return (
+                    <div key={type} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="text-sm font-semibold text-foreground">{label}</h3>
+                        {hasExisting && !existing?.imageUrl && (
+                          <span className="text-xs text-muted">(Submitted)</span>
+                        )}
+                      </div>
+                      
+                      {doc?.imageUrl && !doc?.imageUrl.startsWith("http") && (
+                        <div className="mb-2">
+                          <p className="text-xs text-muted">{doc.fileName}</p>
+                          {doc.isPdf ? (
+                            <div className="flex items-center gap-2">
+                              <FileText size={20} className="text-red-400" />
+                              <a href={resolvePdfUrl(doc.imageUrl)} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                                View PDF
+                              </a>
+                            </div>
+                          ) : (
+                            <img src={doc.preview || doc.imageUrl} alt="Preview" className="h-24 w-full rounded object-cover" />
+                          )}
+                        </div>
+                      )}
+                      
+                      {!doc?.imageUrl && (
+                        <div className="space-y-2">
+                          <div className="flex mb-2">
+                            <label className="block text-sm font-medium text-foreground">Document number</label>
+                            <input
+                              value={doc?.documentNumber || ""}
+                              onChange={(e) => {
+                                setAdditionalDocs(prev => ({
+                                  ...prev,
+                                  [type]: {
+                                    ...(prev[tempType] || {}),
+                                    documentNumber: e.target.value,
+                                  }
+                                })
+                              }}
+                              placeholder="Enter document number"
+                              className="block w-full rounded border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                            />
+                          </div>
+                          
+                          <div className="flex items-center">
+                            <label className="block text-sm font-medium text-foreground mr-2">
+                              Upload file
+                            </label>
+                            <input
+                              type="file"
+                              accept=".pdf,image/jpeg,image/png"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                if (!file) return
+                                if (!["image/jpeg", "image/png", "image/jpg", "application/pdf"].includes(file.type)) {
+                                  setMessage({ type: "error", text: "Only PDF, JPG, and PNG files are allowed" })
+                                  e.target.value = ""
+                                  return
+                                }
+                                if (file.size > 10 * 1024 * 1024) {
+                                  setMessage({ type: "error", text: "File size must be under 10MB" })
+                                  e.target.value = ""
+                                  return
+                                }
+                                
+                                setMessage(null)
+                                const previewUrl = URL.createObjectURL(file)
+                                setAdditionalDocs(prev => ({
+                                  ...prev,
+                                  [type]: {
+                                    documentNumber: doc?.documentNumber || "",
+                                    imageUrl: "",
+                                    preview: isPdf ? "" : previewUrl,
+                                    isPdf: file.type === "application/pdf",
+                                    fileName: file.name,
+                                  }
+                                }))
+                              }}
+                              className="block w-full rounded border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                            />
+                          </div>
+                        </div>
+                      )}
+                      
+                      {doc?.imageUrl && !doc?.imageUrl.startsWith("http") && (
+                        <div className="mt-2">
+                          {doc.isPdf ? (
+                            <div className="flex items-center gap-2">
+                              <FileText size={20} className="text-red-400" />
+                              <a href={resolvePdfUrl(doc.imageUrl)} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                                View PDF
+                              </a>
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <img src={doc.preview || doc.imageUrl} alt="Document" className="h-24 w-full rounded object-cover" />
+                              <button onClick={() => handleRemoveAdditionalDoc(type)} className="text-xs text-red-500 hover:text-red-600">
+                                Remove
+                              </button>
+                            </div>
+                          )
+                        )}
+                      }}
+                    </div>
+                  )
                 )}
               </div>
-            )
-          })}
-        </div>
-      </div>
-
-      <div className="border-t border-border pt-6">
-        <h2 className="mb-4 font-heading text-xl font-semibold text-text-primary">
-          Submission History
-        </h2>
-
-        {data?.documents && data.documents.length > 0 ? (
-          <div className="space-y-4">
-            {data.documents.map((doc) => (
-              <div key={doc.id} className="border-b pb-4 last:border-b-0">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-muted">Document:</span>
-                      <span className="font-medium text-foreground">
-                        {doc.documentType ? docTypeLabels[doc.documentType] || doc.documentType : "Unknown"}
-                      </span>
-                    </div>
-                    {doc.documentNumber && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="text-muted">Number:</span>
-                        <span className="font-mono text-xs text-foreground">{doc.documentNumber}</span>
+            </div>
+          </form>
+        )}
+        
+        {/* Verified state - show success message */}
+        {kycStatus === "VERIFIED" && (
+          <div className="mt-8 rounded-xl border border-green-200 bg-green-50 p-8 text-center">
+            <CheckCircle size={48} className="mx-auto text-green-500" />
+            <h2 className="mt-3 text-xl font-bold text-green-800">Identity Verified</h2>
+            <p className="mt-1 text-sm text-green-700">Your identity has been verified. All platform features are now available to you.</p>
+          </div>
+        )}
+        
+        {/* Submission History */}
+        <div className="mt-8 rounded-xl border border-border bg-surface">
+          <div className="border-b border-border px-6 py-4">
+            <h2 className="text-lg font-semibold text-foreground">Submission History</h2>
+          </div>
+          {data?.documents && data.documents.length > 0 ? (
+            <div className="divide-y divide-border">
+              {data.documents.map(doc => (
+                <div key={doc.id} className="px-6 py-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-medium text-foreground">
+                          {docTypeLabels[doc.documentType] || doc.documentType}
+                        </span>
+                        {["NATIONAL_ID", "DRIVERS_LICENSE", "PASSPORT"].includes(doc.documentType as any) ? (
+                          <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">Required</span>
+                        ) : (
+                          <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-muted">Optional</span>
+                        )}
+                        <StatusBadge status={doc.status} />
                       </div>
-                    )}
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-muted">Submitted:</span>
-                      <span className="text-foreground">{new Date(doc.createdAt).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <span className={cn(
-                        "px-3 py-1 rounded text-xs font-medium",
-                        doc.status === "PENDING" && "bg-yellow-500/20 text-yellow-600",
-                        doc.status === "VERIFIED" && "bg-green-500/20 text-green-600",
-                        doc.status === "REJECTED" && "bg-red-500/20 text-red-600"
-                      )}>
-                        {doc.status === "PENDING" && "Pending Review"}
-                        {doc.status === "VERIFIED" && "Verified"}
-                        {doc.status === "REJECTED" && "Rejected"}
-                      </span>
+                      <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
+                        {doc.documentNumber && <span>#{doc.documentNumber}</span>}
+                        <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                        {doc.rejectionReason && <span className="text-red-500">Reason: {doc.rejectionReason}</span>}
+                      </div>
+                      {(doc.frontImage || doc.backImage) && (
+                        <div className="mt-3 flex gap-3">
+                          {doc.frontImage && (
+                            <div className="space-y-1">
+                              <p className="text-[10px] text-muted">Front</p>
+                              {doc.frontImage.match(/\.pdf/i) ? (
+                                <div className="flex items-center gap-2">
+                                  <FileText size={20} className="text-red-400" />
+                                  <a href={resolvePdfUrl(doc.frontImage)} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                                    View PDF
+                                  </a>
+                                </div>
+                              ) : (
+                                <img src={doc.frontImage} alt="Front ID" className="h-14 w-20 object-cover" />
+                              )}
+                            </div>
+                          )}
+                          {doc.backImage && (
+                            <div className="space-y-1">
+                              <p className="text-[10px] text-muted">Back</p>
+                              {doc.backImage.match(/\.pdf/i) ? (
+                                <div className="flex items-center gap-2">
+                                  <FileText size={20} className="text-red-400" />
+                                  <a href={resolvePdfUrl(doc.backImage)} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                                    View PDF
+                                  </a>
+                                </div>
+                              ) : (
+                                <img src={doc.backImage} alt="Back ID" className="h-14 w-20 object-cover" />
+                              )}
+                            </div>
+                          )}
+                        )}
+                      </div>
                       {doc.status === "REJECTED" && (
                         <button
-                          type="button"
-                          disabled={deleting === doc.id}
-                          onClick={async () => {
-                            if (!confirm("Delete this rejected submission permanently?")) return
-                            setDeleting(doc.id)
-                            try {
-                              const res = await fetch(`/api/user/kyc/${doc.id}`, { method: "DELETE" })
-                              if (!res.ok) {
-                                const err = await res.json()
-                                throw new Error(err.error || "Failed to delete")
-                              }
-                              setMessage({ type: "success", text: "Submission deleted" })
-                              fetchKyc()
-                            } catch (err) {
-                              setMessage({
-                                type: "error",
-                                text: err instanceof Error ? err.message : "Failed to delete",
-                              })
-                            } finally {
-                              setDeleting(null)
-                            }
-                          }}
-                          className="rounded p-1 text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                          onClick={() => setDeleteConfirm(doc.id)}
+                          className="shrink-0 rounded p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors"
                           title="Delete permanently"
                         >
                           {deleting === doc.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                         </button>
                       )}
                     </div>
-                    {doc.rejectionReason && (
-                      <p className="text-xs text-red-500">Reason: {doc.rejectionReason}</p>
+                    {deleteConfirm === doc.id && (
+                      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={handleDeleteCancel}>
+                        <div className="mx-4 w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+                          <div className="flex items-center gap-3">
+                            <XCircle size={24} className="text-red-500" />
+                            <h3 className="text-lg font-semibold">Delete submission?</h3>
+                          </div>
+                          <p className="mt-2 text-sm text-muted">This permanently deletes the rejected document. You can submit a new one later.</p>
+                          <div className="mt-4 flex justify-end gap-3">
+                            <button onClick={handleDeleteCancel} className="rounded-lg border border-input px-4 py-2 text-sm font-medium hover:bg-gray-50">
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => handleDelete(doc.id)}
+                              disabled={deleting === doc.id}
+                              className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                            >
+                              {deleting === doc.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                              Delete
+                            </button>
+                          </div>
+                        </div>
                     )}
                   </div>
-                </div>
-
-                {(doc.frontImage || doc.backImage) && (
-                  <div className="mt-4 flex items-start gap-4">
-                    {doc.frontImage && (
-                      <div className="space-y-1">
-                        <p className="text-xs text-muted">
-                          {doc.documentType === "BUSINESS_PERMIT" || doc.documentType === "BUSINESS_REGISTRATION" || doc.documentType === "KRA_PIN" ? "Document" : "Front"}
-                        </p>
-                        {doc.frontImage.match(/\.pdf/i) ? (
-                          <PdfViewer url={doc.frontImage} label={doc.documentType} compact />
-                        ) : (
-                          <DocImage src={doc.frontImage} label={doc.documentType} />
-                        )}
-                      </div>
-                    )}
-                    {doc.backImage && (
-                      <div className="space-y-1">
-                        <p className="text-xs text-muted">Back</p>
-                        {doc.backImage.match(/\.pdf/i) ? (
-                          <PdfViewer url={doc.backImage} label="Back" compact />
-                        ) : (
-                          <DocImage src={doc.backImage} label="Back" />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="px-6 py-10 text-center">
+                <Shield size={32} className="mx-auto text-muted" />
+                <p className="mt-2 text-sm text-muted">No submissions yet</p>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="py-8 text-center">
-            <p className="text-muted">No submissions yet</p>
-          </div>
-        )}
+        }
       </div>
     </div>
   )
