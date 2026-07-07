@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2 } from "lucide-react"
+import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 import ImageCropper from "@/components/kyc/ImageCropper"
 
@@ -46,6 +46,8 @@ const additionalDocTypes = [
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ACCEPTED_FILE_TYPES = ["image/jpeg", "image/png", "image/jpg"]
+const ADDITIONAL_ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/jpg", "application/pdf"]
+const ADDITIONAL_MAX_SIZE = 10 * 1024 * 1024
 
 interface StatusInfo {
   label: string
@@ -82,6 +84,8 @@ export default function KycPage() {
   const [additionalUploading, setAdditionalUploading] = useState(false)
   const [additionalSubmitting, setAdditionalSubmitting] = useState(false)
   const [additionalCropping, setAdditionalCropping] = useState(false)
+  const [additionalIsPdf, setAdditionalIsPdf] = useState(false)
+  const [additionalFileName, setAdditionalFileName] = useState("")
 
   // Cropper state
   const [croppingFor, setCroppingFor] = useState<"front" | "back" | null>(null)
@@ -131,6 +135,25 @@ export default function KycPage() {
     } finally {
       if (side === "front") setUploadingFront(false)
       else setUploadingBack(false)
+    }
+  }
+
+  const uploadPdfDirectly = async (file: File) => {
+    const formData = new FormData()
+    formData.append("file", file)
+    setAdditionalUploading(true)
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: formData })
+      if (!res.ok) throw new Error("Upload failed")
+      const result = await res.json()
+      if (result.url) setAdditionalImageUrl(result.url)
+      else throw new Error("No URL returned")
+    } catch {
+      setMessage({ type: "error", text: "Failed to upload PDF" })
+      setAdditionalPreview(null)
+      setAdditionalIsPdf(false)
+    } finally {
+      setAdditionalUploading(false)
     }
   }
 
@@ -273,7 +296,7 @@ export default function KycPage() {
 
   return (
     <div className="space-y-8">
-      {cropImageUrl && (croppingFor || additionalCropping) && (
+      {cropImageUrl && (croppingFor || (additionalCropping && !additionalIsPdf)) && (
         <ImageCropper
           imageUrl={cropImageUrl}
           aspectRatio={croppingFor ? docTypeAspectRatios[documentType] : 1.42}
@@ -564,7 +587,19 @@ export default function KycPage() {
                       <p className="mt-1 text-[11px] text-red-500">Reason: {sub.rejectionReason}</p>
                     )}
                     {sub.frontImage && (
-                      <img src={sub.frontImage} alt={label} className="mt-2 h-16 w-full rounded object-cover" />
+                      sub.frontImage.match(/\.pdf/i) ? (
+                        <a
+                          href={sub.frontImage}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 flex h-16 w-full items-center justify-center gap-2 rounded-lg border border-border bg-gray-50 text-xs text-muted hover:bg-gray-100 hover:text-primary transition-colors"
+                        >
+                          <FileText size={16} className="text-red-400" />
+                          View PDF
+                        </a>
+                      ) : (
+                        <img src={sub.frontImage} alt={label} className="mt-2 h-16 w-full rounded object-cover" />
+                      )
                     )}
                   </>
                 ) : isActive ? (
@@ -588,16 +623,45 @@ export default function KycPage() {
 
                     {additionalPreview ? (
                       <div className="space-y-2">
-                        <div className="relative h-36 rounded-lg border border-dashed border-muted/50 bg-background">
-                          <img
-                            src={additionalPreview}
-                            alt="Preview"
-                            className="h-full w-full rounded-lg object-cover"
-                          />
-                          {additionalUploading && (
-                            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
-                              <Loader2 className="h-5 w-5 animate-spin text-white" />
-                            </div>
+                        <div className="relative flex h-36 items-center justify-center rounded-lg border border-dashed border-muted/50 bg-background">
+                          {additionalIsPdf ? (
+                            additionalUploading ? (
+                              <div className="flex flex-col items-center gap-2">
+                                <Loader2 className="h-6 w-6 animate-spin text-muted" />
+                                <span className="text-[11px] text-muted">Uploading {additionalFileName}...</span>
+                              </div>
+                            ) : additionalImageUrl ? (
+                              <div className="flex flex-col items-center gap-2">
+                                <FileText size={32} className="text-red-500" />
+                                <span className="text-[11px] font-medium text-foreground">{additionalFileName}</span>
+                                <a
+                                  href={additionalImageUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[11px] text-primary hover:underline"
+                                >
+                                  View PDF
+                                </a>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center gap-2">
+                                <FileText size={32} className="text-red-400" />
+                                <span className="text-[11px] text-muted">{additionalFileName}</span>
+                              </div>
+                            )
+                          ) : (
+                            <>
+                              <img
+                                src={additionalPreview}
+                                alt="Preview"
+                                className="h-full w-full rounded-lg object-cover"
+                              />
+                              {additionalUploading && (
+                                <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
+                                  <Loader2 className="h-5 w-5 animate-spin text-white" />
+                                </div>
+                              )}
+                            </>
                           )}
                         </div>
                         {additionalImageUrl && !additionalUploading && (
@@ -606,6 +670,8 @@ export default function KycPage() {
                             onClick={() => {
                               setAdditionalImageUrl("")
                               setAdditionalPreview(null)
+                              setAdditionalIsPdf(false)
+                              setAdditionalFileName("")
                             }}
                             className="text-[11px] text-error-500 hover:text-error-600"
                           >
@@ -617,25 +683,36 @@ export default function KycPage() {
                       <label className="flex h-24 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background hover:border-teal-400 hover:bg-teal-50/50">
                         <Upload className="mb-1 h-4 w-4 text-muted" />
                         <span className="text-[11px] text-muted">Click to upload</span>
+                        <span className="text-[10px] text-muted">PDF, JPG, or PNG</span>
                         <input
                           type="file"
-                          accept="image/jpeg,image/png,image/jpg"
+                          accept=".pdf,image/jpeg,image/png"
                           onChange={(e) => {
                             const file = e.target.files?.[0]
                             if (!file) return
-                            if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
-                              setMessage({ type: "error", text: "Only JPG and PNG files are allowed" })
+                            if (!ADDITIONAL_ACCEPTED_TYPES.includes(file.type)) {
+                              setMessage({ type: "error", text: "Only PDF, JPG, and PNG files are allowed" })
                               e.target.value = ""
                               return
                             }
-                            if (file.size > MAX_FILE_SIZE) {
-                              setMessage({ type: "error", text: "File size must be under 5MB" })
+                            if (file.size > ADDITIONAL_MAX_SIZE) {
+                              setMessage({ type: "error", text: "File size must be under 10MB" })
                               e.target.value = ""
                               return
                             }
-                            setAdditionalPreview(URL.createObjectURL(file))
-                            setCropImageUrl(URL.createObjectURL(file))
-                            setAdditionalCropping(true)
+                            const isPdf = file.type === "application/pdf"
+                            setAdditionalIsPdf(isPdf)
+                            setAdditionalFileName(file.name)
+                            if (isPdf) {
+                              setAdditionalPreview(file.name)
+                              setAdditionalImageUrl("")
+                              setAdditionalUploading(false)
+                              uploadPdfDirectly(file)
+                            } else {
+                              setAdditionalPreview(URL.createObjectURL(file))
+                              setCropImageUrl(URL.createObjectURL(file))
+                              setAdditionalCropping(true)
+                            }
                           }}
                           className="hidden"
                         />
@@ -771,22 +848,48 @@ export default function KycPage() {
                   <div className="mt-4 flex items-start gap-4">
                     {doc.frontImage && (
                       <div className="space-y-1">
-                        <p className="text-xs text-muted">Front</p>
-                        <img
-                          src={doc.frontImage}
-                          alt="Front ID"
-                          className="h-20 w-28 rounded-lg border border-border object-cover"
-                        />
+                        <p className="text-xs text-muted">
+                          {doc.documentType === "BUSINESS_PERMIT" || doc.documentType === "BUSINESS_REGISTRATION" || doc.documentType === "KRA_PIN" ? "Document" : "Front"}
+                        </p>
+                        {doc.frontImage.match(/\.pdf/i) ? (
+                          <a
+                            href={doc.frontImage}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex h-20 w-28 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-gray-50 text-xs text-muted hover:bg-gray-100 hover:text-primary transition-colors"
+                          >
+                            <FileText size={20} className="text-red-400" />
+                            View PDF
+                          </a>
+                        ) : (
+                          <img
+                            src={doc.frontImage}
+                            alt="Document"
+                            className="h-20 w-28 rounded-lg border border-border object-cover"
+                          />
+                        )}
                       </div>
                     )}
                     {doc.backImage && (
                       <div className="space-y-1">
                         <p className="text-xs text-muted">Back</p>
-                        <img
-                          src={doc.backImage}
-                          alt="Back ID"
-                          className="h-20 w-28 rounded-lg border border-border object-cover"
-                        />
+                        {doc.backImage.match(/\.pdf/i) ? (
+                          <a
+                            href={doc.backImage}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex h-20 w-28 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-gray-50 text-xs text-muted hover:bg-gray-100 hover:text-primary transition-colors"
+                          >
+                            <FileText size={20} className="text-red-400" />
+                            View PDF
+                          </a>
+                        ) : (
+                          <img
+                            src={doc.backImage}
+                            alt="Back"
+                            className="h-20 w-28 rounded-lg border border-border object-cover"
+                          />
+                        )}
                       </div>
                     )}
                   </div>
