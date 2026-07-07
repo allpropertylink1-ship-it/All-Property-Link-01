@@ -38,6 +38,10 @@ const docTypeAspectRatios: Record<string, number> = {
   KRA_PIN: 1.42,
 }
 
+function pdfUrl(url: string) {
+  return url.replace("/image/upload/", "/raw/upload/").replace(/\.pdf$/, "")
+}
+
 const additionalDocTypes = [
   { type: "BUSINESS_PERMIT", label: "Business Permit", desc: "Your valid business permit issued by the county government" },
   { type: "BUSINESS_REGISTRATION", label: "Business Registration", desc: "Certificate of business registration" },
@@ -611,7 +615,7 @@ export default function KycPage() {
                     )}
                     {sub.frontImage && (
                       sub.frontImage.match(/\.pdf/i) ? (
-                        <a href={sub.frontImage} target="_blank" rel="noopener noreferrer"
+                        <a href={pdfUrl(sub.frontImage)} target="_blank" rel="noopener noreferrer"
                           className="mt-2 flex h-16 w-full items-center justify-center gap-2 rounded-lg border border-border bg-gray-50 text-xs text-muted hover:bg-gray-100 hover:text-primary transition-colors"
                         >
                           <FileText size={16} className="text-red-400" />
@@ -920,7 +924,7 @@ export default function KycPage() {
                           {doc.documentType === "BUSINESS_PERMIT" || doc.documentType === "BUSINESS_REGISTRATION" || doc.documentType === "KRA_PIN" ? "Document" : "Front"}
                         </p>
                         {doc.frontImage.match(/\.pdf/i) ? (
-                          <a href={doc.frontImage} target="_blank" rel="noopener noreferrer"
+                          <a href={pdfUrl(doc.frontImage)} target="_blank" rel="noopener noreferrer"
                             className="flex h-20 w-28 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-gray-50 text-xs text-muted hover:bg-gray-100 hover:text-primary transition-colors"
                           >
                             <FileText size={20} className="text-red-400" />
@@ -935,7 +939,7 @@ export default function KycPage() {
                       <div className="space-y-1">
                         <p className="text-xs text-muted">Back</p>
                         {doc.backImage.match(/\.pdf/i) ? (
-                          <a href={doc.backImage} target="_blank" rel="noopener noreferrer"
+                          <a href={pdfUrl(doc.backImage)} target="_blank" rel="noopener noreferrer"
                             className="flex h-20 w-28 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-gray-50 text-xs text-muted hover:bg-gray-100 hover:text-primary transition-colors"
                           >
                             <FileText size={20} className="text-red-400" />
