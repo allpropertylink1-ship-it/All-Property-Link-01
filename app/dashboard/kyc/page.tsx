@@ -225,6 +225,9 @@ export default function KycPage() {
   const status: StatusInfo = statusDisplay[kycStatus] || statusDisplay.NONE
   const StatusIcon = status.icon
 
+  const hasPending = data?.documents?.some((d) => d.status === "PENDING")
+  const lastRejection = data?.documents?.find((d) => d.status === "REJECTED")
+
   return (
     <div className="space-y-8">
       {cropImageUrl && croppingFor && (
@@ -237,7 +240,7 @@ export default function KycPage() {
         />
       )}
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <h1 className="text-2xl font-bold text-text-primary">
           Identity Verification (KYC)
         </h1>
@@ -250,9 +253,19 @@ export default function KycPage() {
                 Your identity has been verified. You can now list properties and use all features.
               </p>
             )}
-            {kycStatus === "REJECTED" && data?.documents[0]?.rejectionReason && (
+            {kycStatus === "PENDING" && (
+              <p className="text-sm text-warning-600">
+                Your documents are under review. An admin will verify them shortly.
+              </p>
+            )}
+            {kycStatus === "REJECTED" && lastRejection?.rejectionReason && (
               <p className="text-sm text-error-500">
-                Reason: {data.documents[0].rejectionReason}
+                Reason: {lastRejection.rejectionReason}
+              </p>
+            )}
+            {kycStatus === "NONE" && (
+              <p className="text-sm text-muted-foreground">
+                Submit your identity documents to unlock platform features.
               </p>
             )}
           </div>
@@ -270,7 +283,40 @@ export default function KycPage() {
         </div>
       )}
 
-      {kycStatus !== "VERIFIED" && (
+      {kycStatus === "PENDING" && hasPending && (
+        <div className="rounded-xl border border-warning-200 bg-warning-50 p-6">
+          <div className="flex items-center gap-3">
+            <Clock size={24} className="shrink-0 text-warning-500" />
+            <div>
+              <h2 className="font-heading text-lg font-semibold text-warning-700">Documents Under Review</h2>
+              <p className="text-sm text-warning-600">
+                Your documents have been submitted and are awaiting admin verification. You can already access other dashboard features while you wait.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {kycStatus === "REJECTED" && lastRejection && (
+        <div className="rounded-xl border border-error-200 bg-error-50 p-6">
+          <div className="flex items-start gap-3">
+            <XCircle size={24} className="shrink-0 text-error-500" />
+            <div>
+              <h2 className="font-heading text-lg font-semibold text-error-700">Documents Rejected</h2>
+              {lastRejection.rejectionReason && (
+                <p className="mt-1 text-sm text-error-600">
+                  Reason: {lastRejection.rejectionReason}
+                </p>
+              )}
+              <p className="mt-1 text-sm text-error-600">
+                Please submit new, valid documents for verification.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {kycStatus !== "VERIFIED" && !hasPending && (
         <div className="rounded-xl border border-border bg-surface p-6">
           <h2 className="mb-4 font-heading text-xl font-semibold text-text-primary">
             Submit Your Documents

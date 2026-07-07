@@ -2,6 +2,7 @@ import { requireAuth } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { DashboardBanner } from "@/components/dashboard/DashboardBanner";
+import { KycGate } from "@/components/dashboard/KycGate";
 
 export default async function DashboardLayout({
   children,
@@ -13,7 +14,7 @@ export default async function DashboardLayout({
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { accountStatus: true, onboardingComplete: true },
+    select: { accountStatus: true, onboardingComplete: true, kycStatus: true },
   });
 
   return (
@@ -21,9 +22,11 @@ export default async function DashboardLayout({
       <DashboardNav />
       <main className="flex-1 bg-surface-secondary">
         {user && <DashboardBanner accountStatus={user.accountStatus} onboardingComplete={user.onboardingComplete} />}
-        <div className="p-6 lg:p-8">
-          <div className="mx-auto max-w-7xl">{children}</div>
-        </div>
+        <KycGate kycStatus={user?.kycStatus}>
+          <div className="p-6 lg:p-8">
+            <div className="mx-auto max-w-7xl">{children}</div>
+          </div>
+        </KycGate>
       </main>
     </div>
   );
