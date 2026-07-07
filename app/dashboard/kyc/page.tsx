@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, FileText, Trash2, RefreshCcw } from "lucide-react"
+import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, FileText, Trash2, RefreshCcw, ImageIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import ImageCropper from "@/components/kyc/ImageCropper"
 
@@ -60,6 +60,26 @@ const statusDisplay: Record<string, StatusInfo> = {
   PENDING: { label: "Pending Review", icon: Clock, color: "text-yellow-500" },
   VERIFIED: { label: "Verified", icon: CheckCircle, color: "text-green-500" },
   REJECTED: { label: "Rejected", icon: XCircle, color: "text-red-500" },
+}
+
+function DocImage({ src, label, className }: { src: string; label: string; className?: string }) {
+  const [failed, setFailed] = useState(false)
+  if (failed) {
+    return (
+      <div className={cn("flex flex-col items-center justify-center gap-1 rounded-lg border border-border bg-gray-50 text-xs text-muted", className)}>
+        <ImageIcon size={20} className="opacity-50" />
+        <span>Failed</span>
+      </div>
+    )
+  }
+  return (
+    <a href={src} target="_blank" rel="noopener noreferrer"
+      className="block overflow-hidden rounded-lg border border-border transition-all hover:ring-2 hover:ring-primary/50"
+      title="Click to view full size"
+    >
+      <img src={src} alt={label} className={cn("h-full w-full object-cover", className)} onError={() => setFailed(true)} />
+    </a>
+  )
 }
 
 export default function KycPage() {
@@ -591,17 +611,14 @@ export default function KycPage() {
                     )}
                     {sub.frontImage && (
                       sub.frontImage.match(/\.pdf/i) ? (
-                        <a
-                          href={sub.frontImage}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <a href={sub.frontImage} target="_blank" rel="noopener noreferrer"
                           className="mt-2 flex h-16 w-full items-center justify-center gap-2 rounded-lg border border-border bg-gray-50 text-xs text-muted hover:bg-gray-100 hover:text-primary transition-colors"
                         >
                           <FileText size={16} className="text-red-400" />
                           View PDF
                         </a>
                       ) : (
-                        <img src={sub.frontImage} alt={label} className="mt-2 h-16 w-full rounded object-cover" />
+                        <DocImage src={sub.frontImage} label={label} className="mt-2 h-16 w-full" />
                       )
                     )}
                     <button
@@ -903,21 +920,14 @@ export default function KycPage() {
                           {doc.documentType === "BUSINESS_PERMIT" || doc.documentType === "BUSINESS_REGISTRATION" || doc.documentType === "KRA_PIN" ? "Document" : "Front"}
                         </p>
                         {doc.frontImage.match(/\.pdf/i) ? (
-                          <a
-                            href={doc.frontImage}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <a href={doc.frontImage} target="_blank" rel="noopener noreferrer"
                             className="flex h-20 w-28 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-gray-50 text-xs text-muted hover:bg-gray-100 hover:text-primary transition-colors"
                           >
                             <FileText size={20} className="text-red-400" />
                             View PDF
                           </a>
                         ) : (
-                          <img
-                            src={doc.frontImage}
-                            alt="Document"
-                            className="h-20 w-28 rounded-lg border border-border object-cover"
-                          />
+                          <DocImage src={doc.frontImage} label={doc.documentType} />
                         )}
                       </div>
                     )}
@@ -925,21 +935,14 @@ export default function KycPage() {
                       <div className="space-y-1">
                         <p className="text-xs text-muted">Back</p>
                         {doc.backImage.match(/\.pdf/i) ? (
-                          <a
-                            href={doc.backImage}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <a href={doc.backImage} target="_blank" rel="noopener noreferrer"
                             className="flex h-20 w-28 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-gray-50 text-xs text-muted hover:bg-gray-100 hover:text-primary transition-colors"
                           >
                             <FileText size={20} className="text-red-400" />
                             View PDF
                           </a>
                         ) : (
-                          <img
-                            src={doc.backImage}
-                            alt="Back"
-                            className="h-20 w-28 rounded-lg border border-border object-cover"
-                          />
+                          <DocImage src={doc.backImage} label="Back" />
                         )}
                       </div>
                     )}
