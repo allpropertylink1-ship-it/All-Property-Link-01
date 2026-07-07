@@ -198,7 +198,7 @@ export default function OnboardingPage() {
 
     try {
       const res = await fetch("/api/user/onboarding", {
-        method: "PUT",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,

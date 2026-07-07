@@ -38,7 +38,7 @@ export default function NotificationsPage() {
   const fetchNotifications = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/user/notifications?limit=100");
+      const res = await fetch("/api/notifications");
       if (res.ok) {
         const data = await res.json();
         setNotifications(data.notifications || []);
@@ -57,7 +57,7 @@ export default function NotificationsPage() {
 
   async function handleMarkAllRead() {
     try {
-      const res = await fetch("/api/user/notifications", { method: "PUT" });
+      const res = await fetch("/api/notifications", { method: "PATCH" });
       if (res.ok) {
         setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
         setUnreadCount(0);
@@ -69,7 +69,7 @@ export default function NotificationsPage() {
 
   async function handleMarkRead(id: string) {
     try {
-      const res = await fetch(`/api/user/notifications/${id}`, { method: "PUT" });
+      const res = await fetch(`/api/notifications/${id}`, { method: "PATCH" });
       if (res.ok) {
         setNotifications((prev) =>
           prev.map((n) => (n.id === id ? { ...n, read: true } : n))

@@ -17,7 +17,6 @@ interface KycDoc {
 }
 
 interface KycData {
-  user: { kycStatus: string; firstName: string; lastName: string } | null
   documents: KycDoc[]
 }
 
@@ -222,7 +221,7 @@ export default function KycPage() {
     }
   }
 
-  const kycStatus = data?.user?.kycStatus || "NONE"
+  const kycStatus = data?.documents && data.documents.length > 0 ? data.documents[0].status : "NONE"
   const status: StatusInfo = statusDisplay[kycStatus] || statusDisplay.NONE
   const StatusIcon = status.icon
 

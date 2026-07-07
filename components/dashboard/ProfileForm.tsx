@@ -59,7 +59,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
     try {
       const res = await fetch("/api/user/profile", {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
@@ -99,7 +99,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
     try {
       const res = await fetch("/api/user/password", {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ currentPassword, newPassword }),
       });

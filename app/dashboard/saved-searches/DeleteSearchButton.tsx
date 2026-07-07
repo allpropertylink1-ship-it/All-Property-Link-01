@@ -7,7 +7,7 @@ export function DeleteSearchButton({ id }: { id: string }) {
   const router = useRouter();
 
   async function handleDelete() {
-    const res = await fetch(`/api/saved-searches?id=${id}`, {
+    const res = await fetch(`/api/saved-searches/${id}`, {
       method: "DELETE",
     });
 

@@ -33,7 +33,7 @@ export default function FavoritesPage() {
   const fetchFavorites = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/user/favorites");
+      const res = await fetch("/api/favorites");
       if (res.ok) {
         const data = await res.json();
         setFavorites(data.favorites || []);
@@ -49,15 +49,13 @@ export default function FavoritesPage() {
     fetchFavorites();
   }, [fetchFavorites]);
 
-  async function handleRemoveFavorite(favoriteId: string) {
+  async function handleRemoveFavorite(favorite: FavoriteItem) {
     try {
-      const res = await fetch("/api/user/favorites", {
+      const res = await fetch(`/api/favorites/${favorite.property.id}`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ favoriteId }),
       });
       if (res.ok) {
-        setFavorites((prev) => prev.filter((f) => f.id !== favoriteId));
+        setFavorites((prev) => prev.filter((f) => f.id !== favorite.id));
       }
     } catch {
       // silent
@@ -115,7 +113,7 @@ export default function FavoritesPage() {
             >
               <button
                 type="button"
-                onClick={() => handleRemoveFavorite(fav.id)}
+                onClick={() => handleRemoveFavorite(fav)}
                 className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-error-500 shadow transition-colors hover:bg-error-500 hover:text-white"
                 aria-label="Remove from favorites"
               >
