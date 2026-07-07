@@ -1,49 +1,45 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { api } from "@/lib/api-client";
-import {
-  Shield,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Camera,
-  Upload,
-  Trash2,
-  Loader2,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState, useEffect, useCallback } from "react"
+import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2 } from "lucide-react"
+import { cn } from "@/lib/utils"
+import ImageCropper from "@/components/kyc/ImageCropper"
 
 interface KycDoc {
-  id: string;
-  documentType: string;
-  documentNumber: string | null;
-  status: string;
-  frontImage: string | null;
-  backImage: string | null;
-  rejectionReason: string | null;
-  createdAt: string;
+  id: string
+  documentType: string
+  documentNumber: string | null
+  status: string
+  frontImage: string | null
+  backImage: string | null
+  rejectionReason: string | null
+  createdAt: string
 }
 
 interface KycData {
-  user: { kycStatus: string; firstName: string; lastName: string } | null;
-  documents: KycDoc[];
+  user: { kycStatus: string; firstName: string; lastName: string } | null
+  documents: KycDoc[]
 }
 
 const docTypeLabels: Record<string, string> = {
   NATIONAL_ID: "National ID Card",
   DRIVERS_LICENSE: "Driver's License",
   PASSPORT: "Passport",
-};
+}
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_FILE_TYPES = ["image/jpeg", "image/png", "image/jpg"];
+const docTypeAspectRatios: Record<string, number> = {
+  NATIONAL_ID: 85.6 / 54,
+  DRIVERS_LICENSE: 85.6 / 54,
+  PASSPORT: 125 / 88,
+}
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024
+const ACCEPTED_FILE_TYPES = ["image/jpeg", "image/png", "image/jpg"]
 
 interface StatusInfo {
-  label: string;
-  icon: React.ElementType;
-  color: string;
+  label: string
+  icon: React.ElementType
+  color: string
 }
 
 const statusDisplay: Record<string, StatusInfo> = {
@@ -51,165 +47,145 @@ const statusDisplay: Record<string, StatusInfo> = {
   PENDING: { label: "Pending Review", icon: Clock, color: "text-yellow-500" },
   VERIFIED: { label: "Verified", icon: CheckCircle, color: "text-green-500" },
   REJECTED: { label: "Rejected", icon: XCircle, color: "text-red-500" },
-};
+}
 
 export default function KycPage() {
-  const router = useRouter();
-  const [data, setData] = useState<KycData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [data, setData] = useState<KycData | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
-  // Form state
-  const [documentType, setDocumentType] = useState("NATIONAL_ID");
-  const [documentNumber, setDocumentNumber] = useState("");
-  const [frontImageUrl, setFrontImageUrl] = useState("");
-  const [backImageUrl, setBackImageUrl] = useState("");
+  const [documentType, setDocumentType] = useState("NATIONAL_ID")
+  const [documentNumber, setDocumentNumber] = useState("")
+  const [frontImageUrl, setFrontImageUrl] = useState("")
+  const [backImageUrl, setBackImageUrl] = useState("")
+  const [frontPreview, setFrontPreview] = useState<string | null>(null)
+  const [backPreview, setBackPreview] = useState<string | null>(null)
+  const [uploadingFront, setUploadingFront] = useState(false)
+  const [uploadingBack, setUploadingBack] = useState(false)
 
-  // File state for preview and upload
-  const [frontFile, setFrontFile] = useState<File | null>(null);
-  const [backFile, setBackFile] = useState<File | null>(null);
-  const [frontPreview, setFrontPreview] = useState<string | null>(null);
-  const [backPreview, setBackPreview] = useState<string | null>(null);
-  const [uploadingFront, setUploadingFront] = useState(false);
-  const [uploadingBack, setUploadingBack] = useState(false);
+  // Cropper state
+  const [croppingFor, setCroppingFor] = useState<"front" | "back" | null>(null)
+  const [cropImageUrl, setCropImageUrl] = useState<string | null>(null)
 
   const fetchKyc = useCallback(async () => {
-    setLoading(true);
     try {
-      const res = await fetch("/api/user/kyc");
+      const res = await fetch("/api/user/kyc")
       if (res.ok) {
-        const result = await res.json();
-        setData(result);
+        const result = await res.json()
+        setData(result)
       }
     } catch {
-      setData(null);
-    } finally {
-      setLoading(false);
+      setData(null)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
-    fetchKyc();
-  }, [fetchKyc]);
+    fetchKyc()
+  }, [fetchKyc])
 
-  const handleFileUpload = async (
-    file: File,
-    setUrl: React.Dispatch<React.SetStateAction<string>>,
-    setUpdating: React.Dispatch<React.SetStateAction<boolean>>
+  const uploadCroppedBlob = async (
+    blob: Blob,
+    side: "front" | "back"
   ) => {
-    setUpdating(true);
+    const formData = new FormData()
+    formData.append("file", blob, `document-${side}.jpg`)
+
+    if (side === "front") setUploadingFront(true)
+    else setUploadingBack(true)
 
     try {
-      // Upload to Cloudinary
-      const formData = new FormData();
-      formData.append("file", file);
-
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
-      });
+      })
 
-      if (!res.ok) {
-        throw new Error("Upload failed");
-      }
+      if (!res.ok) throw new Error("Upload failed")
 
-      const result = await res.json();
+      const result = await res.json()
       if (result.url) {
-        setUrl(result.url);
+        if (side === "front") setFrontImageUrl(result.url)
+        else setBackImageUrl(result.url)
       }
-    } catch (err) {
-      setMessage({ type: "error", text: "Failed to upload image" });
+    } catch {
+      setMessage({ type: "error", text: "Failed to upload image" })
     } finally {
-      setUpdating(false);
+      if (side === "front") setUploadingFront(false)
+      else setUploadingBack(false)
     }
-  };
+  }
 
-  const handleFrontFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      setFrontFile(null);
-      setFrontImageUrl("");
-      setFrontPreview(null);
-      return;
-    }
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
     if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
-      setMessage({ type: "error", text: "Only JPG and PNG files are allowed" });
-      e.target.value = "";
-      return;
+      setMessage({ type: "error", text: "Only JPG and PNG files are allowed" })
+      e.target.value = ""
+      return
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      setMessage({ type: "error", text: "File size must be under 5MB" });
-      e.target.value = "";
-      return;
+      setMessage({ type: "error", text: "File size must be under 5MB" })
+      e.target.value = ""
+      return
     }
 
-    setFrontFile(file);
-    const previewUrl = URL.createObjectURL(file);
-    setFrontPreview(previewUrl);
-    await handleFileUpload(file, setFrontImageUrl, setUploadingFront);
-  };
-
-  const handleBackFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      setBackFile(null);
-      setBackImageUrl("");
-      setBackPreview(null);
-      return;
+    const previewUrl = URL.createObjectURL(file)
+    if (side === "front") {
+      setFrontPreview(previewUrl)
+    } else {
+      setBackPreview(previewUrl)
     }
+    setCropImageUrl(previewUrl)
+    setCroppingFor(side)
+  }
 
-    if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
-      setMessage({ type: "error", text: "Only JPG and PNG files are allowed" });
-      e.target.value = "";
-      return;
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    const side = croppingFor!
+    await uploadCroppedBlob(croppedBlob, side)
+    setCroppingFor(null)
+    setCropImageUrl(null)
+    setMessage(null)
+  }
+
+  const handleCropCancel = () => {
+    if (croppingFor === "front") {
+      setFrontPreview(null)
+    } else {
+      setBackPreview(null)
     }
+    setCroppingFor(null)
+    setCropImageUrl(null)
+  }
 
-    if (file.size > MAX_FILE_SIZE) {
-      setMessage({ type: "error", text: "File size must be under 5MB" });
-      e.target.value = "";
-      return;
+  const removeImage = (side: "front" | "back") => {
+    if (side === "front") {
+      setFrontImageUrl("")
+      setFrontPreview(null)
+    } else {
+      setBackImageUrl("")
+      setBackPreview(null)
     }
-
-    setBackFile(file);
-    const previewUrl = URL.createObjectURL(file);
-    setBackPreview(previewUrl);
-    await handleFileUpload(file, setBackImageUrl, setUploadingBack);
-  };
-
-  const removeFile = (
-    type: "front" | "back",
-    setFile: React.Dispatch<React.SetStateAction<File | null>>,
-    setUrl: React.Dispatch<React.SetStateAction<string>>,
-    setPreview: React.Dispatch<React.SetStateAction<string | null>>
-  ) => {
-    setFile(null);
-    setUrl("");
-    setPreview(null);
-    const input = document.querySelector(`input[name="${type}Image"]`);
-    if (input) {
-      (input as HTMLInputElement).value = "";
-    }
-  };
+    const input = document.querySelector(`input[name="${side}Image"]`) as HTMLInputElement
+    if (input) input.value = ""
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setMessage(null);
+    e.preventDefault()
+    setSubmitting(true)
+    setMessage(null)
 
     try {
       if (!documentNumber.trim()) {
-        setMessage({ type: "error", text: "Document number is required" });
-        setSubmitting(false);
-        return;
+        setMessage({ type: "error", text: "Document number is required" })
+        setSubmitting(false)
+        return
       }
 
       if (!frontImageUrl) {
-        setMessage({ type: "error", text: "Front image is required" });
-        setSubmitting(false);
-        return;
+        setMessage({ type: "error", text: "Front image is required" })
+        setSubmitting(false)
+        return
       }
 
       const res = await fetch("/api/user/kyc", {
@@ -221,39 +197,47 @@ export default function KycPage() {
           frontImage: frontImageUrl,
           backImage: backImageUrl || undefined,
         }),
-      });
+      })
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to submit KYC documents");
+        const err = await res.json()
+        throw new Error(err.error || "Failed to submit KYC documents")
       }
 
-      setMessage({ type: "success", text: "Documents submitted for verification" });
-      setDocumentType("NATIONAL_ID");
-      setDocumentNumber("");
-      setFrontImageUrl("");
-      setBackImageUrl("");
-      setFrontFile(null);
-      setBackFile(null);
-      setFrontPreview(null);
-      setBackPreview(null);
-      fetchKyc();
+      setMessage({ type: "success", text: "Documents submitted for verification" })
+      setDocumentType("NATIONAL_ID")
+      setDocumentNumber("")
+      setFrontImageUrl("")
+      setBackImageUrl("")
+      setFrontPreview(null)
+      setBackPreview(null)
+      fetchKyc()
     } catch (err) {
       setMessage({
         type: "error",
         text: err instanceof Error ? err.message : "Something went wrong",
-      });
+      })
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
-  const kycStatus = data?.user?.kycStatus || "NONE";
-  const status: StatusInfo = statusDisplay[kycStatus] || statusDisplay.NONE;
-  const StatusIcon = status.icon;
+  const kycStatus = data?.user?.kycStatus || "NONE"
+  const status: StatusInfo = statusDisplay[kycStatus] || statusDisplay.NONE
+  const StatusIcon = status.icon
 
   return (
     <div className="space-y-8">
+      {cropImageUrl && croppingFor && (
+        <ImageCropper
+          imageUrl={cropImageUrl}
+          aspectRatio={docTypeAspectRatios[documentType]}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+          sideLabel={croppingFor === "front" ? "Front" : "Back"}
+        />
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-text-primary">
           Identity Verification (KYC)
@@ -288,166 +272,150 @@ export default function KycPage() {
       )}
 
       {kycStatus !== "VERIFIED" && (
-        <div className="space-y-6">
-          <div className="rounded-xl border border-border bg-surface p-6">
-            <h2 className="mb-4 font-heading text-xl font-semibold text-text-primary">
-              Submit Your Documents
-            </h2>
+        <div className="rounded-xl border border-border bg-surface p-6">
+          <h2 className="mb-4 font-heading text-xl font-semibold text-text-primary">
+            Submit Your Documents
+          </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-3">
-                <label htmlFor="documentType" className="block text-sm font-medium text-text-primary mb-1">
-                  Document type
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="documentType" className="mb-1 block text-sm font-medium text-text-primary">
+                Document type
+              </label>
+              <select
+                id="documentType"
+                value={documentType}
+                onChange={(e) => setDocumentType(e.target.value)}
+                className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <option value="NATIONAL_ID">National ID Card</option>
+                <option value="DRIVERS_LICENSE">Driver's License</option>
+                <option value="PASSPORT">Passport</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="documentNumber" className="mb-1 block text-sm font-medium text-text-primary">
+                Document number
+              </label>
+              <input
+                id="documentNumber"
+                value={documentNumber}
+                onChange={(e) => setDocumentNumber(e.target.value)}
+                placeholder="Enter your ID number"
+                className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                required
+              />
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-text-primary">
+                  Front image
                 </label>
-                <select
-                  id="documentType"
-                  value={documentType}
-                  onChange={(e) => setDocumentType(e.target.value)}
-                  className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-visible disabled:pointer-events-none"
-                >
-                  <option value="NATIONAL_ID">National ID Card</option>
-                  <option value="DRIVERS_LICENSE">Driver's License</option>
-                  <option value="PASSPORT">Passport</option>
-                </select>
-              </div>
-
-              <div className="space-y-3">
-                <label htmlFor="documentNumber" className="block text-sm font-medium text-text-primary mb-1">
-                  Document number
-                </label>
-                <input
-                  id="documentNumber"
-                  value={documentNumber}
-                  onChange={(e) => setDocumentNumber(e.target.value)}
-                  placeholder="Enter your ID number"
-                  className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-visible disabled:pointer-events-none"
-                  required
-                />
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="frontImage" className="block text-sm font-medium text-text-primary mb-1">
-                    Front Image
-                  </label>
-                  <div className="flex flex-col space-y-2">
+                {frontPreview ? (
+                  <div className="space-y-2">
+                    <div className="relative h-48 rounded-lg border border-dashed border-muted/50 bg-background">
+                      <img
+                        src={frontPreview}
+                        alt="Front preview"
+                        className="h-full w-full rounded-lg object-cover"
+                      />
+                      {uploadingFront && (
+                        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
+                          <Loader2 className="h-6 w-6 animate-spin text-white" />
+                        </div>
+                      )}
+                    </div>
+                    {frontImageUrl && !uploadingFront && (
+                      <button
+                        type="button"
+                        onClick={() => removeImage("front")}
+                        className="text-xs text-error-500 hover:text-error-600"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <label className="flex h-48 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background hover:border-teal-400 hover:bg-teal-50/50">
+                    <Upload className="mb-2 h-6 w-6 text-muted" />
+                    <span className="text-sm text-muted">Click to upload</span>
+                    <span className="mt-1 text-xs text-muted">JPG or PNG, max 5MB</span>
                     <input
                       type="file"
-                      id="frontImage"
                       name="frontImage"
                       accept="image/jpeg,image/png,image/jpg"
-                      onChange={handleFrontFileChange}
-                      className="block w-full text-sm text-muted file:border-0 file:bg-transparent file:text-sm file:font-medium"
+                      onChange={(e) => handleFileSelect(e, "front")}
+                      className="hidden"
                     />
-                    {frontFile && (
-                      <div className="flex items-center space-x-2 text-sm">
-                        <span className="text-muted">Selected:</span>
-                        <span className="break-all text-xs font-mono">{frontFile.name}</span>
-                        <span className="text-xs text-muted">
-                          ({(frontFile.size / (1024 * 1024)).toFixed(2)} MB)
-                        </span>
-                      </div>
-                    )}
-                    {frontPreview && (
-                      <div className="mt-3">
-                        <div className="relative h-48 w-full rounded-lg border border-dashed border-muted/50 bg-background">
-                          <img
-                            src={frontPreview}
-                            alt="Front preview"
-                            className="h-full w-full object-cover rounded-lg"
-                          />
-                          {uploadingFront && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                              <Loader2 className="h-4 w-4 animate-spin text-white" />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    {frontFile && (
-                      <button
-                        type="button"
-                        onClick={() => removeFile("front", setFrontFile, setFrontImageUrl, setFrontPreview)}
-                        disabled={!frontFile}
-                        className="text-xs font-muted hover:text-primary transition-colors w-fit"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="backImage" className="block text-sm font-medium text-text-primary mb-1">
-                    Back Image (Optional)
                   </label>
-                  <div className="flex flex-col space-y-2">
-                    <input
-                      type="file"
-                      id="backImage"
-                      name="backImage"
-                      accept="image/jpeg,image/png,image/jpg"
-                      onChange={handleBackFileChange}
-                      className="block w-full text-sm text-muted file:border-0 file:bg-transparent file:text-sm file:font-medium"
-                    />
-                    {backFile && (
-                      <div className="flex items-center space-x-2 text-sm">
-                        <span className="text-muted">Selected:</span>
-                        <span className="break-all text-xs font-mono">{backFile.name}</span>
-                        <span className="text-xs text-muted">
-                          ({(backFile.size / (1024 * 1024)).toFixed(2)} MB)
-                        </span>
-                      </div>
-                    )}
-                    {backPreview && (
-                      <div className="mt-3">
-                        <div className="relative h-48 w-full rounded-lg border border-dashed border-muted/50 bg-background">
-                          <img
-                            src={backPreview}
-                            alt="Back preview"
-                            className="h-full w-full object-cover rounded-lg"
-                          />
-                          {uploadingBack && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                              <Loader2 className="h-4 w-4 animate-spin text-white" />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    {backFile && (
-                      <button
-                        type="button"
-                        onClick={() => removeFile("back", setBackFile, setBackImageUrl, setBackPreview)}
-                        disabled={!backFile}
-                        className="text-xs font-muted hover:text-primary transition-colors w-fit"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                </div>
+                )}
               </div>
 
-              <button
-                type="submit"
-                disabled={submitting || !documentNumber.trim() || !frontImageUrl}
-                className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting...
-                  </>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-text-primary">
+                  Back image <span className="text-muted">(optional)</span>
+                </label>
+                {backPreview ? (
+                  <div className="space-y-2">
+                    <div className="relative h-48 rounded-lg border border-dashed border-muted/50 bg-background">
+                      <img
+                        src={backPreview}
+                        alt="Back preview"
+                        className="h-full w-full rounded-lg object-cover"
+                      />
+                      {uploadingBack && (
+                        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
+                          <Loader2 className="h-6 w-6 animate-spin text-white" />
+                        </div>
+                      )}
+                    </div>
+                    {backImageUrl && !uploadingBack && (
+                      <button
+                        type="button"
+                        onClick={() => removeImage("back")}
+                        className="text-xs text-error-500 hover:text-error-600"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
                 ) : (
-                  <>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Submit for Verification
-                  </>
+                  <label className="flex h-48 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background hover:border-teal-400 hover:bg-teal-50/50">
+                    <Upload className="mb-2 h-6 w-6 text-muted" />
+                    <span className="text-sm text-muted">Click to upload</span>
+                    <span className="mt-1 text-xs text-muted">JPG or PNG, max 5MB</span>
+                    <input
+                      type="file"
+                      name="backImage"
+                      accept="image/jpeg,image/png,image/jpg"
+                      onChange={(e) => handleFileSelect(e, "back")}
+                      className="hidden"
+                    />
+                  </label>
                 )}
-              </button>
-            </form>
-          </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting || !documentNumber.trim() || !frontImageUrl}
+              className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4" />
+                  Submit for Verification
+                </>
+              )}
+            </button>
+          </form>
         </div>
       )}
 
@@ -480,7 +448,7 @@ export default function KycPage() {
                     </div>
                   </div>
 
-                  <div className="text-right space-y-2">
+                  <div className="space-y-2 text-right">
                     <span className={cn(
                       "px-3 py-1 rounded text-xs font-medium",
                       doc.status === "PENDING" && "bg-yellow-500/20 text-yellow-600",
@@ -491,11 +459,8 @@ export default function KycPage() {
                       {doc.status === "VERIFIED" && "Verified"}
                       {doc.status === "REJECTED" && "Rejected"}
                     </span>
-
                     {doc.rejectionReason && (
-                      <p className="mt-1 text-xs text-red-500">
-                        Reason: {doc.rejectionReason}
-                      </p>
+                      <p className="mt-1 text-xs text-red-500">Reason: {doc.rejectionReason}</p>
                     )}
                   </div>
                 </div>
@@ -503,22 +468,22 @@ export default function KycPage() {
                 {(doc.frontImage || doc.backImage) && (
                   <div className="mt-4 flex items-start gap-4">
                     {doc.frontImage && (
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <p className="text-xs text-muted">Front</p>
                         <img
                           src={doc.frontImage}
                           alt="Front ID"
-                          className="h-16 w-16 rounded-lg border border-border object-cover"
+                          className="h-20 w-28 rounded-lg border border-border object-cover"
                         />
                       </div>
                     )}
                     {doc.backImage && (
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <p className="text-xs text-muted">Back</p>
                         <img
                           src={doc.backImage}
                           alt="Back ID"
-                          className="h-16 w-16 rounded-lg border border-border object-cover"
+                          className="h-20 w-28 rounded-lg border border-border object-cover"
                         />
                       </div>
                     )}
@@ -528,11 +493,11 @@ export default function KycPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-8">
+          <div className="py-8 text-center">
             <p className="text-muted">No submissions yet</p>
           </div>
         )}
       </div>
     </div>
-  );
+  )
 }
