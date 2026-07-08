@@ -91,7 +91,7 @@ export default function KycPage() {
   const uploadFiles = async (files: File[]): Promise<{ url: string }[]> => {
     const formData = new FormData()
     files.forEach(f => formData.append("files", f))
-    const res = await fetch("/api/uploadthing", { method: "POST", body: formData })
+    const res = await fetch("https://delightful-encouragement-production-878d.up.railway.app/api/uploadthing", { method: "POST", body: formData })
     if (!res.ok) throw new Error("Upload failed")
     return res.json()
   }
