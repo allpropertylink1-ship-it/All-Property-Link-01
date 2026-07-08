@@ -92,17 +92,29 @@ export default function KycPage() {
   const [agentName, setAgentName] = useState<string | null>(null)
   const [agentPhone, setAgentPhone] = useState<string | null>(null)
   const [agentConfirmed, setAgentConfirmed] = useState(false)
+  const [agentCodeState, setAgentCodeState] = useState<"idle" | "found" | "confirmed">("idle")
   const [agentLookupLoading, setAgentLookupLoading] = useState(false)
   const [agentLookupError, setAgentLookupError] = useState("")
+
+  const resetAgentCode = useCallback(() => {
+    setAgentCode("")
+    setAplAgentId(null)
+    setAgentName(null)
+    setAgentPhone(null)
+    setAgentConfirmed(false)
+    setAgentCodeState("idle")
+    setAgentLookupError("")
+  }, [])
 
   const handleAgentLookup = async () => {
     if (!agentCode.trim()) return
     setAgentLookupLoading(true)
     setAgentLookupError("")
+    setAplAgentId(null)
     setAgentName(null)
     setAgentPhone(null)
-    setAplAgentId(null)
     setAgentConfirmed(false)
+    setAgentCodeState("idle")
     try {
       const res = await fetch("/api/apl-agents/lookup", {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -116,10 +128,18 @@ export default function KycPage() {
       setAplAgentId(result.agent.id)
       setAgentName(result.agent.fullName)
       setAgentPhone(result.agent.phone)
+      setAgentCodeState("found")
     } catch {
       setAgentLookupError("Failed to look up code. Try again.")
     } finally {
       setAgentLookupLoading(false)
+    }
+  }
+
+  const handleConfirmAgent = () => {
+    if (aplAgentId) {
+      setAgentConfirmed(true)
+      setAgentCodeState("confirmed")
     }
   }
 
@@ -233,7 +253,7 @@ export default function KycPage() {
       setMessage({ type: "success", text: "Document submitted" })
       setDocNumber(""); setFrontFile(null); setBackFile(null); setFrontUrl(""); setBackUrl(""); setCropping(null)
       setBioFirstName(""); setBioMiddleName(""); setBioLastName(""); setBioPhone(""); setBioEmail("")
-      setAgentCode(""); setAplAgentId(null); setAgentName(null); setAgentPhone(null); setAgentConfirmed(false)
+      resetAgentCode()
       fetchKyc()
     } catch (err) {
       setMessage({ type: "error", text: err instanceof Error ? err.message : "Something went wrong" })
@@ -322,30 +342,55 @@ export default function KycPage() {
             <h2 className="mb-4 text-lg font-semibold text-foreground">
               Agent Code <span className="text-sm font-normal text-muted">(Optional — fill if an APL Agent introduced you to the platform)</span>
             </h2>
-            <div className="flex flex-wrap items-end gap-3">
-              <div className="flex-1 min-w-[200px]">
-                <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="agentCode">Agent Code</label>
-                <input id="agentCode" value={agentCode} onChange={e => setAgentCode(e.target.value.toUpperCase())} placeholder="e.g. APL-JOE-001-07/26"
-                  className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm uppercase font-mono focus:outline-none focus:ring-2 focus:ring-primary/50" />
-              </div>
-              <button type="button" onClick={handleAgentLookup} disabled={agentLookupLoading || !agentCode.trim()}
-                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-50">
-                {agentLookupLoading ? <Loader2 size={16} className="animate-spin" /> : null}
-                Look Up
-              </button>
-            </div>
-            {agentLookupError && <p className="mt-2 text-sm text-red-500">{agentLookupError}</p>}
-            {agentName && (
-              <div className="mt-3 rounded-lg border border-green-200 bg-green-50 p-4">
-                <p className="text-sm font-medium text-green-800">Agent Found</p>
-                <p className="mt-1 text-sm text-green-700"><strong>Name:</strong> {agentName}</p>
+
+            {agentCodeState === "confirmed" ? (
+              <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                <div className="flex items-center gap-2">
+                  <CheckCircle size={18} className="text-green-600" />
+                  <p className="text-sm font-medium text-green-800">Agent Confirmed</p>
+                </div>
+                <p className="mt-2 text-sm text-green-700"><strong>Name:</strong> {agentName}</p>
                 <p className="text-sm text-green-700"><strong>Phone:</strong> {agentPhone}</p>
-                <label className="mt-3 flex items-start gap-2 cursor-pointer">
-                  <input type="checkbox" checked={agentConfirmed} onChange={e => setAgentConfirmed(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
-                  <span className="text-sm text-green-700">I confirm that this is the APL Agent who introduced me to All Property Link</span>
-                </label>
+                <p className="mt-1 text-xs text-green-500">This agent will be credited with your referral.</p>
+                <button type="button" onClick={resetAgentCode}
+                  className="mt-3 text-sm font-medium text-primary hover:underline">
+                  Change Agent
+                </button>
               </div>
+            ) : (
+              <>
+                <div className="flex flex-wrap items-end gap-3">
+                  <div className="flex-1 min-w-[200px]">
+                    <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="agentCode">Agent Code</label>
+                    <input id="agentCode" value={agentCode} onChange={e => setAgentCode(e.target.value.toUpperCase())} placeholder="e.g. APL-JOE-001-07/26"
+                      className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm uppercase font-mono focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                  </div>
+                  <button type="button" onClick={handleAgentLookup} disabled={agentLookupLoading || !agentCode.trim()}
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-50">
+                    {agentLookupLoading ? <Loader2 size={16} className="animate-spin" /> : null}
+                    Look Up
+                  </button>
+                </div>
+                {agentLookupError && <p className="mt-2 text-sm text-red-500">{agentLookupError}</p>}
+                {agentCodeState === "found" && agentName && (
+                  <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-4">
+                    <p className="text-sm font-medium text-foreground">Agent Found</p>
+                    <p className="mt-1 text-sm text-muted"><strong>Name:</strong> {agentName}</p>
+                    <p className="text-sm text-muted"><strong>Phone:</strong> {agentPhone}</p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <button type="button" onClick={handleConfirmAgent}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90">
+                        <CheckCircle size={16} />
+                        Confirm Agent
+                      </button>
+                      <button type="button" onClick={resetAgentCode}
+                        className="rounded-lg border border-input px-4 py-2 text-sm font-medium text-muted transition-colors hover:bg-background">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
