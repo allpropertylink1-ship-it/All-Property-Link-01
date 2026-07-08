@@ -32,6 +32,7 @@ const nextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-DNS-Prefetch-Control", value: "on" },
+          { key: "Cross-Origin-Opener-Policy", value: "unsafe-none" },
           {
             key: "Content-Security-Policy",
             value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://accounts.google.com; img-src 'self' data: blob: https://res.cloudinary.com https://uploadthing.com https://utfs.io; font-src 'self' data:; connect-src 'self' https://delightful-encouragement-production-878d.up.railway.app https://uploadthing.com; frame-src 'self' https://accounts.google.com; object-src 'none'",
