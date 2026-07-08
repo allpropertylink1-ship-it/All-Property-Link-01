@@ -24,19 +24,13 @@ interface KycData {
 
 const LABELS: Record<string, string> = {
   NATIONAL_ID: "National ID Card", DRIVERS_LICENSE: "Driver's License", PASSPORT: "Passport",
-  BUSINESS_PERMIT: "Business Permit", BUSINESS_REGISTRATION: "Business Registration", KRA_PIN: "KRA PIN",
 }
 
 const ASPECTS: Record<string, number> = {
-  NATIONAL_ID: 85.6 / 54, DRIVERS_LICENSE: 85.6 / 54, PASSPORT: 125 / 88, BUSINESS_PERMIT: 1.42, BUSINESS_REGISTRATION: 1.42, KRA_PIN: 1.42,
+  NATIONAL_ID: 85.6 / 54, DRIVERS_LICENSE: 85.6 / 54, PASSPORT: 125 / 88,
 }
 
 const CORE_TYPES = ["NATIONAL_ID", "DRIVERS_LICENSE", "PASSPORT"]
-const ADDITIONAL_TYPES = [
-  { type: "BUSINESS_PERMIT", label: "Business Permit" },
-  { type: "BUSINESS_REGISTRATION", label: "Business Registration" },
-  { type: "KRA_PIN", label: "KRA PIN" },
-]
 
 const STATUS: Record<string, { label: string; icon: React.ElementType; color: string; bg: string; border: string }> = {
   NONE: { label: "Not Verified", icon: Shield, color: "text-gray-500", bg: "bg-gray-50", border: "border-gray-200" },
@@ -79,7 +73,6 @@ export default function KycPage() {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
-  const [showAdditional, setShowAdditional] = useState(false)
 
   const [docType, setDocType] = useState("NATIONAL_ID")
   const [docNumber, setDocNumber] = useState("")
@@ -88,9 +81,6 @@ export default function KycPage() {
   const [frontUrl, setFrontUrl] = useState("")
   const [backUrl, setBackUrl] = useState("")
   const [cropping, setCropping] = useState<"front" | "back" | null>(null)
-
-  const [additional, setAdditional] = useState<Record<string, { number: string; file: File | null; url: string }>>({})
-  const [addCropping, setAddCropping] = useState<string | null>(null)
 
   const uploadFiles = async (files: File[]): Promise<{ url: string }[]> => {
     const formData = new FormData()
@@ -133,25 +123,7 @@ export default function KycPage() {
     const file = new File([blob], "document.jpg", { type: "image/jpeg" })
     if (cropping === "front") setFrontFile(file)
     else if (cropping === "back") setBackFile(file)
-    else if (addCropping) {
-      setAdditional(prev => ({ ...prev, [addCropping]: { ...prev[addCropping] || { number: "" }, file } }))
-      setAddCropping(null)
-    }
     setCropping(null)
-  }
-
-  const handleAddFileSelect = (type: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (!["image/jpeg", "image/png", "image/jpg", "application/pdf"].includes(file.type)) {
-      setMessage({ type: "error", text: "Only PDF, JPG, and PNG files are allowed" }); e.target.value = ""; return
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      setMessage({ type: "error", text: "File must be under 10MB" }); e.target.value = ""; return
-    }
-    setMessage(null)
-    setAdditional(prev => ({ ...prev, [type]: { ...prev[type] || { number: "" }, file } }))
-    if (file.type.startsWith("image/")) setAddCropping(type)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -167,19 +139,13 @@ export default function KycPage() {
 
       const uploads: File[] = [frontFile]
       if (backFile) uploads.push(backFile)
-      const addUploads: { type: string; file: File }[] = []
-      Object.entries(additional).forEach(([type, doc]) => {
-        if (doc.file && doc.number.trim()) addUploads.push({ type, file: doc.file })
-      })
-      addUploads.forEach(({ file }) => uploads.push(file))
 
       const results = await uploadFiles(uploads)
       if (!results || results.length === 0) throw new Error("Upload failed")
       if (results.some(r => !r.url)) throw new Error("One or more uploads failed")
 
-      let idx = 0
-      const frontUrl_ = results[idx++].url!
-      const backUrl_ = backFile ? results[idx++].url! : ""
+      const frontUrl_ = results[0].url!
+      const backUrl_ = backFile ? results[1]?.url! : ""
 
       const body: Record<string, string> = {
         documentType: docType,
@@ -188,31 +154,14 @@ export default function KycPage() {
       }
       if (backUrl_) body.backImage = backUrl_
 
-      const ops: Promise<Response>[] = []
+      const res = coreDoc?.status === "REJECTED"
+        ? await fetch(`/api/user/kyc/${coreDoc.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+        : await fetch("/api/user/kyc", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
 
-      if (coreDoc?.status === "REJECTED") {
-        ops.push(fetch(`/api/user/kyc/${coreDoc.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }))
-      } else {
-        ops.push(fetch("/api/user/kyc", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }))
-      }
+      if (!res.ok) throw new Error("Submission failed")
 
-      addUploads.forEach(({ type }) => {
-        const existing = data?.documents?.find(d => d.documentType === type && d.documentNumber === additional[type].number.trim())
-        const addUrl = results[idx++].url!
-        const addBody: Record<string, string> = { documentType: type, documentNumber: additional[type].number.trim(), frontImage: addUrl }
-        if (existing) {
-          ops.push(fetch(`/api/user/kyc/${existing.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(addBody) }))
-        } else {
-          ops.push(fetch("/api/user/kyc", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(addBody) }))
-        }
-      })
-
-      const resps = await Promise.all(ops)
-      const errors = resps.filter(r => !r.ok)
-      if (errors.length > 0) throw new Error(`${errors.length} submission(s) failed`)
-
-      setMessage({ type: "success", text: ops.length === 1 ? "Document submitted" : `${ops.length} documents submitted` })
-      setDocNumber(""); setFrontFile(null); setBackFile(null); setFrontUrl(""); setBackUrl(""); setAdditional({}); setCropping(null); setAddCropping(null)
+      setMessage({ type: "success", text: "Document submitted" })
+      setDocNumber(""); setFrontFile(null); setBackFile(null); setFrontUrl(""); setBackUrl(""); setCropping(null)
       fetchKyc()
     } catch (err) {
       setMessage({ type: "error", text: err instanceof Error ? err.message : "Something went wrong" })
@@ -338,50 +287,6 @@ export default function KycPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-surface">
-            <button type="button" onClick={() => setShowAdditional(!showAdditional)}
-              className="flex w-full items-center justify-between p-6 text-left transition-colors hover:bg-gray-50">
-              <h2 className="text-lg font-semibold text-foreground">
-                Additional Documents <span className="text-sm font-normal text-muted">(Optional)</span>
-              </h2>
-              <span className="text-sm text-muted">{showAdditional ? "Collapse" : "Expand"}</span>
-            </button>
-            {showAdditional && (
-              <div className="border-t border-border p-6">
-                <p className="mb-4 text-sm text-muted">Uploading business documents can speed up verification.</p>
-                <div className="grid gap-4 sm:grid-cols-3">
-                  {ADDITIONAL_TYPES.map(({ type, label }) => {
-                    const doc = additional[type] || { number: "", file: null, url: "" }
-                    return (
-                      <div key={type} className="rounded-lg border border-border p-4">
-                        <h3 className="mb-2 text-sm font-semibold text-foreground">{label}</h3>
-                        <input value={doc.number} onChange={e => setAdditional(prev => ({ ...prev, [type]: { ...prev[type] || { file: null, url: "" }, number: e.target.value } }))} placeholder="Document number"
-                          className="mb-2 block w-full rounded border border-input bg-background px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
-                        {doc.file ? (
-                          <div className="space-y-1">
-                            {addCropping === type && doc.file.type.startsWith("image/") ? (
-                              <ImageCropper imageUrl={URL.createObjectURL(doc.file)} aspectRatio={1.42} onCropComplete={handleCropComplete} onCancel={() => setAddCropping(null)} sideLabel={label} />
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                {doc.file.type.startsWith("image/") ? <img src={URL.createObjectURL(doc.file)} alt="" className="h-16 w-full rounded object-cover" /> : <FileText size={20} className="text-red-400" />}
-                                <button type="button" onClick={() => setAdditional(prev => ({ ...prev, [type]: { ...prev[type] || { number: "" }, file: null } }))} className="text-xs text-red-500 hover:text-red-600">Remove</button>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <label className="flex cursor-pointer items-center justify-center gap-2 rounded border border-dashed border-muted/50 px-3 py-4 text-xs text-muted hover:border-primary/50 hover:text-primary transition-colors">
-                            <Upload size={14} /> Upload file
-                            <input type="file" accept=".pdf,image/jpeg,image/png" onChange={e => handleAddFileSelect(type, e)} className="hidden" />
-                          </label>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-
           <button type="submit" disabled={submitting || !docNumber.trim() || !frontFile}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-base font-medium text-white shadow-lg transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed">
             {submitting ? <Loader2 size={18} className="animate-spin" /> : <Shield size={18} />}
@@ -409,9 +314,7 @@ export default function KycPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm font-medium text-foreground">{LABELS[doc.documentType] || doc.documentType}</span>
-                    <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-medium", CORE_TYPES.includes(doc.documentType) ? "bg-primary/10 text-primary" : "bg-gray-100 text-muted")}>
-                      {CORE_TYPES.includes(doc.documentType) ? "Required" : "Optional"}
-                    </span>
+                    <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">Required</span>
                     <Badge status={doc.status} />
                   </div>
                   <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">

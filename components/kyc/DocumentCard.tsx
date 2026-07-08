@@ -16,7 +16,7 @@ interface DocumentCardProps {
     createdAt: string
   }
   docTypeLabels: Record<string, string>
-  coreTypes: readonly string[]
+
   deleting: string | null
   deleteConfirm: string | null
   onDeleteConfirm: (id: string) => void
@@ -64,14 +64,12 @@ function DocThumbnail({ src, label }: { src: string; label: string }) {
 export default function DocumentCard({
   doc,
   docTypeLabels,
-  coreTypes,
   deleting,
   deleteConfirm,
   onDeleteConfirm,
   onDeleteCancel,
   onDelete,
 }: DocumentCardProps) {
-  const isCore = coreTypes.includes(doc.documentType)
   const isRejected = doc.status === "REJECTED"
   const showDelete = isRejected && deleteConfirm !== doc.id
   const showConfirm = deleteConfirm === doc.id
@@ -85,11 +83,7 @@ export default function DocumentCard({
               <span className="text-sm font-medium text-foreground">
                 {docTypeLabels[doc.documentType] || doc.documentType}
               </span>
-              {isCore ? (
-                <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">Required</span>
-              ) : (
-                <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-muted">Optional</span>
-              )}
+              <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">Required</span>
               <StatusBadge status={doc.status} />
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">

@@ -15,7 +15,6 @@ interface CoreDocumentFormProps {
   uploadingBack: boolean
   croppingFor: "front" | "back" | null
   cropImageUrl: string | null
-  cropDocType: string | null
   onDocumentTypeChange: (value: string) => void
   onDocumentNumberChange: (value: string) => void
   onHandleFileSelect: (e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") => void
@@ -24,7 +23,6 @@ interface CoreDocumentFormProps {
   onRemoveCoreImage: (side: "front" | "back") => void
   aspectRatios: Record<string, number>
   docTypeLabels: Record<string, string>
-  coreTypes: readonly string[]
   isReSubmit: boolean
   coreDocSubmitted: boolean
   coreDocStatus: string | null
@@ -41,7 +39,6 @@ export default function CoreDocumentForm({
   uploadingBack,
   croppingFor,
   cropImageUrl,
-  cropDocType,
   onDocumentTypeChange,
   onDocumentNumberChange,
   onHandleFileSelect,
@@ -50,7 +47,6 @@ export default function CoreDocumentForm({
   onRemoveCoreImage,
   aspectRatios,
   docTypeLabels,
-  coreTypes,
   isReSubmit,
   coreDocSubmitted,
   coreDocStatus,
@@ -58,7 +54,6 @@ export default function CoreDocumentForm({
   const isCoreDocSubmitted = coreDocSubmitted && coreDocStatus !== "REJECTED"
   const isCoreDocPending = coreDocStatus === "PENDING"
   const isCoreDocRejected = coreDocStatus === "REJECTED" && coreDocSubmitted
-  const isCoreDocVerified = coreDocStatus === "VERIFIED"
   
   const handleFrontSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     onHandleFileSelect(e, "front")
