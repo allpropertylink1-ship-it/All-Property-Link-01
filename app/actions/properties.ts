@@ -30,7 +30,7 @@ export async function createProperty(formData: FormData) {
     return { success: false, error: "KYC verification required to post listings. Complete your KYC verification first." };
   }
   const parsed = propertySchema.safeParse(parseForm(formData));
-  if (!parsed.success) return { success: false, error: parsed.error.flatten().fieldErrors as unknown as string };
+  if (!parsed.success) return { success: false, error: Object.values(parsed.error.flatten().fieldErrors).flat().join(", ") };
 
   await createPropertyService(parsed.data, userId);
   revalidatePath("/properties");
@@ -43,7 +43,7 @@ export async function updateProperty(id: string, formData: FormData) {
   const userId = (session.user as { id: string }).id;
   const userRole = (session.user as { role: string }).role;
   const parsed = propertySchema.safeParse(parseForm(formData));
-  if (!parsed.success) return { success: false, error: parsed.error.flatten().fieldErrors as unknown as string };
+  if (!parsed.success) return { success: false, error: Object.values(parsed.error.flatten().fieldErrors).flat().join(", ") };
 
   const result = await updatePropertyService(id, parsed.data, userId, userRole);
   if (!result.success) return result;

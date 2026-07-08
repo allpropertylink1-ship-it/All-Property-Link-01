@@ -115,22 +115,11 @@ export async function togglePublish(propertyId: string, publish: boolean) {
   }
 }
 
-export async function saveSettings(formData: FormData) {
+export async function saveSettings(_formData: FormData) {
   const { requireRole } = await import("@/lib/auth-utils");
   await requireRole(["ADMIN"]);
 
-  const data = {
-    platformName: formData.get("platformName"),
-    platformUrl: formData.get("platformUrl"),
-    contactEmail: formData.get("contactEmail"),
-    fromName: formData.get("fromName"),
-    fromEmail: formData.get("fromEmail"),
-    replyTo: formData.get("replyTo"),
-    businessNumber: formData.get("businessNumber"),
-    responseTime: formData.get("responseTime"),
-  };
 
-  console.log("Settings saved:", data);
 }
 
 export async function viewProperty(_propertyId: string) {

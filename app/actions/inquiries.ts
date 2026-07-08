@@ -18,7 +18,7 @@ export async function sendInquiry(propertyId: string, formData: FormData) {
 
   const parsed = inquirySchema.safeParse(raw);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.flatten().fieldErrors as unknown as string };
+    return { success: false, error: Object.values(parsed.error.flatten().fieldErrors).flat().join(", ") };
   }
 
   const session = await requireAuth().catch(() => null);

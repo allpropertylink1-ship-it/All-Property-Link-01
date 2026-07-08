@@ -13,7 +13,7 @@ interface SessionUser {
   companyName?: string
 }
 
-const BACKEND_URL = process.env.BACKEND_URL || "https://delightful-encouragement-production-878d.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://delightful-encouragement-production-878d.up.railway.app"
 
 export async function getSession() {
   try {
@@ -21,7 +21,7 @@ export async function getSession() {
     const cookieStore = await cookies();
     const token = cookieStore.get("access_token")?.value;
     if (!token) return null;
-    const res = await fetch(`${BACKEND_URL}/api/auth/me`, {
+    const res = await fetch(`${API_URL}/api/auth/me`, {
       headers: { Cookie: `access_token=${token}` },
     });
     if (!res.ok) return null;

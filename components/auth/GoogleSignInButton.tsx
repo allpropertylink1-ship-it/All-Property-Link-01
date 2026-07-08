@@ -57,15 +57,13 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin" }: Goog
     if (!ready || renderedRef.current || !btnRef.current) return
     renderedRef.current = true
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const google = (window as any).google
+    const google = (window as unknown as Record<string, unknown>).google as { accounts?: { id: { initialize: (config: Record<string, unknown>) => void; renderButton: (element: HTMLElement, options: Record<string, unknown>) => void } } } | undefined
     if (!google?.accounts?.id) return
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      callback: (response: any) => {
+      callback: (response: { credential?: string }) => {
         if (response?.credential) {
           handleCredential(response.credential)
         } else {
