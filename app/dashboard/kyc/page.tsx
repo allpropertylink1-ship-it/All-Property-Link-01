@@ -12,6 +12,7 @@ interface KycDocument {
   documentNumber: string
   frontImage: string
   backImage: string
+  bioData: { firstName?: string; middleName?: string; lastName?: string; phone?: string; email?: string } | null
   status: string
   rejectionReason: string | null
   createdAt: string
@@ -81,6 +82,11 @@ export default function KycPage() {
   const [frontUrl, setFrontUrl] = useState("")
   const [backUrl, setBackUrl] = useState("")
   const [cropping, setCropping] = useState<"front" | "back" | null>(null)
+  const [bioFirstName, setBioFirstName] = useState("")
+  const [bioMiddleName, setBioMiddleName] = useState("")
+  const [bioLastName, setBioLastName] = useState("")
+  const [bioPhone, setBioPhone] = useState("")
+  const [bioEmail, setBioEmail] = useState("")
 
   const uploadFiles = async (files: File[]): Promise<{ url: string }[]> => {
     const formData = new FormData()
@@ -136,6 +142,14 @@ export default function KycPage() {
         setMessage({ type: "error", text: "Document number and front image are required" })
         setSubmitting(false); return
       }
+      if (!bioFirstName.trim() || !bioLastName.trim()) {
+        setMessage({ type: "error", text: "First name and last name are required" })
+        setSubmitting(false); return
+      }
+      if (!bioPhone.trim()) {
+        setMessage({ type: "error", text: "Phone number is required" })
+        setSubmitting(false); return
+      }
 
       const uploads: File[] = [frontFile]
       if (backFile) uploads.push(backFile)
@@ -147,10 +161,17 @@ export default function KycPage() {
       const frontUrl_ = results[0]!.url!
       const backUrl_ = backFile ? results[1]!.url! : ""
 
-      const body: Record<string, string> = {
+      const body: Record<string, unknown> = {
         documentType: docType,
         documentNumber: docNumber.trim(),
         frontImage: frontUrl_,
+        bioData: {
+          firstName: bioFirstName.trim(),
+          middleName: bioMiddleName.trim() || null,
+          lastName: bioLastName.trim(),
+          phone: bioPhone.trim(),
+          email: bioEmail.trim() || null,
+        },
       }
       if (backUrl_) body.backImage = backUrl_
 
@@ -162,6 +183,7 @@ export default function KycPage() {
 
       setMessage({ type: "success", text: "Document submitted" })
       setDocNumber(""); setFrontFile(null); setBackFile(null); setFrontUrl(""); setBackUrl(""); setCropping(null)
+      setBioFirstName(""); setBioMiddleName(""); setBioLastName(""); setBioPhone(""); setBioEmail("")
       fetchKyc()
     } catch (err) {
       setMessage({ type: "error", text: err instanceof Error ? err.message : "Something went wrong" })
@@ -211,6 +233,41 @@ export default function KycPage() {
 
       {(kycStatus === "NONE" || kycStatus === "REJECTED") && (
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+          <div className="rounded-xl border border-border bg-surface p-6">
+            <h2 className="mb-4 text-lg font-semibold text-foreground">
+              Personal Details <span className="text-sm font-normal text-muted">(as they appear on your ID)</span>
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">First Name <span className="text-red-500">*</span></label>
+                <input value={bioFirstName} onChange={e => setBioFirstName(e.target.value)} placeholder="e.g. John"
+                  className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Middle Name <span className="text-xs text-muted">(optional)</span></label>
+                <input value={bioMiddleName} onChange={e => setBioMiddleName(e.target.value)} placeholder="e.g. Michael"
+                  className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Last Name <span className="text-red-500">*</span></label>
+                <input value={bioLastName} onChange={e => setBioLastName(e.target.value)} placeholder="e.g. Doe"
+                  className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+              </div>
+            </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Phone Number <span className="text-red-500">*</span></label>
+                <input value={bioPhone} onChange={e => setBioPhone(e.target.value)} type="tel" placeholder="e.g. +254 712 345 678"
+                  className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Email <span className="text-xs text-muted">(optional)</span></label>
+                <input value={bioEmail} onChange={e => setBioEmail(e.target.value)} type="email" placeholder="e.g. john@example.com"
+                  className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+              </div>
+            </div>
+          </div>
+
           <div className="rounded-xl border border-border bg-surface p-6">
             <h2 className="mb-4 text-lg font-semibold text-foreground">
               Core Identity Document <span className="text-sm font-normal text-muted">(Required)</span>
@@ -322,6 +379,13 @@ export default function KycPage() {
                     <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
                     {doc.rejectionReason && <span className="text-red-500">Reason: {doc.rejectionReason}</span>}
                   </div>
+                  {doc.bioData && (
+                    <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-muted">
+                      <span>{doc.bioData.firstName} {doc.bioData.middleName} {doc.bioData.lastName}</span>
+                      {doc.bioData.phone && <span>· {doc.bioData.phone}</span>}
+                      {doc.bioData.email && <span>· {doc.bioData.email}</span>}
+                    </div>
+                  )}
                   {(doc.frontImage || doc.backImage) && (
                     <div className="mt-3 flex gap-3">
                       {doc.frontImage && (isPdf(doc.frontImage) ? <PdfViewer url={doc.frontImage} compact /> : <img src={doc.frontImage} alt="" className="h-14 w-20 rounded object-cover" />)}
