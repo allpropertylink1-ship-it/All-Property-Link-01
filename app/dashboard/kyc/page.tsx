@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, FileText, Trash2 } from "lucide-react"
+import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import ImageCropper from "@/components/kyc/ImageCropper"
 import PdfViewer from "@/components/kyc/PdfViewer"
@@ -144,8 +144,8 @@ export default function KycPage() {
       if (!results || results.length === 0) throw new Error("Upload failed")
       if (results.some(r => !r.url)) throw new Error("One or more uploads failed")
 
-      const frontUrl_ = results[0].url!
-      const backUrl_ = backFile ? results[1]?.url! : ""
+      const frontUrl_ = results[0]!.url!
+      const backUrl_ = backFile ? results[1]!.url! : ""
 
       const body: Record<string, string> = {
         documentType: docType,
