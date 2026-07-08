@@ -20,7 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const links = [
-  { href: "/dashboard", label: "Dashboard", icon: Home },
+  { href: "/dashboard", label: "Complete Your Profile", icon: Home },
   { href: "/dashboard/listings", label: "My Listings", icon: Building2 },
   { href: "/dashboard/favorites", label: "Favorites", icon: Heart },
   { href: "/dashboard/inquiries", label: "Inquiries", icon: MessageSquare },

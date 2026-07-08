@@ -95,7 +95,7 @@ export function ProfileButton() {
               />
               <path d="M3.5 11.5l1.25 1.25a.75.75 0 001.06 0l5.69-5.69a.75.75 0 010 1.06l-5.69 5.69a.75.75 0 01-1.06 0L3.5 12.56V15a.5.5 0 00.5.5h9a.5.5 0 00.5-.5V8a.75.75 0 011.5 0v7a2 2 0 01-2 2H4a2 2 0 01-2-2v-2.5z" />
             </svg>
-            Dashboard
+            Complete Your Profile
           </Link>
 
           <Link
