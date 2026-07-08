@@ -14,6 +14,7 @@ interface User {
   kycStatus?: string
   accountStatus?: string
   isAgent?: boolean
+  aplAgentId?: string
   companyName?: string
 }
 

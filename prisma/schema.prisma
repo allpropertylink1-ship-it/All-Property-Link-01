@@ -117,6 +117,9 @@ model User {
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
 
+  aplAgent         AplAgent?  @relation(fields: [aplAgentId], references: [id], onDelete: SetNull)
+  aplAgentId       String?
+
   properties       Property[]
   savedSearches    SavedSearch[]
   inquiries        Inquiry[]
@@ -130,6 +133,20 @@ model User {
   kycDocuments     KycDocument[]
 
   @@map("users")
+}
+
+model AplAgent {
+  id        String   @id @default(uuid())
+  fullName  String
+  email     String   @unique
+  phone     String
+  agentCode String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users User[]
+
+  @@map("apl_agents")
 }
 
 model KycDocument {

@@ -87,6 +87,41 @@ export default function KycPage() {
   const [bioLastName, setBioLastName] = useState("")
   const [bioPhone, setBioPhone] = useState("")
   const [bioEmail, setBioEmail] = useState("")
+  const [agentCode, setAgentCode] = useState("")
+  const [aplAgentId, setAplAgentId] = useState<string | null>(null)
+  const [agentName, setAgentName] = useState<string | null>(null)
+  const [agentPhone, setAgentPhone] = useState<string | null>(null)
+  const [agentConfirmed, setAgentConfirmed] = useState(false)
+  const [agentLookupLoading, setAgentLookupLoading] = useState(false)
+  const [agentLookupError, setAgentLookupError] = useState("")
+
+  const handleAgentLookup = async () => {
+    if (!agentCode.trim()) return
+    setAgentLookupLoading(true)
+    setAgentLookupError("")
+    setAgentName(null)
+    setAgentPhone(null)
+    setAplAgentId(null)
+    setAgentConfirmed(false)
+    try {
+      const res = await fetch("/api/apl-agents/lookup", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agentCode: agentCode.trim().toUpperCase() }),
+      })
+      const result = await res.json()
+      if (!res.ok || !result.agent) {
+        setAgentLookupError(result.error || "Invalid code")
+        return
+      }
+      setAplAgentId(result.agent.id)
+      setAgentName(result.agent.fullName)
+      setAgentPhone(result.agent.phone)
+    } catch {
+      setAgentLookupError("Failed to look up code. Try again.")
+    } finally {
+      setAgentLookupLoading(false)
+    }
+  }
 
   const uploadFiles = async (files: File[]): Promise<{ url: string }[]> => {
     const signRes = await fetch("/api/uploadthing/sign", {
@@ -187,6 +222,7 @@ export default function KycPage() {
         },
       }
       if (backUrl_) body.backImage = backUrl_
+      if (aplAgentId && agentConfirmed) body.aplAgentId = aplAgentId
 
       const res = coreDoc?.status === "REJECTED"
         ? await fetch(`/api/user/kyc/${coreDoc.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
@@ -197,6 +233,7 @@ export default function KycPage() {
       setMessage({ type: "success", text: "Document submitted" })
       setDocNumber(""); setFrontFile(null); setBackFile(null); setFrontUrl(""); setBackUrl(""); setCropping(null)
       setBioFirstName(""); setBioMiddleName(""); setBioLastName(""); setBioPhone(""); setBioEmail("")
+      setAgentCode(""); setAplAgentId(null); setAgentName(null); setAgentPhone(null); setAgentConfirmed(false)
       fetchKyc()
     } catch (err) {
       setMessage({ type: "error", text: err instanceof Error ? err.message : "Something went wrong" })
@@ -279,6 +316,37 @@ export default function KycPage() {
                   className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
               </div>
             </div>
+          </div>
+
+          <div className="rounded-xl border border-border bg-surface p-6">
+            <h2 className="mb-4 text-lg font-semibold text-foreground">
+              Agent Code <span className="text-sm font-normal text-muted">(Optional — fill if an APL Agent introduced you to the platform)</span>
+            </h2>
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="flex-1 min-w-[200px]">
+                <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="agentCode">Agent Code</label>
+                <input id="agentCode" value={agentCode} onChange={e => setAgentCode(e.target.value.toUpperCase())} placeholder="e.g. APL-JOE-001-07/26"
+                  className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm uppercase font-mono focus:outline-none focus:ring-2 focus:ring-primary/50" />
+              </div>
+              <button type="button" onClick={handleAgentLookup} disabled={agentLookupLoading || !agentCode.trim()}
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-50">
+                {agentLookupLoading ? <Loader2 size={16} className="animate-spin" /> : null}
+                Look Up
+              </button>
+            </div>
+            {agentLookupError && <p className="mt-2 text-sm text-red-500">{agentLookupError}</p>}
+            {agentName && (
+              <div className="mt-3 rounded-lg border border-green-200 bg-green-50 p-4">
+                <p className="text-sm font-medium text-green-800">Agent Found</p>
+                <p className="mt-1 text-sm text-green-700"><strong>Name:</strong> {agentName}</p>
+                <p className="text-sm text-green-700"><strong>Phone:</strong> {agentPhone}</p>
+                <label className="mt-3 flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox" checked={agentConfirmed} onChange={e => setAgentConfirmed(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                  <span className="text-sm text-green-700">I confirm that this is the APL Agent who introduced me to All Property Link</span>
+                </label>
+              </div>
+            )}
           </div>
 
           <div className="rounded-xl border border-border bg-surface p-6">
