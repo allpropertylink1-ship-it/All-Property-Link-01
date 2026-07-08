@@ -1,6 +1,6 @@
 "use client"
 
-import { Upload, Loader2, X, FileText, ImageIcon } from "lucide-react"
+import { Upload, Loader2, X, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface UploadZoneProps {

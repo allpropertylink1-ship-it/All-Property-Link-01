@@ -1,9 +1,5 @@
 "use client"
 
-import { useState } from "react"
-import { Shield, CheckCircle, XCircle, Clock } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { resolvePdfUrl } from "@/lib/pdf-utils"
 import UploadZone from "./UploadZone"
 import ImageCropper from "./ImageCropper"
 import PdfViewer from "./PdfViewer"
@@ -23,7 +19,7 @@ interface CoreDocumentFormProps {
   onDocumentTypeChange: (value: string) => void
   onDocumentNumberChange: (value: string) => void
   onHandleFileSelect: (e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") => void
-  onHandleCropComplete: (croppedBlob: Blob) => void
+  onHandleCropComplete: (croppedBlob: Blob) => Promise<void>
   onHandleCropCancel: () => void
   onRemoveCoreImage: (side: "front" | "back") => void
   aspectRatios: Record<string, number>
@@ -152,9 +148,7 @@ export default function CoreDocumentForm({
           {cropImageUrl && croppingFor && (
             <ImageCropper
               imageUrl={cropImageUrl}
-              aspectRatio={croppingFor === "additional" && cropDocType
-                ? (aspectRatios[cropDocType] || 1.42)
-                : aspectRatios[documentType]}
+              aspectRatio={aspectRatios[documentType]}
               onCropComplete={onHandleCropComplete}
               onCancel={onHandleCropCancel}
               sideLabel={

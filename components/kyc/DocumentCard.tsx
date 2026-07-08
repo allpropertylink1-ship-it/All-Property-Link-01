@@ -1,6 +1,6 @@
 "use client"
 
-import { Trash2, Loader2, FileText, ImageIcon } from "lucide-react"
+import { Trash2, Loader2, FileText, ImageIcon, CheckCircle, XCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { resolvePdfUrl } from "@/lib/pdf-utils"
 
@@ -71,7 +71,7 @@ export default function DocumentCard({
   onDeleteCancel,
   onDelete,
 }: DocumentCardProps) {
-  const isCore = coreTypes.includes(doc.documentType as any)
+  const isCore = coreTypes.includes(doc.documentType)
   const isRejected = doc.status === "REJECTED"
   const showDelete = isRejected && deleteConfirm !== doc.id
   const showConfirm = deleteConfirm === doc.id
