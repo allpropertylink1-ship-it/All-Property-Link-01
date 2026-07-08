@@ -89,11 +89,25 @@ export default function KycPage() {
   const [bioEmail, setBioEmail] = useState("")
 
   const uploadFiles = async (files: File[]): Promise<{ url: string }[]> => {
-    const formData = new FormData()
-    files.forEach(f => formData.append("files", f))
-    const res = await fetch("https://delightful-encouragement-production-878d.up.railway.app/api/uploadthing", { method: "POST", body: formData })
-    if (!res.ok) throw new Error("Upload failed")
-    return res.json()
+    const base = "https://delightful-encouragement-production-878d.up.railway.app"
+    const signRes = await fetch(`${base}/api/uploadthing/sign`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ folder: "allpropertylink/kyc" }),
+    })
+    if (!signRes.ok) throw new Error("Failed to get upload signature")
+    const { signature, timestamp, apiKey, cloudName } = await signRes.json()
+    return Promise.all(files.map(async (file) => {
+      const fd = new FormData()
+      fd.append("file", file)
+      fd.append("api_key", apiKey)
+      fd.append("timestamp", String(timestamp))
+      fd.append("signature", signature)
+      fd.append("folder", "allpropertylink/kyc")
+      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${file.type === "application/pdf" ? "raw" : "image"}/upload`, { method: "POST", body: fd })
+      if (!uploadRes.ok) throw new Error("Cloudinary upload failed")
+      const result = await uploadRes.json()
+      return { url: result.secure_url, publicId: result.public_id }
+    }))
   }
 
   const fetchKyc = useCallback(async () => {

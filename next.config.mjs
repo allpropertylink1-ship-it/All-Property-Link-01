@@ -35,7 +35,7 @@ const nextConfig = {
           { key: "Cross-Origin-Opener-Policy", value: "unsafe-none" },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://accounts.google.com; img-src 'self' data: blob: https://res.cloudinary.com https://uploadthing.com https://utfs.io; font-src 'self' data:; connect-src 'self' https://delightful-encouragement-production-878d.up.railway.app https://uploadthing.com; frame-src 'self' https://accounts.google.com; object-src 'none'",
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://accounts.google.com; img-src 'self' data: blob: https://res.cloudinary.com; font-src 'self' data:; connect-src 'self' https://delightful-encouragement-production-878d.up.railway.app https://api.cloudinary.com; frame-src 'self' https://accounts.google.com; object-src 'none'",
           },
         ],
       },
