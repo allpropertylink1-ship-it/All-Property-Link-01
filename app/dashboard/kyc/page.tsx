@@ -89,8 +89,7 @@ export default function KycPage() {
   const [bioEmail, setBioEmail] = useState("")
 
   const uploadFiles = async (files: File[]): Promise<{ url: string }[]> => {
-    const base = "https://delightful-encouragement-production-878d.up.railway.app"
-    const signRes = await fetch(`${base}/api/uploadthing/sign`, {
+    const signRes = await fetch("/api/uploadthing/sign", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ folder: "allpropertylink/kyc" }),
     })
