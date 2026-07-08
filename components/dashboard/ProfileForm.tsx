@@ -122,12 +122,12 @@ export function ProfileForm({ user }: ProfileFormProps) {
     }
   }
 
-  async function handleDeleteAccount(password: string) {
+  async function handleDeleteAccount(confirmText: string) {
     try {
       const res = await fetch("/api/user/account", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ confirmText }),
       });
 
       if (!res.ok) {
@@ -388,16 +388,17 @@ export function ProfileForm({ user }: ProfileFormProps) {
           title="Delete account"
           description={
             <div className="space-y-3">
-              <p>This will permanently delete your account and all associated data. This cannot be undone.</p>
-              <p className="text-sm text-text-secondary">Enter your password to confirm:</p>
+              <p>This will permanently delete your account, listings, KYC documents, and all associated data. This cannot be undone.</p>
+              <p className="text-sm text-text-secondary">Type <strong>delete-account</strong> to confirm:</p>
             </div>
           }
           confirmLabel="Delete my account"
           confirmVariant="destructive"
           requiresInput
-          inputLabel="Password"
-          inputPlaceholder="Enter your password"
-          inputType="password"
+          requiredInputValue="delete-account"
+          inputLabel="Confirmation"
+          inputPlaceholder="Type delete-account"
+          inputType="text"
           onConfirmWithInput={handleDeleteAccount}
         />
       </div>

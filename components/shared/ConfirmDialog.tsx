@@ -23,6 +23,7 @@ interface ConfirmDialogProps {
   confirmVariant?: "destructive" | "default";
   onConfirm?: () => void;
   requiresInput?: boolean;
+  requiredInputValue?: string;
   inputLabel?: string;
   inputPlaceholder?: string;
   inputType?: string;
@@ -37,6 +38,7 @@ export function ConfirmDialog({
   confirmVariant = "default",
   onConfirm,
   requiresInput,
+  requiredInputValue,
   inputLabel = "Type to confirm",
   inputPlaceholder = "",
   inputType = "text",
@@ -81,7 +83,7 @@ export function ConfirmDialog({
           <AlertDialogAction
             variant={confirmVariant === "destructive" ? "destructive" : "default"}
             onClick={handleConfirm}
-            disabled={requiresInput && !inputValue.trim()}
+            disabled={requiresInput && (requiredInputValue ? inputValue !== requiredInputValue : !inputValue.trim())}
           >
             {confirmLabel}
           </AlertDialogAction>
