@@ -26,7 +26,7 @@ function loadGoogleScript(): Promise<void> {
   })
 }
 
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "1053793884191-kv89kqiehqonbsc6072uom61a4nchqtf.apps.googleusercontent.com"
 
 export function GoogleSignInButton({ onSuccess, onError, mode = "signin" }: GoogleSignInButtonProps) {
   const [ready, setReady] = useState(false)
