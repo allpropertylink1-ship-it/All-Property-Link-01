@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, FileText, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useUploadThing } from "@/lib/uploadthing"
 import ImageCropper from "@/components/kyc/ImageCropper"
 import PdfViewer from "@/components/kyc/PdfViewer"
 
@@ -93,7 +92,13 @@ export default function KycPage() {
   const [additional, setAdditional] = useState<Record<string, { number: string; file: File | null; url: string }>>({})
   const [addCropping, setAddCropping] = useState<string | null>(null)
 
-  const { startUpload } = useUploadThing("kycDocument")
+  const uploadFiles = async (files: File[]): Promise<{ url: string }[]> => {
+    const formData = new FormData()
+    files.forEach(f => formData.append("files", f))
+    const res = await fetch("/api/uploadthing", { method: "POST", body: formData })
+    if (!res.ok) throw new Error("Upload failed")
+    return res.json()
+  }
 
   const fetchKyc = useCallback(async () => {
     try {
@@ -168,7 +173,7 @@ export default function KycPage() {
       })
       addUploads.forEach(({ file }) => uploads.push(file))
 
-      const results = await startUpload(uploads)
+      const results = await uploadFiles(uploads)
       if (!results || results.length === 0) throw new Error("Upload failed")
       if (results.some(r => !r.url)) throw new Error("One or more uploads failed")
 
