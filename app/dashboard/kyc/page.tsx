@@ -280,7 +280,7 @@ export default function KycPage() {
           <div className="min-w-0 flex-1">
             <h1 className="text-xl font-bold text-foreground">
               Identity Verification (KYC)
-              <span className="ml-3"><Badge status={kycStatus} /></span>
+              {kycStatus !== "VERIFIED" && <span className="ml-3"><Badge status={kycStatus} /></span>}
             </h1>
             <p className={cn("mt-1 text-sm", statusConfig.color)}>
               {coreRejection ? <>Your documents were not approved. Reason: <strong>{coreRejection}</strong></> : STATUS[kycStatus]?.label === "Not Verified" ? "Verify your identity to unlock all features." : kycStatus === "PENDING" ? "Your documents are being reviewed." : "Your identity has been verified."}
@@ -450,14 +450,6 @@ export default function KycPage() {
             {submitting ? "Submitting..." : "Submit for Verification"}
           </button>
         </form>
-      )}
-
-      {kycStatus === "VERIFIED" && (
-        <div className="mt-8 rounded-xl border border-green-200 bg-green-50 p-8 text-center">
-          <CheckCircle size={48} className="mx-auto text-green-500" />
-          <h2 className="mt-3 text-xl font-bold text-green-800">Identity Verified</h2>
-          <p className="mt-1 text-sm text-green-700">All platform features are now available.</p>
-        </div>
       )}
 
       <div className="mt-8 rounded-xl border border-border bg-surface">
