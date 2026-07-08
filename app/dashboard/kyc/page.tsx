@@ -92,7 +92,7 @@ export default function KycPage() {
   const [agentName, setAgentName] = useState<string | null>(null)
   const [agentPhone, setAgentPhone] = useState<string | null>(null)
   const [agentConfirmed, setAgentConfirmed] = useState(false)
-  const [agentCodeState, setAgentCodeState] = useState<"idle" | "found" | "confirmed">("idle")
+  const [agentCodeState, setAgentCodeState] = useState<"idle" | "confirmed">("idle")
   const [agentLookupLoading, setAgentLookupLoading] = useState(false)
   const [agentLookupError, setAgentLookupError] = useState("")
 
@@ -106,7 +106,7 @@ export default function KycPage() {
     setAgentLookupError("")
   }, [])
 
-  const handleAgentLookup = async () => {
+  const handleRevealAgent = async () => {
     if (!agentCode.trim()) return
     setAgentLookupLoading(true)
     setAgentLookupError("")
@@ -128,18 +128,12 @@ export default function KycPage() {
       setAplAgentId(result.agent.id)
       setAgentName(result.agent.fullName)
       setAgentPhone(result.agent.phone)
-      setAgentCodeState("found")
+      setAgentConfirmed(true)
+      setAgentCodeState("confirmed")
     } catch {
       setAgentLookupError("Failed to look up code. Try again.")
     } finally {
       setAgentLookupLoading(false)
-    }
-  }
-
-  const handleConfirmAgent = () => {
-    if (aplAgentId) {
-      setAgentConfirmed(true)
-      setAgentCodeState("confirmed")
     }
   }
 
@@ -358,40 +352,20 @@ export default function KycPage() {
                 </button>
               </div>
             ) : (
-              <>
-                <div className="flex flex-wrap items-end gap-3">
-                  <div className="flex-1 min-w-[200px]">
-                    <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="agentCode">Agent Code</label>
-                    <input id="agentCode" value={agentCode} onChange={e => setAgentCode(e.target.value.toUpperCase())} placeholder="e.g. APL-JOE-001-07/26"
-                      className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm uppercase font-mono focus:outline-none focus:ring-2 focus:ring-primary/50" />
-                  </div>
-                  <button type="button" onClick={handleAgentLookup} disabled={agentLookupLoading || !agentCode.trim()}
-                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-50">
-                    {agentLookupLoading ? <Loader2 size={16} className="animate-spin" /> : null}
-                    Look Up
-                  </button>
+              <div className="flex flex-wrap items-end gap-3">
+                <div className="flex-1 min-w-[200px]">
+                  <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="agentCode">Agent Code</label>
+                  <input id="agentCode" value={agentCode} onChange={e => setAgentCode(e.target.value.toUpperCase())} placeholder="e.g. APL-JOE-001-07/26"
+                    className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm uppercase font-mono focus:outline-none focus:ring-2 focus:ring-primary/50" />
                 </div>
-                {agentLookupError && <p className="mt-2 text-sm text-red-500">{agentLookupError}</p>}
-                {agentCodeState === "found" && agentName && (
-                  <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-4">
-                    <p className="text-sm font-medium text-foreground">Agent Found</p>
-                    <p className="mt-1 text-sm text-muted"><strong>Name:</strong> {agentName}</p>
-                    <p className="text-sm text-muted"><strong>Phone:</strong> {agentPhone}</p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <button type="button" onClick={handleConfirmAgent}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90">
-                        <CheckCircle size={16} />
-                        Confirm Agent
-                      </button>
-                      <button type="button" onClick={resetAgentCode}
-                        className="rounded-lg border border-input px-4 py-2 text-sm font-medium text-muted transition-colors hover:bg-background">
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </>
+                <button type="button" onClick={handleRevealAgent} disabled={agentLookupLoading || !agentCode.trim()}
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-50">
+                  {agentLookupLoading ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                  {agentLookupLoading ? "Revealing..." : "Reveal Agent"}
+                </button>
+              </div>
             )}
+            {agentLookupError && <p className="mt-2 text-sm text-red-500">{agentLookupError}</p>}
           </div>
 
           <div className="rounded-xl border border-border bg-surface p-6">
