@@ -17,8 +17,8 @@ export default async function AdminDashboard() {
     recentProperties,
     recentInquiries,
   ] = await Promise.all([
-    prisma.user.count(),
-    prisma.user.count({ where: { role: "AGENT" } }),
+    prisma.user.count({ where: { deletedAt: null } }),
+    prisma.aplAgent.count(),
     prisma.property.count({ where: { deletedAt: null } }),
     prisma.property.count({ where: { moderationStatus: "PENDING_REVIEW", deletedAt: null } }),
     prisma.inquiry.count(),
@@ -40,7 +40,7 @@ export default async function AdminDashboard() {
 
   const stats = [
     { label: "Total Users", value: totalUsers, icon: "Users" },
-    { label: "Agents", value: totalAgents, icon: "Agen" },
+    { label: "APL Agents", value: totalAgents, icon: "Agen" },
     { label: "Properties", value: totalProperties, icon: "Prop" },
     { label: "Pending Approval", value: pendingProperties, icon: "Pend" },
     { label: "Pending Approval", value: pendingApprovals, icon: "Appr" },
