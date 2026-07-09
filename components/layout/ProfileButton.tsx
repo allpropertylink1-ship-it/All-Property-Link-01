@@ -95,7 +95,7 @@ export function ProfileButton() {
               />
               <path d="M3.5 11.5l1.25 1.25a.75.75 0 001.06 0l5.69-5.69a.75.75 0 010 1.06l-5.69 5.69a.75.75 0 01-1.06 0L3.5 12.56V15a.5.5 0 00.5.5h9a.5.5 0 00.5-.5V8a.75.75 0 011.5 0v7a2 2 0 01-2 2H4a2 2 0 01-2-2v-2.5z" />
             </svg>
-            Complete Your Profile
+            Business Profile
           </Link>
 
           <Link
@@ -106,7 +106,7 @@ export function ProfileButton() {
             <svg className="h-4 w-4 text-accent-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
             </svg>
-            My Profile
+            Personal Profile
           </Link>
 
           <div className="border-t border-border" />

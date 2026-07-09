@@ -89,14 +89,14 @@ export function MobileMenu() {
                 onClick={() => setOpen(false)}
                 className="text-sm font-medium text-accent-300 transition-colors hover:text-accent-400"
               >
-                Complete Your Profile
+                Business Profile
               </Link>
               <Link
                 href="/dashboard/profile"
                 onClick={() => setOpen(false)}
                 className="text-sm font-medium text-accent-300 transition-colors hover:text-accent-400"
               >
-                My Profile
+                Personal Profile
               </Link>
               <button
                 type="button"
