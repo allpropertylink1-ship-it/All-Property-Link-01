@@ -29,12 +29,13 @@ export default function PropertyImageUploader({
   const [entries, setEntries] = useState<ImageEntry[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const pendingRef = useRef<ImageEntry[]>([]);
 
-  async function uploadFile(file: File, folder: string): Promise<string> {
+  async function uploadOne(file: File, folder: string): Promise<string> {
     const signRes = await api.post<{ signature: string; timestamp: number; apiKey: string; cloudName: string }>("/api/uploadthing/sign", { folder });
-    if (signRes.error || !signRes.data) throw new Error(signRes.error || "Failed to get upload signature");
+    if (signRes.error) throw new Error("Sign: " + signRes.error);
+    if (!signRes.data) throw new Error("Sign: empty response");
     const { signature, timestamp, apiKey, cloudName } = signRes.data;
+    if (!cloudName) throw new Error("Cloudinary not configured on server");
     const fd = new FormData();
     fd.append("file", file);
     fd.append("api_key", apiKey);
@@ -42,8 +43,12 @@ export default function PropertyImageUploader({
     fd.append("signature", signature);
     fd.append("folder", folder);
     const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: fd });
-    if (!uploadRes.ok) throw new Error("Upload failed");
+    if (!uploadRes.ok) {
+      const text = await uploadRes.text().catch(() => "");
+      throw new Error(`Cloudinary ${uploadRes.status}: ${text.slice(0, 200)}`);
+    }
     const result = await uploadRes.json();
+    if (!result?.secure_url) throw new Error("Cloudinary: no secure_url in response");
     return result.secure_url;
   }
 
@@ -71,31 +76,36 @@ export default function PropertyImageUploader({
       setUploading(true);
 
       const newEntries: ImageEntry[] = files.map((f) => ({ preview: URL.createObjectURL(f), url: null }));
-      pendingRef.current = newEntries;
       setEntries((prev) => [...prev, ...newEntries]);
 
-      try {
-        const promises = files.map((f) => uploadFile(f, "allpropertylink/property-listings"));
-        const results = await Promise.all(promises);
-        setEntries((prev) => {
-          const copy = [...prev];
-          let resultIdx = 0;
-          for (let i = copy.length - newEntries.length; i < copy.length && resultIdx < results.length; i++) {
-            copy[i] = { ...copy[i], url: results[resultIdx++] };
-          }
-          return copy;
-        });
-        onUploadComplete(results);
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : "Upload failed";
-        setError(msg);
-        onUploadError?.(msg);
-        setEntries((prev) => prev.slice(0, -newEntries.length));
-      } finally {
-        setUploading(false);
-        pendingRef.current = [];
-        e.target.value = "";
+      const urls: string[] = [];
+      let failed = false;
+
+      for (let fi = 0; fi < files.length; fi++) {
+        try {
+          const url = await uploadOne(files[fi], "allpropertylink/property-listings");
+          urls.push(url);
+          setEntries((prev) => {
+            const copy = [...prev];
+            const idx = copy.length - files.length + fi;
+            if (idx >= 0 && idx < copy.length) copy[idx] = { ...copy[idx], url };
+            return copy;
+          });
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          setError(`${files[fi].name}: ${msg}`);
+          onUploadError?.(msg);
+          failed = true;
+          break;
+        }
       }
+
+      if (!failed && urls.length > 0) {
+        onUploadComplete(urls);
+      }
+
+      setUploading(false);
+      e.target.value = "";
     },
     [multiple, maxFiles, entries.length, onUploadComplete, onUploadError]
   );

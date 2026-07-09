@@ -37,15 +37,22 @@ export function ListingForm() {
 
   async function onSubmit(data: ListingFormData) {
     setError("");
+    if (imageUrls.length === 0) {
+      setError("Please upload at least one image");
+      return;
+    }
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) formData.append(key, String(value));
     });
-    if (imageUrls.length > 0) {
-      formData.append("images", JSON.stringify(imageUrls));
+    formData.append("images", JSON.stringify(imageUrls));
+    try {
+      const result = await createProperty(formData);
+      if (result?.error) { setError(result.error); return }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create listing");
+      return;
     }
-    const result = await createProperty(formData);
-    if (result?.error) { setError(result.error); return }
     router.push("/dashboard/listings");
   }
 
