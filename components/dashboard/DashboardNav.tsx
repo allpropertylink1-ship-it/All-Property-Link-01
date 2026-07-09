@@ -132,7 +132,7 @@ export function DashboardNav() {
           <NavGroup links={primary} section="primary" />
           <NavGroup links={secondary} section="secondary" />
           <NavGroup links={tertiary} section="tertiary" />
-          {user?.aplAgentId && <NavGroup links={agentLinks} section="primary" />}
+          {user?.isAgent && <NavGroup links={agentLinks} section="primary" />}
         </nav>
 
         <div className="border-t border-border p-3">

@@ -70,14 +70,14 @@ export default function AgentDashboardPage() {
   }, [])
 
   useEffect(() => {
-    if (user && !user.aplAgentId) {
+    if (user && !user.isAgent) {
       setLoading(false)
       return
     }
     fetchDashboard()
   }, [user, fetchDashboard])
 
-  if (!user || !user.aplAgentId) {
+  if (!user || !user.isAgent) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="max-w-md text-center">

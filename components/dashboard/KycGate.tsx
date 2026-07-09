@@ -7,12 +7,14 @@ import { Shield, ShieldX, Clock } from "lucide-react"
 interface KycGateProps {
   children: React.ReactNode
   kycStatus: string | null | undefined
+  isAgent?: boolean
 }
 
-export function KycGate({ children, kycStatus }: KycGateProps) {
+export function KycGate({ children, kycStatus, isAgent }: KycGateProps) {
   const pathname = usePathname()
   const isKycPage = pathname === "/dashboard/kyc" || pathname.startsWith("/dashboard/kyc/")
 
+  if (isAgent) return <>{children}</>
   if (kycStatus === "VERIFIED") return <>{children}</>
   if (isKycPage) return <>{children}</>
 

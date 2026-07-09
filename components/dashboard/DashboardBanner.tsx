@@ -5,9 +5,11 @@ interface DashboardBannerProps {
   accountStatus: string;
   onboardingComplete: boolean;
   kycStatus: string;
+  isAgent?: boolean;
 }
 
-export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus }: DashboardBannerProps) {
+export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, isAgent }: DashboardBannerProps) {
+  if (isAgent) return null;
   if (accountStatus === "ACTIVE" && (kycStatus === "VERIFIED" || kycStatus === "PENDING")) return null;
 
   if (kycStatus === "NONE" || kycStatus === "REJECTED") {
