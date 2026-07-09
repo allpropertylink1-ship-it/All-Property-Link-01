@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Camera, Save, Key, Trash2, Shield, CheckCircle, Clock, XCircle, Image, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ImageCropper from "@/components/kyc/ImageCropper";
 
 interface ProfileFormProps {
   user: {
@@ -41,6 +42,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passportUploading, setPassportUploading] = useState(false);
   const [passportPhotoUrl, setPassportPhotoUrl] = useState(user.passportPhoto || "");
+  const [passportFile, setPassportFile] = useState<File | null>(null);
+  const [cropping, setCropping] = useState(false);
 
   useEffect(() => {
     if (user.passportPhoto === undefined) {
@@ -56,7 +59,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
     }
   }, [user.passportPhoto]);
 
-  async function handlePassportUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  function handlePassportSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
@@ -65,9 +68,16 @@ export function ProfileForm({ user }: ProfileFormProps) {
     if (file.size > 10 * 1024 * 1024) {
       setMessage({ type: "error", text: "File must be under 10MB" }); return;
     }
-    setPassportUploading(true);
     setMessage(null);
+    setPassportFile(file);
+    setCropping(true);
+  }
+
+  async function handleCropComplete(blob: Blob) {
+    setCropping(false);
+    setPassportUploading(true);
     try {
+      const file = new File([blob], "passport.jpg", { type: "image/jpeg" });
       const signRes = await fetch("/api/uploadthing/sign", {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -86,10 +96,11 @@ export function ProfileForm({ user }: ProfileFormProps) {
       const result = await uploadRes.json();
       const url = result.secure_url;
       setPassportPhotoUrl(url);
+      setPassportFile(null);
       const patchRes = await fetch("/api/user/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ passportPhoto: url }),
+        body: JSON.stringify({ passportPhoto: url, avatar: url }),
       });
       if (!patchRes.ok) {
         const err = await patchRes.json();
@@ -235,10 +246,14 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
       <div className="flex items-center gap-6">
         <div className="relative">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-50 text-2xl font-bold text-primary-600">
-            {user.firstName[0]}
-            {user.lastName[0]}
-          </div>
+          {passportPhotoUrl ? (
+            <img src={passportPhotoUrl} alt="" className="h-20 w-20 rounded-full object-cover ring-2 ring-primary/20" />
+          ) : (
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-50 text-2xl font-bold text-primary-600">
+              {user.firstName[0]}
+              {user.lastName[0]}
+            </div>
+          )}
           <div className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-primary-600 text-white shadow">
             <Camera size={14} />
           </div>
@@ -272,7 +287,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
               ) : (
                 <><Camera size={14} /> {passportPhotoUrl ? "Change" : "Upload"}</>
               )}
-              <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handlePassportUpload} className="hidden" disabled={passportUploading} />
+              <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handlePassportSelect} className="hidden" disabled={passportUploading} />
             </label>
             {passportPhotoUrl && (
               <p className="mt-1 text-xs text-text-secondary">JPG or PNG, max 10MB</p>
@@ -280,6 +295,15 @@ export function ProfileForm({ user }: ProfileFormProps) {
           </div>
         </div>
       </div>
+
+      {cropping && passportFile && (
+        <ImageCropper
+          imageUrl={URL.createObjectURL(passportFile)}
+          onCropComplete={handleCropComplete}
+          onCancel={() => { setCropping(false); setPassportFile(null); }}
+          sideLabel="Passport Photo"
+        />
+      )}
 
       <form onSubmit={handleProfileSubmit} className="space-y-6">
         <h3 className="font-heading text-lg font-semibold text-text-primary">
