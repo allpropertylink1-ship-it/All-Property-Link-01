@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ interface ProfileFormProps {
     email: string | null;
     phone: string | null;
     avatar: string | null;
-    passportPhoto: string | null;
+    passportPhoto?: string | null;
     location: string | null;
     address: string | null;
     city: string | null;
@@ -41,6 +41,20 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passportUploading, setPassportUploading] = useState(false);
   const [passportPhotoUrl, setPassportPhotoUrl] = useState(user.passportPhoto || "");
+
+  useEffect(() => {
+    if (user.passportPhoto === undefined) {
+      (async () => {
+        try {
+          const res = await fetch("/api/user/profile", { credentials: "include" });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.user?.passportPhoto) setPassportPhotoUrl(data.user.passportPhoto);
+          }
+        } catch {}
+      })();
+    }
+  }, [user.passportPhoto]);
 
   async function handlePassportUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
