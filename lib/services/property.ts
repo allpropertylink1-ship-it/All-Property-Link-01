@@ -91,10 +91,20 @@ export async function getProperties(filters: PropertyFilters = {}) {
 export async function getPropertyBySlug(slug: string) {
   const property = await prisma.property.findFirst({
     where: { slug, deletedAt: null },
-    include: { agent: { select: { firstName: true, lastName: true, phone: true, email: true, avatar: true, businessLogo: true, companyName: true, category: true, specialties: true, website: true } } },
+    include: { agent: { select: { firstName: true, lastName: true, phone: true, email: true, avatar: true, businessLogo: true, companyName: true, category: true, specialties: true, website: true, id: true } } },
   });
   if (!property) return null;
   return { ...property, price: Number(property.price) };
+}
+
+export async function getOtherPropertiesByAgent(agentId: string, currentPropertyId: string) {
+  const properties = await prisma.property.findMany({
+    where: { agentId, id: { not: currentPropertyId }, deletedAt: null },
+    take: 6,
+    orderBy: { createdAt: "desc" },
+    select: { id: true, title: true, slug: true, price: true, city: true, currency: true, images: true },
+  });
+  return properties.map(p => ({ ...p, price: Number(p.price) }));
 }
 
 export async function getCities() {
