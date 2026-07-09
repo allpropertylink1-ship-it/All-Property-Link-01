@@ -149,24 +149,28 @@ export default async function PropertyDetailPage({ params }: Props) {
                 )}
               </div>
             )}
+            {property.agent?.phone && (
+              <div className="mt-3">
+                <WhatsAppContact phone={property.agent.phone} title={property.title} />
+              </div>
+            )}
+            {property.agent?.email && (
+              <a
+                href={`mailto:${property.agent.email}`}
+                className="mt-2 flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700"
+              >
+                {property.agent.email}
+              </a>
+            )}
             {property.agent?.website && (
               <a
                 href={property.agent.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-3 flex items-center gap-1.5 text-xs text-primary-600 hover:text-primary-700"
+                className="mt-2 flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700"
               >
                 {property.agent.website.replace(/^https?:\/\//, "")}
               </a>
-            )}
-            <a
-              href={`/contact?property=${encodeURIComponent(property.title)}`}
-              className="touch-target mt-4 flex w-full items-center justify-center rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-text-on-primary hover:bg-primary-700"
-            >
-              Send inquiry
-            </a>
-            {property.agent?.phone && (
-              <WhatsAppContact phone={property.agent.phone} title={property.title} />
             )}
           </div>
         </div>

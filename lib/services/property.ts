@@ -91,7 +91,7 @@ export async function getProperties(filters: PropertyFilters = {}) {
 export async function getPropertyBySlug(slug: string) {
   const property = await prisma.property.findFirst({
     where: { slug, deletedAt: null },
-    include: { agent: { select: { firstName: true, lastName: true, phone: true, avatar: true, companyName: true, category: true, specialties: true, website: true } } },
+    include: { agent: { select: { firstName: true, lastName: true, phone: true, email: true, avatar: true, companyName: true, category: true, specialties: true, website: true } } },
   });
   if (!property) return null;
   return { ...property, price: Number(property.price) };
