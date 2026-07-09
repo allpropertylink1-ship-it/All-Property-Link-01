@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2, Check, Save } from "lucide-react"
+import { Loader2, Check, Save, Camera, Image, Building2, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
 
@@ -123,6 +123,11 @@ export default function BusinessProfilePage() {
     estateSubLocation: "",
   })
 
+  const [avatarUrl, setAvatarUrl] = useState("")
+  const [businessLogoUrl, setBusinessLogoUrl] = useState("")
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const [logoUploading, setLogoUploading] = useState(false)
+
   useEffect(() => {
     ;(async () => {
       const res = await api.get<{
@@ -134,6 +139,8 @@ export default function BusinessProfilePage() {
           website: string | null
           location: string | null
           estateSubLocation: string | null
+          avatar: string | null
+          businessLogo: string | null
         }
       }>("/api/user/profile")
       if (res.data?.user) {
@@ -147,10 +154,70 @@ export default function BusinessProfilePage() {
           location: u.location || "",
           estateSubLocation: u.estateSubLocation || "",
         })
+        setAvatarUrl(u.avatar || "")
+        setBusinessLogoUrl(u.businessLogo || "")
       }
       setFetching(false)
     })()
   }, [])
+
+  async function uploadFile(file: File, folder: string): Promise<string> {
+    const signRes = await fetch("/api/uploadthing/sign", {
+      method: "POST", credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ folder }),
+    })
+    if (!signRes.ok) throw new Error("Failed to get upload signature")
+    const { signature, timestamp, apiKey, cloudName } = await signRes.json()
+    const fd = new FormData()
+    fd.append("file", file)
+    fd.append("api_key", apiKey)
+    fd.append("timestamp", String(timestamp))
+    fd.append("signature", signature)
+    fd.append("folder", folder)
+    const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: fd })
+    if (!uploadRes.ok) throw new Error("Upload failed")
+    const result = await uploadRes.json()
+    return result.secure_url
+  }
+
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith("image/")) { setError("Only image files are allowed"); return }
+    if (file.size > 10 * 1024 * 1024) { setError("File must be under 10MB"); return }
+    setAvatarUploading(true)
+    setError("")
+    try {
+      const url = await uploadFile(file, "allpropertylink/avatars")
+      setAvatarUrl(url)
+      const res = await api.patch("/api/user/profile", { avatar: url })
+      if (res.error) throw new Error(res.error)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed")
+    } finally {
+      setAvatarUploading(false)
+    }
+  }
+
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith("image/")) { setError("Only image files are allowed"); return }
+    if (file.size > 10 * 1024 * 1024) { setError("File must be under 10MB"); return }
+    setLogoUploading(true)
+    setError("")
+    try {
+      const url = await uploadFile(file, "allpropertylink/logos")
+      setBusinessLogoUrl(url)
+      const res = await api.patch("/api/user/profile", { businessLogo: url })
+      if (res.error) throw new Error(res.error)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed")
+    } finally {
+      setLogoUploading(false)
+    }
+  }
 
   function toggleSpecialty(value: string) {
     setForm((prev) => ({
@@ -172,12 +239,9 @@ export default function BusinessProfilePage() {
     setLoading(true)
     setError("")
     setSuccess(false)
-
     try {
       const res = await api.patch("/api/user/profile", form)
-      if (res.error) {
-        throw new Error(res.error)
-      }
+      if (res.error) throw new Error(res.error)
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
@@ -204,7 +268,14 @@ export default function BusinessProfilePage() {
       <div className="mb-8">
         <h1 className="font-heading text-2xl font-bold text-text-primary">Business Profile</h1>
         <p className="mt-1 text-sm text-text-secondary">
-          View and update your business information at any time.
+          View and update your business information.
+        </p>
+      </div>
+
+      <div className="mb-6 rounded-lg border border-primary-200 bg-primary-50/50 px-4 py-3 text-sm text-primary-800">
+        <p className="font-medium">Public Information</p>
+        <p className="mt-1 text-primary-600">
+          Information entered here will be visible to all All Property Link users viewing your profile, listings, and services.
         </p>
       </div>
 
@@ -220,6 +291,57 @@ export default function BusinessProfilePage() {
       )}
 
       <div className="space-y-6 rounded-xl border border-border bg-surface p-6">
+
+        <div className="flex items-center gap-6">
+          <div className="relative">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="h-20 w-20 rounded-full object-cover ring-2 ring-primary/20" />
+            ) : (
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-50 text-2xl font-bold text-primary-600">
+                <User size={28} />
+              </div>
+            )}
+          </div>
+          <div className="flex-1">
+            <h3 className="font-heading text-sm font-semibold text-text-primary">Profile Photo</h3>
+            <p className="text-xs text-text-secondary">This photo appears on your public profile</p>
+            <label className="mt-2 touch-target inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700">
+              {avatarUploading ? (
+                <><Loader2 size={14} className="animate-spin" /> Uploading...</>
+              ) : (
+                <><Camera size={14} /> {avatarUrl ? "Change" : "Upload"}</>
+              )}
+              <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handleAvatarUpload} className="hidden" disabled={avatarUploading} />
+            </label>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6">
+          <div className="relative">
+            {businessLogoUrl ? (
+              <img src={businessLogoUrl} alt="" className="h-20 w-20 rounded-xl object-cover ring-2 ring-primary/20" />
+            ) : (
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-primary-50">
+                <Building2 size={28} className="text-primary-400" />
+              </div>
+            )}
+          </div>
+          <div className="flex-1">
+            <h3 className="font-heading text-sm font-semibold text-text-primary">Business Logo</h3>
+            <p className="text-xs text-text-secondary">This logo appears alongside your listings and services</p>
+            <label className="mt-2 touch-target inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700">
+              {logoUploading ? (
+                <><Loader2 size={14} className="animate-spin" /> Uploading...</>
+              ) : (
+                <><Camera size={14} /> {businessLogoUrl ? "Change" : "Upload"}</>
+              )}
+              <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handleLogoUpload} className="hidden" disabled={logoUploading} />
+            </label>
+          </div>
+        </div>
+
+        <hr className="border-border" />
+
         <div className="space-y-2">
           <label className="block text-sm font-medium text-text-primary">Full name / Company Name</label>
           <input
