@@ -141,11 +141,10 @@ export default function KycPage() {
       if (file.type === "application/pdf") {
         const fd = new FormData()
         fd.append("file", file)
-        fd.append("folder", "allpropertylink/kyc")
-        const res = await fetch("/api/upload", { method: "POST", credentials: "include", body: fd })
+        const res = await fetch("/api/upload/pdf", { method: "POST", credentials: "include", body: fd })
         if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Upload failed") }
         const result = await res.json()
-        return { url: result.url, publicId: result.public_id }
+        return { url: result.url }
       }
       const signRes = await api.post<{ signature: string; timestamp: number; apiKey: string; cloudName: string }>("/api/uploadthing/sign", { folder: "allpropertylink/kyc" })
       if (!signRes.data) throw new Error(signRes.error || "Failed to get upload signature")
