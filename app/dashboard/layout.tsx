@@ -21,7 +21,7 @@ export default async function DashboardLayout({
     <div className="flex min-h-[calc(100vh-4rem)]">
       <DashboardNav />
       <main className="flex-1 bg-surface-secondary">
-        {user && <DashboardBanner accountStatus={user.accountStatus} onboardingComplete={user.onboardingComplete} />}
+        {user && <DashboardBanner accountStatus={user.accountStatus} onboardingComplete={user.onboardingComplete} kycStatus={user.kycStatus} />}
         <KycGate kycStatus={user?.kycStatus}>
           <div className="p-6 lg:p-8">
             <div className="mx-auto max-w-7xl">{children}</div>
