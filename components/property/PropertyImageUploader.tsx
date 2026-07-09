@@ -2,7 +2,6 @@
 
 import { useState, useCallback, ChangeEvent } from "react";
 import { Upload, Loader2, X } from "lucide-react";
-import { uploadImageToCloudinary } from "@/lib/actions/upload";
 
 interface ImageEntry {
   preview: string;
@@ -62,11 +61,20 @@ export default function PropertyImageUploader({
             reader.readAsDataURL(file);
           });
 
-          const result = await uploadImageToCloudinary(base64, file.type, "allpropertylink/property-listings");
-          if (!result.success) throw new Error(result.error);
+          const res = await fetch("/api/upload/base64", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ base64, mime: file.type, folder: "allpropertylink/property-listings" }),
+          });
+          if (!res.ok) {
+            const errBody = await res.json().catch(() => ({ error: "Upload failed" }));
+            throw new Error(errBody.error || `HTTP ${res.status}`);
+          }
+          const data = await res.json();
 
-          urls.push(result.url);
-          setEntries((prev) => [...prev, { preview, url: result.url }]);
+          urls.push(data.url);
+          setEntries((prev) => [...prev, { preview, url: data.url }]);
         } catch (err) {
           const msg = err instanceof Error ? err.message : "Upload failed";
           setError(`${file.name}: ${msg}`);
