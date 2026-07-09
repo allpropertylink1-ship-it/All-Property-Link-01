@@ -9,6 +9,7 @@ interface PropertyImageUploaderProps {
   onUploadError?: (error: string) => void;
   onRemoveImage?: (url: string) => void;
   maxFiles?: number;
+  initialUrls?: string[];
 }
 
 export default function PropertyImageUploader({
@@ -16,8 +17,11 @@ export default function PropertyImageUploader({
   onUploadError,
   onRemoveImage,
   maxFiles = 10,
+  initialUrls,
 }: PropertyImageUploaderProps) {
-  const [entries, setEntries] = useState<Array<{ preview: string; url: string }>>([]);
+  const [entries, setEntries] = useState<Array<{ preview: string; url: string }>>(
+    () => initialUrls?.map((url) => ({ preview: url, url })) || []
+  );
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);

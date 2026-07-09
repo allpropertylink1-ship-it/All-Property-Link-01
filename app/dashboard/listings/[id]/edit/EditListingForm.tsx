@@ -159,6 +159,7 @@ export default function EditListingForm({ propertyId, property }: { propertyId: 
           onUploadError={handleImageUploadError}
           onRemoveImage={handleRemoveImage}
           maxFiles={10}
+          initialUrls={property.images}
         />
       </div>
       <div className="flex items-center gap-4 pt-2">
