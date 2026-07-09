@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useId } from "react";
 import { Upload, Loader2, X } from "lucide-react";
 import { api } from "@/lib/api-client";
 
@@ -21,6 +21,7 @@ export default function PropertyImageUploader({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId();
 
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,7 +117,7 @@ export default function PropertyImageUploader({
 
       <input
         ref={inputRef}
-        id="image-upload-input"
+        id={inputId}
         type="file"
         multiple
         accept="image/jpeg,image/png,image/webp"
@@ -125,9 +126,9 @@ export default function PropertyImageUploader({
         disabled={uploading}
       />
 
-      <div
-        onClick={() => inputRef.current?.click()}
-        className="cursor-pointer border-2 border-dashed rounded-lg bg-surface-secondary p-6 text-center hover:border-primary-500 transition-border"
+      <label
+        htmlFor={inputId}
+        className="block cursor-pointer border-2 border-dashed rounded-lg bg-surface-secondary p-6 text-center hover:border-primary-500 transition-border"
       >
         <div className="flex flex-col items-center gap-3 pointer-events-none">
           {uploading ? (
@@ -139,7 +140,7 @@ export default function PropertyImageUploader({
             {uploading ? "Uploading..." : "Click to upload"}
           </span>
         </div>
-      </div>
+      </label>
 
       {entries.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-3">
