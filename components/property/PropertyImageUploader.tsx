@@ -119,32 +119,39 @@ export default function PropertyImageUploader({
         <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{error}</div>
       )}
 
-      <input
-        ref={inputRef}
-        id={inputId}
-        type="file"
-        multiple
-        accept="image/jpeg,image/png,image/webp"
-        className="hidden"
-        onChange={handleFileChange}
-        disabled={uploading}
-      />
-
-      <label
-        htmlFor={inputId}
-        className="block cursor-pointer border-2 border-dashed rounded-lg bg-surface-secondary p-6 text-center hover:border-primary-500 transition-border"
-      >
-        <div className="flex flex-col items-center gap-3 pointer-events-none">
-          {uploading ? (
-            <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
-          ) : (
-            <Upload className="h-8 w-8 text-primary-500" />
-          )}
-          <span className="text-sm text-text-primary">
-            {uploading ? "Uploading..." : "Click to upload"}
-          </span>
+      {entries.length < maxFiles ? (
+        <>
+          <input
+            ref={inputRef}
+            id={inputId}
+            type="file"
+            multiple
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={handleFileChange}
+            disabled={uploading}
+          />
+          <label
+            htmlFor={inputId}
+            className="block cursor-pointer border-2 border-dashed rounded-lg bg-surface-secondary p-6 text-center hover:border-primary-500 transition-border"
+          >
+            <div className="flex flex-col items-center gap-3 pointer-events-none">
+              {uploading ? (
+                <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+              ) : (
+                <Upload className="h-8 w-8 text-primary-500" />
+              )}
+              <span className="text-sm text-text-primary">
+                {uploading ? "Uploading..." : "Click to upload"}
+              </span>
+            </div>
+          </label>
+        </>
+      ) : (
+        <div className="rounded-lg bg-surface-secondary px-4 py-3 text-sm text-text-secondary text-center">
+          Maximum {maxFiles} images reached. Remove some to upload more.
         </div>
-      </label>
+      )}
 
       {entries.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-3">
