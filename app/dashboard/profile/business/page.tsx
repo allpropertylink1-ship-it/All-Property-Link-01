@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Loader2, Check, Save, Camera, Image, Building2, User } from "lucide-react"
+import { Check, Loader2, Save, Camera, User, Building2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
 
@@ -107,7 +106,6 @@ const specialtiesService = [
 ]
 
 export default function BusinessProfilePage() {
-  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
   const [error, setError] = useState("")
@@ -123,7 +121,7 @@ export default function BusinessProfilePage() {
     estateSubLocation: "",
   })
 
-  const [avatarUrl, setAvatarUrl] = useState("")
+  const [businessProfilePhotoUrl, setBusinessProfilePhotoUrl] = useState("")
   const [businessLogoUrl, setBusinessLogoUrl] = useState("")
   const [avatarUploading, setAvatarUploading] = useState(false)
   const [logoUploading, setLogoUploading] = useState(false)
@@ -141,6 +139,7 @@ export default function BusinessProfilePage() {
           estateSubLocation: string | null
           avatar: string | null
           businessLogo: string | null
+          businessProfilePhoto: string | null
         }
       }>("/api/user/profile")
       if (res.data?.user) {
@@ -154,7 +153,7 @@ export default function BusinessProfilePage() {
           location: u.location || "",
           estateSubLocation: u.estateSubLocation || "",
         })
-        setAvatarUrl(u.avatar || "")
+        setBusinessProfilePhotoUrl(u.businessProfilePhoto || "")
         setBusinessLogoUrl(u.businessLogo || "")
       }
       setFetching(false)
@@ -162,13 +161,9 @@ export default function BusinessProfilePage() {
   }, [])
 
   async function uploadFile(file: File, folder: string): Promise<string> {
-    const signRes = await fetch("/api/uploadthing/sign", {
-      method: "POST", credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ folder }),
-    })
-    if (!signRes.ok) throw new Error("Failed to get upload signature")
-    const { signature, timestamp, apiKey, cloudName } = await signRes.json()
+    const signRes = await api.post<{ signature: string; timestamp: number; apiKey: string; cloudName: string }>("/api/uploadthing/sign", { folder })
+    if (signRes.error || !signRes.data) throw new Error(signRes.error || "Failed to get upload signature")
+    const { signature, timestamp, apiKey, cloudName } = signRes.data
     const fd = new FormData()
     fd.append("file", file)
     fd.append("api_key", apiKey)
@@ -181,7 +176,7 @@ export default function BusinessProfilePage() {
     return result.secure_url
   }
 
-  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleBusinessProfilePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith("image/")) { setError("Only image files are allowed"); return }
@@ -189,9 +184,9 @@ export default function BusinessProfilePage() {
     setAvatarUploading(true)
     setError("")
     try {
-      const url = await uploadFile(file, "allpropertylink/avatars")
-      setAvatarUrl(url)
-      const res = await api.patch("/api/user/profile", { avatar: url })
+      const url = await uploadFile(file, "allpropertylink/business-profiles")
+      setBusinessProfilePhotoUrl(url)
+      const res = await api.patch("/api/user/profile", { businessProfilePhoto: url })
       if (res.error) throw new Error(res.error)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed")
@@ -292,79 +287,85 @@ export default function BusinessProfilePage() {
 
       <div className="space-y-6 rounded-xl border border-border bg-surface p-6">
 
-        <div className="flex items-center gap-6">
-          <div className="relative">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="" className="h-20 w-20 rounded-full object-cover ring-2 ring-primary/20" />
-            ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-50 text-2xl font-bold text-primary-600">
-                <User size={28} />
-              </div>
-            )}
-          </div>
-          <div className="flex-1">
-            <h3 className="font-heading text-sm font-semibold text-text-primary">Profile Photo</h3>
-            <p className="text-xs text-text-secondary">This photo appears on your public profile</p>
-            <label className="mt-2 touch-target inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700">
-              {avatarUploading ? (
-                <><Loader2 size={14} className="animate-spin" /> Uploading...</>
-              ) : (
-                <><Camera size={14} /> {avatarUrl ? "Change" : "Upload"}</>
-              )}
-              <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handleAvatarUpload} className="hidden" disabled={avatarUploading} />
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-text-primary">
+              Full name / Company Name <span className="text-error-500">*</span>
             </label>
+            <input
+              type="text"
+              value={form.companyName}
+              onChange={(e) => updateField("companyName", e.target.value)}
+              placeholder="Your full name or company name"
+              className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            />
+          </div>
+
+          <div className="flex items-center gap-4 justify-self-end">
+            <div className="text-right flex-1">
+              <h3 className="font-heading text-sm font-semibold text-text-primary">Business Logo</h3>
+              <p className="text-xs text-text-secondary">Appears on your listings & services</p>
+              <label className="mt-2 touch-target inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700">
+                {logoUploading ? (
+                  <><Loader2 size={14} className="animate-spin" /> Uploading...</>
+                ) : (
+                  <><Camera size={14} /> {businessLogoUrl ? "Change" : "Upload"}</>
+                )}
+                <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handleLogoUpload} className="hidden" disabled={logoUploading} />
+              </label>
+            </div>
+            <div className="shrink-0">
+              {businessLogoUrl ? (
+                <img src={businessLogoUrl} alt="Logo" className="h-28 w-28 rounded-xl object-cover ring-2 ring-primary/20" />
+              ) : (
+                <div className="flex h-28 w-28 items-center justify-center rounded-xl bg-primary-50 ring-2 ring-primary/10">
+                  <Building2 size={40} className="text-primary-400" />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="relative">
-            {businessLogoUrl ? (
-              <img src={businessLogoUrl} alt="" className="h-20 w-20 rounded-xl object-cover ring-2 ring-primary/20" />
-            ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-primary-50">
-                <Building2 size={28} className="text-primary-400" />
-              </div>
-            )}
-          </div>
-          <div className="flex-1">
-            <h3 className="font-heading text-sm font-semibold text-text-primary">Business Logo</h3>
-            <p className="text-xs text-text-secondary">This logo appears alongside your listings and services</p>
-            <label className="mt-2 touch-target inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700">
-              {logoUploading ? (
-                <><Loader2 size={14} className="animate-spin" /> Uploading...</>
-              ) : (
-                <><Camera size={14} /> {businessLogoUrl ? "Change" : "Upload"}</>
-              )}
-              <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handleLogoUpload} className="hidden" disabled={logoUploading} />
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-text-primary">
+              Contact Person <span className="text-error-500">*</span>
             </label>
+            <input
+              type="text"
+              value={form.contactPerson}
+              onChange={(e) => updateField("contactPerson", e.target.value)}
+              placeholder="Contact person name"
+              className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            />
+          </div>
+
+          <div className="flex items-center gap-4 justify-self-end">
+            <div className="text-right flex-1">
+              <h3 className="font-heading text-sm font-semibold text-text-primary">Profile Photo</h3>
+              <p className="text-xs text-text-secondary">This photo appears on your public profile</p>
+              <label className="mt-2 touch-target inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700">
+                {avatarUploading ? (
+                  <><Loader2 size={14} className="animate-spin" /> Uploading...</>
+                ) : (
+                  <><Camera size={14} /> {businessProfilePhotoUrl ? "Change" : "Upload"}</>
+                )}
+                <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handleBusinessProfilePhotoUpload} className="hidden" disabled={avatarUploading} />
+              </label>
+            </div>
+            <div className="shrink-0">
+              {businessProfilePhotoUrl ? (
+                <img src={businessProfilePhotoUrl} alt="" className="h-20 w-20 rounded-full object-cover ring-2 ring-primary/20" />
+              ) : (
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-50 text-2xl font-bold text-primary-600">
+                  <User size={28} />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         <hr className="border-border" />
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-text-primary">Full name / Company Name</label>
-          <input
-            type="text"
-            value={form.companyName}
-            onChange={(e) => updateField("companyName", e.target.value)}
-            placeholder="Your full name or company name"
-            className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-text-primary">
-            Contact Person <span className="text-error-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={form.contactPerson}
-            onChange={(e) => updateField("contactPerson", e.target.value)}
-            placeholder="Contact person name"
-            className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-          />
-        </div>
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-text-primary">

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Camera, Save, Key, Trash2, Shield, CheckCircle, Clock, XCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/api-client";
 import ImageCropper from "@/components/kyc/ImageCropper";
 
 interface ProfileFormProps {
@@ -61,13 +62,9 @@ export function ProfileForm({ user }: ProfileFormProps) {
     setPassportUploading(true);
     try {
       const file = new File([blob], "passport.jpg", { type: "image/jpeg" });
-      const signRes = await fetch("/api/uploadthing/sign", {
-        method: "POST", credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ folder: "allpropertylink/profiles" }),
-      });
-      if (!signRes.ok) throw new Error("Failed to get upload signature");
-      const { signature, timestamp, apiKey, cloudName } = await signRes.json();
+      const signRes = await api.post<{ signature: string; timestamp: number; apiKey: string; cloudName: string }>("/api/uploadthing/sign", { folder: "allpropertylink/profiles" });
+      if (signRes.error || !signRes.data) throw new Error(signRes.error || "Failed to get upload signature");
+      const { signature, timestamp, apiKey, cloudName } = signRes.data;
       const fd = new FormData();
       fd.append("file", file);
       fd.append("api_key", apiKey);
