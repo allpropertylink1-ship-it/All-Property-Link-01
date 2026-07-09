@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getPropertyBySlug } from "@/lib/services/property";
-import { WhatsAppShare, WhatsAppContact } from "@/components/shared/WhatsAppShare";
+import { WhatsAppShare } from "@/components/shared/WhatsAppShare";
+import { Building2, Phone, Mail, Globe, Sparkles, MessageCircle } from "lucide-react";
 
 interface Props {
   params: { slug: string };
@@ -123,56 +124,98 @@ export default async function PropertyDetailPage({ params }: Props) {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-xl border border-border bg-surface p-6">
-            <h3 className="font-heading text-lg font-semibold text-text-primary">
-              Lister
-            </h3>
-            {property.agent && (
-              <div className="mt-2 space-y-2">
-                <p className="text-sm font-medium text-text-primary">
-                  {property.agent.firstName} {property.agent.lastName}
-                </p>
-                {property.agent.companyName && (
-                  <p className="text-xs text-text-secondary">{property.agent.companyName}</p>
-                )}
+          {property.agent && (
+            <>
+              {/* Business Profile */}
+              <div className="rounded-xl border border-border bg-surface p-6">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
+                    <Building2 size={20} className="text-primary-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading text-base font-semibold text-text-primary">
+                      {property.agent.companyName || `${property.agent.firstName} ${property.agent.lastName}`}
+                    </h3>
+                    {property.agent.companyName && (
+                      <p className="text-xs text-text-secondary">
+                        {property.agent.firstName} {property.agent.lastName}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
                 {property.agent.category && (
-                  <p className="text-xs text-text-secondary">{property.agent.category}</p>
-                )}
-                {property.agent.specialties?.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {property.agent.specialties.map((s: string, i: number) => (
-                      <span key={i} className="rounded-full bg-surface-secondary px-2 py-0.5 text-xs text-text-secondary">
-                        {s}
-                      </span>
-                    ))}
+                  <div className="mb-3">
+                    <span className="inline-flex items-center rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-700">
+                      {property.agent.category}
+                    </span>
                   </div>
                 )}
+
+                {property.agent.specialties?.length > 0 && (
+                  <div className="mb-3">
+                    <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-text-secondary">Specialties</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {property.agent.specialties.map((s: string, i: number) => (
+                        <span key={i} className="inline-flex items-center gap-1 rounded-full bg-surface-secondary px-2.5 py-1 text-xs text-text-secondary">
+                          <Sparkles size={10} />
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {property.agent.website && (
+                  <a
+                    href={property.agent.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700"
+                  >
+                    <Globe size={14} />
+                    {property.agent.website.replace(/^https?:\/\//, "")}
+                  </a>
+                )}
               </div>
-            )}
-            {property.agent?.phone && (
-              <div className="mt-3">
-                <WhatsAppContact phone={property.agent.phone} title={property.title} />
+
+              {/* Contact Actions */}
+              <div className="rounded-xl border border-border bg-surface p-6">
+                <h3 className="mb-4 font-heading text-base font-semibold text-text-primary">Contact</h3>
+                <div className="space-y-3">
+                  {property.agent.phone && (
+                    <>
+                      <a
+                        href={`https://wa.me/${property.agent.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="touch-target flex w-full items-center justify-center gap-2.5 rounded-lg bg-[#25D366] px-4 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[#1ebe5c]"
+                      >
+                        <MessageCircle size={18} />
+                        WhatsApp
+                      </a>
+                      <a
+                        href={`tel:${property.agent.phone}`}
+                        className="touch-target flex w-full items-center justify-center gap-2.5 rounded-lg border border-border bg-surface px-4 py-3.5 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
+                      >
+                        <Phone size={18} />
+                        {property.agent.phone}
+                      </a>
+                    </>
+                  )}
+                  {property.agent.email && (
+                    <a
+                      href={`mailto:${property.agent.email}`}
+                      className="touch-target flex w-full items-center justify-center gap-2.5 rounded-lg border border-border bg-surface px-4 py-3.5 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
+                    >
+                      <Mail size={18} />
+                      {property.agent.email}
+                    </a>
+                  )}
+                </div>
               </div>
-            )}
-            {property.agent?.email && (
-              <a
-                href={`mailto:${property.agent.email}`}
-                className="mt-2 flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700"
-              >
-                {property.agent.email}
-              </a>
-            )}
-            {property.agent?.website && (
-              <a
-                href={property.agent.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700"
-              >
-                {property.agent.website.replace(/^https?:\/\//, "")}
-              </a>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>
