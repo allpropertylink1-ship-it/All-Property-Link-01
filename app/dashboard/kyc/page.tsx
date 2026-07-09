@@ -377,7 +377,7 @@ export default function KycPage() {
 
           <div className="rounded-xl border border-border bg-surface p-6">
             <h2 className="mb-4 text-lg font-semibold text-foreground">
-              Agent Code <span className="text-sm font-normal text-muted">(Optional — fill if an APL Agent introduced you to the platform)</span>
+              Agent Code <span className="text-sm font-normal text-muted">(Optional — fill if an APL Representative introduced you to the platform)</span>
             </h2>
 
             {agentCodeState === "confirmed" ? (

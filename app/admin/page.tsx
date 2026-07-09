@@ -40,7 +40,7 @@ export default async function AdminDashboard() {
 
   const stats = [
     { label: "Total Users", value: totalUsers, icon: "Users" },
-    { label: "APL Agents", value: totalAgents, icon: "Agen" },
+    { label: "APL Representatives", value: totalAgents, icon: "Agen" },
     { label: "Properties", value: totalProperties, icon: "Prop" },
     { label: "Pending Approval", value: pendingProperties, icon: "Pend" },
     { label: "Pending Approval", value: pendingApprovals, icon: "Appr" },
