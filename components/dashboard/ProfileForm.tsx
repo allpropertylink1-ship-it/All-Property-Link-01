@@ -107,7 +107,6 @@ export function ProfileForm({ user }: ProfileFormProps) {
         throw new Error(err.error || "Failed to save");
       }
       setMessage({ type: "success", text: "Passport photo updated" });
-      router.refresh();
     } catch (err) {
       setMessage({ type: "error", text: err instanceof Error ? err.message : "Upload failed" });
     } finally {
