@@ -30,10 +30,6 @@ const LABELS: Record<string, string> = {
   NATIONAL_ID: "National ID Card", DRIVERS_LICENSE: "Driver's License", PASSPORT: "Passport",
 }
 
-const ASPECTS: Record<string, number> = {
-  NATIONAL_ID: 85.6 / 54, DRIVERS_LICENSE: 85.6 / 54, PASSPORT: 125 / 88,
-}
-
 const CORE_TYPES = ["NATIONAL_ID", "DRIVERS_LICENSE", "PASSPORT"]
 
 const STATUS: Record<string, { label: string; icon: React.ElementType; color: string; bg: string; border: string }> = {
@@ -433,7 +429,7 @@ export default function KycPage() {
                 {frontFile ? (
                   <div className="space-y-2">
                     {cropping === "front" && frontFile ? (
-                      <ImageCropper imageUrl={previewUrl(frontFile)!} aspectRatio={ASPECTS[docType]} onCropComplete={handleCropComplete} onCancel={() => setCropping(null)} sideLabel="Front" />
+                      <ImageCropper imageUrl={previewUrl(frontFile)!} onCropComplete={handleCropComplete} onCancel={() => setCropping(null)} sideLabel="Front" />
                     ) : (
                       <>
                         <FilePreview url={previewUrl(frontFile)!} onRemove={() => { setFrontFile(null); URL.revokeObjectURL(previewUrl(frontFile)!) }} />
@@ -459,7 +455,7 @@ export default function KycPage() {
                 {backFile ? (
                   <div className="space-y-2">
                     {cropping === "back" && backFile ? (
-                      <ImageCropper imageUrl={previewUrl(backFile)!} aspectRatio={ASPECTS[docType]} onCropComplete={handleCropComplete} onCancel={() => setCropping(null)} sideLabel="Back" />
+                      <ImageCropper imageUrl={previewUrl(backFile)!} onCropComplete={handleCropComplete} onCancel={() => setCropping(null)} sideLabel="Back" />
                     ) : (
                       <>
                         <FilePreview url={previewUrl(backFile)!} onRemove={() => { setBackFile(null); URL.revokeObjectURL(previewUrl(backFile)!) }} />
