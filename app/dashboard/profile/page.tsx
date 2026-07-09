@@ -15,6 +15,7 @@ export default async function ProfilePage() {
       email: true,
       phone: true,
       avatar: true,
+      passportPhoto: true,
       location: true,
       address: true,
       city: true,

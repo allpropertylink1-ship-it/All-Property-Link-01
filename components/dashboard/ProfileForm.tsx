@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { Camera, Save, Key, Trash2, Shield, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Camera, Save, Key, Trash2, Shield, CheckCircle, Clock, XCircle, Image, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ProfileFormProps {
@@ -18,6 +18,7 @@ interface ProfileFormProps {
     email: string | null;
     phone: string | null;
     avatar: string | null;
+    passportPhoto: string | null;
     location: string | null;
     address: string | null;
     city: string | null;
@@ -38,6 +39,56 @@ export function ProfileForm({ user }: ProfileFormProps) {
     text: string;
   } | null>(null);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passportUploading, setPassportUploading] = useState(false);
+  const [passportPhotoUrl, setPassportPhotoUrl] = useState(user.passportPhoto || "");
+
+  async function handlePassportUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setMessage({ type: "error", text: "Only image files are allowed" }); return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setMessage({ type: "error", text: "File must be under 10MB" }); return;
+    }
+    setPassportUploading(true);
+    setMessage(null);
+    try {
+      const signRes = await fetch("/api/uploadthing/sign", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ folder: "allpropertylink/profiles" }),
+      });
+      if (!signRes.ok) throw new Error("Failed to get upload signature");
+      const { signature, timestamp, apiKey, cloudName } = await signRes.json();
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("api_key", apiKey);
+      fd.append("timestamp", String(timestamp));
+      fd.append("signature", signature);
+      fd.append("folder", "allpropertylink/profiles");
+      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: fd });
+      if (!uploadRes.ok) throw new Error("Upload failed");
+      const result = await uploadRes.json();
+      const url = result.secure_url;
+      setPassportPhotoUrl(url);
+      const patchRes = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ passportPhoto: url }),
+      });
+      if (!patchRes.ok) {
+        const err = await patchRes.json();
+        throw new Error(err.error || "Failed to save");
+      }
+      setMessage({ type: "success", text: "Passport photo updated" });
+      router.refresh();
+    } catch (err) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Upload failed" });
+    } finally {
+      setPassportUploading(false);
+    }
+  }
 
   async function handleProfileSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -186,6 +237,32 @@ export function ProfileForm({ user }: ProfileFormProps) {
           <div className="mt-1 flex items-center gap-2">
             <kyc.icon size={14} className={kyc.color} />
             <span className={cn("text-xs", kyc.color)}>KYC: {kyc.label}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-border bg-surface-secondary p-4">
+        <h3 className="mb-3 font-heading text-sm font-semibold text-text-primary">Passport Photo</h3>
+        <div className="flex items-center gap-4">
+          {passportPhotoUrl ? (
+            <img src={passportPhotoUrl} alt="Passport" className="h-16 w-16 rounded-full object-cover ring-2 ring-primary/20" />
+          ) : (
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-50">
+              <Image size={24} className="text-primary-400" />
+            </div>
+          )}
+          <div className="flex-1">
+            <label className="touch-target inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700">
+              {passportUploading ? (
+                <><Loader2 size={14} className="animate-spin" /> Uploading...</>
+              ) : (
+                <><Camera size={14} /> {passportPhotoUrl ? "Change" : "Upload"}</>
+              )}
+              <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handlePassportUpload} className="hidden" disabled={passportUploading} />
+            </label>
+            {passportPhotoUrl && (
+              <p className="mt-1 text-xs text-text-secondary">JPG or PNG, max 10MB</p>
+            )}
           </div>
         </div>
       </div>
