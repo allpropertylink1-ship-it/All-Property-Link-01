@@ -137,17 +137,26 @@ export default function KycPage() {
   }
 
   const uploadFiles = async (files: File[]): Promise<{ url: string }[]> => {
-    const signRes = await api.post<{ signature: string; timestamp: number; apiKey: string; cloudName: string }>("/api/uploadthing/sign", { folder: "allpropertylink/kyc" })
-    if (!signRes.data) throw new Error(signRes.error || "Failed to get upload signature")
-    const { signature, timestamp, apiKey, cloudName } = signRes.data
     return Promise.all(files.map(async (file) => {
+      if (file.type === "application/pdf") {
+        const fd = new FormData()
+        fd.append("file", file)
+        fd.append("folder", "allpropertylink/kyc")
+        const res = await fetch("/api/upload", { method: "POST", credentials: "include", body: fd })
+        if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Upload failed") }
+        const result = await res.json()
+        return { url: result.url, publicId: result.public_id }
+      }
+      const signRes = await api.post<{ signature: string; timestamp: number; apiKey: string; cloudName: string }>("/api/uploadthing/sign", { folder: "allpropertylink/kyc" })
+      if (!signRes.data) throw new Error(signRes.error || "Failed to get upload signature")
+      const { signature, timestamp, apiKey, cloudName } = signRes.data
       const fd = new FormData()
       fd.append("file", file)
       fd.append("api_key", apiKey)
       fd.append("timestamp", String(timestamp))
       fd.append("signature", signature)
       fd.append("folder", "allpropertylink/kyc")
-      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${file.type === "application/pdf" ? "raw" : "image"}/upload`, { method: "POST", body: fd })
+      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: fd })
       if (!uploadRes.ok) throw new Error("Cloudinary upload failed")
       const result = await uploadRes.json()
       return { url: result.secure_url, publicId: result.public_id }
