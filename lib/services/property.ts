@@ -69,7 +69,7 @@ export async function getProperties(filters: PropertyFilters = {}) {
 
   if (filters.city) where.city = filters.city;
   if (filters.propertyType) where.propertyType = filters.propertyType as Prisma.EnumPropertyTypeFilter["equals"];
-  if (filters.bedrooms) where.bedrooms = filters.bedrooms;
+  if (filters.bedrooms) where.bedrooms = { gte: filters.bedrooms };
   if (filters.minPrice || filters.maxPrice) {
     where.price = {};
     if (filters.minPrice) where.price.gte = filters.minPrice;
@@ -92,7 +92,7 @@ export async function getProperties(filters: PropertyFilters = {}) {
       take: pageSize,
       select: {
         id: true, slug: true, title: true, price: true, currency: true,
-        propertyType: true, city: true, region: true, bedrooms: true,
+        propertyType: true, status: true, city: true, region: true, bedrooms: true,
         bathrooms: true, area: true, images: true, isFeatured: true, createdAt: true,
       },
     }),
@@ -100,15 +100,15 @@ export async function getProperties(filters: PropertyFilters = {}) {
   ]);
 
   return {
-    properties: properties.map((p) => ({ ...p, price: Number(p.price) })),
+    properties: properties.map(({ status: _, ...p }) => ({ ...p, price: Number(p.price), isRent: _ === "RENTED" })),
     total, page, pageSize,
     totalPages: Math.ceil(total / pageSize),
   };
 }
 
 export async function getPropertyBySlug(slug: string) {
-  const property = await prisma.property.findUnique({
-    where: { slug, deletedAt: null },
+  const property = await prisma.property.findFirst({
+    where: { slug, moderationStatus: "APPROVED", isPublished: true, deletedAt: null },
     include: { agent: { select: { firstName: true, lastName: true, phone: true, avatar: true } } },
   });
   if (!property) return null;

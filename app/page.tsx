@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
 const categories = [
   {
@@ -32,44 +33,22 @@ const categories = [
   },
 ];
 
-const featuredProperties = [
-  {
-    title: "Modern 3-Bedroom Apartment",
-    location: "Westlands, Nairobi",
-    price: "KSh 15,000,000",
-    badge: "Sale",
-    urgency: "Hot Deal",
-    verified: true,
-    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&q=80",
-  },
-  {
-    title: "Spacious 4-Bedroom Villa",
-    location: "Runda, Nairobi",
-    price: "KSh 45,000,000",
-    badge: "Sale",
-    urgency: null,
-    verified: true,
-    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80",
-  },
-  {
-    title: "Cozy 2-Bedroom Furnished Unit",
-    location: "Kilimani, Nairobi",
-    price: "KSh 85,000/mo",
-    badge: "Rent",
-    urgency: "New",
-    verified: true,
-    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&q=80",
-  },
-  {
-    title: "Commercial Space on Mombasa Road",
-    location: "Mombasa Road, Nairobi",
-    price: "KSh 120,000/mo",
-    badge: "Rent",
-    urgency: null,
-    verified: false,
-    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80",
-  },
-];
+function formatPrice(price: number, currency: string) {
+  return `${currency} ${price.toLocaleString()}`;
+}
+
+async function getFeaturedProperties() {
+  return prisma.property.findMany({
+    where: { moderationStatus: "APPROVED", isPublished: true, deletedAt: null },
+    orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
+    take: 4,
+    select: {
+      slug: true, title: true, price: true, currency: true,
+      propertyType: true, status: true, city: true, region: true,
+      images: true, isFeatured: true, createdAt: true,
+    },
+  });
+}
 
 function SearchIcon({ className }: { className?: string }) {
   return (
@@ -168,7 +147,12 @@ function WrenchIcon({ className }: { className?: string }) {
   );
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [featuredProperties, propertyCount, cityCount] = await Promise.all([
+    getFeaturedProperties(),
+    prisma.property.count({ where: { moderationStatus: "APPROVED", isPublished: true, deletedAt: null } }),
+    prisma.property.groupBy({ by: ["city"], where: { moderationStatus: "APPROVED", isPublished: true, deletedAt: null }, _count: { city: true } }),
+  ]);
   return (
     <>
       {/* Hero Section */}
@@ -275,9 +259,9 @@ export default function HomePage() {
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { icon: UsersIcon, label: "10,000+", desc: "Active users" },
-              { icon: ShieldIcon, label: "1,200+", desc: "Properties listed" },
-              { icon: MapPinIcon, label: "12+", desc: "Counties covered" },
+              { icon: UsersIcon, label: "1,000+", desc: "Active users" },
+              { icon: ShieldIcon, label: `${propertyCount}+`, desc: "Properties listed" },
+              { icon: MapPinIcon, label: `${cityCount.length}+`, desc: "Counties covered" },
               { icon: StarIcon, label: "4.8/5", desc: "Average rating" },
             ].map((stat) => (
               <div
@@ -318,50 +302,54 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {featuredProperties.map((prop) => (
-              <div
-                key={prop.title}
-                className="reveal group overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-lg"
-              >
-                <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
-                  <Image
-                    src={prop.image}
-                    alt={prop.title}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute left-2 top-2 z-10 flex gap-2">
-                    <span className="rounded-full bg-accent-300 px-3 py-1 text-xs font-semibold text-white">
-                      {prop.badge}
-                    </span>
-                    {prop.urgency && (
-                      <span className="rounded-full bg-warning-500 px-3 py-1 text-xs font-semibold text-white">
-                        {prop.urgency}
+            {featuredProperties.map((prop) => {
+              const images = Array.isArray(prop.images) ? prop.images : [];
+              const imageUrl = images.length > 0 ? String(images[0]) : "/placeholder.jpg";
+              const isRent = prop.status === "RENTED";
+              return (
+                <Link
+                  key={prop.slug}
+                  href={`/properties/${prop.city.toLowerCase()}/${prop.slug}`}
+                  className="reveal group overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-lg"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
+                    <Image
+                      src={imageUrl}
+                      alt={prop.title}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute left-2 top-2 z-10 flex gap-2">
+                      <span className={`rounded-full px-3 py-1 text-xs font-semibold text-white ${isRent ? "bg-accent-300" : "bg-primary-500"}`}>
+                        {isRent ? "Rent" : "Sale"}
                       </span>
-                    )}
-                  </div>
-                  {prop.verified && (
+                      {prop.isFeatured && (
+                        <span className="rounded-full bg-warning-500 px-3 py-1 text-xs font-semibold text-white">
+                          Featured
+                        </span>
+                      )}
+                    </div>
                     <div className="absolute bottom-2 left-2 z-10 flex items-center gap-1 rounded-full bg-success-500/90 px-2.5 py-1 text-xs font-medium text-white">
                       <VerifiedIcon className="h-3.5 w-3.5" />
                       Verified
                     </div>
-                  )}
-                </div>
-                <div className="space-y-2 p-4">
-                  <h3 className="font-heading font-semibold text-text-primary line-clamp-1">
-                    {prop.title}
-                  </h3>
-                  <div className="flex items-center gap-1.5 text-sm text-text-secondary">
-                    <MapPinIcon className="h-3.5 w-3.5 shrink-0" />
-                    {prop.location}
                   </div>
-                  <p className="font-heading text-base font-bold text-primary-500">
-                    {prop.price}
-                  </p>
-                </div>
-              </div>
-            ))}
+                  <div className="space-y-2 p-4">
+                    <h3 className="font-heading font-semibold text-text-primary line-clamp-1">
+                      {prop.title}
+                    </h3>
+                    <div className="flex items-center gap-1.5 text-sm text-text-secondary">
+                      <MapPinIcon className="h-3.5 w-3.5 shrink-0" />
+                      {prop.region}, {prop.city}
+                    </div>
+                    <p className="font-heading text-base font-bold text-primary-500">
+                      {formatPrice(Number(prop.price), prop.currency)}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
           <div className="mt-8 text-center sm:hidden">
             <Link
