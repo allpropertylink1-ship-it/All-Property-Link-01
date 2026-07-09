@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X, Expand } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogClose,
+  DialogTitle,
 } from "@/components/ui/dialog";
 
 interface Props {
@@ -17,241 +17,224 @@ interface Props {
 
 export function PropertyGallery({ images, title }: Props) {
   const [current, setCurrent] = useState(0);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIdx, setLightboxIdx] = useState(0);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [showLightbox, setShowLightbox] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [paused, setPaused] = useState(false);
 
-  const total = images.length;
-  if (total === 0) return null;
-
-  const startAuto = useCallback(() => {
-    stopAuto();
-    intervalRef.current = setInterval(() => {
-      setCurrent((p) => (p + 1) % total);
-    }, 4000);
-  }, [total]);
-
-  const stopAuto = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
+  const goTo = useCallback((i: number) => {
+    setCurrent(i);
   }, []);
 
+  const next = useCallback(() => {
+    setCurrent((p) => (p + 1) % images.length);
+  }, [images.length]);
+
+  const prev = useCallback(() => {
+    setCurrent((p) => (p - 1 + images.length) % images.length);
+  }, [images.length]);
+
+  const openLightbox = useCallback((i: number) => {
+    setLightboxIndex(i);
+    setShowLightbox(true);
+    setPaused(true);
+  }, []);
+
+  const lbNext = useCallback(() => {
+    setLightboxIndex((p) => (p + 1) % images.length);
+  }, [images.length]);
+
+  const lbPrev = useCallback(() => {
+    setLightboxIndex((p) => (p - 1 + images.length) % images.length);
+  }, [images.length]);
+
   useEffect(() => {
-    startAuto();
-    return stopAuto;
-  }, [startAuto, stopAuto]);
+    if (images.length <= 1 || paused) return;
+    timerRef.current = setInterval(next, 5000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [images.length, paused, next]);
 
-  function goTo(idx: number) {
-    setCurrent(idx);
-    startAuto();
-  }
+  useEffect(() => {
+    if (!showLightbox) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "ArrowRight") lbNext();
+      if (e.key === "ArrowLeft") lbPrev();
+      if (e.key === "Escape") setShowLightbox(false);
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [showLightbox, lbNext, lbPrev]);
 
-  function prev() {
-    goTo((current - 1 + total) % total);
-  }
+  if (images.length === 0) return null;
 
-  function next() {
-    goTo((current + 1) % total);
-  }
-
-  function openLightbox(idx: number) {
-    stopAuto();
-    setLightboxIdx(idx);
-    setLightboxOpen(true);
-  }
-
-  function closeLightbox() {
-    setLightboxOpen(false);
-    startAuto();
-  }
-
-  function lbPrev() {
-    setLightboxIdx((p) => (p - 1 + total) % total);
-  }
-
-  function lbNext() {
-    setLightboxIdx((p) => (p + 1) % total);
-  }
-
-  function onKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "ArrowLeft") lbPrev();
-    if (e.key === "ArrowRight") lbNext();
+  if (images.length === 1) {
+    return (
+      <div className="mb-8 overflow-hidden rounded-xl">
+        <button
+          type="button"
+          onClick={() => openLightbox(0)}
+          className="group relative block w-full"
+          aria-label="View image full-screen"
+        >
+          <Image
+            src={images[0]}
+            alt={title}
+            width={1000}
+            height={650}
+            className="h-auto w-full rounded-xl object-cover"
+            priority
+          />
+          <span className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-lg bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100">
+            <Expand size={16} />
+          </span>
+        </button>
+      </div>
+    );
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="group relative mb-8 overflow-hidden rounded-xl bg-surface-secondary"
-      onMouseEnter={stopAuto}
-      onMouseLeave={startAuto}
-      onFocus={stopAuto}
-      onBlur={startAuto}
-    >
-      {/* Main image */}
-      <button
-        type="button"
-        className="relative block aspect-[4/3] w-full cursor-zoom-in overflow-hidden focus-visible:outline-none"
-        onClick={() => openLightbox(current)}
-        aria-label="View full size"
+    <>
+      <div
+        className="mb-8"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        onFocus={() => setPaused(true)}
+        onBlur={() => setPaused(false)}
       >
-        <Image
-          src={images[current]}
-          alt={`${title} — image ${current + 1} of ${total}`}
-          fill
-          className="object-cover transition-opacity duration-300"
-          priority={current === 0}
-          sizes="(max-width: 1024px) 100vw, 800px"
-        />
-
-        {/* Expand hint */}
-        <span className="absolute top-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-          <Expand size={16} />
-        </span>
-      </button>
-
-      {/* Prev / Next arrows */}
-      {total > 1 && (
-        <>
+        {/* Main image */}
+        <div className="relative overflow-hidden rounded-xl">
           <button
             type="button"
-            onClick={prev}
-            className="absolute top-1/2 left-3 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white/80 text-foreground shadow-sm opacity-0 transition-all duration-200 hover:bg-white hover:scale-105 focus-visible:opacity-100 group-hover:opacity-100"
+            onClick={() => openLightbox(current)}
+            className="block w-full"
+            aria-label="View image full-screen"
+          >
+            <Image
+              src={images[current]}
+              alt={`${title} — image ${current + 1} of ${images.length}`}
+              width={1000}
+              height={650}
+              className="h-auto w-full rounded-xl object-cover transition-opacity duration-300"
+              priority={current === 0}
+            />
+          </button>
+
+          {/* Counter */}
+          <span className="absolute bottom-3 left-3 rounded-lg bg-black/50 px-2.5 py-1 text-xs font-medium text-white">
+            {current + 1} / {images.length}
+          </span>
+
+          {/* Expand button */}
+          <button
+            type="button"
+            onClick={() => openLightbox(current)}
+            className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-lg bg-black/40 text-white opacity-0 transition-opacity hover:opacity-100 focus-visible:opacity-100"
+            aria-label="View full-screen"
+          >
+            <Expand size={16} />
+          </button>
+
+          {/* Navigation arrows */}
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); prev(); }}
+            className="absolute left-2 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity hover:bg-black/60 hover:opacity-100 focus-visible:opacity-100"
             aria-label="Previous image"
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={22} />
           </button>
           <button
             type="button"
-            onClick={next}
-            className="absolute top-1/2 right-3 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white/80 text-foreground shadow-sm opacity-0 transition-all duration-200 hover:bg-white hover:scale-105 focus-visible:opacity-100 group-hover:opacity-100"
+            onClick={(e) => { e.stopPropagation(); next(); }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity hover:bg-black/60 hover:opacity-100 focus-visible:opacity-100"
             aria-label="Next image"
           >
-            <ChevronRight size={20} />
+            <ChevronRight size={22} />
           </button>
-        </>
-      )}
-
-      {/* Dot indicators */}
-      {total > 1 && (
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1.5">
-          {images.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => goTo(i)}
-              className={`h-2 rounded-full transition-all duration-200 ${
-                i === current
-                  ? "w-5 bg-white"
-                  : "w-2 bg-white/50 hover:bg-white/80"
-              }`}
-              aria-label={`Image ${i + 1}`}
-            />
-          ))}
         </div>
-      )}
 
-      {/* Thumbnail strip */}
-      {total > 1 && (
-        <div className="flex gap-2 overflow-x-auto px-4 pb-4 pt-3 scrollbar-none">
+        {/* Thumbnails */}
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
           {images.map((url, i) => (
             <button
               key={i}
               type="button"
               onClick={() => goTo(i)}
-              className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-200 focus-visible:outline-none ${
+              className={`relative shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
                 i === current
-                  ? "border-primary-600 opacity-100 ring-1 ring-primary-600"
-                  : "border-transparent opacity-60 hover:opacity-90"
+                  ? "border-primary-500 ring-1 ring-primary-500"
+                  : "border-transparent opacity-60 hover:opacity-100"
               }`}
-              aria-label={`Thumbnail ${i + 1}`}
+              aria-label={`View image ${i + 1}`}
             >
               <Image
                 src={url}
                 alt=""
-                fill
-                className="object-cover"
-                sizes="96px"
+                width={80}
+                height={56}
+                className="h-14 w-20 object-cover"
               />
             </button>
           ))}
         </div>
-      )}
+      </div>
 
       {/* Lightbox */}
-      <Dialog open={lightboxOpen} onOpenChange={(open) => { if (!open) closeLightbox(); }}>
+      <Dialog open={showLightbox} onOpenChange={setShowLightbox}>
         <DialogContent
-          className="fixed inset-0 z-50 flex max-w-none items-center justify-center bg-black/95 p-0 sm:max-w-none"
+          className="fixed inset-0 z-50 flex h-full w-full max-w-none items-center justify-center bg-black/90 p-0 sm:max-w-none"
           showCloseButton={false}
-          onKeyDown={onKeyDown}
         >
-          <DialogClose
-            render={
-              <button
-                type="button"
-                className="absolute top-4 right-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors"
-                aria-label="Close"
-              />
-            }
+          <DialogTitle className="sr-only">{title} — image {lightboxIndex + 1} of {images.length}</DialogTitle>
+
+          {/* Close */}
+          <button
+            type="button"
+            onClick={() => setShowLightbox(false)}
+            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
+            aria-label="Close"
           >
             <X size={22} />
-          </DialogClose>
+          </button>
 
-          <div className="relative flex h-full w-full items-center justify-center p-4 sm:p-12">
+          {/* Counter */}
+          <span className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-lg bg-black/50 px-3 py-1.5 text-sm font-medium text-white">
+            {lightboxIndex + 1} / {images.length}
+          </span>
+
+          {/* Prev */}
+          <button
+            type="button"
+            onClick={lbPrev}
+            className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/60"
+            aria-label="Previous image"
+          >
+            <ChevronLeft size={28} />
+          </button>
+
+          {/* Next */}
+          <button
+            type="button"
+            onClick={lbNext}
+            className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/60"
+            aria-label="Next image"
+          >
+            <ChevronRight size={28} />
+          </button>
+
+          {/* Image */}
+          <div className="flex h-full w-full items-center justify-center p-4">
             <Image
-              src={images[lightboxIdx]}
-              alt={`${title} — image ${lightboxIdx + 1} of ${total}`}
-              fill
-              className="object-contain"
+              src={images[lightboxIndex]}
+              alt={`${title} — image ${lightboxIndex + 1}`}
+              width={1200}
+              height={800}
+              className="max-h-full max-w-full rounded-lg object-contain"
               priority
-              sizes="100vw"
             />
           </div>
-
-          {total > 1 && (
-            <>
-              <button
-                type="button"
-                onClick={lbPrev}
-                className="absolute top-1/2 left-4 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors"
-                aria-label="Previous"
-              >
-                <ChevronLeft size={24} />
-              </button>
-              <button
-                type="button"
-                onClick={lbNext}
-                className="absolute top-1/2 right-4 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors"
-                aria-label="Next"
-              >
-                <ChevronRight size={24} />
-              </button>
-
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
-                {images.map((_, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setLightboxIdx(i)}
-                    className={`h-2 rounded-full transition-all duration-200 ${
-                      i === lightboxIdx
-                        ? "w-5 bg-white"
-                        : "w-2 bg-white/40 hover:bg-white/70"
-                    }`}
-                    aria-label={`View image ${i + 1}`}
-                  />
-                ))}
-              </div>
-
-              <span className="absolute bottom-6 right-6 text-sm text-white/60">
-                {lightboxIdx + 1} / {total}
-              </span>
-            </>
-          )}
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
