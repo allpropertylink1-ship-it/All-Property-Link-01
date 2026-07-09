@@ -120,6 +120,14 @@ export default async function PropertyDetailPage({ params }: Props) {
               </div>
             </div>
           )}
+
+          {/* Share - clearly visible near listing details */}
+          <div className="mt-8 border-t border-border pt-6">
+            <p className="mb-3 text-xs font-medium uppercase tracking-wider text-text-secondary">
+              Share this listing
+            </p>
+            <ShareButtons title={property.title} />
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -239,7 +247,6 @@ export default async function PropertyDetailPage({ params }: Props) {
               </div>
             </>
           )}
-          <ShareButtons title={property.title} />
         </div>
       </div>
     </div>

@@ -72,9 +72,7 @@ export function ShareButtons({ title }: { title: string }) {
   }, [currentUrl]);
 
   return (
-    <div className="rounded-xl border border-border bg-surface p-6">
-      <h3 className="mb-4 font-heading text-base font-semibold text-text-primary">Share</h3>
-      <div className="flex flex-wrap gap-3">
+    <div className="flex flex-wrap gap-3">
         {/* WhatsApp */}
         <Button
           variant="ghost"
@@ -141,6 +139,5 @@ export function ShareButtons({ title }: { title: string }) {
           {copied === "link" ? <Check className="h-5 w-5" /> : <Link className="h-5 w-5" />}
         </Button>
       </div>
-    </div>
   );
 }
