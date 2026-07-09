@@ -49,6 +49,7 @@ export async function createProperty(formData: FormData) {
 
     await createPropertyService(parsed.data, userId);
     revalidatePath("/properties");
+    revalidatePath("/dashboard/listings");
     revalidatePath("/dashboard");
     return ok();
   } catch (err) {
@@ -69,6 +70,7 @@ export async function updateProperty(id: string, formData: FormData) {
     if (!result.success) return result;
 
     revalidatePath("/properties");
+    revalidatePath("/dashboard/listings");
     revalidatePath("/dashboard");
     return ok();
   } catch (err) {
@@ -87,6 +89,7 @@ export async function deleteProperty(id: string) {
     if (!result.success) return result;
 
     revalidatePath("/properties");
+    revalidatePath("/dashboard/listings");
     revalidatePath("/dashboard");
     return ok();
   } catch (err) {
