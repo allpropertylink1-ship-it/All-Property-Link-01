@@ -87,6 +87,8 @@ model User {
   agentLicense     String?
   agencyName       String?
   notificationPrefs Json?
+  onboardingComplete Boolean @default(false)
+
   kycStatus        String    @default("NONE")
   accountStatus    String    @default("PENDING_APPROVAL")
   approvedAt       DateTime?
@@ -98,11 +100,6 @@ model User {
   specialties      String[]
   website          String?
   estateSubLocation String?
-  aplRepName       String?
-  aplRepPhone      String?
-  refereeName      String?
-  refereePhone     String?
-  refereeLocation  String?
 
   dateOfBirth      DateTime?
   gender           String?

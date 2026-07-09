@@ -14,14 +14,14 @@ export default async function DashboardLayout({
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { accountStatus: true, kycStatus: true, isAgent: true },
+    select: { accountStatus: true, onboardingComplete: true, kycStatus: true, isAgent: true },
   });
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)]">
       <DashboardNav />
       <main className="flex-1 bg-surface-secondary">
-        {user && <DashboardBanner accountStatus={user.accountStatus} kycStatus={user.kycStatus} isAgent={user.isAgent} />}
+        {user && <DashboardBanner accountStatus={user.accountStatus} onboardingComplete={user.onboardingComplete} kycStatus={user.kycStatus} isAgent={user.isAgent} />}
         <KycGate kycStatus={user?.kycStatus} isAgent={user?.isAgent}>
           <div className="p-6 lg:p-8">
             <div className="mx-auto max-w-7xl">{children}</div>
