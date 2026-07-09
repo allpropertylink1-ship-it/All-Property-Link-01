@@ -48,7 +48,7 @@ export function ListingForm() {
     formData.append("images", JSON.stringify(imageUrls));
     try {
       const result = await createProperty(formData);
-      if (result?.error) { setError(result.error); return }
+      if (result && !result.success) { setError(result.error); return }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create listing");
       return;

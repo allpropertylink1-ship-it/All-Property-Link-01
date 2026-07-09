@@ -4,6 +4,12 @@ import { requireAuth } from "@/lib/auth-utils";
 import { propertySchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
 import { withRateLimit } from "@/lib/rate-limiter";
+
+const REDIRECT_ERROR_CODE = "NEXT_REDIRECT";
+
+function isRedirect(err: unknown): boolean {
+  return err instanceof Error && "digest" in err && String((err as any).digest).startsWith(REDIRECT_ERROR_CODE);
+}
 import {
   createProperty as createPropertyService,
   updateProperty as updatePropertyService,
@@ -20,71 +26,104 @@ function parseForm(formData: FormData) {
   return raw;
 }
 
-export async function createProperty(formData: FormData) {
-  const { allowed } = await withRateLimit({ max: 10, windowMs: 60_000 });
-  if (!allowed) return { success: false, error: "Too many requests. Try again later." };
-  const session = await requireAuth();
-  const userId = (session.user as { id: string }).id;
-  const kycStatus = (session.user as { kycStatus?: string }).kycStatus;
-  if (kycStatus !== "VERIFIED" && kycStatus !== "NONE") {
-    return { success: false, error: "KYC verification required to post listings." };
-  }
-  const parsed = propertySchema.safeParse(parseForm(formData));
-  if (!parsed.success) return { success: false, error: Object.values(parsed.error.flatten().fieldErrors).flat().join(", ") };
+function ok(data?: Record<string, unknown>) {
+  return { success: true, ...data } as const;
+}
 
-  await createPropertyService(parsed.data, userId);
-  revalidatePath("/properties");
-  revalidatePath("/dashboard");
-  return { success: true };
+function fail(error: string) {
+  return { success: false, error } as const;
+}
+
+export async function createProperty(formData: FormData) {
+  try {
+    const { allowed } = await withRateLimit({ max: 10, windowMs: 60_000 });
+    if (!allowed) return fail("Too many requests. Try again later.");
+    const session = await requireAuth();
+    const userId = (session.user as { id: string }).id;
+    const kycStatus = (session.user as { kycStatus?: string }).kycStatus;
+    if (kycStatus !== "VERIFIED" && kycStatus !== "NONE") {
+      return fail("KYC verification required to post listings.");
+    }
+    const parsed = propertySchema.safeParse(parseForm(formData));
+    if (!parsed.success) return fail(Object.values(parsed.error.flatten().fieldErrors).flat().join(", "));
+
+    await createPropertyService(parsed.data, userId);
+    revalidatePath("/properties");
+    revalidatePath("/dashboard");
+    return ok();
+  } catch (err) {
+    if (isRedirect(err)) throw err;
+    return fail(err instanceof Error ? err.message : "Failed to create listing");
+  }
 }
 
 export async function updateProperty(id: string, formData: FormData) {
-  const session = await requireAuth();
-  const userId = (session.user as { id: string }).id;
-  const userRole = (session.user as { role: string }).role;
-  const parsed = propertySchema.safeParse(parseForm(formData));
-  if (!parsed.success) return { success: false, error: Object.values(parsed.error.flatten().fieldErrors).flat().join(", ") };
+  try {
+    const session = await requireAuth();
+    const userId = (session.user as { id: string }).id;
+    const userRole = (session.user as { role: string }).role;
+    const parsed = propertySchema.safeParse(parseForm(formData));
+    if (!parsed.success) return fail(Object.values(parsed.error.flatten().fieldErrors).flat().join(", "));
 
-  const result = await updatePropertyService(id, parsed.data, userId, userRole);
-  if (!result.success) return result;
+    const result = await updatePropertyService(id, parsed.data, userId, userRole);
+    if (!result.success) return result;
 
-  revalidatePath("/properties");
-  revalidatePath("/dashboard");
-  return { success: true };
+    revalidatePath("/properties");
+    revalidatePath("/dashboard");
+    return ok();
+  } catch (err) {
+    if (isRedirect(err)) throw err;
+    return fail(err instanceof Error ? err.message : "Failed to update listing");
+  }
 }
 
 export async function deleteProperty(id: string) {
-  const session = await requireAuth();
-  const userId = (session.user as { id: string }).id;
-  const userRole = (session.user as { role: string }).role;
+  try {
+    const session = await requireAuth();
+    const userId = (session.user as { id: string }).id;
+    const userRole = (session.user as { role: string }).role;
 
-  const result = await deletePropertyService(id, userId, userRole);
-  if (!result.success) return result;
+    const result = await deletePropertyService(id, userId, userRole);
+    if (!result.success) return result;
 
-  revalidatePath("/properties");
-  revalidatePath("/dashboard");
-  return { success: true };
+    revalidatePath("/properties");
+    revalidatePath("/dashboard");
+    return ok();
+  } catch (err) {
+    if (isRedirect(err)) throw err;
+    return fail(err instanceof Error ? err.message : "Failed to delete listing");
+  }
 }
 
 export async function publishProperty(id: string) {
-  const session = await requireAuth();
-  const role = (session.user as { role: string }).role;
-  if (role !== "ADMIN") return { success: false, error: "Unauthorized" };
+  try {
+    const session = await requireAuth();
+    const role = (session.user as { role: string }).role;
+    if (role !== "ADMIN") return fail("Unauthorized");
 
-  await publishPropertyService(id);
-  revalidatePath("/properties");
-  revalidatePath("/admin");
-  return { success: true };
+    await publishPropertyService(id);
+    revalidatePath("/properties");
+    revalidatePath("/admin");
+    return ok();
+  } catch (err) {
+    if (isRedirect(err)) throw err;
+    return fail(err instanceof Error ? err.message : "Failed to publish listing");
+  }
 }
 
 export async function rejectProperty(id: string, reason: string) {
-  const session = await requireAuth();
-  const role = (session.user as { role: string }).role;
-  const userId = (session.user as { id: string }).id;
-  if (role !== "ADMIN") return { success: false, error: "Unauthorized" };
+  try {
+    const session = await requireAuth();
+    const role = (session.user as { role: string }).role;
+    const userId = (session.user as { id: string }).id;
+    if (role !== "ADMIN") return fail("Unauthorized");
 
-  await rejectPropertyService(id, reason, userId);
-  revalidatePath("/properties");
-  revalidatePath("/admin");
-  return { success: true };
+    await rejectPropertyService(id, reason, userId);
+    revalidatePath("/properties");
+    revalidatePath("/admin");
+    return ok();
+  } catch (err) {
+    if (isRedirect(err)) throw err;
+    return fail(err instanceof Error ? err.message : "Failed to reject listing");
+  }
 }

@@ -68,11 +68,14 @@ export default function EditListingForm({ propertyId, property }: { propertyId: 
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) formData.append(key, String(value));
     });
-    if (imageUrls.length > 0) {
-      formData.append("images", JSON.stringify(imageUrls));
+    formData.append("images", JSON.stringify(imageUrls));
+    try {
+      const result = await updateProperty(propertyId, formData);
+      if (result && !result.success) { setError(result.error); return }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update listing");
+      return;
     }
-    const result = await updateProperty(propertyId, formData);
-    if (result?.error) { setError(result.error); return }
     router.push("/dashboard/listings");
   }
 
@@ -82,6 +85,10 @@ export default function EditListingForm({ propertyId, property }: { propertyId: 
 
   const handleImageUploadError = (error: string) => {
     setError(error);
+  };
+
+  const handleRemoveImage = (url: string) => {
+    setImageUrls((prev) => prev.filter((u) => u !== url));
   };
 
   return (
@@ -150,6 +157,7 @@ export default function EditListingForm({ propertyId, property }: { propertyId: 
         <PropertyImageUploader 
           onUploadComplete={handleImageUploadComplete}
           onUploadError={handleImageUploadError}
+          onRemoveImage={handleRemoveImage}
           maxFiles={10}
         />
       </div>
