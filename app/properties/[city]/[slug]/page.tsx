@@ -128,16 +128,26 @@ export default async function PropertyDetailPage({ params }: Props) {
             <>
               {/* Business Profile */}
               <div className="rounded-xl border border-border bg-surface p-6">
-                <div className="flex items-center gap-2.5 mb-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
-                    <Building2 size={20} className="text-primary-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-heading text-base font-semibold text-text-primary">
+                <div className="flex items-center gap-4 mb-4">
+                  {property.agent.avatar ? (
+                    <Image
+                      src={property.agent.avatar}
+                      alt={`${property.agent.firstName} ${property.agent.lastName}`}
+                      width={56}
+                      height={56}
+                      className="h-14 w-14 shrink-0 rounded-full border-2 border-border object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary-50 border-2 border-border">
+                      <Building2 size={22} className="text-primary-500" />
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <h3 className="font-heading text-base font-semibold text-text-primary truncate">
                       {property.agent.companyName || `${property.agent.firstName} ${property.agent.lastName}`}
                     </h3>
                     {property.agent.companyName && (
-                      <p className="text-xs text-text-secondary">
+                      <p className="truncate text-xs text-text-secondary">
                         {property.agent.firstName} {property.agent.lastName}
                       </p>
                     )}
