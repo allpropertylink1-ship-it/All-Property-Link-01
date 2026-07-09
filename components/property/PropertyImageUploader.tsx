@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, ChangeEvent } from "react";
+import { useState, useCallback, useEffect, ChangeEvent } from "react";
 import { Upload, Loader2, X } from "lucide-react";
 
 interface ImageEntry {
@@ -15,6 +15,11 @@ interface PropertyImageUploaderProps {
   maxFiles?: number;
 }
 
+interface UploadConfig {
+  cloudName: string;
+  presetName: string;
+}
+
 export default function PropertyImageUploader({
   onUploadComplete,
   onUploadError,
@@ -24,6 +29,16 @@ export default function PropertyImageUploader({
   const [entries, setEntries] = useState<ImageEntry[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [config, setConfig] = useState<UploadConfig | null>(null);
+  const [configLoading, setConfigLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/upload/config", { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => setConfig({ cloudName: data.cloudName, presetName: data.presetName }))
+      .catch(() => setError("Failed to load upload config"))
+      .finally(() => setConfigLoading(false));
+  }, []);
 
   const handleFileChange = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
@@ -51,30 +66,23 @@ export default function PropertyImageUploader({
         try {
           const preview = URL.createObjectURL(file);
 
-          const reader = new FileReader();
-          const base64 = await new Promise<string>((resolve, reject) => {
-            reader.onload = () => {
-              const result = reader.result as string;
-              resolve(result.split(",")[1]);
-            };
-            reader.onerror = () => reject(new Error("Failed to read file"));
-            reader.readAsDataURL(file);
-          });
+          const body = new FormData();
+          body.append("file", file);
+          body.append("upload_preset", config!.presetName);
 
-          const res = await fetch("/api/upload/base64", {
+          const res = await fetch(`https://api.cloudinary.com/v1_1/${config!.cloudName}/image/upload`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ base64, mime: file.type, folder: "allpropertylink/property-listings" }),
+            body,
           });
           if (!res.ok) {
-            const errBody = await res.json().catch(() => ({ error: "Upload failed" }));
-            throw new Error(errBody.error || `HTTP ${res.status}`);
+            const text = await res.text().catch(() => "");
+            throw new Error(`Upload failed (${res.status}): ${text.slice(0, 200)}`);
           }
           const data = await res.json();
+          if (!data.secure_url) throw new Error("No URL returned from Cloudinary");
 
-          urls.push(data.url);
-          setEntries((prev) => [...prev, { preview, url: data.url }]);
+          urls.push(data.secure_url);
+          setEntries((prev) => [...prev, { preview, url: data.secure_url }]);
         } catch (err) {
           const msg = err instanceof Error ? err.message : "Upload failed";
           setError(`${file.name}: ${msg}`);
@@ -89,7 +97,7 @@ export default function PropertyImageUploader({
       setUploading(false);
       e.target.value = "";
     },
-    [maxFiles, entries.length, onUploadComplete, onUploadError]
+    [maxFiles, entries.length, config, onUploadComplete, onUploadError]
   );
 
   const handleRemove = useCallback(
@@ -103,6 +111,14 @@ export default function PropertyImageUploader({
     },
     [onRemoveImage]
   );
+
+  if (configLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
