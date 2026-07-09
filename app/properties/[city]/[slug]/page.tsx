@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getPropertyBySlug } from "@/lib/services/property";
-import { WhatsAppShare } from "@/components/shared/WhatsAppShare";
+import { ShareButtons } from "@/components/shared/ShareButtons";
 import { Building2, Phone, Mail, Globe, Sparkles, MessageCircle } from "lucide-react";
 
 interface Props {
@@ -71,7 +71,6 @@ export default async function PropertyDetailPage({ params }: Props) {
                 {property.currency} {Number(property.price).toLocaleString()}
               </p>
             </div>
-            <WhatsAppShare title={property.title} />
           </div>
 
           <div className="mt-6 flex flex-wrap gap-4 border-y border-border py-4">
@@ -240,6 +239,7 @@ export default async function PropertyDetailPage({ params }: Props) {
               </div>
             </>
           )}
+          <ShareButtons title={property.title} />
         </div>
       </div>
     </div>
