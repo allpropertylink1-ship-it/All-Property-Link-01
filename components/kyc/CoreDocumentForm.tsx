@@ -21,7 +21,6 @@ interface CoreDocumentFormProps {
   onHandleCropComplete: (croppedBlob: Blob) => Promise<void>
   onHandleCropCancel: () => void
   onRemoveCoreImage: (side: "front" | "back") => void
-  aspectRatios: Record<string, number>
   docTypeLabels: Record<string, string>
   isReSubmit: boolean
   coreDocSubmitted: boolean
@@ -45,7 +44,6 @@ export default function CoreDocumentForm({
   onHandleCropComplete,
   onHandleCropCancel,
   onRemoveCoreImage,
-  aspectRatios,
   docTypeLabels,
   isReSubmit,
   coreDocSubmitted,
@@ -143,7 +141,6 @@ export default function CoreDocumentForm({
           {cropImageUrl && croppingFor && (
             <ImageCropper
               imageUrl={cropImageUrl}
-              aspectRatio={aspectRatios[documentType]}
               onCropComplete={onHandleCropComplete}
               onCancel={onHandleCropCancel}
               sideLabel={
