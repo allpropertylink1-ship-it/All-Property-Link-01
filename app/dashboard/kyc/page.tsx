@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, Trash2 } from "lucide-react"
+import { api } from "@/lib/api-client"
 import { cn } from "@/lib/utils"
 import ImageCropper from "@/components/kyc/ImageCropper"
 import PdfViewer from "@/components/kyc/PdfViewer"
@@ -116,18 +117,14 @@ export default function KycPage() {
     setAgentConfirmed(false)
     setAgentCodeState("idle")
     try {
-      const res = await fetch("/api/apl-agents/lookup", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentCode: agentCode.trim().toUpperCase() }),
-      })
-      const result = await res.json()
-      if (!res.ok || !result.agent) {
-        setAgentLookupError(result.error || "Invalid code")
+      const res = await api.post<{ agent: { id: string; fullName: string; phone: string } }>("/api/apl-agents/lookup", { agentCode: agentCode.trim().toUpperCase() })
+      if (!res.data?.agent) {
+        setAgentLookupError(res.error || "Invalid code")
         return
       }
-      setAplAgentId(result.agent.id)
-      setAgentName(result.agent.fullName)
-      setAgentPhone(result.agent.phone)
+      setAplAgentId(res.data.agent.id)
+      setAgentName(res.data.agent.fullName)
+      setAgentPhone(res.data.agent.phone)
       setAgentConfirmed(true)
       setAgentCodeState("confirmed")
     } catch {
@@ -138,12 +135,9 @@ export default function KycPage() {
   }
 
   const uploadFiles = async (files: File[]): Promise<{ url: string }[]> => {
-    const signRes = await fetch("/api/uploadthing/sign", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ folder: "allpropertylink/kyc" }),
-    })
-    if (!signRes.ok) throw new Error("Failed to get upload signature")
-    const { signature, timestamp, apiKey, cloudName } = await signRes.json()
+    const signRes = await api.post<{ signature: string; timestamp: number; apiKey: string; cloudName: string }>("/api/uploadthing/sign", { folder: "allpropertylink/kyc" })
+    if (!signRes.data) throw new Error(signRes.error || "Failed to get upload signature")
+    const { signature, timestamp, apiKey, cloudName } = signRes.data
     return Promise.all(files.map(async (file) => {
       const fd = new FormData()
       fd.append("file", file)
@@ -160,8 +154,8 @@ export default function KycPage() {
 
   const fetchKyc = useCallback(async () => {
     try {
-      const res = await fetch("/api/user/kyc")
-      if (res.ok) setData(await res.json())
+      const res = await api.get<KycData>("/api/user/kyc")
+      if (res.data) setData(res.data)
     } catch { setData(null) }
   }, [])
 
@@ -239,10 +233,10 @@ export default function KycPage() {
       if (aplAgentId && agentConfirmed) body.aplAgentId = aplAgentId
 
       const res = coreDoc?.status === "REJECTED"
-        ? await fetch(`/api/user/kyc/${coreDoc.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
-        : await fetch("/api/user/kyc", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+        ? await api.patch(`/api/user/kyc/${coreDoc.id}`, body)
+        : await api.post("/api/user/kyc", body)
 
-      if (!res.ok) throw new Error("Submission failed")
+      if (!res.data) throw new Error(res.error || "Submission failed")
 
       setMessage({ type: "success", text: "Document submitted" })
       setDocNumber(""); setFrontFile(null); setBackFile(null); setFrontUrl(""); setBackUrl(""); setCropping(null)
@@ -258,8 +252,8 @@ export default function KycPage() {
 
   const handleDelete = async (docId: string) => {
     try {
-      const res = await fetch(`/api/user/kyc/${docId}`, { method: "DELETE" })
-      if (!res.ok) throw new Error("Delete failed")
+      const res = await api.delete(`/api/user/kyc/${docId}`)
+      if (!res.data) throw new Error(res.error || "Delete failed")
       setMessage({ type: "success", text: "Document deleted" })
       setDeleteConfirm(null)
       fetchKyc()
