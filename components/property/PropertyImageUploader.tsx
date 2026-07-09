@@ -1,12 +1,18 @@
 'use client';
 
-import { useState, useCallback, ChangeEvent } from "react";
+import { useState, useCallback, useRef, ChangeEvent } from "react";
 import { api } from "@/lib/api-client";
 import { Upload, Loader2, X } from "lucide-react";
+
+interface ImageEntry {
+  preview: string;
+  url: string | null;
+}
 
 interface PropertyImageUploaderProps {
   onUploadComplete: (urls: string[]) => void;
   onUploadError?: (error: string) => void;
+  onRemoveImage?: (url: string) => void;
   multiple?: boolean;
   maxFiles?: number;
   accept?: string;
@@ -15,13 +21,15 @@ interface PropertyImageUploaderProps {
 export default function PropertyImageUploader({
   onUploadComplete,
   onUploadError,
+  onRemoveImage,
   multiple = true,
   maxFiles = 10,
   accept = "image/*",
 }: PropertyImageUploaderProps) {
-  const [previews, setPreviews] = useState<string[]>([]);
+  const [entries, setEntries] = useState<ImageEntry[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const pendingRef = useRef<ImageEntry[]>([]);
 
   async function uploadFile(file: File, folder: string): Promise<string> {
     const signRes = await api.post<{ signature: string; timestamp: number; apiKey: string; cloudName: string }>("/api/uploadthing/sign", { folder });
@@ -44,70 +52,70 @@ export default function PropertyImageUploader({
       const files = Array.from(e.target.files || []);
       if (files.length === 0) return;
       if (!multiple && files.length > 1) {
-        setError("Please select only one file");
-        return;
+        setError("Please select only one file"); return;
       }
-      if (previews.length + files.length > maxFiles) {
-        setError(`Maximum ${maxFiles} images allowed`);
-        return;
+      if (entries.length + files.length > maxFiles) {
+        setError(`Maximum ${maxFiles} images allowed`); return;
       }
 
       for (const file of files) {
-        const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-        if (!allowedTypes.includes(file.type)) {
-          setError(`Invalid file type: ${file.name}. Only JPEG, PNG, and WebP are allowed.`);
-          return;
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+          setError(`Invalid type: ${file.name}. Only JPEG, PNG, WebP.`); return;
         }
         if (file.size > 10 * 1024 * 1024) {
-          setError(`File ${file.name} is too large. Maximum size is 10MB.`);
-          return;
+          setError(`${file.name} is too large. Max 10MB.`); return;
         }
       }
 
       setError(null);
       setUploading(true);
 
-      const newPreviews = files.map((f) => URL.createObjectURL(f));
-      setPreviews((prev) => [...prev, ...newPreviews]);
-
-      const uploadPromises = files.map((file) =>
-        uploadFile(file, "allpropertylink/property-listings")
-      );
+      const newEntries: ImageEntry[] = files.map((f) => ({ preview: URL.createObjectURL(f), url: null }));
+      pendingRef.current = newEntries;
+      setEntries((prev) => [...prev, ...newEntries]);
 
       try {
-        const results = await Promise.all(uploadPromises);
+        const promises = files.map((f) => uploadFile(f, "allpropertylink/property-listings"));
+        const results = await Promise.all(promises);
+        setEntries((prev) => {
+          const copy = [...prev];
+          let resultIdx = 0;
+          for (let i = copy.length - newEntries.length; i < copy.length && resultIdx < results.length; i++) {
+            copy[i] = { ...copy[i], url: results[resultIdx++] };
+          }
+          return copy;
+        });
         onUploadComplete(results);
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "Upload failed. Please try again.";
+        const msg = err instanceof Error ? err.message : "Upload failed";
         setError(msg);
         onUploadError?.(msg);
+        setEntries((prev) => prev.slice(0, -newEntries.length));
       } finally {
         setUploading(false);
+        pendingRef.current = [];
         e.target.value = "";
       }
     },
-    [multiple, maxFiles, previews.length, onUploadComplete, onUploadError]
+    [multiple, maxFiles, entries.length, onUploadComplete, onUploadError]
   );
 
   const handleRemoveImage = useCallback(
     (index: number) => {
-      setPreviews((prev) => {
-        const updated = [...prev];
-        URL.revokeObjectURL(updated[index]);
-        updated.splice(index, 1);
-        return updated;
-      });
+      const entry = entries[index];
+      if (!entry) return;
+      URL.revokeObjectURL(entry.preview);
+      if (entry.url && onRemoveImage) onRemoveImage(entry.url);
+      setEntries((prev) => prev.filter((_, i) => i !== index));
     },
-    []
+    [entries, onRemoveImage]
   );
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-text-secondary">
-          Upload up to {maxFiles} images (JPEG, PNG, WebP). Max size 10MB each.
-        </p>
-      </div>
+      <p className="text-sm text-text-secondary">
+        Upload up to {maxFiles} images (JPEG, PNG, WebP). Max size 10MB each.
+      </p>
 
       {error && (
         <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{error}</div>
@@ -141,12 +149,12 @@ export default function PropertyImageUploader({
         />
       </div>
 
-      {previews.length > 0 && (
+      {entries.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-3">
-          {previews.map((preview, index) => (
-            <div key={preview} className="relative group">
+          {entries.map((entry, index) => (
+            <div key={entry.preview} className="relative group">
               <img
-                src={preview}
+                src={entry.preview}
                 alt={`Property image ${index + 1}`}
                 className="rounded-lg w-full h-48 object-cover"
               />

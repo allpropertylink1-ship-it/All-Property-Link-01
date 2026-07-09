@@ -57,6 +57,10 @@ export function ListingForm() {
     setError(error);
   };
 
+  const handleRemoveImage = (url: string) => {
+    setImageUrls((prev) => prev.filter((u) => u !== url));
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {error && <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{error}</div>}
@@ -122,6 +126,7 @@ export function ListingForm() {
         <PropertyImageUploader 
           onUploadComplete={handleImageUploadComplete}
           onUploadError={handleImageUploadError}
+          onRemoveImage={handleRemoveImage}
           maxFiles={10}
         />
       </div>
