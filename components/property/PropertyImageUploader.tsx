@@ -1,12 +1,7 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, ChangeEvent, useRef } from "react";
 import { Upload, Loader2, X } from "lucide-react";
-
-interface ImageEntry {
-  preview: string;
-  url: string;
-}
 
 interface PropertyImageUploaderProps {
   onUploadComplete: (urls: string[]) => void;
@@ -15,100 +10,84 @@ interface PropertyImageUploaderProps {
   maxFiles?: number;
 }
 
-declare global {
-  interface Window {
-    cloudinary?: {
-      createUploadWidget: (
-        options: Record<string, unknown>,
-        callback: (err: unknown, result: { event: string; info: { secure_url: string } }) => void
-      ) => { open: () => void };
-    };
-  }
-}
-
 export default function PropertyImageUploader({
   onUploadComplete,
   onUploadError,
   onRemoveImage,
   maxFiles = 10,
 }: PropertyImageUploaderProps) {
-  const [entries, setEntries] = useState<ImageEntry[]>([]);
+  const [entries, setEntries] = useState<Array<{ preview: string; url: string }>>([]);
   const [uploading, setUploading] = useState(false);
-  const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const widgetRef = useRef<{ open: () => void } | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  const handleFileChange = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
+      if (entries.length + files.length > maxFiles) {
+        setError(`Maximum ${maxFiles} images allowed`); return;
+      }
 
-    if (!window.cloudinary) {
-      const s = document.createElement("script");
-      s.src = "https://upload-widget.cloudinary.com/global/all.js";
-      s.async = true;
-      s.onload = () => setReady(true);
-      document.head.appendChild(s);
-      return;
-    }
-    setReady(true);
-  }, []);
-
-  const openWidget = useCallback(() => {
-    if (widgetRef.current) return;
-    if (!window.cloudinary) return;
-
-    setError(null);
-
-    widgetRef.current = window.cloudinary.createUploadWidget(
-      {
-        cloudName: "oxdzvktu",
-        uploadPreset: "allpropertylink_unsigned",
-        folder: "allpropertylink/property-listings",
-        maxFiles,
-        maxFileSize: 10485760,
-        clientAllowedFormats: ["jpg", "jpeg", "png", "webp"],
-        sources: ["local", "camera"],
-        multiple: true,
-      },
-      (err: unknown, result: { event: string; info: { secure_url: string } }) => {
-        if (err) {
-          const msg = typeof err === "string" ? err : "Upload widget error";
-          setError(msg);
-          onUploadError?.(msg);
-          widgetRef.current = null;
-          return;
+      for (const file of files) {
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+          setError(`Invalid type: ${file.name}. Only JPEG, PNG, WebP.`); return;
         }
-
-        if (result.event === "queues-start") {
-          setUploading(true);
-        }
-
-        if (result.event === "success") {
-          const url = result.info.secure_url;
-          const preview = url;
-          setEntries((prev) => [...prev, { preview, url }]);
-          onUploadComplete([url]);
-        }
-
-        if (result.event === "queue-end") {
-          setUploading(false);
-          widgetRef.current = null;
-        }
-
-        if (result.event === "close") {
-          setUploading(false);
-          widgetRef.current = null;
+        if (file.size > 10 * 1024 * 1024) {
+          setError(`${file.name} is too large. Max 10MB.`); return;
         }
       }
-    );
 
-    widgetRef.current.open();
-  }, [maxFiles, onUploadComplete, onUploadError]);
+      setError(null);
+      setUploading(true);
+
+      const urls: string[] = [];
+
+      for (const file of files) {
+        try {
+          const preview = URL.createObjectURL(file);
+
+          const body = new FormData();
+          body.append("file", file);
+          body.append("upload_preset", "allpropertylink_unsigned");
+
+          const res = await fetch("https://api.cloudinary.com/v1_1/oxdzvktu/image/upload", {
+            method: "POST",
+            body,
+          });
+
+          if (!res.ok) {
+            const text = await res.text().catch(() => "");
+            throw new Error(`HTTP ${res.status}: ${text.slice(0, 200)}`);
+          }
+
+          const data = await res.json();
+          if (!data.secure_url) throw new Error("No URL in response");
+
+          urls.push(data.secure_url);
+          setEntries((prev) => [...prev, { preview, url: data.secure_url }]);
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Upload failed";
+          setError(`${file.name}: ${msg}`);
+          onUploadError?.(msg);
+          setUploading(false);
+          if (inputRef.current) inputRef.current.value = "";
+          return;
+        }
+      }
+
+      if (urls.length > 0) onUploadComplete(urls);
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    },
+    [maxFiles, entries.length, onUploadComplete, onUploadError]
+  );
 
   const handleRemove = useCallback(
     (url: string) => {
       setEntries((prev) => {
         const entry = prev.find((e) => e.url === url);
-        if (entry && entry.preview.startsWith("blob:")) URL.revokeObjectURL(entry.preview);
+        if (entry) URL.revokeObjectURL(entry.preview);
         return prev.filter((e) => e.url !== url);
       });
       onRemoveImage?.(url);
@@ -126,28 +105,32 @@ export default function PropertyImageUploader({
         <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{error}</div>
       )}
 
-      {!ready ? (
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
-          <span className="ml-2 text-sm text-text-secondary">Loading uploader...</span>
+      <input
+        ref={inputRef}
+        id="image-upload-input"
+        type="file"
+        multiple
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={handleFileChange}
+        disabled={uploading}
+      />
+
+      <div
+        onClick={() => inputRef.current?.click()}
+        className="cursor-pointer border-2 border-dashed rounded-lg bg-surface-secondary p-6 text-center hover:border-primary-500 transition-border"
+      >
+        <div className="flex flex-col items-center gap-3 pointer-events-none">
+          {uploading ? (
+            <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+          ) : (
+            <Upload className="h-8 w-8 text-primary-500" />
+          )}
+          <span className="text-sm text-text-primary">
+            {uploading ? "Uploading..." : "Click to upload"}
+          </span>
         </div>
-      ) : (
-        <div
-          onClick={uploading ? undefined : openWidget}
-          className="cursor-pointer border-2 border-dashed rounded-lg bg-surface-secondary p-6 text-center hover:border-primary-500 transition-border"
-        >
-          <div className="flex flex-col items-center gap-3 pointer-events-none">
-            {uploading ? (
-              <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
-            ) : (
-              <Upload className="h-8 w-8 text-primary-500" />
-            )}
-            <span className="text-sm text-text-primary">
-              {uploading ? "Uploading..." : "Click to upload"}
-            </span>
-          </div>
-        </div>
-      )}
+      </div>
 
       {entries.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-3">
