@@ -23,9 +23,6 @@ interface ProfileFormProps {
     location: string | null;
     address: string | null;
     city: string | null;
-    gender: string | null;
-    dateOfBirth: string | null;
-    nationality: string | null;
     kycStatus: string;
   };
 }
@@ -113,9 +110,6 @@ export function ProfileForm({ user }: ProfileFormProps) {
       location: form.get("location") as string,
       address: form.get("address") as string,
       city: form.get("city") as string,
-      gender: form.get("gender") as string,
-      dateOfBirth: form.get("dateOfBirth") as string || undefined,
-      nationality: form.get("nationality") as string,
     };
 
     try {
@@ -309,38 +303,6 @@ export function ProfileForm({ user }: ProfileFormProps) {
               type="tel"
               defaultValue={user.phone || ""}
               placeholder="+254 7XX XXX XXX"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="dateOfBirth">Date of birth</Label>
-            <Input
-              id="dateOfBirth"
-              name="dateOfBirth"
-              type="date"
-              defaultValue={user.dateOfBirth || ""}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="gender">Gender</Label>
-            <select
-              id="gender"
-              name="gender"
-              defaultValue={user.gender || ""}
-              className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-            >
-              <option value="">Select gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="nationality">Nationality</Label>
-            <Input
-              id="nationality"
-              name="nationality"
-              defaultValue={user.nationality || ""}
-              placeholder="e.g., Kenyan"
             />
           </div>
         </div>

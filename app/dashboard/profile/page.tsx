@@ -19,9 +19,6 @@ export default async function ProfilePage() {
       location: true,
       address: true,
       city: true,
-      gender: true,
-      dateOfBirth: true,
-      nationality: true,
       kycStatus: true,
     },
   });
@@ -40,12 +37,7 @@ export default async function ProfilePage() {
         Profile
       </h1>
       <div className="mx-auto max-w-2xl rounded-xl border border-border bg-surface p-6">
-        <ProfileForm
-          user={{
-            ...user,
-            dateOfBirth: user.dateOfBirth?.toISOString().split("T")[0] || null,
-          }}
-        />
+        <ProfileForm user={user} />
       </div>
     </div>
   );

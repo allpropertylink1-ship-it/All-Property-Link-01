@@ -102,9 +102,6 @@ model User {
   website          String?
   estateSubLocation String?
 
-  dateOfBirth      DateTime?
-  gender           String?
-  nationality      String?
   address          String?
   city             String?
   postalCode       String?
