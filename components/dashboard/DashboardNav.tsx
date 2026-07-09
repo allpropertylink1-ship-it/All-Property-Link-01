@@ -43,6 +43,10 @@ const tertiary: NavLink[] = [
   { href: "/dashboard/profile", label: "Personal Profile", icon: User },
 ]
 
+const agentLinks: NavLink[] = [
+  { href: "/dashboard/agent", label: "Agent Dashboard", icon: Briefcase },
+]
+
 const SECTION_LABELS: Record<string, string> = {
   primary: "Verification",
   secondary: "Activity",
@@ -128,6 +132,7 @@ export function DashboardNav() {
           <NavGroup links={primary} section="primary" />
           <NavGroup links={secondary} section="secondary" />
           <NavGroup links={tertiary} section="tertiary" />
+          {user?.aplAgentId && <NavGroup links={agentLinks} section="primary" />}
         </nav>
 
         <div className="border-t border-border p-3">
