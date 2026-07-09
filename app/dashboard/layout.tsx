@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
@@ -17,10 +16,6 @@ export default async function DashboardLayout({
     where: { id: userId },
     select: { accountStatus: true, onboardingComplete: true, kycStatus: true, isAgent: true },
   });
-
-  if (user && user.kycStatus === "VERIFIED" && !user.onboardingComplete && !user.isAgent) {
-    redirect("/dashboard/onboarding");
-  }
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)]">
