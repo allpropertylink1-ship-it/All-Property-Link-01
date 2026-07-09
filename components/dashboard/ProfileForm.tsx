@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { Camera, Save, Key, Trash2, Shield, CheckCircle, Clock, XCircle, Image, Loader2 } from "lucide-react";
+import { Camera, Save, Key, Trash2, Shield, CheckCircle, Clock, XCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ImageCropper from "@/components/kyc/ImageCropper";
 
@@ -246,17 +246,20 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
       <div className="flex items-center gap-6">
         <div className="relative">
-          {passportPhotoUrl ? (
-            <img src={passportPhotoUrl} alt="" className="h-20 w-20 rounded-full object-cover ring-2 ring-primary/20" />
-          ) : (
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-50 text-2xl font-bold text-primary-600">
-              {user.firstName[0]}
-              {user.lastName[0]}
+          <label className="block cursor-pointer">
+            {passportPhotoUrl ? (
+              <img src={passportPhotoUrl} alt="" className="h-20 w-20 rounded-full object-cover ring-2 ring-primary/20" />
+            ) : (
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-50 text-2xl font-bold text-primary-600">
+                {user.firstName[0]}
+                {user.lastName[0]}
+              </div>
+            )}
+            <div className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-primary-600 text-white shadow hover:bg-primary-700 transition-colors">
+              {passportUploading ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
             </div>
-          )}
-          <div className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-primary-600 text-white shadow">
-            <Camera size={14} />
-          </div>
+            <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handlePassportSelect} className="hidden" disabled={passportUploading} />
+          </label>
         </div>
         <div>
           <h2 className="font-heading text-xl font-semibold text-text-primary">
@@ -267,32 +270,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
             <kyc.icon size={14} className={kyc.color} />
             <span className={cn("text-xs", kyc.color)}>KYC: {kyc.label}</span>
           </div>
-        </div>
-      </div>
-
-      <div className="rounded-lg border border-border bg-surface-secondary p-4">
-        <h3 className="mb-3 font-heading text-sm font-semibold text-text-primary">Passport Photo</h3>
-        <div className="flex items-center gap-4">
-          {passportPhotoUrl ? (
-            <img src={passportPhotoUrl} alt="Passport" className="h-16 w-16 rounded-full object-cover ring-2 ring-primary/20" />
-          ) : (
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-50">
-              <Image size={24} className="text-primary-400" />
-            </div>
-          )}
-          <div className="flex-1">
-            <label className="touch-target inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700">
-              {passportUploading ? (
-                <><Loader2 size={14} className="animate-spin" /> Uploading...</>
-              ) : (
-                <><Camera size={14} /> {passportPhotoUrl ? "Change" : "Upload"}</>
-              )}
-              <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handlePassportSelect} className="hidden" disabled={passportUploading} />
-            </label>
-            {passportPhotoUrl && (
-              <p className="mt-1 text-xs text-text-secondary">JPG or PNG, max 10MB</p>
-            )}
-          </div>
+          <p className="mt-0.5 text-xs text-text-secondary">Click the camera icon to change your profile photo</p>
         </div>
       </div>
 
