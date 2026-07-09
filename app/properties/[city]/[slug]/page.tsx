@@ -128,30 +128,44 @@ export default async function PropertyDetailPage({ params }: Props) {
             <>
               {/* Business Profile */}
               <div className="rounded-xl border border-border bg-surface p-6">
-                <div className="flex items-center gap-4 mb-4">
+                {/* Photo row: avatar + businessLogo side by side */}
+                <div className="flex items-center gap-4 mb-5">
                   {property.agent.avatar ? (
                     <Image
                       src={property.agent.avatar}
                       alt={`${property.agent.firstName} ${property.agent.lastName}`}
-                      width={56}
-                      height={56}
-                      className="h-14 w-14 shrink-0 rounded-full border-2 border-border object-cover"
+                      width={72}
+                      height={72}
+                      className="h-[72px] w-[72px] shrink-0 rounded-full border-2 border-border object-cover"
                     />
-                  ) : (
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary-50 border-2 border-border">
-                      <Building2 size={22} className="text-primary-500" />
+                  ) : property.agent.businessLogo ? null : (
+                    <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-primary-50 border-2 border-border">
+                      <Building2 size={28} className="text-primary-500" />
                     </div>
                   )}
-                  <div className="min-w-0">
-                    <h3 className="font-heading text-base font-semibold text-text-primary truncate">
-                      {property.agent.companyName || `${property.agent.firstName} ${property.agent.lastName}`}
-                    </h3>
-                    {property.agent.companyName && (
-                      <p className="truncate text-xs text-text-secondary">
-                        {property.agent.firstName} {property.agent.lastName}
-                      </p>
-                    )}
-                  </div>
+                  {property.agent.businessLogo && (
+                    <div className="relative shrink-0 h-[72px] w-auto min-w-[72px] max-w-[160px]">
+                      <Image
+                        src={property.agent.businessLogo}
+                        alt="Business logo"
+                        width={160}
+                        height={72}
+                        className="h-[72px] w-auto max-w-[160px] rounded-lg border border-border object-contain bg-surface-secondary"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Name row */}
+                <div className="min-w-0 mb-3">
+                  <h3 className="font-heading text-base font-semibold text-text-primary truncate">
+                    {property.agent.companyName || `${property.agent.firstName} ${property.agent.lastName}`}
+                  </h3>
+                  {property.agent.companyName && (
+                    <p className="truncate text-xs text-text-secondary">
+                      {property.agent.firstName} {property.agent.lastName}
+                    </p>
+                  )}
                 </div>
 
                 {property.agent.category && (
@@ -181,7 +195,7 @@ export default async function PropertyDetailPage({ params }: Props) {
                     href={property.agent.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-3 flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700"
+                    className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700"
                   >
                     <Globe size={14} />
                     {property.agent.website.replace(/^https?:\/\//, "")}

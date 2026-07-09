@@ -72,6 +72,7 @@ model User {
   phoneVerified     Boolean   @default(false)
   avatar            String?
   passportPhoto     String?
+  businessLogo      String?
 
   failedLoginAttempts Int      @default(0)
   lockedUntil       DateTime?
