@@ -39,3 +39,8 @@ export async function viewProperty(_propertyId: string) {
 
   return { success: true };
 }
+
+export async function saveSettings(_formData: FormData) {
+  const { requireRole } = await import("@/lib/auth-utils");
+  await requireRole(["ADMIN"]);
+}
