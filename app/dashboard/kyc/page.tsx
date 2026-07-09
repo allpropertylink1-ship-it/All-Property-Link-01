@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, Trash2 } from "lucide-react"
+import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, Trash2, FileText, User } from "lucide-react"
 import { api } from "@/lib/api-client"
 import { cn } from "@/lib/utils"
 import ImageCropper from "@/components/kyc/ImageCropper"
@@ -12,7 +12,9 @@ interface KycDocument {
   documentType: string
   documentNumber: string
   frontImage: string
-  backImage: string
+  backImage: string | null
+  passportPhoto: string | null
+  businessPermit: string | null
   bioData: { firstName?: string; middleName?: string; lastName?: string; phone?: string; email?: string } | null
   status: string
   rejectionReason: string | null
@@ -82,7 +84,11 @@ export default function KycPage() {
   const [backFile, setBackFile] = useState<File | null>(null)
   const [frontUrl, setFrontUrl] = useState("")
   const [backUrl, setBackUrl] = useState("")
-  const [cropping, setCropping] = useState<"front" | "back" | null>(null)
+  const [cropping, setCropping] = useState<"front" | "back" | "passport" | null>(null)
+  const [passportFile, setPassportFile] = useState<File | null>(null)
+  const [passportUrl, setPassportUrl] = useState("")
+  const [businessPermitFile, setBusinessPermitFile] = useState<File | null>(null)
+  const [businessPermitUrl, setBusinessPermitUrl] = useState("")
   const [bioFirstName, setBioFirstName] = useState("")
   const [bioMiddleName, setBioMiddleName] = useState("")
   const [bioLastName, setBioLastName] = useState("")
@@ -181,10 +187,38 @@ export default function KycPage() {
     setCropping(side)
   }
 
+  const handlePassportSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
+      setMessage({ type: "error", text: "Only JPG and PNG files are allowed" }); e.target.value = ""; return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setMessage({ type: "error", text: "File must be under 10MB" }); e.target.value = ""; return
+    }
+    setMessage(null)
+    setPassportFile(file)
+    setCropping("passport")
+  }
+
+  const handleBusinessPermitSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.type !== "application/pdf") {
+      setMessage({ type: "error", text: "Only PDF files are allowed" }); e.target.value = ""; return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setMessage({ type: "error", text: "File must be under 10MB" }); e.target.value = ""; return
+    }
+    setMessage(null)
+    setBusinessPermitFile(file)
+  }
+
   const handleCropComplete = async (blob: Blob) => {
     const file = new File([blob], "document.jpg", { type: "image/jpeg" })
     if (cropping === "front") setFrontFile(file)
     else if (cropping === "back") setBackFile(file)
+    else if (cropping === "passport") setPassportFile(file)
     setCropping(null)
   }
 
@@ -198,6 +232,10 @@ export default function KycPage() {
         setMessage({ type: "error", text: "Document number and front image are required" })
         setSubmitting(false); return
       }
+      if (!passportFile) {
+        setMessage({ type: "error", text: "Passport photo is required" })
+        setSubmitting(false); return
+      }
       if (!bioFirstName.trim() || !bioLastName.trim()) {
         setMessage({ type: "error", text: "First name and last name are required" })
         setSubmitting(false); return
@@ -207,20 +245,25 @@ export default function KycPage() {
         setSubmitting(false); return
       }
 
-      const uploads: File[] = [frontFile]
+      const uploads: File[] = [frontFile, passportFile]
       if (backFile) uploads.push(backFile)
+      if (businessPermitFile) uploads.push(businessPermitFile)
 
       const results = await uploadFiles(uploads)
       if (!results || results.length === 0) throw new Error("Upload failed")
       if (results.some(r => !r.url)) throw new Error("One or more uploads failed")
 
       const frontUrl_ = results[0]!.url!
-      const backUrl_ = backFile ? results[1]!.url! : ""
+      const passportUrl_ = results[1]!.url!
+      let idx = 2
+      const backUrl_ = backFile ? results[idx++]!.url! : ""
+      const businessPermitUrl_ = businessPermitFile ? results[idx]!.url! : ""
 
       const body: Record<string, unknown> = {
         documentType: docType,
         documentNumber: docNumber.trim(),
         frontImage: frontUrl_,
+        passportPhoto: passportUrl_,
         bioData: {
           firstName: bioFirstName.trim(),
           middleName: bioMiddleName.trim() || null,
@@ -230,6 +273,7 @@ export default function KycPage() {
         },
       }
       if (backUrl_) body.backImage = backUrl_
+      if (businessPermitUrl_) body.businessPermit = businessPermitUrl_
       if (aplAgentId && agentConfirmed) body.aplAgentId = aplAgentId
 
       const res = coreDoc?.status === "REJECTED"
@@ -240,6 +284,7 @@ export default function KycPage() {
 
       setMessage({ type: "success", text: "Document submitted" })
       setDocNumber(""); setFrontFile(null); setBackFile(null); setFrontUrl(""); setBackUrl(""); setCropping(null)
+      setPassportFile(null); setPassportUrl(""); setBusinessPermitFile(null); setBusinessPermitUrl("")
       setBioFirstName(""); setBioMiddleName(""); setBioLastName(""); setBioPhone(""); setBioEmail("")
       resetAgentCode()
       fetchKyc()
@@ -438,7 +483,70 @@ export default function KycPage() {
             </div>
           </div>
 
-          <button type="submit" disabled={submitting || !docNumber.trim() || !frontFile}
+          <div className="rounded-xl border border-border bg-surface p-6">
+            <h2 className="mb-4 text-lg font-semibold text-foreground">
+              Passport Photo / Logo <span className="text-red-500">*</span>
+              <span className="ml-2 text-sm font-normal text-muted">Standard digital passport or logo sizing. Crop freely.</span>
+            </h2>
+            {passportFile ? (
+              <div className="space-y-2">
+                {cropping === "passport" && passportFile ? (
+                  <ImageCropper imageUrl={previewUrl(passportFile)!} onCropComplete={handleCropComplete} onCancel={() => setCropping(null)} sideLabel="Passport" />
+                ) : (
+                  <>
+                    <FilePreview url={previewUrl(passportFile)!} onRemove={() => { setPassportFile(null); URL.revokeObjectURL(previewUrl(passportFile)!) }} />
+                    <button type="button" onClick={() => setCropping("passport")} className="text-xs text-primary hover:underline">Re-crop</button>
+                  </>
+                )}
+              </div>
+            ) : passportUrl ? (
+              <div className="space-y-2">
+                {isPdf(passportUrl) ? <PdfViewer url={passportUrl} compact /> : <img src={passportUrl} alt="" className="h-44 w-full rounded-lg object-cover" />}
+              </div>
+            ) : (
+              <label className="flex h-44 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background hover:border-primary/50 hover:bg-primary/5 transition-colors">
+                <User className="mb-2 h-6 w-6 text-muted" />
+                <span className="text-sm text-muted">Upload passport photo or logo</span>
+                <span className="mt-1 text-xs text-muted">JPG or PNG, max 10MB</span>
+                <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handlePassportSelect} className="hidden" />
+              </label>
+            )}
+          </div>
+
+          <div className="rounded-xl border border-border bg-surface p-6">
+            <h2 className="mb-4 text-lg font-semibold text-foreground">
+              Business Permit <span className="text-sm font-normal text-muted">(Optional — upload your business permit document)</span>
+            </h2>
+            {businessPermitFile ? (
+              <div className="flex items-center gap-3 rounded-lg border border-border bg-background p-4">
+                <FileText size={24} className="text-primary shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground truncate">{businessPermitFile.name}</p>
+                  <p className="text-xs text-muted">{(businessPermitFile.size / 1024 / 1024).toFixed(1)} MB</p>
+                </div>
+                <button type="button" onClick={() => { setBusinessPermitFile(null); URL.revokeObjectURL(previewUrl(businessPermitFile)!) }} className="rounded p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors">
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ) : businessPermitUrl ? (
+              <div className="flex items-center gap-3 rounded-lg border border-border bg-background p-4">
+                <FileText size={24} className="text-primary shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground">Business Permit</p>
+                </div>
+                <a href={businessPermitUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">View</a>
+              </div>
+            ) : (
+              <label className="flex h-32 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background hover:border-primary/50 hover:bg-primary/5 transition-colors">
+                <FileText className="mb-2 h-6 w-6 text-muted" />
+                <span className="text-sm text-muted">Upload business permit (PDF)</span>
+                <span className="mt-1 text-xs text-muted">PDF only, max 10MB</span>
+                <input type="file" accept="application/pdf" onChange={handleBusinessPermitSelect} className="hidden" />
+              </label>
+            )}
+          </div>
+
+          <button type="submit" disabled={submitting || !docNumber.trim() || !frontFile || !passportFile}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-base font-medium text-white shadow-lg transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed">
             {submitting ? <Loader2 size={18} className="animate-spin" /> : <Shield size={18} />}
             {submitting ? "Submitting..." : "Submit for Verification"}
@@ -472,10 +580,12 @@ export default function KycPage() {
                       {doc.bioData.email && <span>· {doc.bioData.email}</span>}
                     </div>
                   )}
-                  {(doc.frontImage || doc.backImage) && (
-                    <div className="mt-3 flex gap-3">
+                  {(doc.frontImage || doc.backImage || doc.passportPhoto || doc.businessPermit) && (
+                    <div className="mt-3 flex flex-wrap gap-3">
                       {doc.frontImage && (isPdf(doc.frontImage) ? <PdfViewer url={doc.frontImage} compact /> : <img src={doc.frontImage} alt="" className="h-14 w-20 rounded object-cover" />)}
                       {doc.backImage && (isPdf(doc.backImage) ? <PdfViewer url={doc.backImage} compact /> : <img src={doc.backImage} alt="" className="h-14 w-20 rounded object-cover" />)}
+                      {doc.passportPhoto && <img src={doc.passportPhoto} alt="Passport" className="h-14 w-14 rounded-full object-cover ring-2 ring-primary/20" title="Passport Photo" />}
+                      {doc.businessPermit && (isPdf(doc.businessPermit) ? <PdfViewer url={doc.businessPermit} compact /> : <img src={doc.businessPermit} alt="" className="h-14 w-14 rounded object-cover" />)}
                     </div>
                   )}
                 </div>

@@ -6,7 +6,7 @@ import { Loader2, Check, X, ZoomIn, ZoomOut } from "lucide-react";
 
 interface ImageCropperProps {
   imageUrl: string;
-  aspectRatio: number;
+  aspectRatio?: number;
   onCropComplete: (croppedBlob: Blob) => Promise<void>;
   onCancel: () => void;
   sideLabel?: string;
@@ -96,7 +96,7 @@ export default function ImageCropper({
               Crop {sideLabel || "Image"}
             </h3>
             <p className="text-sm text-gray-500">
-              Drag to position. Aspect ratio locked to document type.
+              {aspectRatio ? "Drag to position. Aspect ratio locked to document type." : "Drag the corners to crop freely."}
             </p>
           </div>
           <button
