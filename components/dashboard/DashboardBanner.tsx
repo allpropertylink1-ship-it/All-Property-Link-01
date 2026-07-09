@@ -3,12 +3,11 @@ import { Clock, XCircle, ShieldAlert } from "lucide-react";
 
 interface DashboardBannerProps {
   accountStatus: string;
-  onboardingComplete: boolean;
   kycStatus: string;
   isAgent?: boolean;
 }
 
-export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, isAgent }: DashboardBannerProps) {
+export function DashboardBanner({ accountStatus, kycStatus, isAgent }: DashboardBannerProps) {
   if (isAgent) return null;
   if (accountStatus === "ACTIVE" && (kycStatus === "VERIFIED" || kycStatus === "PENDING")) return null;
 
@@ -23,7 +22,7 @@ export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, 
             </p>
             <p className="text-error-600">
               {kycStatus === "NONE"
-                ? "Complete identity verification first before setting up your business profile."
+                ? "Complete identity verification to access your dashboard."
                 : "Your identity documents were not approved. Please resubmit."}
             </p>
           </div>
@@ -45,20 +44,8 @@ export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, 
           <Clock size={18} className="shrink-0 text-warning-500" />
           <div className="flex-1">
             <p className="font-medium text-warning-700">Account pending approval</p>
-            <p className="text-warning-600">
-              {onboardingComplete
-                ? "Your information has been submitted. An admin will review and activate your account shortly."
-                : "Please complete your business profile to submit for admin approval."}
-            </p>
+            <p className="text-warning-600">Your account is awaiting admin review. You will be notified once approved.</p>
           </div>
-          {!onboardingComplete && (
-            <Link
-              href="/dashboard/onboarding"
-              className="shrink-0 rounded-lg bg-warning-500 px-4 py-2 text-sm font-medium text-white hover:bg-warning-600"
-            >
-              Complete profile
-            </Link>
-          )}
         </div>
       )}
 
@@ -68,15 +55,9 @@ export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, 
           <div className="flex-1">
             <p className="font-medium text-error-700">Account not approved</p>
             <p className="text-error-600">
-              Your registration was not approved. Please contact support or update your information.
+              Your registration was not approved. Please contact support for assistance.
             </p>
           </div>
-          <Link
-            href="/dashboard/onboarding"
-            className="shrink-0 rounded-lg bg-error-500 px-4 py-2 text-sm font-medium text-white hover:bg-error-600"
-          >
-            Update & resubmit
-          </Link>
         </div>
       )}
     </div>

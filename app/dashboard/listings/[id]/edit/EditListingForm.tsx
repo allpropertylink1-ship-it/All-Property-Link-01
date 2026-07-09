@@ -72,7 +72,8 @@ export default function EditListingForm({ propertyId, property }: { propertyId: 
       formData.append("images", JSON.stringify(imageUrls));
     }
     const result = await updateProperty(propertyId, formData);
-    if (result?.error) setError("Failed to update listing. Please check your inputs.");
+    if (result?.error) { setError(result.error); return }
+    router.push("/dashboard/listings");
   }
 
   const handleImageUploadComplete = (urls: string[]) => {

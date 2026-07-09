@@ -71,15 +71,11 @@ export default async function DashboardPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { onboardingComplete: true, kycStatus: true },
+    select: { kycStatus: true },
   });
 
   if (user && (user.kycStatus === "NONE" || user.kycStatus === "REJECTED")) {
     redirect("/dashboard/kyc");
-  }
-
-  if (user && !user.onboardingComplete) {
-    redirect("/dashboard/onboarding");
   }
 
   const stats = await getStats(userId);

@@ -1,17 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { api } from "@/lib/api-client";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 
 export function DeleteSearchButton({ id }: { id: string }) {
   const router = useRouter();
 
   async function handleDelete() {
-    const res = await fetch(`/api/saved-searches/${id}`, {
-      method: "DELETE",
-    });
-
-    if (res.ok) {
+    const { error } = await api.delete(`/api/saved-searches/${id}`);
+    if (!error) {
       router.refresh();
     }
   }

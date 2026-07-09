@@ -6,6 +6,7 @@ import { Heart } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import Image from "next/image";
+import { api } from "@/lib/api-client";
 
 interface FavoriteItem {
   id: string;
@@ -33,11 +34,9 @@ export default function FavoritesPage() {
   const fetchFavorites = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/favorites");
-      if (res.ok) {
-        const data = await res.json();
-        setFavorites(data.favorites || []);
-      }
+      const { data, error } = await api.get<{ favorites: FavoriteItem[] }>("/api/favorites");
+      if (error) { setFavorites([]); return }
+      setFavorites(data?.favorites || []);
     } catch {
       setFavorites([]);
     } finally {
@@ -51,10 +50,8 @@ export default function FavoritesPage() {
 
   async function handleRemoveFavorite(favorite: FavoriteItem) {
     try {
-      const res = await fetch(`/api/favorites/${favorite.property.id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
+      const { error } = await api.delete(`/api/favorites/${favorite.property.id}`);
+      if (!error) {
         setFavorites((prev) => prev.filter((f) => f.id !== favorite.id));
       }
     } catch {

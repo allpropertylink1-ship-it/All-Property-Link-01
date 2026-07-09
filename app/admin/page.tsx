@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import { requireRole } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 
 export default async function AdminDashboard() {
   await requireRole(["ADMIN"]);
@@ -50,6 +52,7 @@ export default async function AdminDashboard() {
   ];
 
   return (
+    <Suspense fallback={<LoadingSkeleton count={6} />}>
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
@@ -127,5 +130,6 @@ export default async function AdminDashboard() {
         </section>
       </div>
     </div>
+    </Suspense>
   );
 }

@@ -41,12 +41,12 @@ export function ListingForm() {
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) formData.append(key, String(value));
     });
-    // Add images
     if (imageUrls.length > 0) {
       formData.append("images", JSON.stringify(imageUrls));
     }
     const result = await createProperty(formData);
-    if (result?.error) setError("Failed to create listing. Please check your inputs.");
+    if (result?.error) { setError(result.error); return }
+    router.push("/dashboard/listings");
   }
 
   const handleImageUploadComplete = (urls: string[]) => {

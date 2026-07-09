@@ -87,8 +87,6 @@ model User {
   agentLicense     String?
   agencyName       String?
   notificationPrefs Json?
-  onboardingComplete Boolean @default(false)
-
   kycStatus        String    @default("NONE")
   accountStatus    String    @default("PENDING_APPROVAL")
   approvedAt       DateTime?

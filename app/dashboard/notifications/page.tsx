@@ -6,6 +6,7 @@ import { CheckCheck, ExternalLink } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/api-client";
 
 interface NotificationItem {
   id: string;
@@ -38,12 +39,10 @@ export default function NotificationsPage() {
   const fetchNotifications = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/notifications");
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data.notifications || []);
-        setUnreadCount(data.unreadCount || 0);
-      }
+      const { data, error } = await api.get<{ notifications: NotificationItem[]; unreadCount: number }>("/api/notifications");
+      if (error) { setNotifications([]); return }
+      setNotifications(data?.notifications || []);
+      setUnreadCount(data?.unreadCount || 0);
     } catch {
       setNotifications([]);
     } finally {
@@ -57,8 +56,8 @@ export default function NotificationsPage() {
 
   async function handleMarkAllRead() {
     try {
-      const res = await fetch("/api/notifications", { method: "PATCH" });
-      if (res.ok) {
+      const { error } = await api.patch("/api/notifications");
+      if (!error) {
         setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
         setUnreadCount(0);
       }
@@ -69,8 +68,8 @@ export default function NotificationsPage() {
 
   async function handleMarkRead(id: string) {
     try {
-      const res = await fetch(`/api/notifications/${id}`, { method: "PATCH" });
-      if (res.ok) {
+      const { error } = await api.patch(`/api/notifications/${id}`);
+      if (!error) {
         setNotifications((prev) =>
           prev.map((n) => (n.id === id ? { ...n, read: true } : n))
         );
