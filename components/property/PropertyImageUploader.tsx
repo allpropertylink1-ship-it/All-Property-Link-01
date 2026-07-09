@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback, ChangeEvent, FormEvent } from "react";
+import { useState, useCallback, ChangeEvent } from "react";
 import { uploadImage } from "@/lib/actions/upload";
-import { Upload } from "lucide-react";
+import { Upload, Loader2, X } from "lucide-react";
 
 interface PropertyImageUploaderProps {
   onUploadComplete: (urls: string[]) => void;
@@ -19,25 +19,23 @@ export default function PropertyImageUploader({
   maxFiles = 10,
   accept = "image/*",
 }: PropertyImageUploaderProps) {
-  const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const handleFileChange = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
       if (!multiple && files.length > 1) {
         setError("Please select only one file");
         return;
       }
-      if (files.length > maxFiles) {
-        setError(`Please select no more than ${maxFiles} files`);
+      if (previews.length + files.length > maxFiles) {
+        setError(`Maximum ${maxFiles} images allowed`);
         return;
       }
 
-      // Validate each file
       for (const file of files) {
         const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
         if (!allowedTypes.includes(file.type)) {
@@ -50,34 +48,16 @@ export default function PropertyImageUploader({
         }
       }
 
-      setImages(files);
-      // Create preview URLs
-      const previews = await Promise.all(
-        files.map(
-          (file) => URL.createObjectURL(file)
-        )
-      );
-      setPreviews(previews);
       setError(null);
-    },
-    [multiple, maxFiles]
-  );
-
-  const handleUpload = useCallback(
-    async (e: FormEvent) => {
-      e.preventDefault();
-      if (images.length === 0) {
-        setError("Please select at least one image to upload");
-        return;
-      }
       setUploading(true);
-      setError(null);
-      setSuccess(null);
 
-      const uploadPromises = images.map((image) => {
-        const formData = new FormData();
-        formData.append("file", image);
-        return uploadImage(formData);
+      const newPreviews = files.map((f) => URL.createObjectURL(f));
+      setPreviews((prev) => [...prev, ...newPreviews]);
+
+      const uploadPromises = files.map((file) => {
+        const fd = new FormData();
+        fd.append("file", file);
+        return uploadImage(fd);
       });
 
       try {
@@ -96,8 +76,9 @@ export default function PropertyImageUploader({
         if (errors.length > 0) {
           setError(errors.join(" "));
           onUploadError?.(errors.join(" "));
-        } else {
-          setSuccess(`Successfully uploaded ${urls.length} image(s)`);
+        }
+
+        if (urls.length > 0) {
           onUploadComplete(urls);
         }
       } catch {
@@ -105,45 +86,34 @@ export default function PropertyImageUploader({
         onUploadError?.("Upload failed. Please try again.");
       } finally {
         setUploading(false);
+        e.target.value = "";
       }
     },
-    [images, onUploadComplete, onUploadError]
+    [multiple, maxFiles, previews.length, onUploadComplete, onUploadError]
   );
 
-  const handleRemoveImage = useCallback((index: number) => {
-    setImages((prev) => {
-      const newImages = [...prev];
-      newImages.splice(index, 1);
-      return newImages;
-    });
-    setPreviews((prev) => {
-      const newPreviews = [...prev];
-      newPreviews.splice(index, 1);
-      return newPreviews;
-    });
-    // Revoke the object URL to free memory
-    URL.revokeObjectURL(previews[index]);
-  }, [previews]);
+  const handleRemoveImage = useCallback(
+    (index: number) => {
+      setPreviews((prev) => {
+        const updated = [...prev];
+        URL.revokeObjectURL(updated[index]);
+        updated.splice(index, 1);
+        return updated;
+      });
+    },
+    []
+  );
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-text-primary">Property Images</h2>
         <p className="text-sm text-text-secondary">
           Upload up to {maxFiles} images (JPEG, PNG, WebP). Max size 5MB each.
         </p>
       </div>
 
       {error && (
-        <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="rounded-lg bg-success-500/10 px-4 py-3 text-sm text-success-500">
-          {success}
-        </div>
+        <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{error}</div>
       )}
 
       <div className="border-2 border-dashed rounded-lg bg-surface-secondary p-6 text-center hover:border-primary-500 transition-border">
@@ -151,10 +121,16 @@ export default function PropertyImageUploader({
           onClick={() => document.getElementById("image-upload-input")?.click()}
           className="cursor-pointer flex flex-col items-center gap-3"
         >
-          <Upload className="h-8 w-8 text-primary-500" />
-          <span className="text-sm text-text-primary">Click to upload</span>
+          {uploading ? (
+            <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+          ) : (
+            <Upload className="h-8 w-8 text-primary-500" />
+          )}
+          <span className="text-sm text-text-primary">
+            {uploading ? "Uploading..." : "Click to upload"}
+          </span>
           <span className="text-xs text-text-secondary">
-            or drag and drop images here
+            Images upload automatically after selection
           </span>
         </div>
         <input
@@ -164,46 +140,29 @@ export default function PropertyImageUploader({
           accept={accept}
           className="hidden"
           onChange={handleFileChange}
+          disabled={uploading}
         />
-        <button
-          type="button"
-          onClick={() => document.getElementById("image-upload-input")?.click()}
-          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-text-on-primary hover:bg-primary-700"
-        >
-          Upload Images
-        </button>
       </div>
 
-      {images.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="font-semibold text-text-primary">Preview</h3>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {previews.map((preview, index) => (
-              <div key={preview} className="relative group">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={preview}
-                  alt={`Property image ${index + 1}`}
-                  className="rounded-lg w-full h-48 object-cover"
-                />
-                <button
-                  onClick={() => handleRemoveImage(index)}
-                  className="absolute top-2 right-2 rounded-full bg-error-500/20 p-1 text-xs font-medium text-error-500 hover:bg-error-500/30 transition-colors group-hover:bg-error-500/40"
-                  aria-label={`Remove image ${index + 1}`}
-                >
-                  &times;
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <button
-            onClick={handleUpload}
-            disabled={images.length === 0}
-            className="w-full flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-text-on-primary hover:bg-primary-700 disabled:opacity-50"
-          >
-            {uploading ? "Uploading..." : "Upload Images"}
-          </button>
+      {previews.length > 0 && (
+        <div className="grid gap-4 sm:grid-cols-3">
+          {previews.map((preview, index) => (
+            <div key={preview} className="relative group">
+              <img
+                src={preview}
+                alt={`Property image ${index + 1}`}
+                className="rounded-lg w-full h-48 object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => handleRemoveImage(index)}
+                className="absolute top-2 right-2 rounded-full bg-error-500/80 p-1 text-white hover:bg-error-500 transition-colors"
+                aria-label={`Remove image ${index + 1}`}
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>

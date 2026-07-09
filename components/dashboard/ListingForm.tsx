@@ -119,7 +119,6 @@ export function ListingForm() {
         <Input id="features" placeholder="Parking, Pool, Garden" {...register("features")} />
       </div>
       <div className="space-y-6">
-        <h2 className="font-semibold text-text-primary">Property Images</h2>
         <PropertyImageUploader 
           onUploadComplete={handleImageUploadComplete}
           onUploadError={handleImageUploadError}

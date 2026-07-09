@@ -128,7 +128,7 @@ export async function createProperty(data: PropertyInput, userId: string) {
   const slug = await uniqueSlug(slugify(data.title));
   return prisma.property.create({
     data: dataToCreate(data, {
-      slug, agentId: userId, moderationStatus: "DRAFT", isPublished: false, version: 1,
+      slug, agentId: userId, moderationStatus: "APPROVED", isPublished: true, publishedAt: new Date(), version: 1,
     }),
   });
 }

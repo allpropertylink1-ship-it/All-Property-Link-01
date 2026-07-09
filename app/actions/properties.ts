@@ -15,7 +15,7 @@ import {
 function parseForm(formData: FormData) {
   const raw: Record<string, unknown> = {};
   Array.from(formData.entries()).forEach(([key, value]) => { raw[key] = value; });
-  if (typeof raw.features === "string") { try { raw.features = JSON.parse(raw.features); } catch { raw.features = []; } }
+  if (typeof raw.features === "string") { raw.features = raw.features.split(",").map((s) => s.trim()).filter(Boolean); }
   if (typeof raw.images === "string") { try { raw.images = JSON.parse(raw.images); } catch { raw.images = []; } }
   return raw;
 }
@@ -26,8 +26,8 @@ export async function createProperty(formData: FormData) {
   const session = await requireAuth();
   const userId = (session.user as { id: string }).id;
   const kycStatus = (session.user as { kycStatus?: string }).kycStatus;
-  if (kycStatus !== "VERIFIED") {
-    return { success: false, error: "KYC verification required to post listings. Complete your KYC verification first." };
+  if (kycStatus !== "VERIFIED" && kycStatus !== "NONE") {
+    return { success: false, error: "KYC verification required to post listings." };
   }
   const parsed = propertySchema.safeParse(parseForm(formData));
   if (!parsed.success) return { success: false, error: Object.values(parsed.error.flatten().fieldErrors).flat().join(", ") };
