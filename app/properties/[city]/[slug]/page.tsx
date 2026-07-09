@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getPropertyBySlug } from "@/lib/services/property";
+import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
 import { Building2, Phone, Mail, Globe, Sparkles, MessageCircle } from "lucide-react";
 
@@ -43,19 +44,7 @@ export default async function PropertyDetailPage({ params }: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="mx-auto max-w-5xl px-4 py-8">
-      <div className="mb-8 grid gap-4 sm:grid-cols-2">
-        {imageUrls.slice(0, 4).map((url, i) => (
-          <div key={i} className="aspect-[4/3] overflow-hidden rounded-xl bg-surface-secondary">
-            <Image
-              src={url}
-              alt={property.title}
-              width={400}
-              height={300}
-              className="h-full w-full object-cover"
-            />
-          </div>
-        ))}
-      </div>
+      <PropertyGallery images={imageUrls} title={property.title} />
 
       <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
         <div>
