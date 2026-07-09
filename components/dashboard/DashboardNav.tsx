@@ -28,7 +28,7 @@ interface NavLink {
 
 const primary: NavLink[] = [
   { href: "/dashboard/kyc", label: "KYC Verification", icon: Shield },
-  { href: "/dashboard", label: "Business Profile", icon: Briefcase },
+  { href: "/dashboard", label: "Business Summary", icon: Briefcase },
 ]
 
 const secondary: NavLink[] = [
@@ -41,6 +41,7 @@ const secondary: NavLink[] = [
 
 const tertiary: NavLink[] = [
   { href: "/dashboard/profile", label: "Personal Profile", icon: User },
+  { href: "/dashboard/profile/business", label: "Business Profile", icon: Briefcase },
 ]
 
 const agentLinks: NavLink[] = [
