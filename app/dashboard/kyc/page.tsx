@@ -147,7 +147,7 @@ export default function KycPage() {
       fd.append("timestamp", String(timestamp))
       fd.append("signature", signature)
       fd.append("folder", "allpropertylink/kyc")
-      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: fd })
+      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${file.type === "application/pdf" ? "raw" : "image"}/upload`, { method: "POST", body: fd })
       if (!uploadRes.ok) throw new Error("Cloudinary upload failed")
       const result = await uploadRes.json()
       return { url: result.secure_url, publicId: result.public_id }
