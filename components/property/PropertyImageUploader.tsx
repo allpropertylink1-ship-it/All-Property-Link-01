@@ -2,22 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { Upload, Loader2, X } from "lucide-react";
-
-function resizeImage(file: File, maxW = 1200, quality = 0.8): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const c = document.createElement("canvas");
-      let w = img.width, h = img.height;
-      if (w > maxW) { h = h * maxW / w; w = maxW; }
-      c.width = w; c.height = h;
-      c.getContext("2d")!.drawImage(img, 0, 0, w, h);
-      resolve(c.toDataURL("image/jpeg", quality));
-    };
-    img.onerror = () => reject(new Error("Failed to read image"));
-    img.src = URL.createObjectURL(file);
-  });
-}
+import { api } from "@/lib/api-client";
 
 interface PropertyImageUploaderProps {
   onUploadComplete: (urls: string[]) => void;
@@ -32,8 +17,8 @@ export default function PropertyImageUploader({
   onRemoveImage,
   maxFiles = 10,
 }: PropertyImageUploaderProps) {
-  const [entries, setEntries] = useState<Array<{ preview: string; dataUrl: string }>>([]);
-  const [processing, setProcessing] = useState(false);
+  const [entries, setEntries] = useState<Array<{ preview: string; url: string }>>([]);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -55,27 +40,53 @@ export default function PropertyImageUploader({
       }
 
       setError(null);
-      setProcessing(true);
+      setUploading(true);
 
-      const dataUrls: string[] = [];
+      const urls: string[] = [];
 
       for (const file of files) {
         try {
-          const dataUrl = await resizeImage(file);
-          setEntries((prev) => [...prev, { preview: dataUrl, dataUrl }]);
-          dataUrls.push(dataUrl);
+          const preview = URL.createObjectURL(file);
+
+          const signRes = await api.post<{ signature: string; timestamp: number; apiKey: string; cloudName: string }>(
+            "/api/uploadthing/sign",
+            { folder: "allpropertylink/property-listings" }
+          );
+          if (signRes.error || !signRes.data) throw new Error(signRes.error || "Failed to get upload signature");
+
+          const { signature, timestamp, apiKey, cloudName } = signRes.data;
+          const fd = new FormData();
+          fd.append("file", file);
+          fd.append("api_key", apiKey);
+          fd.append("timestamp", String(timestamp));
+          fd.append("signature", signature);
+          fd.append("folder", "allpropertylink/property-listings");
+
+          const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+            method: "POST",
+            body: fd,
+          });
+          if (!uploadRes.ok) {
+            const text = await uploadRes.text().catch(() => "");
+            throw new Error(`Cloudinary ${uploadRes.status}: ${text.slice(0, 200)}`);
+          }
+          const result = await uploadRes.json();
+          if (!result.secure_url) throw new Error("No URL returned from Cloudinary");
+
+          urls.push(result.secure_url);
+          setEntries((prev) => [...prev, { preview, url: result.secure_url }]);
         } catch (err) {
-          const msg = err instanceof Error ? err.message : "Failed to process image";
+          const msg = err instanceof Error ? err.message : "Upload failed";
           setError(`${file.name}: ${msg}`);
           onUploadError?.(msg);
-          setProcessing(false);
+          setUploading(false);
           if (inputRef.current) inputRef.current.value = "";
           return;
         }
       }
 
-      if (dataUrls.length > 0) onUploadComplete(dataUrls);
-      setProcessing(false);
+      if (urls.length > 0) onUploadComplete(urls);
+      setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
     },
     [maxFiles, entries.length, onUploadComplete, onUploadError]
@@ -83,7 +94,11 @@ export default function PropertyImageUploader({
 
   const handleRemove = useCallback(
     (url: string) => {
-      setEntries((prev) => prev.filter((e) => e.dataUrl !== url));
+      setEntries((prev) => {
+        const entry = prev.find((e) => e.url === url);
+        if (entry && entry.preview.startsWith("blob:")) URL.revokeObjectURL(entry.preview);
+        return prev.filter((e) => e.url !== url);
+      });
       onRemoveImage?.(url);
     },
     [onRemoveImage]
@@ -107,7 +122,7 @@ export default function PropertyImageUploader({
         accept="image/jpeg,image/png,image/webp"
         className="hidden"
         onChange={handleFileChange}
-        disabled={processing}
+        disabled={uploading}
       />
 
       <div
@@ -115,13 +130,13 @@ export default function PropertyImageUploader({
         className="cursor-pointer border-2 border-dashed rounded-lg bg-surface-secondary p-6 text-center hover:border-primary-500 transition-border"
       >
         <div className="flex flex-col items-center gap-3 pointer-events-none">
-          {processing ? (
+          {uploading ? (
             <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
           ) : (
             <Upload className="h-8 w-8 text-primary-500" />
           )}
           <span className="text-sm text-text-primary">
-            {processing ? "Processing..." : "Click to upload"}
+            {uploading ? "Uploading..." : "Click to upload"}
           </span>
         </div>
       </div>
@@ -129,7 +144,7 @@ export default function PropertyImageUploader({
       {entries.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-3">
           {entries.map((entry) => (
-            <div key={entry.dataUrl} className="relative group">
+            <div key={entry.url} className="relative group">
               <img
                 src={entry.preview}
                 alt="Property image"
@@ -137,7 +152,7 @@ export default function PropertyImageUploader({
               />
               <button
                 type="button"
-                onClick={() => handleRemove(entry.dataUrl)}
+                onClick={() => handleRemove(entry.url)}
                 className="absolute top-2 right-2 rounded-full bg-error-500/80 p-1 text-white hover:bg-error-500 transition-colors"
                 aria-label="Remove image"
               >
