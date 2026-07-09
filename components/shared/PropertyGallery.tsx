@@ -69,19 +69,19 @@ export function PropertyGallery({ images, title }: Props) {
 
   if (images.length === 1) {
     return (
-      <div className="mb-8 overflow-hidden rounded-xl">
+      <div className="mb-8 rounded-xl bg-surface-secondary p-4 sm:p-6">
         <button
           type="button"
           onClick={() => openLightbox(0)}
-          className="group relative block w-full"
+          className="group relative mx-auto block max-w-lg"
           aria-label="View image full-screen"
         >
           <Image
             src={images[0]}
             alt={title}
-            width={1000}
-            height={650}
-            className="h-auto w-full rounded-xl object-cover"
+            width={600}
+            height={400}
+            className="h-auto w-full rounded-lg object-cover"
             priority
           />
           <span className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-lg bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100">
@@ -95,14 +95,14 @@ export function PropertyGallery({ images, title }: Props) {
   return (
     <>
       <div
-        className="mb-8"
+        className="mb-8 rounded-xl bg-surface-secondary p-4 sm:p-6"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         onFocus={() => setPaused(true)}
         onBlur={() => setPaused(false)}
       >
         {/* Main image */}
-        <div className="relative overflow-hidden rounded-xl">
+        <div className="relative mx-auto max-w-lg">
           <button
             type="button"
             onClick={() => openLightbox(current)}
@@ -112,9 +112,9 @@ export function PropertyGallery({ images, title }: Props) {
             <Image
               src={images[current]}
               alt={`${title} — image ${current + 1} of ${images.length}`}
-              width={1000}
-              height={650}
-              className="h-auto w-full rounded-xl object-cover transition-opacity duration-300"
+              width={600}
+              height={400}
+              className="h-auto w-full rounded-lg object-cover transition-opacity duration-300"
               priority={current === 0}
             />
           </button>
@@ -154,7 +154,7 @@ export function PropertyGallery({ images, title }: Props) {
         </div>
 
         {/* Thumbnails */}
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+        <div className="mt-4 flex justify-center gap-2 overflow-x-auto pb-1">
           {images.map((url, i) => (
             <button
               key={i}
