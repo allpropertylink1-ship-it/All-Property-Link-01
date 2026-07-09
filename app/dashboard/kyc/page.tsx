@@ -150,9 +150,7 @@ export default function KycPage() {
       const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: fd })
       if (!uploadRes.ok) throw new Error("Cloudinary upload failed")
       const result = await uploadRes.json()
-      let url = result.secure_url
-      if (file.type === "application/pdf" && !/\.pdf$/i.test(url)) url += ".pdf"
-      return { url, publicId: result.public_id }
+      return { url: result.secure_url, publicId: result.public_id }
     }))
   }
 
@@ -583,7 +581,7 @@ export default function KycPage() {
                       {doc.frontImage && (isPdf(doc.frontImage) ? <PdfViewer url={doc.frontImage} compact /> : <img src={doc.frontImage} alt="" className="h-14 w-20 rounded object-cover" />)}
                       {doc.backImage && (isPdf(doc.backImage) ? <PdfViewer url={doc.backImage} compact /> : <img src={doc.backImage} alt="" className="h-14 w-20 rounded object-cover" />)}
                       {doc.passportPhoto && <img src={doc.passportPhoto} alt="Passport" className="h-14 w-14 rounded-full object-cover ring-2 ring-primary/20" title="Passport Photo" />}
-                      {doc.businessPermit && (isPdf(doc.businessPermit) ? <PdfViewer url={doc.businessPermit} compact /> : <img src={doc.businessPermit} alt="" className="h-14 w-14 rounded object-cover" />)}
+                      {doc.businessPermit && <PdfViewer url={doc.businessPermit} compact />}
                     </div>
                   )}
                 </div>
