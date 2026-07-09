@@ -8,7 +8,7 @@ import { withRateLimit } from "@/lib/rate-limiter";
 const REDIRECT_ERROR_CODE = "NEXT_REDIRECT";
 
 function isRedirect(err: unknown): boolean {
-  return err instanceof Error && "digest" in err && String((err as any).digest).startsWith(REDIRECT_ERROR_CODE);
+  return err instanceof Error && "digest" in err && String((err as Error & { digest: string }).digest).startsWith(REDIRECT_ERROR_CODE);
 }
 import {
   createProperty as createPropertyService,
