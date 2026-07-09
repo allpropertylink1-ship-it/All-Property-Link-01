@@ -30,31 +30,15 @@ async function uniqueSlug(base: string) {
   return slug;
 }
 
-function dataToCreate(data: PropertyInput, extra: Record<string, unknown>) {
-  return {
-    title: data.title, description: data.description, price: data.price,
-    currency: data.currency, propertyType: data.propertyType, status: data.status,
-    address: data.address, city: data.city, region: data.region, country: data.country,
-    bedrooms: data.bedrooms, bathrooms: data.bathrooms, area: data.area,
-    latitude: data.latitude, longitude: data.longitude,
-    features: data.features ?? [], seoTitle: data.seoTitle, seoDescription: data.seoDescription,
-    images: (data.images ?? []) as Prisma.InputJsonValue,
-    ...extra,
-  } as Prisma.PropertyUncheckedCreateInput;
-}
-
-function dataToUpdate(data: PropertyInput, extra: Record<string, unknown>) {
-  return {
-    title: data.title, description: data.description, price: data.price,
-    currency: data.currency, propertyType: data.propertyType, status: data.status,
-    address: data.address, city: data.city, region: data.region, country: data.country,
-    bedrooms: data.bedrooms, bathrooms: data.bathrooms, area: data.area,
-    latitude: data.latitude, longitude: data.longitude,
-    features: data.features ?? [], seoTitle: data.seoTitle, seoDescription: data.seoDescription,
-    images: (data.images ?? []) as Prisma.InputJsonValue,
-    ...extra,
-  } as Prisma.PropertyUncheckedUpdateInput;
-}
+const propertyFields = (data: PropertyInput) => ({
+  title: data.title, description: data.description, price: data.price,
+  currency: data.currency, propertyType: data.propertyType, status: data.status,
+  address: data.address, city: data.city, region: data.region, country: data.country,
+  bedrooms: data.bedrooms, bathrooms: data.bathrooms, area: data.area,
+  latitude: data.latitude, longitude: data.longitude,
+  features: data.features ?? [], seoTitle: data.seoTitle, seoDescription: data.seoDescription,
+  images: (data.images ?? []) as Prisma.InputJsonValue,
+})
 
 export async function getProperties(filters: PropertyFilters = {}) {
   const page = filters.page || 1;
@@ -62,8 +46,6 @@ export async function getProperties(filters: PropertyFilters = {}) {
   const skip = (page - 1) * pageSize;
 
   const where: Prisma.PropertyWhereInput = {
-    moderationStatus: "APPROVED",
-    isPublished: true,
     deletedAt: null,
   };
 
@@ -108,8 +90,8 @@ export async function getProperties(filters: PropertyFilters = {}) {
 
 export async function getPropertyBySlug(slug: string) {
   const property = await prisma.property.findFirst({
-    where: { slug, moderationStatus: "APPROVED", isPublished: true, deletedAt: null },
-    include: { agent: { select: { firstName: true, lastName: true, phone: true, avatar: true } } },
+    where: { slug, deletedAt: null },
+    include: { agent: { select: { firstName: true, lastName: true, phone: true, avatar: true, companyName: true, category: true, specialties: true, website: true } } },
   });
   if (!property) return null;
   return { ...property, price: Number(property.price) };
@@ -118,7 +100,7 @@ export async function getPropertyBySlug(slug: string) {
 export async function getCities() {
   return prisma.property.groupBy({
     by: ["city"],
-    where: { moderationStatus: "APPROVED", isPublished: true, deletedAt: null },
+    where: { deletedAt: null },
     _count: { city: true },
     orderBy: { _count: { city: "desc" } },
   });
@@ -127,9 +109,7 @@ export async function getCities() {
 export async function createProperty(data: PropertyInput, userId: string) {
   const slug = await uniqueSlug(slugify(data.title));
   return prisma.property.create({
-    data: dataToCreate(data, {
-      slug, agentId: userId, moderationStatus: "APPROVED", isPublished: true, publishedAt: new Date(), version: 1,
-    }),
+    data: { ...propertyFields(data), slug, agentId: userId, moderationStatus: "APPROVED", isPublished: true, publishedAt: new Date(), version: 1 },
   });
 }
 
@@ -148,7 +128,7 @@ export async function updateProperty(
   try {
     await prisma.property.update({
       where: { id, version: existing.version },
-      data: dataToUpdate(data, { version: { increment: 1 } }),
+      data: { ...propertyFields(data), version: { increment: 1 } },
     });
     return { success: true } as const;
   } catch (e) {

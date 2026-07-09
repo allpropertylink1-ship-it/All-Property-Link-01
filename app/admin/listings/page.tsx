@@ -5,8 +5,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { getProperties, approveProperty, rejectProperty, togglePublish, viewProperty } from "@/lib/admin-actions";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { getProperties, viewProperty } from "@/lib/admin-actions";
 
 interface PropertyRow {
   id: string;
@@ -23,7 +22,6 @@ interface PropertyRow {
 }
 
 export default function AdminListingsPage() {
-  const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "expired" | "all">("pending");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [properties, setProperties] = useState<PropertyRow[]>([]);
@@ -34,18 +32,13 @@ export default function AdminListingsPage() {
       setLoading(true);
       setTotal(0);
       setProperties([]);
-      const result = await getProperties(filter, page);
+      const result = await getProperties(page);
       setTotal(result.total);
       setProperties(result.properties as unknown as PropertyRow[]);
       setLoading(false);
     };
     fetchProperties();
-  }, [filter, page]);
-
-  const handleFilterChange = (f: "pending" | "approved" | "rejected" | "expired" | "all") => {
-    setFilter(f);
-    setPage(1);
-  };
+  }, [page]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -63,31 +56,15 @@ export default function AdminListingsPage() {
             Property Management
           </h1>
           <p className="text-text-secondary">
-            Review and manage property listings
+            View all property listings
           </p>
-        </div>
-        <div className="flex gap-2">
-          {(["pending", "approved", "rejected", "expired", "all"] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => handleFilterChange(f)}
-              className={cn(
-                "touch-target flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
-                filter === f
-                  ? "bg-primary-600 text-white"
-                  : "border-border text-text-secondary hover:bg-surface-secondary hover:text-text-primary"
-              )}
-            >
-              {f === "pending" ? "Pending Review" : f === "approved" ? "Approved" : f === "rejected" ? "Rejected" : f === "expired" ? "Expired" : "All"}
-            </button>
-          ))}
         </div>
       </div>
 
       {properties.length === 0 ? (
         <EmptyState
           title="No properties found"
-          description={filter === "pending" ? "No properties awaiting approval" : "No properties match this filter"}
+          description="No properties have been listed yet."
         />
       ) : (
         <>
@@ -182,69 +159,21 @@ export default function AdminListingsPage() {
                       <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                         prop.moderationStatus === "DRAFT"
                           ? "bg-surface-secondary text-text-secondary"
-                          : prop.moderationStatus === "PENDING_REVIEW"
-                            ? "bg-warning-500/10 text-warning-500"
-                            : prop.moderationStatus === "APPROVED"
-                              ? "bg-success-500/10 text-success-600"
-                              : prop.moderationStatus === "REJECTED"
-                                ? "bg-error-500/10 text-error-600"
-                                : prop.moderationStatus === "EXPIRED"
-                                  ? "bg-warning-500/10 text-warning-500"
-                                  : prop.moderationStatus === "ARCHIVED"
-                                    ? "bg-surface-secondary text-text-secondary"
-                                    : "bg-surface-secondary text-text-secondary"
+                          : prop.moderationStatus === "APPROVED"
+                            ? "bg-success-500/10 text-success-600"
+                            : prop.moderationStatus === "REJECTED"
+                              ? "bg-error-500/10 text-error-600"
+                              : prop.moderationStatus === "EXPIRED"
+                                ? "bg-warning-500/10 text-warning-500"
+                                : prop.moderationStatus === "ARCHIVED"
+                                  ? "bg-surface-secondary text-text-secondary"
+                                  : "bg-surface-secondary text-text-secondary"
                       }`}>
-                        {prop.moderationStatus === "DRAFT" ? "Draft" : prop.moderationStatus === "PENDING_REVIEW" ? "Pending Review" : prop.moderationStatus === "APPROVED" ? "Approved" : prop.moderationStatus === "REJECTED" ? "Rejected" : prop.moderationStatus === "EXPIRED" ? "Expired" : "Archived"}
+                        {prop.moderationStatus === "DRAFT" ? "Draft" : prop.moderationStatus === "APPROVED" ? "Approved" : prop.moderationStatus === "REJECTED" ? "Rejected" : prop.moderationStatus === "EXPIRED" ? "Expired" : "Archived"}
                       </span>
                     </td>
                     <td className="px-4 py-3 space-x-2">
                       <div className="flex space-x-2">
-                        {prop.moderationStatus === "PENDING_REVIEW" && (
-                          <>
-                            <button
-                              onClick={() => approveProperty(prop.id)}
-                              className="touch-target flex items-center gap-1 rounded-lg bg-success-500 px-3 py-2 text-sm font-medium text-white hover:bg-success-600"
-                            >
-                              Approve
-                            </button>
-                            <ConfirmDialog
-                              trigger={
-                                <button className="touch-target flex items-center gap-1 rounded-lg bg-error-500 px-3 py-2 text-sm font-medium text-white hover:bg-error-600">
-                                  Reject
-                                </button>
-                              }
-                              title="Reject Property"
-                              description={`Are you sure you want to reject "${prop.title}"?`}
-                              confirmLabel="Reject"
-                              confirmVariant="destructive"
-                              onConfirm={() => rejectProperty(prop.id)}
-                            />
-                          </>
-                        )}
-                        {prop.isPublished && (
-                          <>
-                            <ConfirmDialog
-                              trigger={
-                                <button className="touch-target flex items-center gap-1 rounded-lg bg-warning-500 px-3 py-2 text-sm font-medium text-white hover:bg-warning-600">
-                                  Unpublish
-                                </button>
-                              }
-                              title="Unpublish Property"
-                              description={`Are you sure you want to unpublish "${prop.title}"? It will no longer be visible to users.`}
-                              confirmLabel="Unpublish"
-                              confirmVariant="destructive"
-                              onConfirm={() => togglePublish(prop.id, false)}
-                            />
-                          </>
-                        )}
-                        {!prop.isPublished && prop.moderationStatus === "APPROVED" && (
-                          <button
-                            onClick={() => togglePublish(prop.id, true)}
-                            className="touch-target flex items-center gap-1 rounded-lg bg-primary-600 px-3 py-2 text-sm font-medium text-white hover:bg-primary-700"
-                          >
-                            Publish
-                          </button>
-                        )}
                         <button
                           onClick={() => viewProperty(prop.id)}
                           className="touch-target flex items-center gap-1 rounded-lg bg-primary-600 px-3 py-2 text-sm font-medium text-text-on-primary hover:bg-primary-700"
@@ -263,4 +192,3 @@ export default function AdminListingsPage() {
     </div>
   );
 }
-

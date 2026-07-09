@@ -22,7 +22,7 @@ const staticPages = (base: string): MetadataRoute.Sitemap => [
 async function propertyPages(base: string): Promise<MetadataRoute.Sitemap> {
   try {
     const properties = await prisma.property.findMany({
-      where: { moderationStatus: "APPROVED", isPublished: true, deletedAt: null },
+      where: { deletedAt: null },
       select: { slug: true, city: true, updatedAt: true },
     });
     const cityMap = new Map<string, Date>();

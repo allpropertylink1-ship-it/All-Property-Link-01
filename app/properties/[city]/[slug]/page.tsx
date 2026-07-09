@@ -125,12 +125,39 @@ export default async function PropertyDetailPage({ params }: Props) {
         <div className="space-y-4">
           <div className="rounded-xl border border-border bg-surface p-6">
             <h3 className="font-heading text-lg font-semibold text-text-primary">
-              Contact agent
+              Lister
             </h3>
             {property.agent && (
-              <p className="mt-2 text-sm text-text-secondary">
-                {property.agent.firstName} {property.agent.lastName}
-              </p>
+              <div className="mt-2 space-y-2">
+                <p className="text-sm font-medium text-text-primary">
+                  {property.agent.firstName} {property.agent.lastName}
+                </p>
+                {property.agent.companyName && (
+                  <p className="text-xs text-text-secondary">{property.agent.companyName}</p>
+                )}
+                {property.agent.category && (
+                  <p className="text-xs text-text-secondary">{property.agent.category}</p>
+                )}
+                {property.agent.specialties?.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {property.agent.specialties.map((s: string, i: number) => (
+                      <span key={i} className="rounded-full bg-surface-secondary px-2 py-0.5 text-xs text-text-secondary">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {property.agent?.website && (
+              <a
+                href={property.agent.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 flex items-center gap-1.5 text-xs text-primary-600 hover:text-primary-700"
+              >
+                {property.agent.website.replace(/^https?:\/\//, "")}
+              </a>
             )}
             <a
               href={`/contact?property=${encodeURIComponent(property.title)}`}

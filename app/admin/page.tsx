@@ -11,24 +11,20 @@ export default async function AdminDashboard() {
     totalUsers,
     totalAgents,
     totalProperties,
-    pendingProperties,
     totalInquiries,
     pendingInquiries,
     pendingKyc,
-    pendingApprovals,
     recentProperties,
     recentInquiries,
   ] = await Promise.all([
     prisma.user.count({ where: { deletedAt: null } }),
     prisma.aplAgent.count(),
     prisma.property.count({ where: { deletedAt: null } }),
-    prisma.property.count({ where: { moderationStatus: "PENDING_REVIEW", deletedAt: null } }),
     prisma.inquiry.count(),
     prisma.inquiry.count({ where: { status: "PENDING" } }),
     prisma.user.count({ where: { kycStatus: "PENDING" } }),
-    prisma.user.count({ where: { accountStatus: "PENDING_APPROVAL", deletedAt: null } }),
     prisma.property.findMany({
-      where: { moderationStatus: "PENDING_REVIEW", deletedAt: null },
+      where: { deletedAt: null },
       orderBy: { createdAt: "desc" },
       take: 5,
       select: { id: true, title: true, city: true, moderationStatus: true, createdAt: true, agent: { select: { firstName: true, lastName: true } } },
@@ -44,8 +40,6 @@ export default async function AdminDashboard() {
     { label: "Total Users", value: totalUsers, icon: "Users" },
     { label: "APL Representatives", value: totalAgents, icon: "Agen" },
     { label: "Properties", value: totalProperties, icon: "Prop" },
-    { label: "Pending Approval", value: pendingProperties, icon: "Pend" },
-    { label: "Pending Approval", value: pendingApprovals, icon: "Appr" },
     { label: "KYC Pending", value: pendingKyc, icon: "KYC" },
     { label: "Total Inquiries", value: totalInquiries, icon: "Inq" },
     { label: "Pending Inquiries", value: pendingInquiries, icon: "P.I" },
@@ -78,10 +72,10 @@ export default async function AdminDashboard() {
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-xl border border-border bg-surface">
           <div className="border-b border-border px-6 py-4">
-            <h2 className="font-heading text-lg font-semibold text-text-primary">Recent Properties (Pending)</h2>
+            <h2 className="font-heading text-lg font-semibold text-text-primary">Recent Properties</h2>
           </div>
           {recentProperties.length === 0 ? (
-            <EmptyState title="No pending properties" description="Properties awaiting approval will appear here." />
+            <EmptyState title="No properties yet" description="New properties will appear here." />
           ) : (
             <div className="divide-y divide-border">
               {recentProperties.map((prop) => (

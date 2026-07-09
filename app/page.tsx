@@ -39,7 +39,7 @@ function formatPrice(price: number, currency: string) {
 
 async function getFeaturedProperties() {
   return prisma.property.findMany({
-    where: { moderationStatus: "APPROVED", isPublished: true, deletedAt: null },
+    where: { deletedAt: null },
     orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
     take: 4,
     select: {
@@ -150,8 +150,8 @@ function WrenchIcon({ className }: { className?: string }) {
 export default async function HomePage() {
   const [featuredProperties, propertyCount, cityCount] = await Promise.all([
     getFeaturedProperties(),
-    prisma.property.count({ where: { moderationStatus: "APPROVED", isPublished: true, deletedAt: null } }),
-    prisma.property.groupBy({ by: ["city"], where: { moderationStatus: "APPROVED", isPublished: true, deletedAt: null }, _count: { city: true } }),
+    prisma.property.count({ where: { deletedAt: null } }),
+    prisma.property.groupBy({ by: ["city"], where: { deletedAt: null }, _count: { city: true } }),
   ]);
   return (
     <>

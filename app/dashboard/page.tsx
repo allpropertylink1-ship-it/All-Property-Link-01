@@ -2,16 +2,14 @@ import { requireAuth } from "@/lib/auth-utils"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import {
-  Home, Building2, MessageSquare, Bookmark, Heart, Bell,
-  Plus, Eye, TrendingUp, Clock, CheckCircle, ArrowRight,
+  Building2, MessageSquare, Bookmark, Heart, Bell,
+  Plus, Eye, CheckCircle, ArrowRight,
 } from "lucide-react"
 import Link from "next/link"
 
 async function getStats(userId: string) {
   const [
     totalListings,
-    activeListings,
-    pendingListings,
     totalInquiries,
     newInquiries,
     respondedInquiries,
@@ -21,8 +19,6 @@ async function getStats(userId: string) {
     recentInquiries,
   ] = await Promise.all([
     prisma.property.count({ where: { agentId: userId, deletedAt: null } }),
-    prisma.property.count({ where: { agentId: userId, isPublished: true, deletedAt: null } }),
-    prisma.property.count({ where: { agentId: userId, isPublished: false, deletedAt: null } }),
     prisma.inquiry.count({ where: { property: { agentId: userId } } }),
     prisma.inquiry.count({ where: { property: { agentId: userId }, status: "PENDING" } }),
     prisma.inquiry.count({ where: { property: { agentId: userId }, status: "RESPONDED" } }),
@@ -46,7 +42,7 @@ async function getStats(userId: string) {
   ])
 
   return {
-    totalListings, activeListings, pendingListings,
+    totalListings,
     totalInquiries, newInquiries, respondedInquiries,
     savedSearches, totalFavorites, unreadNotifications,
     recentInquiries,
@@ -55,8 +51,6 @@ async function getStats(userId: string) {
 
 const statCards = [
   { key: "totalListings", label: "Total Listings", icon: Building2, href: "/dashboard/listings" },
-  { key: "activeListings", label: "Active Listings", icon: Home, href: "/dashboard/listings" },
-  { key: "pendingListings", label: "Pending Listings", icon: Clock, href: "/dashboard/listings" },
   { key: "totalInquiries", label: "Total Inquiries", icon: MessageSquare, href: "/dashboard/inquiries" },
   { key: "newInquiries", label: "New Inquiries", icon: Eye, href: "/dashboard/inquiries" },
   { key: "respondedInquiries", label: "Responded", icon: CheckCircle, href: "/dashboard/inquiries" },
