@@ -39,15 +39,6 @@ export const propertySchema = z.object({
 
 export type PropertyInput = z.infer<typeof propertySchema>;
 
-export const inquirySchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email"),
-  phone: z.string().optional(),
-  message: z.string().min(1, "Message is required"),
-});
-
-export type InquiryInput = z.infer<typeof inquirySchema>;
-
 export const registerSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),

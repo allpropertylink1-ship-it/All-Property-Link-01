@@ -24,24 +24,7 @@ const items = [
       </svg>
     ),
   },
-  {
-    href: "/dashboard/saved-searches",
-    label: "Saved",
-    icon: (active: boolean) => (
-      <svg className={active ? "text-accent-300" : "text-text-secondary"} viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-      </svg>
-    ),
-  },
-  {
-    href: "/dashboard/inquiries",
-    label: "Inquiries",
-    icon: (active: boolean) => (
-      <svg className={active ? "text-accent-300" : "text-text-secondary"} viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-      </svg>
-    ),
-  },
+
   {
     href: "/dashboard",
     label: "Profile",

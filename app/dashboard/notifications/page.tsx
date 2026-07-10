@@ -19,7 +19,6 @@ interface NotificationItem {
 }
 
 const typeIcons: Record<string, string> = {
-  INQUIRY: "💬",
   LISTING_APPROVED: "✅",
   LISTING_REJECTED: "❌",
   LISTING_EXPIRING: "⏰",

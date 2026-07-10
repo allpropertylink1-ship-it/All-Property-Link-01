@@ -8,9 +8,6 @@ import {
   Shield,
   Briefcase,
   Building2,
-  Heart,
-  MessageSquare,
-  Bookmark,
   Bell,
   User,
   ArrowLeft,
@@ -33,9 +30,6 @@ const primary: NavLink[] = [
 
 const secondary: NavLink[] = [
   { href: "/dashboard/listings", label: "My Listings", icon: Building2 },
-  { href: "/dashboard/favorites", label: "Favorites", icon: Heart },
-  { href: "/dashboard/inquiries", label: "Inquiries", icon: MessageSquare },
-  { href: "/dashboard/saved-searches", label: "Saved Searches", icon: Bookmark },
   { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
 ]
 

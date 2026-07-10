@@ -21,16 +21,6 @@ export async function sendContactMessage(formData: FormData) {
       return { success: false, error: "Name, email, and message are required" };
     }
 
-    await prisma.inquiry.create({
-      data: {
-        name,
-        email,
-        phone: phone || undefined,
-        message: `[${subject || "General"}] ${message}`,
-        status: "PENDING",
-      },
-    });
-
     const admins = await prisma.user.findMany({
       where: { role: "ADMIN", email: { not: null } },
       select: { email: true },

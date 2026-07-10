@@ -22,11 +22,11 @@ const faqCategories: FAQCategory[] = [
     faqs: [
       {
         question: "How do I create an account on All Property Link?",
-        answer: "Click 'Sign up' in the top right corner. You can register using your email address. After verifying your email, you'll have access to saved searches, property alerts, and inquiry history.",
+        answer: "Click 'Sign up' in the top right corner. You can register using your email address. After verifying your email, you'll have access to saved searches and property alerts.",
       },
       {
         question: "Do I need an account to browse properties?",
-        answer: "No, you can browse all property listings without an account. However, creating an account lets you save searches, set up property alerts, save favorite listings, and track your inquiries.",
+        answer: "No, you can browse all property listings without an account. However, creating an account lets you post your own listings and manage them from your dashboard.",
       },
       {
         question: "What types of accounts are available?",
@@ -51,7 +51,7 @@ const faqCategories: FAQCategory[] = [
       },
       {
         question: "How do I contact a property agent?",
-        answer: "Click 'Contact Agent' on any listing to send an inquiry. You can also use the WhatsApp button for instant messaging. Agents typically respond within a few hours during business hours.",
+        answer: "Click 'Contact Agent' on any listing to contact them directly. You can also use the WhatsApp button for instant messaging. Agents typically respond within a few hours during business hours.",
       },
       {
         question: "Can I schedule a viewing online?",
@@ -75,8 +75,8 @@ const faqCategories: FAQCategory[] = [
         answer: "You must be a verified agent with a valid EARB license. Listings require: accurate property details, clear photos (min. 1024px wide), correct pricing in KES, and location details. Misleading listings are removed.",
       },
       {
-        question: "How do I manage inquiries from buyers?",
-        answer: "All inquiries appear in your dashboard under 'Inquiries'. You can respond via the platform, WhatsApp, or phone. Responding within 2 hours improves your response rate badge and listing visibility.",
+        question: "How do I manage buyer messages?",
+        answer: "All buyer messages appear in your dashboard. You can respond via the platform, WhatsApp, or phone. Responding within 2 hours improves your response rate badge and listing visibility.",
       },
       {
         question: "Can I feature my listings for more visibility?",
@@ -97,7 +97,7 @@ const faqCategories: FAQCategory[] = [
       },
       {
         question: "How do I update my profile or notification preferences?",
-        answer: "Go to your dashboard and click 'Profile' to update personal details, or 'Notifications' to manage email, SMS, and WhatsApp preferences for alerts and inquiries.",
+        answer: "Go to your dashboard and click 'Profile' to update personal details, or 'Notifications' to manage email, SMS, and WhatsApp preferences for alerts.",
       },
       {
         question: "What payment methods are accepted for featured listings?",
@@ -130,7 +130,7 @@ const faqCategories: FAQCategory[] = [
       },
       {
         question: "What are the terms of service for agents?",
-        answer: "Agents must: hold valid EARB license, list only authorized properties, provide accurate information, respond to inquiries promptly, and comply with Kenyan real estate laws. Violations may result in account suspension.",
+        answer: "Agents must: hold valid EARB license, list only authorized properties, provide accurate information, respond to buyers promptly, and comply with Kenyan real estate laws. Violations may result in account suspension.",
       },
       {
         question: "How do I report a fraudulent listing or agent?",

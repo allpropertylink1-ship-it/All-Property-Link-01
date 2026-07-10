@@ -2,76 +2,33 @@ import { requireAuth } from "@/lib/auth-utils"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import {
-  Building2, MessageSquare, Bookmark, Heart, Bell,
-  Plus, Eye, CheckCircle, ArrowRight,
+  Building2, Bell,
+  Plus, ArrowRight,
 } from "lucide-react"
 import Link from "next/link"
 
 async function getStats(userId: string) {
-  const [
-    totalListings,
-    totalInquiries,
-    newInquiries,
-    respondedInquiries,
-    savedSearches,
-    totalFavorites,
-    unreadNotifications,
-    recentInquiries,
-  ] = await Promise.all([
+  const [totalListings, unreadNotifications] = await Promise.all([
     prisma.property.count({ where: { agentId: userId, deletedAt: null } }),
-    prisma.inquiry.count({ where: { property: { agentId: userId } } }),
-    prisma.inquiry.count({ where: { property: { agentId: userId }, status: "PENDING" } }),
-    prisma.inquiry.count({ where: { property: { agentId: userId }, status: "RESPONDED" } }),
-    prisma.savedSearch.count({ where: { userId } }),
-    prisma.favorite.count({ where: { userId } }),
     prisma.notification.count({ where: { userId, read: false } }),
-    prisma.inquiry.findMany({
-      where: { property: { agentId: userId } },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        message: true,
-        status: true,
-        createdAt: true,
-        property: { select: { title: true } },
-      },
-    }),
   ])
 
   return {
     totalListings,
-    totalInquiries, newInquiries, respondedInquiries,
-    savedSearches, totalFavorites, unreadNotifications,
-    recentInquiries,
+    unreadNotifications,
   }
 }
 
 const statCards = [
   { key: "totalListings", label: "Total Listings", icon: Building2, href: "/dashboard/listings" },
-  { key: "totalInquiries", label: "Total Inquiries", icon: MessageSquare, href: "/dashboard/inquiries" },
-  { key: "newInquiries", label: "New Inquiries", icon: Eye, href: "/dashboard/inquiries" },
-  { key: "respondedInquiries", label: "Responded", icon: CheckCircle, href: "/dashboard/inquiries" },
-  { key: "savedSearches", label: "Saved Searches", icon: Bookmark, href: "/dashboard/saved-searches" },
-  { key: "totalFavorites", label: "Favorites", icon: Heart, href: "/dashboard/favorites" },
   { key: "unreadNotifications", label: "Notifications", icon: Bell, href: "/dashboard/notifications" },
 ] as const
 
 const quickActions = [
   { label: "New Listing", icon: Plus, href: "/dashboard/listings/new", color: "text-primary-600 bg-primary-50" },
-  { label: "View Inquiries", icon: MessageSquare, href: "/dashboard/inquiries", color: "text-teal-600 bg-teal-50" },
   { label: "Edit Profile", icon: Building2, href: "/dashboard/profile/business", color: "text-gold-600 bg-gold-50" },
   { label: "Notifications", icon: Bell, href: "/dashboard/notifications", color: "text-error-600 bg-error-50" },
 ]
-
-const statusColors: Record<string, string> = {
-  PENDING: "text-warning-500",
-  READ: "text-primary-600",
-  RESPONDED: "text-success-600",
-  CLOSED: "text-text-secondary",
-}
 
 export default async function DashboardPage() {
   const session = await requireAuth()
@@ -154,47 +111,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {stats.recentInquiries.length > 0 && (
-        <div>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-heading text-lg font-semibold text-text-primary">Recent Inquiries</h2>
-            <Link
-              href="/dashboard/inquiries"
-              className="text-sm font-medium text-primary-600 hover:text-primary-700"
-            >
-              View all
-            </Link>
-          </div>
-          <div className="overflow-hidden rounded-xl border border-border bg-surface">
-            {stats.recentInquiries.map((inquiry, i) => (
-              <div
-                key={inquiry.id}
-                className={`flex items-center justify-between px-5 py-4 ${i < stats.recentInquiries.length - 1 ? "border-b border-border" : ""}`}
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-text-primary">
-                    {inquiry.name}
-                    {inquiry.property && (
-                      <span className="font-normal text-text-secondary">
-                        {" "}about {inquiry.property.title}
-                      </span>
-                    )}
-                  </p>
-                  <p className="mt-0.5 truncate text-xs text-text-secondary">{inquiry.email}</p>
-                </div>
-                <div className="ml-4 flex shrink-0 items-center gap-3">
-                  <span className={`text-xs font-medium ${statusColors[inquiry.status] || ""}`}>
-                    {inquiry.status}
-                  </span>
-                  <span className="text-xs text-text-secondary">
-                    {new Date(inquiry.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+
     </div>
   )
 }

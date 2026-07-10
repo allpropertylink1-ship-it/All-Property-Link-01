@@ -401,7 +401,7 @@ export default async function HomePage() {
                 For Agents & Landlords
               </h3>
               <ul className="space-y-2 text-left text-sm text-text-secondary">
-                {["List properties and reach thousands of buyers", "Get featured and stand out from the crowd", "Manage inquiries and close deals faster"].map(
+                {["List properties and reach thousands of buyers", "Get featured and stand out from the crowd", "Get more visibility and close deals faster"].map(
                   (item) => (
                     <li key={item} className="flex items-start gap-2">
                       <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-success-500" />

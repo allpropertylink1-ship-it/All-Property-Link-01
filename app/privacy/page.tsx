@@ -29,7 +29,7 @@ export default function PrivacyPage() {
                 <li>Account credentials (encrypted password)</li>
                 <li>Profile information (profile photo, bio, location preferences)</li>
                 <li>Property preferences and saved searches</li>
-                <li>Inquiry messages and communications with agents</li>
+                <li>Communications with agents</li>
               </ul>
               <h3 className="mt-3 font-heading text-lg font-semibold text-text-primary">Property Listing Data</h3>
               <ul className="mt-2 space-y-1 list-disc list-inside">
@@ -50,9 +50,9 @@ export default function PrivacyPage() {
               <h2 className="font-heading text-2xl font-semibold text-text-primary">3. How We Use Your Information</h2>
               <ul className="mt-2 space-y-1.5 list-disc list-inside">
                 <li>Provide, maintain, and improve our property marketplace platform</li>
-                <li>Process property listings, inquiries, and agent communications</li>
+                <li>Process property listings and agent communications</li>
                 <li>Send transactional emails via Resend (inquiries, confirmations, notifications)</li>
-                <li>Enable WhatsApp Business API communication for property inquiries</li>
+                <li>Enable WhatsApp Business API communication for property listings</li>
                 <li>Display property locations on Google Maps</li>
                 <li>Store and optimize property images via Cloudinary</li>
                 <li>Personalize user experience and property recommendations</li>
@@ -67,7 +67,7 @@ export default function PrivacyPage() {
               <p className="mt-2">We use the following third-party service providers who process data on our behalf:</p>
               <ul className="mt-2 space-y-2 list-disc list-inside">
                 <li><strong className="text-text-primary">Cloudinary</strong> — Image/video management, optimization, and delivery for property media</li>
-                <li><strong className="text-text-primary">Resend</strong> — Transactional email delivery (inquiry notifications, account emails, password resets)</li>
+                <li><strong className="text-text-primary">Resend</strong> — Transactional email delivery (contact notifications, account emails, password resets)</li>
                 <li><strong className="text-text-primary">Google Maps Platform</strong> — Maps, geocoding, and places API for property location display and search</li>
                 <li><strong className="text-text-primary">WhatsApp Business API (Meta)</strong> — Direct agent communication via WhatsApp</li>
                 <li><strong className="text-text-primary">Supabase (PostgreSQL, Auth, Storage)</strong> — Database, authentication, and file storage backend</li>
@@ -79,7 +79,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="font-heading text-2xl font-semibold text-text-primary">5. Data Sharing and Disclosure</h2>
               <ul className="mt-2 space-y-1.5 list-disc list-inside">
-                <li><strong>Property inquiries:</strong> Shared with the listing agent/owner when you inquire (name, phone, email, message)</li>
+                <li><strong>Contact messages:</strong> Shared with the listing agent/owner when you contact them (name, phone, email, message)</li>
                 <li><strong>Legal compliance:</strong> Disclosed when required by Kenyan law, court order, or regulatory authority (including the ODPC)</li>
                 <li><strong>Business transfers:</strong> In connection with a merger, acquisition, or sale of assets, with appropriate safeguards</li>
                 <li><strong>Service providers:</strong> As described in Section 4, under binding data processing agreements</li>
@@ -92,7 +92,7 @@ export default function PrivacyPage() {
               <ul className="mt-2 space-y-1.5 list-disc list-inside">
                 <li><strong>Account data:</strong> Retained while account is active and 2 years after deletion for legal compliance</li>
                 <li><strong>Property listings:</strong> Retained while active; archived listings retained for 3 years for reference and dispute resolution</li>
-                <li><strong>Inquiry messages:</strong> Retained for 3 years for agent reference and dispute resolution</li>
+                <li><strong>Contact messages:</strong> Retained for 3 years for agent reference and dispute resolution</li>
                 <li><strong>Analytics/logs:</strong> Retained for 13 months (analytics) and 30 days (server logs)</li>
                 <li><strong>Marketing data:</strong> Retained until you opt out or for 2 years after last interaction</li>
               </ul>

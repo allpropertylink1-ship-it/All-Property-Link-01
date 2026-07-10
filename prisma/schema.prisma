@@ -35,13 +35,6 @@ enum ModerationStatus {
   ARCHIVED
 }
 
-enum InquiryStatus {
-  PENDING
-  READ
-  RESPONDED
-  CLOSED
-}
-
 enum ResponseType {
   EMAIL
   WHATSAPP
@@ -49,7 +42,6 @@ enum ResponseType {
 }
 
 enum NotificationType {
-  INQUIRY
   LISTING_APPROVED
   LISTING_REJECTED
   LISTING_EXPIRING
@@ -115,13 +107,10 @@ model User {
   aplAgentId       String?
 
   properties       Property[]
-  savedSearches    SavedSearch[]
-  inquiries        Inquiry[]
   auditLogs        AuditLog[]
   accounts         Account[]
   sessions         Session[]
   notifications    Notification[]
-  favorites        Favorite[]
   refreshTokens    RefreshToken[]
   magicLinkTokens  MagicLinkToken[]
   kycDocuments     KycDocument[]
@@ -244,8 +233,6 @@ model Property {
 
   agent     User?   @relation(fields: [agentId], references: [id])
   agentId   String?
-  inquiries Inquiry[]
-  favorites Favorite[]
 
   @@index([city, propertyType, moderationStatus])
   @@index([isPublished, status, createdAt])
@@ -254,55 +241,6 @@ model Property {
   @@index([expiresAt])
 
   @@map("properties")
-}
-
-model Inquiry {
-  id          String        @id @default(uuid())
-  propertyId  String?
-  userId      String?
-  name        String
-  email       String
-  phone       String?
-  message     String
-  status      InquiryStatus @default(PENDING)
-
-  respondedAt DateTime?
-  responseMessage String?
-  responseType    ResponseType?
-
-  createdAt DateTime @default(now())
-
-  property Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  user     User?    @relation(fields: [userId], references: [id])
-
-  @@index([propertyId])
-  @@index([userId])
-  @@map("inquiries")
-}
-
-model SavedSearch {
-  id        String   @id @default(uuid())
-  name      String
-  filters   Json
-  createdAt DateTime @default(now())
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
-
-  @@map("saved_searches")
-}
-
-model Favorite {
-  id         String   @id @default(uuid())
-  userId     String
-  propertyId String
-  createdAt  DateTime @default(now())
-
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, propertyId])
-  @@map("favorites")
 }
 
 model Notification {

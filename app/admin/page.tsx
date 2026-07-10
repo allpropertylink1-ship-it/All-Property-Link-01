@@ -11,28 +11,18 @@ export default async function AdminDashboard() {
     totalUsers,
     totalAgents,
     totalProperties,
-    totalInquiries,
-    pendingInquiries,
     pendingKyc,
     recentProperties,
-    recentInquiries,
   ] = await Promise.all([
     prisma.user.count({ where: { deletedAt: null } }),
     prisma.aplAgent.count(),
     prisma.property.count({ where: { deletedAt: null } }),
-    prisma.inquiry.count(),
-    prisma.inquiry.count({ where: { status: "PENDING" } }),
     prisma.user.count({ where: { kycStatus: "PENDING" } }),
     prisma.property.findMany({
       where: { deletedAt: null },
       orderBy: { createdAt: "desc" },
       take: 5,
       select: { id: true, title: true, city: true, moderationStatus: true, createdAt: true, agent: { select: { firstName: true, lastName: true } } },
-    }),
-    prisma.inquiry.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: { id: true, name: true, email: true, property: { select: { title: true } }, status: true, createdAt: true },
     }),
   ]);
 
@@ -41,8 +31,6 @@ export default async function AdminDashboard() {
     { label: "APL Representatives", value: totalAgents, icon: "Agen" },
     { label: "Properties", value: totalProperties, icon: "Prop" },
     { label: "KYC Pending", value: pendingKyc, icon: "KYC" },
-    { label: "Total Inquiries", value: totalInquiries, icon: "Inq" },
-    { label: "Pending Inquiries", value: pendingInquiries, icon: "P.I" },
   ];
 
   return (
@@ -94,34 +82,7 @@ export default async function AdminDashboard() {
           )}
         </section>
 
-        <section className="rounded-xl border border-border bg-surface">
-          <div className="border-b border-border px-6 py-4">
-            <h2 className="font-heading text-lg font-semibold text-text-primary">Recent Inquiries</h2>
-          </div>
-          {recentInquiries.length === 0 ? (
-            <EmptyState title="No inquiries yet" description="New inquiries will appear here." />
-          ) : (
-            <div className="divide-y divide-border">
-              {recentInquiries.map((inq) => (
-                <div key={inq.id} className="px-6 py-4 hover:bg-surface-secondary transition-colors">
-                  <p className="font-medium text-text-primary">{inq.name}</p>
-                  <p className="text-sm text-text-secondary">{inq.email} • {inq.property?.title || "General"}</p>
-                  <span className="inline-flex items-center gap-1 mt-1">
-                    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                      inq.status === "PENDING" ? "bg-warning-500/10 text-warning-500" :
-                      inq.status === "READ" ? "bg-primary-50 text-primary-600" :
-                      inq.status === "RESPONDED" ? "bg-success-500/10 text-success-700" :
-                      "bg-surface-secondary text-text-secondary"
-                    }`}>
-                      {inq.status}
-                    </span>
-                    <time className="text-xs text-text-secondary">{new Date(inq.createdAt).toLocaleDateString()}</time>
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+
       </div>
     </div>
     </Suspense>
