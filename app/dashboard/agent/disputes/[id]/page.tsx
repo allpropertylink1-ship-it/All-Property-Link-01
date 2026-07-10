@@ -46,7 +46,7 @@ export default function AgentDisputeDetailPage() {
 
   useEffect(() => { fetchDispute() }, [fetchDispute])
 
-  if (!user?.aplAgentId) {
+  if (user?.authMethod !== "agent") {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="max-w-md text-center">

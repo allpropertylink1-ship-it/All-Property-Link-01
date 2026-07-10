@@ -53,7 +53,7 @@ export default function AgentReferralDetailPage() {
 
   useEffect(() => { fetchReferral() }, [fetchReferral])
 
-  if (!user?.aplAgentId) {
+  if (user?.authMethod !== "agent") {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="max-w-md text-center">
