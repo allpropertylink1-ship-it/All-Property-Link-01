@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getPropertyBySlug, getOtherPropertiesByAgent } from "@/lib/services/property";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
+import { PropertyMap } from "@/components/shared/PropertyMap";
 import { Building2, Bed, Bath, Maximize2, Phone, Mail, Globe, Sparkles, MessageCircle } from "lucide-react";
 
 interface Props {
@@ -20,8 +21,6 @@ export default async function PropertyDetailPage({ params }: Props) {
   const otherProperties = property.agent?.id
     ? await getOtherPropertiesByAgent(property.agent.id, property.id)
     : [];
-
-  const mapQuery = encodeURIComponent(`${property.city}, ${property.region || ""}, ${property.country}`);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -129,26 +128,11 @@ export default async function PropertyDetailPage({ params }: Props) {
                   )}
                 </div>
 
-                <div className="overflow-hidden rounded-xl border border-border bg-surface">
-                  <iframe
-                    title="Property location on Google Maps"
-                    src={`https://maps.google.com/maps?q=${mapQuery}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
-                    width="260"
-                    height="180"
-                    className="w-full border-0"
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                  <a
-                    href={`https://maps.google.com/maps?q=${mapQuery}&t=&z=14`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-1.5 border-t border-border px-3 py-2.5 text-xs font-medium text-primary-600 hover:bg-surface-secondary transition-colors"
-                  >
-                    <Globe size={12} />
-                    View on Google Maps
-                  </a>
-                </div>
+                <PropertyMap
+                  lat={property.latitude ? Number(property.latitude) : null}
+                  lng={property.longitude ? Number(property.longitude) : null}
+                  address={`${property.city}, ${property.region || ""}, ${property.country}`}
+                />
               </>
             )}
           </aside>
