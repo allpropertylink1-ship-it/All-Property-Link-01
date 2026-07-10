@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from "react"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
-import { Building2, Users, DollarSign, Clock, Wallet, ArrowRight } from "lucide-react"
+import Link from "next/link"
+import { Building2, Users, DollarSign, Clock, Wallet, ArrowRight, Eye } from "lucide-react"
 
 interface AgentData {
   agent: {
@@ -142,10 +143,17 @@ export default function AgentDashboardPage() {
   if (!data) return null
 
   const statCards = [
-    { label: "Total Referrals", value: data.stats.totalReferrals, icon: Users, color: "bg-primary-50 text-primary-600" },
-    { label: "Total Earned", value: `KES ${data.stats.totalEarned.toLocaleString()}`, icon: DollarSign, color: "bg-success-50 text-success-700" },
-    { label: "Pending Commissions", value: data.stats.pendingCommissions, icon: Clock, color: "bg-warning-50 text-warning-500" },
-    { label: "Pending Payouts", value: data.stats.pendingPayouts, icon: Wallet, color: "bg-accent-50 text-accent-500" },
+    { label: "Total Referrals", value: data.stats.totalReferrals, icon: Users, color: "bg-primary-50 text-primary-600", href: "/dashboard/agent/referrals" },
+    { label: "Total Earned", value: `KES ${data.stats.totalEarned.toLocaleString()}`, icon: DollarSign, color: "bg-success-50 text-success-700", href: "/dashboard/agent/payouts" },
+    { label: "Pending Commissions", value: data.stats.pendingCommissions, icon: Clock, color: "bg-warning-50 text-warning-500", href: "/dashboard/agent/commissions" },
+    { label: "Pending Payouts", value: data.stats.pendingPayouts, icon: Wallet, color: "bg-accent-50 text-accent-500", href: "/dashboard/agent/payouts" },
+  ]
+
+  const quickActions = [
+    { label: "View Commissions", href: "/dashboard/agent/commissions", icon: DollarSign, color: "bg-primary-50 text-primary-600" },
+    { label: "View Payouts", href: "/dashboard/agent/payouts", icon: Wallet, color: "bg-success-50 text-success-700" },
+    { label: "View Referrals", href: "/dashboard/agent/referrals", icon: Users, color: "bg-warning-50 text-warning-500" },
+    { label: "View Disputes", href: "/dashboard/agent/disputes", icon: Eye, color: "bg-accent-50 text-accent-500" },
   ]
 
   return (
@@ -161,13 +169,30 @@ export default function AgentDashboardPage() {
         {statCards.map((card) => {
           const Icon = card.icon
           return (
-            <div key={card.label} className="rounded-xl border border-border bg-surface p-6 transition-shadow hover:shadow-sm">
+            <Link key={card.label} href={card.href} className="block rounded-xl border border-border bg-surface p-6 transition-shadow hover:shadow-sm">
               <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-lg ${card.color}`}>
                 <Icon size={20} />
               </div>
               <p className="text-2xl font-bold text-text-primary">{card.value}</p>
               <p className="mt-1 text-sm text-text-secondary">{card.label}</p>
-            </div>
+            </Link>
+          )
+        })}
+      </div>
+
+      <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {quickActions.map((action) => {
+          const Icon = action.icon
+          return (
+            <Link key={action.label} href={action.href} className="flex items-center justify-between rounded-xl border border-border bg-surface p-5 transition-shadow hover:shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${action.color}`}>
+                  <Icon size={20} />
+                </div>
+                <span className="text-sm font-medium text-text-primary">{action.label}</span>
+              </div>
+              <ArrowRight size={16} className="shrink-0 text-muted" />
+            </Link>
           )
         })}
       </div>
@@ -180,17 +205,20 @@ export default function AgentDashboardPage() {
           ) : (
             <div className="space-y-3">
               {data.recentReferrals.map((r) => (
-                <div key={r.id} className="flex items-center justify-between rounded-lg bg-surface-secondary p-3">
+                <Link key={r.id} href={`/dashboard/agent/referrals/${r.id}`} className="flex items-center justify-between rounded-lg bg-surface-secondary p-3 transition-colors hover:bg-surface">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-text-primary">{r.firstName} {r.lastName}</p>
                     <p className="truncate text-xs text-text-secondary">{r.email}</p>
                     <p className="text-xs text-text-secondary">{new Date(r.createdAt).toLocaleDateString()}</p>
                   </div>
                   <ArrowRight size={16} className="shrink-0 text-muted" />
-                </div>
+                </Link>
               ))}
             </div>
           )}
+          <Link href="/dashboard/agent/referrals" className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-700">
+            View all <ArrowRight size={12} />
+          </Link>
         </div>
 
         <div className="rounded-xl border border-border bg-surface p-6">
@@ -214,6 +242,9 @@ export default function AgentDashboardPage() {
               ))}
             </div>
           )}
+          <Link href="/dashboard/agent/commissions" className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-700">
+            View all <ArrowRight size={12} />
+          </Link>
         </div>
 
         <div className="rounded-xl border border-border bg-surface p-6">
@@ -236,6 +267,9 @@ export default function AgentDashboardPage() {
               ))}
             </div>
           )}
+          <Link href="/dashboard/agent/payouts" className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-700">
+            View all <ArrowRight size={12} />
+          </Link>
         </div>
       </div>
     </div>

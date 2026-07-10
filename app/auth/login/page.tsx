@@ -1,6 +1,18 @@
-import { LoginForm } from "@/components/auth/LoginForm";
+"use client"
+
+import { useState } from "react"
+import { LoginForm } from "@/components/auth/LoginForm"
+import { AgentLoginForm } from "@/components/auth/AgentLoginForm"
+import { cn } from "@/lib/utils"
+
+const tabs = [
+  { id: "user", label: "User Login" },
+  { id: "agent", label: "APL Representative" },
+] as const
 
 export default function LoginPage() {
+  const [activeTab, setActiveTab] = useState<"user" | "agent">("user")
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface px-4">
       <div className="w-full max-w-md">
@@ -18,9 +30,28 @@ export default function LoginPage() {
               Sign in to your account
             </p>
           </div>
-          <LoginForm />
+
+          <div className="mb-6 flex rounded-lg bg-surface-secondary p-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  "flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all duration-150",
+                  activeTab === tab.id
+                    ? "bg-surface text-text-primary shadow-sm"
+                    : "text-text-secondary hover:text-text-primary"
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {activeTab === "user" ? <LoginForm /> : <AgentLoginForm />}
         </div>
       </div>
     </div>
-  );
+  )
 }

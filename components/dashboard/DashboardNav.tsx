@@ -38,14 +38,20 @@ const tertiary: NavLink[] = [
   { href: "/dashboard/profile/business", label: "Business Profile", icon: Briefcase },
 ]
 
-const agentLinks: NavLink[] = [
-  { href: "/dashboard/agent", label: "Agent Dashboard", icon: Briefcase },
+const agentPrimary: NavLink[] = [
+  { href: "/dashboard/agent", label: "Overview", icon: Briefcase },
+  { href: "/dashboard/agent/commissions", label: "Commissions", icon: Building2 },
+  { href: "/dashboard/agent/payouts", label: "Payouts", icon: Building2 },
+  { href: "/dashboard/agent/referrals", label: "Referrals", icon: User },
+  { href: "/dashboard/agent/disputes", label: "Disputes", icon: Shield },
+  { href: "/dashboard/agent/settings", label: "Settings", icon: User },
 ]
 
 const SECTION_LABELS: Record<string, string> = {
   primary: "Verification",
   secondary: "Activity",
   tertiary: "Settings",
+  agent: "APL Representative",
 }
 
 function NavGroup({ links, section }: { links: NavLink[]; section: keyof typeof SECTION_LABELS }) {
@@ -127,7 +133,7 @@ export function DashboardNav() {
           <NavGroup links={primary} section="primary" />
           <NavGroup links={secondary} section="secondary" />
           <NavGroup links={tertiary} section="tertiary" />
-          {user?.isAgent && <NavGroup links={agentLinks} section="primary" />}
+          {user?.isAgent && <NavGroup links={agentPrimary} section="agent" />}
         </nav>
 
         <div className="border-t border-border p-3">

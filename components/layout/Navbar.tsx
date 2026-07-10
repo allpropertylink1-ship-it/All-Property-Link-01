@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MobileMenu } from "./MobileMenu";
 import { ProfileButton } from "./ProfileButton";
+import { ThemeToggle } from "./ThemeToggle";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -35,7 +36,10 @@ export function Navbar() {
           ))}
         </div>
 
-        <ProfileButton />
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <ProfileButton />
+        </div>
 
         <MobileMenu />
       </div>

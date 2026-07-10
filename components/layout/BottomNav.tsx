@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
 
-const items = [
+const baseItems = [
   {
     href: "/",
     label: "Home",
@@ -24,7 +25,6 @@ const items = [
       </svg>
     ),
   },
-
   {
     href: "/dashboard",
     label: "Profile",
@@ -37,8 +37,22 @@ const items = [
   },
 ];
 
+const agentItem = {
+  href: "/dashboard/agent",
+  label: "Agent",
+  icon: (active: boolean) => (
+    <svg className={active ? "text-accent-300" : "text-text-secondary"} viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+    </svg>
+  ),
+};
+
 export function BottomNav() {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const items = user?.isAgent ? [...baseItems, agentItem] : baseItems;
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">

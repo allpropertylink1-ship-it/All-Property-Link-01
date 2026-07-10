@@ -9,7 +9,7 @@ import { GoogleSignInButton } from "./GoogleSignInButton"
 type ContactMethod = "email" | "phone"
 type Step = "form" | "otp"
 
-export function RegisterForm() {
+export function RegisterForm({ referralCode: initialReferralCode }: { referralCode?: string }) {
   const router = useRouter()
   const { signup, sendOtp, verifyOtp, refreshUser } = useAuth()
   const [step, setStep] = useState<Step>("form")
@@ -17,6 +17,7 @@ export function RegisterForm() {
   const [loading, setLoading] = useState(false)
   const [contactMethod, setContactMethod] = useState<ContactMethod>("email")
   const [password, setPassword] = useState("")
+  const [referralCode, setReferralCode] = useState(initialReferralCode || "")
   const [otpIdentifier, setOtpIdentifier] = useState("")
   const [otpType, setOtpType] = useState<"EMAIL_VERIFICATION" | "PHONE_VERIFICATION">("EMAIL_VERIFICATION")
   const [otpDestination, setOtpDestination] = useState("")
@@ -96,7 +97,7 @@ export function RegisterForm() {
       }
     }
 
-    const { error: signupError, otp } = await signup({ firstName, lastName, password, email, phone })
+    const { error: signupError, otp } = await signup({ firstName, lastName, password, email, phone, referralCode: referralCode || undefined })
     if (signupError) {
       setError(signupError)
       setLoading(false)
@@ -397,6 +398,22 @@ export function RegisterForm() {
               autoComplete="new-password"
               required
               minLength={8}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="referralCode" className="block text-sm font-medium text-text-primary">Referral Code (optional)</label>
+          <div className="mt-1">
+            <input
+              id="referralCode"
+              name="referralCode"
+              type="text"
+              value={referralCode}
+              onChange={(e) => setReferralCode(e.target.value)}
+              placeholder="APL-XXX-000-00/00"
+              className="block w-full rounded-sm border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+              style={{ fontSize: "16px" }}
             />
           </div>
         </div>

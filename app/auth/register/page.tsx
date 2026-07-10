@@ -1,6 +1,8 @@
 import { RegisterForm } from "@/components/auth/RegisterForm";
 
-export default function RegisterPage() {
+export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
+  const { ref } = await searchParams
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface px-4">
       <div className="w-full max-w-md">
@@ -18,7 +20,7 @@ export default function RegisterPage() {
               Join All Property Link today
             </p>
           </div>
-          <RegisterForm />
+          <RegisterForm referralCode={ref} />
         </div>
       </div>
     </div>

@@ -16,6 +16,8 @@ interface User {
   isAgent?: boolean
   aplAgentId?: string
   companyName?: string
+  agentCode?: string
+  fullName?: string
 }
 
 interface OtpResponse {
@@ -32,11 +34,12 @@ interface AuthContextType {
   loading: boolean
   login: (email: string, password: string) => Promise<{ error?: string }>
   logout: () => Promise<void>
-  signup: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
+  signup: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
   sendOtp: (identifier: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
   verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string }>
   refreshUser: () => Promise<void>
   sendMagicLink: (email: string) => Promise<{ error?: string }>
+  agentLogin: (agentCode: string, password: string) => Promise<{ error?: string }>
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -49,6 +52,7 @@ const AuthContext = createContext<AuthContextType>({
   verifyOtp: async () => ({}),
   refreshUser: async () => {},
   sendMagicLink: async () => ({}),
+  agentLogin: async () => ({}),
 })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -90,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }, [])
 
-  const signup = useCallback(async (data: { email: string; password: string; firstName: string; lastName: string; phone?: string }) => {
+  const signup = useCallback(async (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string }) => {
     const { data: result, error } = await api.post<OtpResponse>("/api/auth/register", data)
     if (error) return { error }
     return { otp: result }
@@ -115,8 +119,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {}
   }, [])
 
+  const agentLogin = useCallback(async (agentCode: string, password: string) => {
+    const { data, error } = await api.post<{ user: User }>("/api/auth/agent-login", { agentCode, password })
+    if (data?.user) {
+      setUser(data.user)
+      return {}
+    }
+    return { error: error || "Login failed" }
+  }, [])
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, signup, sendOtp, verifyOtp, refreshUser: fetchUser, sendMagicLink }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, signup, sendOtp, verifyOtp, refreshUser: fetchUser, sendMagicLink, agentLogin }}>
       {children}
     </AuthContext.Provider>
   )
