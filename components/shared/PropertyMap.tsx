@@ -20,34 +20,35 @@ export function PropertyMap({ lat, lng, address }: Props) {
 
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    if (!apiKey) {
-      setStatus("no-key")
+    if (!apiKey) { setStatus("no-key"); return }
+
+    if (typeof google !== "undefined" && google.maps?.places) {
+      setStatus("ready")
       return
     }
 
-    const w = window as { __googleMapsLoading?: boolean; __googleMapsLoaded?: boolean; __googleMapsReady?: () => void }
-    if (typeof window === "undefined" || w.__googleMapsLoading) return
-    w.__googleMapsLoading = true
+    const w = window as { __gmapsCallbacks?: Array<() => void> }
+    w.__gmapsCallbacks = w.__gmapsCallbacks || []
 
-    const script = document.createElement("script")
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=__googleMapsReady`
-    script.async = true
-    script.defer = true
-    script.onerror = () => {
-      setStatus("error")
-      w.__googleMapsLoading = false
+    if (w.__gmapsCallbacks.length > 0) {
+      w.__gmapsCallbacks.push(() => setStatus("ready"))
+      return
     }
 
-    w.__googleMapsReady = () => {
-      w.__googleMapsLoaded = true
-      setStatus("ready")
+    w.__gmapsCallbacks.push(() => setStatus("ready"))
+
+    const script = document.createElement("script")
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=__gmapsLoaded`
+    script.async = true
+    script.defer = true
+    script.onerror = () => { setStatus("error") }
+
+    ;(window as unknown as Record<string, unknown>).__gmapsLoaded = () => {
+      ;(w.__gmapsCallbacks || []).forEach((fn) => fn())
+      w.__gmapsCallbacks = []
     }
 
     document.head.appendChild(script)
-
-    return () => {
-      delete w.__googleMapsLoading
-    }
   }, [])
 
   useEffect(() => {

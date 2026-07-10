@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useEffect, useState, useCallback } from "react"
-import { MapPin } from "lucide-react"
+import { MapPin, Loader2, AlertCircle } from "lucide-react"
 
 interface LocationResult {
   lat: number
@@ -25,28 +25,37 @@ export function LocationPicker({ initialAddress, initialLat, initialLng, onLocat
   const mapInstanceRef = useRef<google.maps.Map | null>(null)
   const markerRef = useRef<google.maps.Marker | null>(null)
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null)
-  const [apiReady, setApiReady] = useState(false)
   const [query, setQuery] = useState(initialAddress || "")
+  const [status, setStatus] = useState<"loading" | "ready" | "error" | "no-key">("loading")
 
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    if (!apiKey) return
+    if (!apiKey) { setStatus("no-key"); return }
 
-    const w = window as { __mapsApiLoaded?: boolean; __mapsApiLoading?: boolean; __mapsApiCallback?: () => void }
-    if (w.__mapsApiLoaded) { setApiReady(true); return }
-    if (w.__mapsApiLoading) return
-    w.__mapsApiLoading = true
+    if (typeof google !== "undefined" && google.maps?.places) {
+      setStatus("ready")
+      return
+    }
+
+    const w = window as { __gmapsCallbacks?: Array<() => void> }
+    w.__gmapsCallbacks = w.__gmapsCallbacks || []
+
+    if (w.__gmapsCallbacks.length > 0) {
+      w.__gmapsCallbacks.push(() => setStatus("ready"))
+      return
+    }
+
+    w.__gmapsCallbacks.push(() => setStatus("ready"))
 
     const script = document.createElement("script")
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=__mapsApiCallback`
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=__gmapsLoaded`
     script.async = true
     script.defer = true
-    script.onerror = () => { w.__mapsApiLoading = false }
+    script.onerror = () => { setStatus("error") }
 
-    w.__mapsApiCallback = () => {
-      w.__mapsApiLoaded = true
-      w.__mapsApiLoading = false
-      setApiReady(true)
+    ;(window as unknown as Record<string, unknown>).__gmapsLoaded = () => {
+      ;(w.__gmapsCallbacks || []).forEach((fn) => fn())
+      w.__gmapsCallbacks = []
     }
 
     document.head.appendChild(script)
@@ -81,7 +90,7 @@ export function LocationPicker({ initialAddress, initialLat, initialLng, onLocat
 
     placeMarker(lat, lng)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiReady])
+  }, [status])
 
   function placeMarker(lat: number, lng: number) {
     if (!mapInstanceRef.current) return
@@ -102,8 +111,8 @@ export function LocationPicker({ initialAddress, initialLat, initialLng, onLocat
 
   function reverseGeocode(lat: number, lng: number) {
     const geocoder = new google.maps.Geocoder()
-    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-      if (status !== "OK" || !results?.[0]) return
+    geocoder.geocode({ location: { lat, lng } }, (results, geocodeStatus) => {
+      if (geocodeStatus !== "OK" || !results?.[0]) return
 
       const components = results[0].address_components || []
       const getComponent = (types: string[]) =>
@@ -130,7 +139,7 @@ export function LocationPicker({ initialAddress, initialLat, initialLng, onLocat
   }
 
   useEffect(() => {
-    if (!apiReady || !inputRef.current) return
+    if (status !== "ready" || !inputRef.current) return
 
     autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current, {
       componentRestrictions: { country: "KE" },
@@ -164,13 +173,13 @@ export function LocationPicker({ initialAddress, initialLat, initialLng, onLocat
       onLocationChange({ lat, lng, address, city, region, country })
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiReady])
+  }, [status])
 
   useEffect(() => {
-    if (!apiReady || !initialLat || !initialLng) return
+    if (status !== "ready" || !initialLat || !initialLng) return
     initMap(Number(initialLat), Number(initialLng))
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiReady])
+  }, [status])
 
   return (
     <div className="space-y-3">
@@ -185,13 +194,42 @@ export function LocationPicker({ initialAddress, initialLat, initialLng, onLocat
           className="w-full rounded-lg border border-border bg-surface pl-9 pr-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
         />
       </div>
+
+      {status === "loading" && (
+        <div className="flex h-64 w-full items-center justify-center rounded-lg border border-border bg-surface/50">
+          <div className="flex flex-col items-center gap-2 text-text-secondary">
+            <Loader2 size={24} className="animate-spin" />
+            <span className="text-sm">Loading map...</span>
+          </div>
+        </div>
+      )}
+
+      {status === "no-key" && (
+        <div className="flex h-64 w-full items-center justify-center rounded-lg border border-border bg-surface/50">
+          <p className="text-sm text-text-secondary">Map not available</p>
+        </div>
+      )}
+
+      {status === "error" && (
+        <div className="flex h-64 w-full items-center justify-center rounded-lg border border-border bg-surface/50">
+          <div className="flex flex-col items-center gap-2 text-error-500">
+            <AlertCircle size={24} />
+            <span className="text-sm">Failed to load map</span>
+          </div>
+        </div>
+      )}
+
       <div
         ref={mapRef}
         className="h-64 w-full rounded-lg border border-border"
+        style={{ display: status === "ready" ? "block" : "none" }}
       />
-      <p className="text-xs text-text-secondary">
-        Search for a location or click the map to drop a pin. Drag the pin to fine-tune.
-      </p>
+
+      {status === "ready" && (
+        <p className="text-xs text-text-secondary">
+          Search for a location or click the map to drop a pin. Drag the pin to fine-tune.
+        </p>
+      )}
     </div>
   )
 }
