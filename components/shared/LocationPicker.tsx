@@ -1,7 +1,9 @@
 "use client"
 
-import { useRef, useEffect, useState, useCallback } from "react"
-import { MapPin, Loader2, AlertCircle } from "lucide-react"
+import { useRef, useEffect, useState } from "react"
+import { MapPin, Loader2, AlertCircle, Search } from "lucide-react"
+import L from "leaflet"
+import "leaflet/dist/leaflet.css"
 
 interface LocationResult {
   lat: number
@@ -19,205 +21,174 @@ interface Props {
   onLocationChange: (location: LocationResult) => void
 }
 
+interface Suggestion {
+  display_name: string
+  lat: string
+  lon: string
+  type: string
+}
+
+const pinIcon = L.divIcon({
+  className: "",
+  html: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40" fill="none"><path d="M16 0C7.16 0 0 7.16 0 16c0 12 16 24 16 24s16-12 16-24C32 7.16 24.84 0 16 0z" fill="#0d9488"/><circle cx="16" cy="16" r="7" fill="#fff"/></svg>`,
+  iconSize: [32, 40],
+  iconAnchor: [16, 40],
+})
+
+const nairobi: [number, number] = [-1.2921, 36.8219]
+
 export function LocationPicker({ initialAddress, initialLat, initialLng, onLocationChange }: Props) {
   const mapRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const mapInstanceRef = useRef<google.maps.Map | null>(null)
-  const markerRef = useRef<google.maps.Marker | null>(null)
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null)
+  const mapInstanceRef = useRef<L.Map | null>(null)
+  const markerRef = useRef<L.Marker | null>(null)
   const [query, setQuery] = useState(initialAddress || "")
-  const [status, setStatus] = useState<"loading" | "ready" | "error" | "no-key">("loading")
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading")
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
 
   useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    if (!apiKey) { setStatus("no-key"); return }
+    if (!mapRef.current) return
 
-    if (typeof google !== "undefined" && google.maps?.places) {
-      setStatus("ready")
-      return
+    const map = L.map(mapRef.current, {
+      center: nairobi,
+      zoom: 12,
+      zoomControl: false,
+      attributionControl: false,
+    })
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+    }).addTo(map)
+
+    map.on("click", (e: L.LeafletMouseEvent) => {
+      placeMarker(e.latlng.lat, e.latlng.lng)
+      reverseGeocode(e.latlng.lat, e.latlng.lng)
+    })
+
+    mapInstanceRef.current = map
+    setStatus("ready")
+
+    if (initialLat && initialLng) {
+      const lat = Number(initialLat)
+      const lng = Number(initialLng)
+      map.setView([lat, lng], 15)
+      placeMarker(lat, lng)
     }
 
-    const w = window as { __gmapsCallbacks?: Array<() => void> }
-    w.__gmapsCallbacks = w.__gmapsCallbacks || []
-
-    if (w.__gmapsCallbacks.length > 0) {
-      w.__gmapsCallbacks.push(() => setStatus("ready"))
-      return
-    }
-
-    w.__gmapsCallbacks.push(() => setStatus("ready"))
-
-    const script = document.createElement("script")
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=__gmapsLoaded`
-    script.async = true
-    script.defer = true
-    script.onerror = () => { setStatus("error") }
-
-    ;(window as unknown as Record<string, unknown>).__gmapsLoaded = () => {
-      ;(w.__gmapsCallbacks || []).forEach((fn) => fn())
-      w.__gmapsCallbacks = []
-    }
-
-    document.head.appendChild(script)
+    return () => { map.remove() }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const initMap = useCallback((lat: number, lng: number) => {
-    if (!mapRef.current) return
-    const position = { lat, lng }
-
-    if (!mapInstanceRef.current) {
-      mapInstanceRef.current = new google.maps.Map(mapRef.current, {
-        center: position,
-        zoom: 15,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
-        styles: [
-          { featureType: "poi", stylers: [{ visibility: "off" }] },
-          { featureType: "transit", stylers: [{ visibility: "off" }] },
-        ],
-      })
-
-      mapInstanceRef.current.addListener("click", (e: google.maps.MapMouseEvent) => {
-        if (e.latLng) {
-          placeMarker(e.latLng.lat(), e.latLng.lng())
-          reverseGeocode(e.latLng.lat(), e.latLng.lng())
-        }
-      })
-    } else {
-      mapInstanceRef.current.setCenter(position)
-    }
-
-    placeMarker(lat, lng)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status])
-
   function placeMarker(lat: number, lng: number) {
-    if (!mapInstanceRef.current) return
-    if (markerRef.current) markerRef.current.setMap(null)
+    const map = mapInstanceRef.current
+    if (!map) return
+    if (markerRef.current) markerRef.current.remove()
 
-    markerRef.current = new google.maps.Marker({
-      position: { lat, lng },
-      map: mapInstanceRef.current,
-      draggable: true,
-      animation: google.maps.Animation.DROP,
+    const marker = L.marker([lat, lng], { icon: pinIcon, draggable: true }).addTo(map)
+    marker.on("dragend", () => {
+      const pos = marker.getLatLng()
+      reverseGeocode(pos.lat, pos.lng)
     })
-
-    markerRef.current.addListener("dragend", () => {
-      const pos = markerRef.current?.getPosition()
-      if (pos) reverseGeocode(pos.lat(), pos.lng())
-    })
+    markerRef.current = marker
   }
 
-  function reverseGeocode(lat: number, lng: number) {
-    const geocoder = new google.maps.Geocoder()
-    geocoder.geocode({ location: { lat, lng } }, (results, geocodeStatus) => {
-      if (geocodeStatus !== "OK" || !results?.[0]) return
+  async function reverseGeocode(lat: number, lng: number) {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
+        { headers: { "Accept-Language": "en" } }
+      )
+      const data = await res.json()
+      if (!data || data.error) return
 
-      const components = results[0].address_components || []
-      const getComponent = (types: string[]) =>
-        components.find((c) => types.some((t) => c.types.includes(t)))?.long_name || ""
+      const addr = data.address || {}
+      const city = addr.city || addr.town || addr.village || addr.municipality || addr.county || ""
+      const region = addr.state || ""
+      const country = addr.country || "Kenya"
+      const road = addr.road || ""
+      const number = addr.house_number || ""
+      const displayName = data.display_name || ""
+      const shortAddress = [road, number].filter(Boolean).join(" ") || city
 
-      const city = getComponent(["locality", "administrative_area_level_2", "sublocality"])
-      const region = getComponent(["administrative_area_level_1"])
-      const country = getComponent(["country"])
-      const number = getComponent(["street_number"])
-      const road = getComponent(["route"])
-      const address = results[0].formatted_address
-
-      setQuery(address)
+      setQuery(displayName)
 
       onLocationChange({
         lat,
         lng,
-        address: `${road} ${number}`.trim() || address,
-        city: city || getComponent(["sublocality"]),
+        address: shortAddress || displayName,
+        city,
         region,
         country,
       })
-    })
+    } catch {
+    }
   }
 
-  useEffect(() => {
-    if (status !== "ready" || !inputRef.current) return
+  function handleInputChange(value: string) {
+    setQuery(value)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
 
-    autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current, {
-      componentRestrictions: { country: "KE" },
-    })
+    if (value.length < 3) {
+      setShowSuggestions(false)
+      return
+    }
 
-    autocompleteRef.current.addListener("place_changed", () => {
-      const place = autocompleteRef.current?.getPlace()
-      if (!place?.geometry?.location) return
-
-      const lat = place.geometry.location.lat()
-      const lng = place.geometry.location.lng()
-      const city = place.address_components?.find((c) =>
-        c.types.includes("locality") || c.types.includes("administrative_area_level_2")
-      )?.long_name || place.name || ""
-
-      const region = place.address_components?.find((c) =>
-        c.types.includes("administrative_area_level_1")
-      )?.long_name || ""
-
-      const country = place.address_components?.find((c) =>
-        c.types.includes("country")
-      )?.long_name || "Kenya"
-
-      const number = place.address_components?.find((c) => c.types.includes("street_number"))?.long_name || ""
-      const road = place.address_components?.find((c) => c.types.includes("route"))?.long_name || ""
-      const address = `${road} ${number}`.trim() || place.formatted_address || query
-
-      setQuery(place.formatted_address || query)
-      initMap(lat, lng)
-
-      onLocationChange({ lat, lng, address, city, region, country })
-    })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status])
-
-  useEffect(() => {
-    if (status !== "ready" || !mapRef.current || mapInstanceRef.current) return
-    if (initialLat && initialLng) return
-    const nairobi = { lat: -1.2921, lng: 36.8219 }
-    mapInstanceRef.current = new google.maps.Map(mapRef.current, {
-      center: nairobi,
-      zoom: 12,
-      mapTypeControl: false,
-      streetViewControl: false,
-      fullscreenControl: false,
-      styles: [
-        { featureType: "poi", stylers: [{ visibility: "off" }] },
-        { featureType: "transit", stylers: [{ visibility: "off" }] },
-      ],
-    })
-    mapInstanceRef.current.addListener("click", (e: google.maps.MapMouseEvent) => {
-      if (e.latLng) {
-        placeMarker(e.latLng.lat(), e.latLng.lng())
-        reverseGeocode(e.latLng.lat(), e.latLng.lng())
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&format=json&limit=5&countrycodes=ke`,
+          { headers: { "Accept-Language": "en" } }
+        )
+        const data: Suggestion[] = await res.json()
+        setSuggestions(data)
+        setShowSuggestions(data.length > 0)
+      } catch {
+        setShowSuggestions(false)
       }
-    })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status])
+    }, 300)
+  }
 
-  useEffect(() => {
-    if (status !== "ready" || !initialLat || !initialLng) return
-    initMap(Number(initialLat), Number(initialLng))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status])
+  function selectSuggestion(s: Suggestion) {
+    const lat = parseFloat(s.lat)
+    const lng = parseFloat(s.lon)
+    setQuery(s.display_name)
+    setShowSuggestions(false)
+    mapInstanceRef.current?.setView([lat, lng], 15)
+    placeMarker(lat, lng)
+    reverseGeocode(lat, lng)
+  }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 relative">
       <div className="relative">
-        <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+        <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary z-10" />
         <input
           ref={inputRef}
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => handleInputChange(e.target.value)}
           placeholder="Search for a location..."
           className="w-full rounded-lg border border-border bg-surface pl-9 pr-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
         />
       </div>
+
+      {showSuggestions && suggestions.length > 0 && (
+        <div className="absolute z-20 w-full rounded-lg border border-border bg-surface shadow-lg max-h-60 overflow-y-auto -mt-2">
+          {suggestions.map((s, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => selectSuggestion(s)}
+              className="flex items-start gap-2 w-full px-3 py-2.5 text-left text-sm text-text-primary hover:bg-surface-secondary transition-colors border-b border-border last:border-0"
+            >
+              <Search size={14} className="mt-0.5 shrink-0 text-text-secondary" />
+              <span className="line-clamp-2">{s.display_name}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {status === "loading" && (
         <div className="flex h-64 w-full items-center justify-center rounded-lg border border-border bg-surface/50">
@@ -225,12 +196,6 @@ export function LocationPicker({ initialAddress, initialLat, initialLng, onLocat
             <Loader2 size={24} className="animate-spin" />
             <span className="text-sm">Loading map...</span>
           </div>
-        </div>
-      )}
-
-      {status === "no-key" && (
-        <div className="flex h-64 w-full items-center justify-center rounded-lg border border-border bg-surface/50">
-          <p className="text-sm text-text-secondary">Map not available</p>
         </div>
       )}
 
@@ -245,7 +210,7 @@ export function LocationPicker({ initialAddress, initialLat, initialLng, onLocat
 
       <div
         ref={mapRef}
-        className="h-64 w-full rounded-lg border border-border"
+        className="h-64 w-full rounded-lg border border-border z-0"
         style={{ display: status === "ready" ? "block" : "none" }}
       />
 

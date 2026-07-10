@@ -1,7 +1,9 @@
 "use client"
 
 import { useRef, useEffect, useState } from "react"
-import { Globe } from "lucide-react"
+import { Globe, Loader2 } from "lucide-react"
+import L from "leaflet"
+import "leaflet/dist/leaflet.css"
 
 interface Props {
   lat?: number | string | null
@@ -9,105 +11,73 @@ interface Props {
   address: string
 }
 
-type MapStatus = "loading" | "ready" | "geocoding" | "error" | "no-key"
+const pinIcon = L.divIcon({
+  className: "",
+  html: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 32 40" fill="none"><path d="M16 0C7.16 0 0 7.16 0 16c0 12 16 24 16 24s16-12 16-24C32 7.16 24.84 0 16 0z" fill="#0d9488"/><circle cx="16" cy="16" r="7" fill="#fff"/></svg>`,
+  iconSize: [28, 36],
+  iconAnchor: [14, 36],
+})
 
 export function PropertyMap({ lat, lng, address }: Props) {
   const mapRef = useRef<HTMLDivElement>(null)
-  const mapInstanceRef = useRef<google.maps.Map | null>(null)
-  const markerRef = useRef<google.maps.Marker | null>(null)
-  const [status, setStatus] = useState<MapStatus>("loading")
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading")
+  const [coords, setCoords] = useState<[number, number] | null>(null)
   const mapQuery = encodeURIComponent(address)
 
   useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    if (!apiKey) { setStatus("no-key"); return }
-
-    if (typeof google !== "undefined" && google.maps?.places) {
-      setStatus("ready")
-      return
-    }
-
-    const w = window as { __gmapsCallbacks?: Array<() => void> }
-    w.__gmapsCallbacks = w.__gmapsCallbacks || []
-
-    if (w.__gmapsCallbacks.length > 0) {
-      w.__gmapsCallbacks.push(() => setStatus("ready"))
-      return
-    }
-
-    w.__gmapsCallbacks.push(() => setStatus("ready"))
-
-    const script = document.createElement("script")
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=__gmapsLoaded`
-    script.async = true
-    script.defer = true
-    script.onerror = () => { setStatus("error") }
-
-    ;(window as unknown as Record<string, unknown>).__gmapsLoaded = () => {
-      ;(w.__gmapsCallbacks || []).forEach((fn) => fn())
-      w.__gmapsCallbacks = []
-    }
-
-    document.head.appendChild(script)
-  }, [])
-
-  useEffect(() => {
-    if (status !== "ready" || !mapRef.current) return
-
+    if (!mapRef.current) return
     const floatLat = lat ? Number(lat) : null
     const floatLng = lng ? Number(lng) : null
 
     if (floatLat && floatLng) {
-      initMap(floatLat, floatLng)
+      setCoords([floatLat, floatLng])
       return
     }
 
-    setStatus("geocoding")
-    const geocoder = new google.maps.Geocoder()
-    geocoder.geocode({ address }, (results, geocodeStatus) => {
-      if (geocodeStatus === "OK" && results?.[0]?.geometry?.location) {
-        const loc = results[0].geometry.location
-        initMap(loc.lat(), loc.lng())
-      } else {
-        setStatus("error")
-      }
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status])
-
-  function initMap(latValue: number, lngValue: number) {
-    if (!mapRef.current) return
-    const position = { lat: latValue, lng: lngValue }
-    if (!mapInstanceRef.current) {
-      mapInstanceRef.current = new google.maps.Map(mapRef.current, {
-        center: position,
-        zoom: 14,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
-        styles: [
-          { featureType: "poi", stylers: [{ visibility: "off" }] },
-          { featureType: "transit", stylers: [{ visibility: "off" }] },
-        ],
+    fetch(
+      `https://nominatim.openstreetmap.org/search?q=${mapQuery}&format=json&limit=1`,
+      { headers: { "Accept-Language": "en" } }
+    )
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.[0]) {
+          setCoords([parseFloat(data[0].lat), parseFloat(data[0].lon)])
+        } else {
+          setStatus("error")
+        }
       })
-    } else {
-      mapInstanceRef.current.setCenter(position)
-    }
-    if (markerRef.current) markerRef.current.setMap(null)
-    markerRef.current = new google.maps.Marker({
-      position,
-      map: mapInstanceRef.current,
-      title: address,
-    })
-    setStatus("ready")
-  }
+      .catch(() => setStatus("error"))
+  }, [])
 
-  if (status === "no-key" || status === "error") {
+  useEffect(() => {
+    if (!coords || !mapRef.current) return
+
+    const map = L.map(mapRef.current, {
+      center: coords,
+      zoom: 14,
+      zoomControl: false,
+      attributionControl: false,
+    })
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+    }).addTo(map)
+
+    L.marker(coords, { icon: pinIcon }).addTo(map)
+    setStatus("ready")
+
+    return () => { map.remove() }
+  }, [coords])
+
+  if (status === "error") {
+    const fallbackUrl = address
+      ? `https://www.google.com/maps?q=${mapQuery}&output=embed`
+      : `https://www.google.com/maps?q=-1.2921,36.8219&output=embed`
     return (
       <div className="overflow-hidden rounded-xl border border-border bg-surface">
         <iframe
-          title="Property location on Google Maps"
-          src={`https://maps.google.com/maps?q=${mapQuery}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
+          title="Property location"
+          src={fallbackUrl}
           width="260"
           height="200"
           className="w-full border-0"
@@ -115,7 +85,7 @@ export function PropertyMap({ lat, lng, address }: Props) {
           referrerPolicy="no-referrer-when-downgrade"
         />
         <a
-          href={`https://maps.google.com/maps?q=${mapQuery}&t=&z=14`}
+          href={`https://www.google.com/maps?q=${mapQuery}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-1.5 border-t border-border px-3 py-2.5 text-xs font-medium text-primary-600 hover:bg-surface-secondary transition-colors"
@@ -127,11 +97,19 @@ export function PropertyMap({ lat, lng, address }: Props) {
     )
   }
 
+  if (status === "loading" || !coords) {
+    return (
+      <div className="flex h-[200px] w-full items-center justify-center rounded-xl border border-border bg-surface/50">
+        <Loader2 size={20} className="animate-spin text-text-secondary" />
+      </div>
+    )
+  }
+
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-surface">
       <div ref={mapRef} className="h-[200px] w-full" />
       <a
-        href={`https://maps.google.com/maps?q=${mapQuery}&t=&z=14`}
+        href={`https://www.google.com/maps?q=${coords[0]},${coords[1]}`}
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center justify-center gap-1.5 border-t border-border px-3 py-2.5 text-xs font-medium text-primary-600 hover:bg-surface-secondary transition-colors"
