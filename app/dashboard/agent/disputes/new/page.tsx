@@ -4,12 +4,14 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
+import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
 import Link from "next/link"
 import { ArrowLeft, Loader2, AlertCircle, Building2 } from "lucide-react"
 
 export default function NewDisputePage() {
   const router = useRouter()
   const { user } = useAuth()
+  useAgentPasswordGuard()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [amount, setAmount] = useState("")

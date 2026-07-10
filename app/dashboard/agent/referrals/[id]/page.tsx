@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useParams } from "next/navigation"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
+import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
 import { Loader2, AlertCircle, Building2, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
@@ -38,6 +39,7 @@ const fmt = (n: number) => new Intl.NumberFormat("en-KE", { style: "currency", c
 
 export default function AgentReferralDetailPage() {
   const { user } = useAuth()
+  useAgentPasswordGuard()
   const params = useParams()
   const [referral, setReferral] = useState<ReferralDetail | null>(null)
   const [loading, setLoading] = useState(true)

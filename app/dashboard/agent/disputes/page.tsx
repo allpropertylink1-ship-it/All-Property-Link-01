@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
+import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
 import { Loader2, AlertCircle, Building2, Plus, ChevronRight } from "lucide-react"
 
 interface Dispute {
@@ -31,6 +32,7 @@ const statusColors: Record<string, string> = {
 
 export default function AgentDisputesPage() {
   const { user } = useAuth()
+  useAgentPasswordGuard()
   const [disputes, setDisputes] = useState<Dispute[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)

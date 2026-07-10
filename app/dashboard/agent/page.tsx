@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
+import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
 import Link from "next/link"
 import { Building2, Users, DollarSign, Clock, Wallet, ArrowRight, Eye } from "lucide-react"
 
@@ -54,6 +55,7 @@ interface AgentData {
 
 export default function AgentDashboardPage() {
   const { user } = useAuth()
+  useAgentPasswordGuard()
   const [data, setData] = useState<AgentData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")

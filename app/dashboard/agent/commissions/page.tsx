@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
+import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
 import { Loader2, AlertCircle, Building2 } from "lucide-react"
 
 interface Commission {
@@ -23,6 +24,7 @@ const statusLabels: Record<string, string> = { "": "All", PENDING: "Pending", PA
 
 export default function AgentCommissionsPage() {
   const { user } = useAuth()
+  useAgentPasswordGuard()
   const [commissions, setCommissions] = useState<Commission[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)

@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"
 import Link from "next/link"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
+import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
 import { Loader2, AlertCircle, Building2, ArrowLeft } from "lucide-react"
 
 interface Dispute {
@@ -31,6 +32,7 @@ const statusColors: Record<string, string> = {
 
 export default function AgentDisputeDetailPage() {
   const { user } = useAuth()
+  useAgentPasswordGuard()
   const params = useParams()
   const [dispute, setDispute] = useState<Dispute | null>(null)
   const [loading, setLoading] = useState(true)

@@ -4,7 +4,11 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { PasswordToggle } from "./PasswordToggle"
 
-export function AgentLoginForm() {
+interface Props {
+  onForgotPassword?: () => void
+}
+
+export function AgentLoginForm({ onForgotPassword }: Props) {
   const router = useRouter()
   const { agentLogin } = useAuth()
   const [error, setError] = useState("")
@@ -24,6 +28,11 @@ export function AgentLoginForm() {
     if (result?.error) {
       setError(result.error)
       setLoading(false)
+      return
+    }
+
+    if (result?.requiresPasswordChange) {
+      router.push("/auth/agent-force-change-password")
       return
     }
 
@@ -66,6 +75,18 @@ export function AgentLoginForm() {
             placeholder="Enter your password"
           />
         </div>
+      </div>
+
+      <div className="flex items-center justify-end">
+        {onForgotPassword && (
+          <button
+            type="button"
+            onClick={onForgotPassword}
+            className="text-sm text-accent-300 hover:text-accent-400 transition-colors"
+          >
+            Forgot password?
+          </button>
+        )}
       </div>
 
       <button

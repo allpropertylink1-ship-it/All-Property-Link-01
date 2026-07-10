@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { LoginForm } from "@/components/auth/LoginForm"
 import { AgentLoginForm } from "@/components/auth/AgentLoginForm"
+import { AgentForgotPasswordForm } from "@/components/auth/AgentForgotPasswordForm"
 import { cn } from "@/lib/utils"
 
 const tabs = [
@@ -12,6 +13,12 @@ const tabs = [
 
 export default function LoginPage() {
   const [activeTab, setActiveTab] = useState<"user" | "agent">("user")
+  const [showAgentForgot, setShowAgentForgot] = useState(false)
+
+  function handleTabChange(tab: "user" | "agent") {
+    setActiveTab(tab)
+    setShowAgentForgot(false)
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface px-4">
@@ -27,29 +34,37 @@ export default function LoginPage() {
               Welcome back
             </h1>
             <p className="mt-2 text-sm text-text-secondary">
-              Sign in to your account
+              {showAgentForgot ? "Reset your APL Representative password" : "Sign in to your account"}
             </p>
           </div>
 
-          <div className="mb-6 flex rounded-lg bg-surface-secondary p-1">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all duration-150",
-                  activeTab === tab.id
-                    ? "bg-surface text-text-primary shadow-sm"
-                    : "text-text-secondary hover:text-text-primary"
-                )}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          {!showAgentForgot && (
+            <div className="mb-6 flex rounded-lg bg-surface-secondary p-1">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => handleTabChange(tab.id)}
+                  className={cn(
+                    "flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all duration-150",
+                    activeTab === tab.id
+                      ? "bg-surface text-text-primary shadow-sm"
+                      : "text-text-secondary hover:text-text-primary"
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          )}
 
-          {activeTab === "user" ? <LoginForm /> : <AgentLoginForm />}
+          {activeTab === "user" ? (
+            <LoginForm />
+          ) : showAgentForgot ? (
+            <AgentForgotPasswordForm onBack={() => setShowAgentForgot(false)} />
+          ) : (
+            <AgentLoginForm onForgotPassword={() => setShowAgentForgot(true)} />
+          )}
         </div>
       </div>
     </div>

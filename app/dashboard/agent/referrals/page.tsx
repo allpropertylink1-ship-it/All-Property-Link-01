@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
+import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
 import { Loader2, AlertCircle, Building2, Search, ChevronRight } from "lucide-react"
 
 interface Referral {
@@ -20,6 +21,7 @@ interface Referral {
 
 export default function AgentReferralsPage() {
   const { user } = useAuth()
+  useAgentPasswordGuard()
   const [referrals, setReferrals] = useState<Referral[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)

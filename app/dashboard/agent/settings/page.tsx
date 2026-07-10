@@ -3,10 +3,12 @@
 import { useState } from "react"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
+import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
 import { Loader2, AlertCircle, Building2, CheckCircle, Link as LinkIcon, Copy, Check } from "lucide-react"
 
 export default function AgentSettingsPage() {
   const { user } = useAuth()
+  useAgentPasswordGuard()
   const [fullName, setFullName] = useState("")
   const [phone, setPhone] = useState("")
   const [profileLoading, setProfileLoading] = useState(false)
