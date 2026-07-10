@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useEffect, useState } from "react"
-import { Globe, Loader2 } from "lucide-react"
+import { Globe, Loader2, AlertCircle } from "lucide-react"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 
@@ -20,12 +20,12 @@ const pinIcon = L.divIcon({
 
 export function PropertyMap({ lat, lng, address }: Props) {
   const mapRef = useRef<HTMLDivElement>(null)
+  const mapInitRef = useRef(false)
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading")
   const [coords, setCoords] = useState<[number, number] | null>(null)
   const mapQuery = encodeURIComponent(address)
 
   useEffect(() => {
-    if (!mapRef.current) return
     const floatLat = lat ? Number(lat) : null
     const floatLng = lng ? Number(lng) : null
 
@@ -50,7 +50,8 @@ export function PropertyMap({ lat, lng, address }: Props) {
   }, [])
 
   useEffect(() => {
-    if (!coords || !mapRef.current) return
+    if (!coords || !mapRef.current || mapInitRef.current) return
+    mapInitRef.current = true
 
     const map = L.map(mapRef.current, {
       center: coords,
@@ -65,27 +66,32 @@ export function PropertyMap({ lat, lng, address }: Props) {
 
     L.marker(coords, { icon: pinIcon }).addTo(map)
     setStatus("ready")
+    setTimeout(() => map.invalidateSize(), 100)
 
     return () => { map.remove() }
   }, [coords])
 
-  if (status === "error") {
-    const fallbackUrl = address
-      ? `https://www.google.com/maps?q=${mapQuery}&output=embed`
-      : `https://www.google.com/maps?q=-1.2921,36.8219&output=embed`
-    return (
-      <div className="overflow-hidden rounded-xl border border-border bg-surface">
-        <iframe
-          title="Property location"
-          src={fallbackUrl}
-          width="260"
-          height="200"
-          className="w-full border-0"
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        />
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-surface">
+      {status === "loading" && (
+        <div className="flex h-[200px] w-full items-center justify-center">
+          <Loader2 size={20} className="animate-spin text-text-secondary" />
+        </div>
+      )}
+      {status === "error" && (
+        <div className="flex h-[200px] w-full items-center justify-center gap-2 text-text-secondary">
+          <AlertCircle size={18} />
+          <span className="text-sm">Could not load map location</span>
+        </div>
+      )}
+      <div
+        ref={mapRef}
+        className="h-[200px] w-full"
+        style={{ display: status === "ready" ? "block" : "none" }}
+      />
+      {status === "ready" && (
         <a
-          href={`https://www.google.com/maps?q=${mapQuery}`}
+          href={`https://www.google.com/maps?q=${coords![0]},${coords![1]}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-1.5 border-t border-border px-3 py-2.5 text-xs font-medium text-primary-600 hover:bg-surface-secondary transition-colors"
@@ -93,30 +99,7 @@ export function PropertyMap({ lat, lng, address }: Props) {
           <Globe size={12} />
           View on Google Maps
         </a>
-      </div>
-    )
-  }
-
-  if (status === "loading" || !coords) {
-    return (
-      <div className="flex h-[200px] w-full items-center justify-center rounded-xl border border-border bg-surface/50">
-        <Loader2 size={20} className="animate-spin text-text-secondary" />
-      </div>
-    )
-  }
-
-  return (
-    <div className="overflow-hidden rounded-xl border border-border bg-surface">
-      <div ref={mapRef} className="h-[200px] w-full" />
-      <a
-        href={`https://www.google.com/maps?q=${coords[0]},${coords[1]}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center justify-center gap-1.5 border-t border-border px-3 py-2.5 text-xs font-medium text-primary-600 hover:bg-surface-secondary transition-colors"
-      >
-        <Globe size={12} />
-        View on Google Maps
-      </a>
+      )}
     </div>
   )
 }

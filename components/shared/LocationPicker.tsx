@@ -69,6 +69,7 @@ export function LocationPicker({ initialAddress, initialLat, initialLng, onLocat
 
     mapInstanceRef.current = map
     setStatus("ready")
+    setTimeout(() => map.invalidateSize(), 100)
 
     if (initialLat && initialLng) {
       const lat = Number(initialLat)
