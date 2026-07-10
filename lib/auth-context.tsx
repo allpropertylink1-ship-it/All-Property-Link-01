@@ -18,6 +18,7 @@ interface User {
   companyName?: string
   agentCode?: string
   fullName?: string
+  authMethod?: "user" | "agent"
 }
 
 interface OtpResponse {

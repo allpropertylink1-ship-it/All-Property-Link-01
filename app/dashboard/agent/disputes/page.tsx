@@ -56,7 +56,7 @@ export default function AgentDisputesPage() {
 
   useEffect(() => { fetchDisputes() }, [fetchDisputes])
 
-  if (!user?.isAgent) {
+  if (!user?.aplAgentId) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="max-w-md text-center">

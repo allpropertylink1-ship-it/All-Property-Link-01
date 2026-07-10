@@ -133,7 +133,7 @@ export function DashboardNav() {
           <NavGroup links={primary} section="primary" />
           <NavGroup links={secondary} section="secondary" />
           <NavGroup links={tertiary} section="tertiary" />
-          {user?.isAgent && <NavGroup links={agentPrimary} section="agent" />}
+          {user?.authMethod === "agent" && <NavGroup links={agentPrimary} section="agent" />}
         </nav>
 
         <div className="border-t border-border p-3">

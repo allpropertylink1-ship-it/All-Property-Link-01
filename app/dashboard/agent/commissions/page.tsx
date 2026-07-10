@@ -48,7 +48,7 @@ export default function AgentCommissionsPage() {
 
   useEffect(() => { fetchCommissions() }, [fetchCommissions])
 
-  if (!user?.isAgent) {
+  if (!user?.aplAgentId) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="max-w-md text-center">

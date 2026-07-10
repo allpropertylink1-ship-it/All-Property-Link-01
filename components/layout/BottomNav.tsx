@@ -52,7 +52,7 @@ export function BottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
 
-  const items = user?.isAgent ? [...baseItems, agentItem] : baseItems;
+  const items = user?.authMethod === "agent" ? [...baseItems, agentItem] : baseItems;
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
