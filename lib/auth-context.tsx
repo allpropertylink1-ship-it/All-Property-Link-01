@@ -36,6 +36,7 @@ interface AuthContextType {
   loading: boolean
   login: (email: string, password: string) => Promise<{ error?: string }>
   logout: () => Promise<void>
+  phoneLogin: (phone: string) => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
   signup: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
   sendOtp: (identifier: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
   verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string }>
@@ -52,6 +53,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   login: async () => ({}),
   logout: async () => {},
+  phoneLogin: async () => ({}),
   signup: async () => ({}),
   sendOtp: async () => ({}),
   verifyOtp: async () => ({}),
@@ -121,6 +123,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {}
   }, [])
 
+  const phoneLogin = useCallback(async (phone: string) => {
+    const { data, error } = await api.post<{ expiresIn: number; retryAfter: number }>("/api/auth/phone-login", { phone })
+    if (error) return { error }
+    return { data }
+  }, [])
+
   const sendMagicLink = useCallback(async (email: string) => {
     const { error } = await api.post("/api/auth/magic-link", { email })
     if (error) return { error }
@@ -156,7 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, signup, sendOtp, verifyOtp, refreshUser: fetchUser, sendMagicLink, agentLogin, agentForgotPassword, agentResetPassword, firstPasswordChange }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, phoneLogin, signup, sendOtp, verifyOtp, refreshUser: fetchUser, sendMagicLink, agentLogin, agentForgotPassword, agentResetPassword, firstPasswordChange }}>
       {children}
     </AuthContext.Provider>
   )
