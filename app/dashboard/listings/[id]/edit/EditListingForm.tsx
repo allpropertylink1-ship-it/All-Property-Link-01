@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PropertyImageUploader from "@/components/property/PropertyImageUploader";
+import { LocationPicker } from "@/components/shared/LocationPicker";
 
 interface PropertyData {
   title: string;
@@ -24,6 +25,8 @@ interface PropertyData {
   area?: number;
   features?: string[];
   images?: string[];
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 const listingSchema = z.object({
@@ -38,6 +41,8 @@ const listingSchema = z.object({
   bathrooms: z.coerce.number().int().min(0).optional(),
   area: z.coerce.number().int().min(0).optional(),
   features: z.string().optional(),
+  latitude: z.coerce.number().optional(),
+  longitude: z.coerce.number().optional(),
 });
 
 export default function EditListingForm({ propertyId, property }: { propertyId: string; property: PropertyData }) {
@@ -45,7 +50,7 @@ export default function EditListingForm({ propertyId, property }: { propertyId: 
   const [error, setError] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>(property.images || []);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<z.infer<typeof listingSchema>>({
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
     defaultValues: {
       title: property.title,
@@ -59,8 +64,18 @@ export default function EditListingForm({ propertyId, property }: { propertyId: 
       bathrooms: property.bathrooms ?? undefined,
       area: property.area ?? undefined,
       features: property.features?.join(", ") || "",
+      latitude: property.latitude ?? undefined,
+      longitude: property.longitude ?? undefined,
     },
   });
+
+  const handleLocationChange = useCallback((loc: { lat: number; lng: number; address: string; city: string; region: string }) => {
+    setValue("address", loc.address)
+    setValue("city", loc.city)
+    setValue("region", loc.region)
+    setValue("latitude", loc.lat)
+    setValue("longitude", loc.lng)
+  }, [setValue])
 
   async function onSubmit(data: z.infer<typeof listingSchema>) {
     setError("");
@@ -120,19 +135,19 @@ export default function EditListingForm({ propertyId, property }: { propertyId: 
           </select>
           {errors.propertyType && <p className="text-xs text-error-500">{errors.propertyType.message}</p>}
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="city">City</Label>
-          <Input id="city" {...register("city")} />
-          {errors.city && <p className="text-xs text-error-500">{errors.city.message}</p>}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="region">Region</Label>
-          <Input id="region" {...register("region")} />
-          {errors.region && <p className="text-xs text-error-500">{errors.region.message}</p>}
-        </div>
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="address">Address</Label>
-          <Input id="address" {...register("address")} />
+          <Label>Location</Label>
+          <LocationPicker
+            initialAddress={property.address}
+            initialLat={property.latitude}
+            initialLng={property.longitude}
+            onLocationChange={handleLocationChange}
+          />
+          <input type="hidden" {...register("city")} />
+          <input type="hidden" {...register("region")} />
+          <input type="hidden" {...register("address")} />
+          <input type="hidden" {...register("latitude")} />
+          <input type="hidden" {...register("longitude")} />
           {errors.address && <p className="text-xs text-error-500">{errors.address.message}</p>}
         </div>
         <div className="space-y-2">

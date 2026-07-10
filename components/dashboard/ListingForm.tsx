@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createProperty } from "@/app/actions/properties";
 import PropertyImageUploader from "@/components/property/PropertyImageUploader";
+import { LocationPicker } from "@/components/shared/LocationPicker";
 
 const listingSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -23,6 +24,8 @@ const listingSchema = z.object({
   bathrooms: z.coerce.number().int().min(0).optional(),
   area: z.coerce.number().int().min(0).optional(),
   features: z.string().optional(),
+  latitude: z.coerce.number().optional(),
+  longitude: z.coerce.number().optional(),
 });
 
 type ListingFormData = z.infer<typeof listingSchema>;
@@ -31,9 +34,17 @@ export function ListingForm() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ListingFormData>({
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<ListingFormData>({
     resolver: zodResolver(listingSchema),
   });
+
+  const handleLocationChange = useCallback((loc: { lat: number; lng: number; address: string; city: string; region: string }) => {
+    setValue("address", loc.address)
+    setValue("city", loc.city)
+    setValue("region", loc.region)
+    setValue("latitude", loc.lat)
+    setValue("longitude", loc.lng)
+  }, [setValue])
 
   async function onSubmit(data: ListingFormData) {
     setError("");
@@ -97,19 +108,14 @@ export function ListingForm() {
           </select>
           {errors.propertyType && <p className="text-xs text-error-500">{errors.propertyType.message}</p>}
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="city">City</Label>
-          <Input id="city" {...register("city")} />
-          {errors.city && <p className="text-xs text-error-500">{errors.city.message}</p>}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="region">Region</Label>
-          <Input id="region" {...register("region")} />
-          {errors.region && <p className="text-xs text-error-500">{errors.region.message}</p>}
-        </div>
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="address">Address</Label>
-          <Input id="address" {...register("address")} />
+          <Label>Location</Label>
+          <LocationPicker onLocationChange={handleLocationChange} />
+          <input type="hidden" {...register("city")} />
+          <input type="hidden" {...register("region")} />
+          <input type="hidden" {...register("address")} />
+          <input type="hidden" {...register("latitude")} />
+          <input type="hidden" {...register("longitude")} />
           {errors.address && <p className="text-xs text-error-500">{errors.address.message}</p>}
         </div>
         <div className="space-y-2">
