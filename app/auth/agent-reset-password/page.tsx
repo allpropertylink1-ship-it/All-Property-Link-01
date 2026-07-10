@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, Suspense } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { PasswordToggle } from "@/components/auth/PasswordToggle"
@@ -21,7 +21,7 @@ function ResetForm() {
     setError("")
 
     if (!token) {
-      setError("Invalid reset link")
+      setError("Invalid reset link. Please request a new one.")
       return
     }
 
@@ -48,15 +48,22 @@ function ResetForm() {
     setLoading(false)
   }
 
+  useEffect(() => {
+    if (success) {
+      const t = setTimeout(() => router.push("/auth/login?tab=agent"), 3000)
+      return () => clearTimeout(t)
+    }
+  }, [success, router])
+
   if (success) {
     return (
       <div className="space-y-6">
         <div className="rounded-lg bg-success-500/10 px-4 py-3 text-sm text-success-700">
-          Your password has been reset successfully. You can now log in with your new password.
+          Your password has been reset successfully. Redirecting to login...
         </div>
         <button
           type="button"
-          onClick={() => router.push("/auth/login")}
+          onClick={() => router.push("/auth/login?tab=agent")}
           className="touch-target w-full rounded-sm bg-accent-300 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-400"
         >
           Go to login

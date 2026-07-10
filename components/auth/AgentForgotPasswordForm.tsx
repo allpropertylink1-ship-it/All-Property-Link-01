@@ -1,12 +1,10 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 
-interface Props {
-  onBack: () => void
-}
-
-export function AgentForgotPasswordForm({ onBack }: Props) {
+export function AgentForgotPasswordForm() {
+  const router = useRouter()
   const { agentForgotPassword } = useAuth()
   const [identifier, setIdentifier] = useState("")
   const [error, setError] = useState("")
@@ -29,15 +27,18 @@ export function AgentForgotPasswordForm({ onBack }: Props) {
     setLoading(false)
   }
 
+  const backToLogin = () => router.push("/auth/login?tab=agent")
+
   if (sent) {
     return (
       <div className="space-y-6">
         <div className="rounded-lg bg-success-500/10 px-4 py-3 text-sm text-success-700">
           If an account with that information exists, a password reset link has been sent to the registered email address.
+          If you don't receive an email within 5 minutes, check your spam folder or contact support.
         </div>
         <button
           type="button"
-          onClick={onBack}
+          onClick={backToLogin}
           className="touch-target w-full rounded-sm bg-accent-300 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-400"
         >
           Back to login
@@ -83,7 +84,7 @@ export function AgentForgotPasswordForm({ onBack }: Props) {
 
       <button
         type="button"
-        onClick={onBack}
+        onClick={backToLogin}
         className="w-full text-center text-sm text-text-secondary hover:text-text-primary transition-colors"
       >
         Back to login
