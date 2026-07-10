@@ -17,7 +17,7 @@ interface Property {
   city: string
   status: string
   moderationStatus: string
-  images: any
+  images: string | { url: string }[] | null
   createdAt: string
 }
 

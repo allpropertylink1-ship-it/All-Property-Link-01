@@ -20,6 +20,8 @@ export default function AgentSettingsPage() {
   const [pwError, setPwError] = useState("")
   const [pwSuccess, setPwSuccess] = useState(false)
 
+  const [copied, setCopied] = useState(false)
+
   if (!user?.isAgent) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
@@ -85,7 +87,6 @@ export default function AgentSettingsPage() {
     setPwLoading(false)
   }
 
-  const [copied, setCopied] = useState(false)
   const referralLink = user.agentCode ? `https://allpropertylink-amber.vercel.app/auth/register?ref=${user.agentCode}` : ""
 
   async function copyReferralLink() {
