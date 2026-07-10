@@ -130,10 +130,15 @@ export function DashboardNav() {
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 pb-4">
-          <NavGroup links={primary} section="primary" />
-          <NavGroup links={secondary} section="secondary" />
-          <NavGroup links={tertiary} section="tertiary" />
-          {user?.authMethod === "agent" && <NavGroup links={agentPrimary} section="agent" />}
+          {user?.authMethod === "agent" ? (
+            <NavGroup links={agentPrimary} section="agent" />
+          ) : (
+            <>
+              <NavGroup links={primary} section="primary" />
+              <NavGroup links={secondary} section="secondary" />
+              <NavGroup links={tertiary} section="tertiary" />
+            </>
+          )}
         </nav>
 
         <div className="border-t border-border p-3">
