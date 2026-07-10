@@ -176,6 +176,30 @@ export function LocationPicker({ initialAddress, initialLat, initialLng, onLocat
   }, [status])
 
   useEffect(() => {
+    if (status !== "ready" || !mapRef.current || mapInstanceRef.current) return
+    if (initialLat && initialLng) return
+    const nairobi = { lat: -1.2921, lng: 36.8219 }
+    mapInstanceRef.current = new google.maps.Map(mapRef.current, {
+      center: nairobi,
+      zoom: 12,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+      styles: [
+        { featureType: "poi", stylers: [{ visibility: "off" }] },
+        { featureType: "transit", stylers: [{ visibility: "off" }] },
+      ],
+    })
+    mapInstanceRef.current.addListener("click", (e: google.maps.MapMouseEvent) => {
+      if (e.latLng) {
+        placeMarker(e.latLng.lat(), e.latLng.lng())
+        reverseGeocode(e.latLng.lat(), e.latLng.lng())
+      }
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status])
+
+  useEffect(() => {
     if (status !== "ready" || !initialLat || !initialLng) return
     initMap(Number(initialLat), Number(initialLng))
   // eslint-disable-next-line react-hooks/exhaustive-deps
