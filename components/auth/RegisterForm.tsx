@@ -312,7 +312,7 @@ export function RegisterForm({ referralCode: initialReferralCode }: { referralCo
             <button
               type="button"
               onClick={() => setContactMethod("email")}
-              className={`flex-1 rounded-sm border px-4 py-2.5 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-sm border px-4 py-3 text-sm font-medium transition-colors ${
                 contactMethod === "email"
                   ? "border-accent-300 bg-accent-300/10 text-accent-300"
                   : "border-border text-text-secondary hover:border-accent-300"
@@ -323,7 +323,7 @@ export function RegisterForm({ referralCode: initialReferralCode }: { referralCo
             <button
               type="button"
               onClick={() => setContactMethod("phone")}
-              className={`flex-1 rounded-sm border px-4 py-2.5 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-sm border px-4 py-3 text-sm font-medium transition-colors ${
                 contactMethod === "phone"
                   ? "border-accent-300 bg-accent-300/10 text-accent-300"
                   : "border-border text-text-secondary hover:border-accent-300"

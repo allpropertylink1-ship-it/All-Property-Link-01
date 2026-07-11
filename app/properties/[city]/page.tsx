@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getProperties, getCities } from "@/lib/services/property";
 import { PropertyGrid } from "@/components/property/PropertyGrid";
 import { PropertyFilters } from "@/components/property/PropertyFilters";
+import { FilterPanel } from "@/components/property/FilterPanel";
 import { Pagination } from "@/components/shared/Pagination";
 
 interface Props {
@@ -32,7 +33,7 @@ export default async function CityPage({ params, searchParams }: Props) {
       </h1>
       <p className="mb-8 text-text-secondary">{data.total} properties found</p>
       <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
-        <aside>
+        <FilterPanel>
           <PropertyFilters
             cities={cities}
             selectedCity={cityName}
@@ -41,7 +42,7 @@ export default async function CityPage({ params, searchParams }: Props) {
             maxPrice={maxPrice}
             bedrooms={bedrooms}
           />
-        </aside>
+        </FilterPanel>
         <div>
           <PropertyGrid properties={data.properties} />
           <Pagination

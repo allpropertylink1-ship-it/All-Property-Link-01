@@ -1,6 +1,7 @@
 import { getProperties, getCities } from "@/lib/services/property";
 import { PropertyGrid } from "@/components/property/PropertyGrid";
 import { PropertyFilters } from "@/components/property/PropertyFilters";
+import { FilterPanel } from "@/components/property/FilterPanel";
 
 interface Props {
   searchParams: { [key: string]: string | undefined };
@@ -26,7 +27,7 @@ export default async function PropertiesPage({ searchParams }: Props) {
         Properties for sale & rent in Kenya
       </h1>
       <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
-        <aside>
+        <FilterPanel>
           <PropertyFilters
             cities={cities}
             selectedCity={city}
@@ -35,7 +36,7 @@ export default async function PropertiesPage({ searchParams }: Props) {
             maxPrice={maxPrice}
             bedrooms={bedrooms}
           />
-        </aside>
+        </FilterPanel>
         <div>
           <p className="mb-4 text-sm text-text-secondary">
             {data.total} {data.total === 1 ? "property" : "properties"} found

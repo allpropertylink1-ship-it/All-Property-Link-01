@@ -48,7 +48,7 @@ function LoginContent() {
               type="button"
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                "flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all duration-150",
+                "flex-1 rounded-md px-4 py-3 text-sm font-medium transition-all duration-150",
                 activeTab === tab.id
                   ? "bg-surface text-text-primary shadow-sm"
                   : "text-text-secondary hover:text-text-primary"
