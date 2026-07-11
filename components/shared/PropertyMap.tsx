@@ -47,7 +47,7 @@ export function PropertyMap({ lat, lng, address }: Props) {
         }
       })
       .catch(() => setStatus("error"))
-  }, [])
+  }, [lat, lng, mapQuery])
 
   useEffect(() => {
     if (!coords || !mapRef.current || mapInitRef.current) return

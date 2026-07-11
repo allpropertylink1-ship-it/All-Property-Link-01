@@ -17,6 +17,7 @@ interface PropertyCardProps {
   isRent?: boolean;
   urgencyText?: "Trending" | "Just listed" | "Popular";
   isVerified?: boolean;
+  priority?: boolean;
 }
 
 function FlashIcon() {
@@ -64,9 +65,10 @@ export function PropertyCard({
   isRent,
   urgencyText,
   isVerified = true,
+  priority,
 }: PropertyCardProps) {
   const imageUrls = Array.isArray(images) ? images : [];
-  const imageUrl = imageUrls.length > 0 ? imageUrls[0] : "/placeholder.jpg";
+  const imageUrl = imageUrls.length > 0 ? imageUrls[0] : "/placeholder.svg";
 
   return (
     <Link
@@ -81,6 +83,7 @@ export function PropertyCard({
             width={400}
             height={300}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            priority={priority}
           />
           <span
             className={`absolute left-2 top-2 z-10 rounded-md px-2.5 py-1 text-xs font-semibold text-white ${

@@ -40,8 +40,8 @@ export function PropertyGrid({ properties, viewToggle = "grid" }: PropertyGridPr
           : "flex flex-col gap-4"
       }
     >
-      {properties.map((property) => (
-        <PropertyCard key={property.id} {...property} />
+      {properties.map((property, i) => (
+        <PropertyCard key={property.id} priority={i === 0} {...property} />
       ))}
     </div>
   );

@@ -264,7 +264,7 @@ export function LocationPicker({ initialAddress, initialLat, initialLng, onLocat
       )}
 
       {status === "loading" && (
-        <div className="flex h-64 w-full items-center justify-center rounded-lg border border-border bg-surface/50">
+        <div className="flex h-64 w-full items-center justify-center rounded-lg border border-border bg-surface">
           <div className="flex flex-col items-center gap-2 text-text-secondary">
             <Loader2 size={24} className="animate-spin" />
             <span className="text-sm">Loading map...</span>
@@ -273,7 +273,7 @@ export function LocationPicker({ initialAddress, initialLat, initialLng, onLocat
       )}
 
       {status === "error" && (
-        <div className="flex h-64 w-full items-center justify-center rounded-lg border border-border bg-surface/50">
+        <div className="flex h-64 w-full items-center justify-center rounded-lg border border-border bg-surface">
           <div className="flex flex-col items-center gap-2 text-error-500">
             <AlertCircle size={24} />
             <span className="text-sm">Failed to load map</span>

@@ -39,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${sora.variable} ${dmSans.variable} flex min-h-screen flex-col antialiased`}>
         <ThemeProvider>
           <AuthProvider>

@@ -14,7 +14,7 @@ const navLinks = [
 
 export function Navbar() {
   return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-surface/95 backdrop-blur">
+    <nav className="sticky top-0 z-50 border-b border-border bg-surface backdrop-blur">
       <div className="mx-auto flex h-16 max-w-content items-center justify-between px-4">
         <Link
           href="/"

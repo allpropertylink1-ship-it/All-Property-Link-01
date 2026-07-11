@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { getPropertyBySlug, getOtherPropertiesByAgent } from "@/lib/services/property";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
-import { PropertyMap } from "@/components/shared/PropertyMap";
+import dynamic from "next/dynamic";
+const PropertyMap = dynamic(() => import("@/components/shared/PropertyMap").then(m => m.PropertyMap), { ssr: false });
 import { Building2, Bed, Bath, Maximize2, Phone, Mail, Globe, Sparkles, MessageCircle } from "lucide-react";
 
 interface Props {

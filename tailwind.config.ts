@@ -50,16 +50,16 @@ const config: Config = {
           500: "#F59E0B",
         },
         surface: {
-          DEFAULT: "#FFFFFF",
-          secondary: "#F6F4EF",
+          DEFAULT: "var(--color-surface)",
+          secondary: "var(--color-bg)",
         },
         text: {
-          primary: "#1A1A1A",
-          secondary: "#75716B",
+          primary: "var(--color-text)",
+          secondary: "var(--color-muted)",
           onPrimary: "#FFFFFF",
         },
         border: {
-          DEFAULT: "#E2DDD3",
+          DEFAULT: "var(--color-line)",
         },
       },
       fontFamily: {

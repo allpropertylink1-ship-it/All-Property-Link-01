@@ -77,16 +77,18 @@ export function PropertyGallery({ images, title }: Props) {
       >
         {/* Main image */}
         <div className="relative overflow-hidden rounded-lg" style={{ aspectRatio: "4 / 3" }}>
-          <button type="button" onClick={() => openLightbox(current)} className="block h-full w-full" aria-label="View image full-screen">
-            <Image
-              src={images[current]}
-              alt={`${title} — image ${current + 1} of ${images.length}`}
-              fill
-              className="object-cover transition-opacity duration-300"
-              priority={current === 0}
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-          </button>
+          <div className="relative h-full w-full">
+            <button type="button" onClick={() => openLightbox(current)} className="relative block h-full w-full" aria-label="View image full-screen">
+              <Image
+                src={images[current]}
+                alt={`${title} — image ${current + 1} of ${images.length}`}
+                fill
+                className="object-cover transition-opacity duration-300"
+                priority={current === 0}
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </button>
+          </div>
 
           {/* Hover overlay with actions */}
           <div className="absolute inset-0 opacity-0 transition-opacity hover:opacity-100">
