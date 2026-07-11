@@ -3,11 +3,11 @@ import Link from "next/link";
 export function Footer() {
   return (
     <footer className="border-t border-border bg-surface">
-      <div className="mx-auto max-w-content px-4 py-16">
-        <div className="mb-12">
+      <div className="mx-auto max-w-content px-4 py-12 md:py-16">
+        <div className="mb-8 md:mb-12">
           <Link
             href="/"
-            className="font-heading text-xl font-bold tracking-tight text-primary"
+            className="font-heading text-lg font-bold tracking-tight text-primary md:text-xl"
           >
             All Property{" "}
             <span className="text-accent-300">Link</span>
@@ -18,7 +18,7 @@ export function Footer() {
           </p>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 sm:gap-8">
           <div>
             <h3 className="mb-4 font-heading text-sm font-semibold text-primary">
               Browse
@@ -142,7 +142,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-2 border-t border-border pt-8 sm:flex-row">
+        <div className="mt-8 flex flex-col items-center justify-between gap-2 border-t border-border pt-6 sm:flex-row sm:mt-12">
           <p className="text-xs text-secondary">
             &copy; {new Date().getFullYear()} All Property Link. All rights
             reserved.

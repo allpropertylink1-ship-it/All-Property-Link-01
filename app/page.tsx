@@ -156,7 +156,7 @@ export default async function HomePage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary-500 to-primary-600 px-4 py-24 text-center text-text-onPrimary md:py-32">
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary-500 to-primary-600 px-4 py-16 text-center text-text-onPrimary md:py-32">
         <div className="absolute inset-0 bg-[url('/hero-pattern.svg')] opacity-5" />
         <div className="wrap mx-auto max-w-content relative z-10">
           <h1 className="mx-auto max-w-4xl font-heading text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">
@@ -205,9 +205,9 @@ export default async function HomePage() {
       </section>
 
       {/* Categories Section */}
-      <section className="bg-surface-secondary px-4 py-20">
+      <section className="bg-surface-secondary px-4 py-14 md:py-20">
         <div className="wrap mx-auto max-w-content">
-          <div className="mb-10 text-center">
+          <div className="mb-6 text-center md:mb-10">
             <span className="font-body text-xs font-semibold uppercase tracking-widest text-accent-300">
               Browse by category
             </span>
@@ -215,12 +215,12 @@ export default async function HomePage() {
               What are you looking for?
             </h2>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {categories.map((cat) => (
               <Link
                 key={cat.title}
                 href={cat.slug}
-                className="reveal group relative flex h-64 items-end overflow-hidden rounded-xl"
+                className="reveal group relative flex h-44 items-end overflow-hidden rounded-xl sm:h-56"
               >
                 <Image
                   src={cat.image}
@@ -233,11 +233,11 @@ export default async function HomePage() {
                   className={`absolute inset-0 bg-gradient-to-t ${cat.gradient}`}
                 />
                 <div className="absolute inset-0 bg-black/20" />
-                <div className="relative z-10 w-full p-6">
-                  <h3 className="font-heading text-lg font-bold text-white">
+                <div className="relative z-10 w-full p-4 sm:p-6">
+                  <h3 className="font-heading text-base font-bold text-white sm:text-lg">
                     {cat.title}
                   </h3>
-                  <p className="mt-1 text-sm text-white/80">{cat.count}</p>
+                  <p className="mt-0.5 text-xs text-white/80 sm:text-sm">{cat.count}</p>
                 </div>
                 <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/10 transition-all group-hover:ring-accent-300/50" />
               </Link>
@@ -247,9 +247,9 @@ export default async function HomePage() {
       </section>
 
       {/* Trust / Stats Section */}
-      <section className="bg-surface px-4 py-20">
+      <section className="bg-surface px-4 py-14 md:py-20">
         <div className="wrap mx-auto max-w-content">
-          <div className="mb-10 text-center">
+          <div className="mb-6 text-center md:mb-10">
             <span className="font-body text-xs font-semibold uppercase tracking-widest text-accent-300">
               Our reach
             </span>
@@ -257,7 +257,7 @@ export default async function HomePage() {
               Trusted across Kenya
             </h2>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
             {[
               { icon: UsersIcon, label: "1,000+", desc: "Active users" },
               { icon: ShieldIcon, label: `${propertyCount}+`, desc: "Properties listed" },
@@ -266,15 +266,15 @@ export default async function HomePage() {
             ].map((stat) => (
               <div
                 key={stat.label}
-                className="reveal rounded-xl border border-border bg-surface p-8 text-center transition-shadow hover:shadow-md"
+                className="reveal rounded-xl border border-border bg-surface p-5 text-center transition-shadow hover:shadow-md md:p-8"
               >
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary-50">
-                  <stat.icon className="h-6 w-6 text-primary-500" />
+                <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary-50 md:mb-4 md:h-12 md:w-12">
+                  <stat.icon className="h-5 w-5 text-primary-500 md:h-6 md:w-6" />
                 </div>
-                <p className="font-heading text-2xl font-bold text-text-primary">
+                <p className="font-heading text-xl font-bold text-text-primary md:text-2xl">
                   {stat.label}
                 </p>
-                <p className="mt-1 text-sm text-text-secondary">{stat.desc}</p>
+                <p className="mt-0.5 text-xs text-text-secondary md:mt-1 md:text-sm">{stat.desc}</p>
               </div>
             ))}
           </div>
@@ -282,7 +282,7 @@ export default async function HomePage() {
       </section>
 
       {/* Featured Properties Section */}
-      <section className="bg-surface-secondary px-4 py-20">
+      <section className="bg-surface-secondary px-4 py-14 md:py-20">
         <div className="wrap mx-auto max-w-content">
           <div className="mb-10 flex items-end justify-between">
             <div>
@@ -364,9 +364,9 @@ export default async function HomePage() {
       </section>
 
       {/* What We Offer Section */}
-      <section className="bg-surface px-4 py-20">
+      <section className="bg-surface px-4 py-14 md:py-20">
         <div className="wrap mx-auto max-w-content">
-          <div className="mb-10 text-center">
+          <div className="mb-6 text-center md:mb-10">
             <span className="font-body text-xs font-semibold uppercase tracking-widest text-accent-300">
               Who we serve
             </span>
@@ -375,9 +375,9 @@ export default async function HomePage() {
             </h2>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
-            <div className="reveal rounded-xl border border-border bg-surface p-8 text-center transition-shadow hover:shadow-md">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50">
-                <HomeIcon className="h-7 w-7 text-primary-500" />
+            <div className="reveal rounded-xl border border-border bg-surface p-5 text-center transition-shadow hover:shadow-md md:p-8">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 md:mb-4 md:h-14 md:w-14">
+                <HomeIcon className="h-6 w-6 text-primary-500 md:h-7 md:w-7" />
               </div>
               <h3 className="mb-2 font-heading text-lg font-semibold text-text-primary">
                 For Buyers & Tenants
@@ -393,9 +393,9 @@ export default async function HomePage() {
                 )}
               </ul>
             </div>
-            <div className="reveal rounded-xl border border-border bg-surface p-8 text-center transition-shadow hover:shadow-md">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50">
-                <BriefcaseIcon className="h-7 w-7 text-primary-500" />
+            <div className="reveal rounded-xl border border-border bg-surface p-5 text-center transition-shadow hover:shadow-md md:p-8">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 md:mb-4 md:h-14 md:w-14">
+                <BriefcaseIcon className="h-6 w-6 text-primary-500 md:h-7 md:w-7" />
               </div>
               <h3 className="mb-2 font-heading text-lg font-semibold text-text-primary">
                 For Agents & Landlords
@@ -411,9 +411,9 @@ export default async function HomePage() {
                 )}
               </ul>
             </div>
-            <div className="reveal rounded-xl border border-border bg-surface p-8 text-center transition-shadow hover:shadow-md">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50">
-                <WrenchIcon className="h-7 w-7 text-primary-500" />
+            <div className="reveal rounded-xl border border-border bg-surface p-5 text-center transition-shadow hover:shadow-md md:p-8">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 md:mb-4 md:h-14 md:w-14">
+                <WrenchIcon className="h-6 w-6 text-primary-500 md:h-7 md:w-7" />
               </div>
               <h3 className="mb-2 font-heading text-lg font-semibold text-text-primary">
                 For Service Providers
@@ -434,24 +434,30 @@ export default async function HomePage() {
       </section>
 
       {/* CTA Banner */}
-      <section className="bg-gradient-to-br from-primary-500 to-primary-600 px-4 py-20 text-center text-text-onPrimary">
+      <section className="bg-gradient-to-br from-primary-500 to-primary-600 px-4 py-14 text-center text-text-onPrimary md:py-20">
         <div className="wrap mx-auto max-w-content">
           <div className="mx-auto flex max-w-2xl flex-col items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-300/20">
-                <CheckIcon className="h-4 w-4 text-accent-300" />
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-300/20 sm:h-8 sm:w-8">
+                  <CheckIcon className="h-3 w-3 text-accent-300 sm:h-4 sm:w-4" />
+                </div>
+                <span className="text-xs text-accent-200 sm:text-sm">Free to list</span>
               </div>
-              <span className="text-sm text-accent-200">Free to list</span>
-              <div className="h-1 w-1 rounded-full bg-white/30" />
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-300/20">
-                <CheckIcon className="h-4 w-4 text-accent-300" />
+              <div className="hidden h-1 w-1 rounded-full bg-white/30 sm:block" />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-300/20 sm:h-8 sm:w-8">
+                  <CheckIcon className="h-3 w-3 text-accent-300 sm:h-4 sm:w-4" />
+                </div>
+                <span className="text-xs text-accent-200 sm:text-sm">No commission</span>
               </div>
-              <span className="text-sm text-accent-200">No commission</span>
-              <div className="h-1 w-1 rounded-full bg-white/30" />
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-300/20">
-                <CheckIcon className="h-4 w-4 text-accent-300" />
+              <div className="hidden h-1 w-1 rounded-full bg-white/30 sm:block" />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-300/20 sm:h-8 sm:w-8">
+                  <CheckIcon className="h-3 w-3 text-accent-300 sm:h-4 sm:w-4" />
+                </div>
+                <span className="text-xs text-accent-200 sm:text-sm">Instant visibility</span>
               </div>
-              <span className="text-sm text-accent-200">Instant visibility</span>
             </div>
             <h2 className="font-heading text-2xl font-bold md:text-3xl">
               Ready to list? Start free today.
