@@ -230,7 +230,8 @@ export default function BusinessProfilePage() {
         ? specialtiesService
         : []
 
-  async function handleSave() {
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
     setLoading(true)
     setError("")
     setSuccess(false)
@@ -285,7 +286,7 @@ export default function BusinessProfilePage() {
         </div>
       )}
 
-      <div className="space-y-6 rounded-xl border border-border bg-surface p-6">
+      <form className="space-y-6 rounded-xl border border-border bg-surface p-6" onSubmit={handleSave}>
 
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-2">
@@ -454,8 +455,7 @@ export default function BusinessProfilePage() {
 
         <div className="flex justify-end border-t border-border pt-6">
           <button
-            type="button"
-            onClick={handleSave}
+            type="submit"
             disabled={loading}
             className="touch-target flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -472,7 +472,7 @@ export default function BusinessProfilePage() {
             )}
           </button>
         </div>
-      </div>
+      </form>
     </div>
   )
 }

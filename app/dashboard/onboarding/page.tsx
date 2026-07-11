@@ -138,7 +138,8 @@ export default function OnboardingPage() {
       ? specialtiesService
       : [];
 
-  async function handleSubmit() {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
     setLoading(true);
     setError("");
 
@@ -202,7 +203,7 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      <div className="space-y-6 rounded-xl border border-border bg-surface p-6">
+      <form className="space-y-6 rounded-xl border border-border bg-surface p-6" onSubmit={handleSubmit}>
         <h2 className="font-heading text-lg font-semibold text-text-primary">Personal & Business Information</h2>
 
         <div className="space-y-2">
@@ -354,15 +355,14 @@ export default function OnboardingPage() {
 
         <div className="flex justify-end">
           <button
-            type="button"
-            onClick={handleSubmit}
+            type="submit"
             disabled={loading || !form.contactPerson || !form.phone || !form.email || !form.category}
             className="touch-target rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Submitting..." : "Submit for Approval"}
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

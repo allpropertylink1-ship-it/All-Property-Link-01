@@ -12,7 +12,7 @@ export default async function AdminLayout({
     <div className="min-h-screen bg-surface">
       <AdminNav />
       <div className="lg:pl-64">
-        <main className="p-6 lg:p-8">{children}</main>
+        <div className="p-6 lg:p-8">{children}</div>
       </div>
     </div>
   );

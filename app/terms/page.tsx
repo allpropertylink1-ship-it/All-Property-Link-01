@@ -15,7 +15,7 @@ export default function TermsPage() {
 
   return (
     <>
-        <main className="min-h-[calc(100vh-4rem)] flex flex-col">
+        <div className="min-h-[calc(100vh-4rem)] flex flex-col">
           <article className="flex-1 w-full max-w-[65ch] mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
             <header className="mb-10 sm:mb-14 text-center">
               <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-text-primary tracking-tight text-balance mb-4">
@@ -369,7 +369,7 @@ export default function TermsPage() {
               </section>
             </div>
           </article>
-        </main>
+        </div>
     </>
   );
 }
