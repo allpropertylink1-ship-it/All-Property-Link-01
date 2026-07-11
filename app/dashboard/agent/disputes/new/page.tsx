@@ -72,7 +72,7 @@ export default function NewDisputePage() {
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-text-primary">Title</label>
           <input id="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} required
-            className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+            className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
             placeholder="Brief title for your dispute"
           />
         </div>
@@ -80,7 +80,7 @@ export default function NewDisputePage() {
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-text-primary">Description</label>
           <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} required rows={5}
-            className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20 resize-y"
+            className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20 resize-y"
             placeholder="Describe the issue in detail"
           />
         </div>
@@ -88,7 +88,7 @@ export default function NewDisputePage() {
         <div>
           <label htmlFor="amount" className="block text-sm font-medium text-text-primary">Disputed Amount (KES)</label>
           <input id="amount" type="number" value={amount} onChange={(e) => setAmount(e.target.value)}
-            className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+            className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
             placeholder="0"
           />
         </div>

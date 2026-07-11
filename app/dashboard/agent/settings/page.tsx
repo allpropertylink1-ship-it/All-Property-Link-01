@@ -137,14 +137,14 @@ export default function AgentSettingsPage() {
         <div>
           <label htmlFor="fullName" className="block text-sm font-medium text-text-primary">Full Name</label>
           <input id="fullName" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder={user.fullName || `${user.firstName} ${user.lastName}`}
-            className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+            className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
           />
         </div>
 
         <div>
           <label htmlFor="phone" className="block text-sm font-medium text-text-primary">Phone</label>
           <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={user.phone || "07XXXXXXXX"}
-            className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+            className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
           />
         </div>
 
@@ -167,21 +167,21 @@ export default function AgentSettingsPage() {
         <div>
           <label htmlFor="currentPassword" className="block text-sm font-medium text-text-primary">Current Password</label>
           <input id="currentPassword" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required
-            className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-text-primary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+            className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
           />
         </div>
 
         <div>
           <label htmlFor="newPassword" className="block text-sm font-medium text-text-primary">New Password</label>
           <input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8}
-            className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-text-primary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+            className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
           />
         </div>
 
         <div>
           <label htmlFor="confirmPassword" className="block text-sm font-medium text-text-primary">Confirm New Password</label>
           <input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required
-            className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-text-primary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+            className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
           />
         </div>
 

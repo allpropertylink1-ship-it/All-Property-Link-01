@@ -298,7 +298,7 @@ export default function BusinessProfilePage() {
               value={form.companyName}
               onChange={(e) => updateField("companyName", e.target.value)}
               placeholder="Your full name or company name"
-              className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
           </div>
 
@@ -337,7 +337,7 @@ export default function BusinessProfilePage() {
               value={form.contactPerson}
               onChange={(e) => updateField("contactPerson", e.target.value)}
               placeholder="Contact person name"
-              className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
           </div>
 
@@ -426,7 +426,7 @@ export default function BusinessProfilePage() {
             value={form.website}
             onChange={(e) => updateField("website", e.target.value)}
             placeholder="https://your-website.com"
-            className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
           />
         </div>
 
@@ -438,7 +438,7 @@ export default function BusinessProfilePage() {
               value={form.location}
               onChange={(e) => updateField("location", e.target.value)}
               placeholder="e.g., Nairobi"
-              className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
           </div>
           <div className="space-y-2">
@@ -448,7 +448,7 @@ export default function BusinessProfilePage() {
               value={form.estateSubLocation}
               onChange={(e) => updateField("estateSubLocation", e.target.value)}
               placeholder="e.g., Westlands"
-              className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
           </div>
         </div>

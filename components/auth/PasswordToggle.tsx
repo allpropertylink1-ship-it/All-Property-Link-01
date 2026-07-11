@@ -28,7 +28,7 @@ export function PasswordToggle({ id, name, value, onChange, placeholder, autoCom
         required={required}
         minLength={minLength}
         style={{ fontSize: "16px" }}
-        className={`block w-full rounded-sm border border-border px-4 py-3 pr-10 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20 ${className}`}
+        className={`block w-full rounded-sm border border-border bg-surface px-4 py-3 pr-10 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20 ${className}`}
       />
       <button
         type="button"

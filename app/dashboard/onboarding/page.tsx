@@ -215,7 +215,7 @@ export default function OnboardingPage() {
             value={form.companyName}
             onChange={(e) => updateField("companyName", e.target.value)}
             placeholder="Your full name or company name"
-            className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
           />
         </div>
 
@@ -228,7 +228,7 @@ export default function OnboardingPage() {
             value={form.contactPerson}
             onChange={(e) => updateField("contactPerson", e.target.value)}
             placeholder="Contact person name"
-            className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             required
           />
         </div>
@@ -243,7 +243,7 @@ export default function OnboardingPage() {
               value={form.phone}
               onChange={(e) => updateField("phone", e.target.value)}
               placeholder="+254 7XX XXX XXX"
-              className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               required
             />
             <p className="text-xs text-text-secondary">Must be unique</p>
@@ -257,7 +257,7 @@ export default function OnboardingPage() {
               value={form.email}
               onChange={(e) => updateField("email", e.target.value)}
               placeholder="your@email.com"
-              className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               required
             />
             <p className="text-xs text-text-secondary">Agents must provide a valid, unique email</p>
@@ -319,7 +319,7 @@ export default function OnboardingPage() {
             value={form.website}
             onChange={(e) => updateField("website", e.target.value)}
             placeholder="https://your-website.com"
-            className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
           />
         </div>
 
@@ -333,7 +333,7 @@ export default function OnboardingPage() {
               value={form.location}
               onChange={(e) => updateField("location", e.target.value)}
               placeholder="e.g., Nairobi"
-              className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               required
             />
           </div>
@@ -346,7 +346,7 @@ export default function OnboardingPage() {
               value={form.estateSubLocation}
               onChange={(e) => updateField("estateSubLocation", e.target.value)}
               placeholder="e.g., Westlands"
-              className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               required
             />
           </div>

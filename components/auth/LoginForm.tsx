@@ -167,7 +167,7 @@ export function LoginForm() {
             type="email"
             autoComplete="email"
             required
-            className="mt-1 block w-full rounded-sm border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+            className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
             style={{ fontSize: "16px" }}
             placeholder="you@example.com"
           />
@@ -214,7 +214,7 @@ export function LoginForm() {
               value={magicEmail}
               onChange={(e) => setMagicEmail(e.target.value)}
               placeholder="your@email.com"
-              className="block flex-1 rounded-sm border border-border px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+              className="block flex-1 rounded-sm border border-border bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
             />
             <button
               type="button"
@@ -257,7 +257,7 @@ export function LoginForm() {
                   value={phone}
                   onChange={(e) => { setPhone(e.target.value); setPhoneError("") }}
                   placeholder="712 345 678"
-                  className="block w-full rounded-sm rounded-l-none border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+                  className="block w-full rounded-sm rounded-l-none border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
                   style={{ fontSize: "16px" }}
                 />
               </div>
@@ -292,7 +292,7 @@ export function LoginForm() {
                   onChange={(e) => handleOtpInput(i, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(i, e)}
                   autoFocus={i === 0}
-                  className="h-14 w-12 rounded-sm border border-border text-center text-xl font-bold text-text-primary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+                  className="h-14 w-12 rounded-sm border border-border bg-surface text-center text-xl font-bold text-text-primary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
                 />
               ))}
             </div>
