@@ -37,6 +37,57 @@ const pinIcon = L.divIcon({
 
 const nairobi: [number, number] = [-1.2921, 36.8219]
 
+function parseCoordinates(input: string): { lat: number; lng: number } | null {
+  const trimmed = input.trim()
+
+  // Try decimal degrees: " -1.2921, 36.8219" or " -1.2921 36.8219"
+  const decimalRe = /^\s*([+-]?\d+\.?\d*)\s*[,/\s]\s*([+-]?\d+\.?\d*)\s*$/
+  const decimalMatch = trimmed.match(decimalRe)
+  if (decimalMatch) {
+    const lat = parseFloat(decimalMatch[1])
+    const lng = parseFloat(decimalMatch[2])
+    if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) return { lat, lng }
+  }
+
+  // Try decimal with direction: "1.2921 S, 36.8219 E" or " 1.2921S  36.8219E"
+  const decimalDirRe = /^\s*([+-]?\d+\.?\d*)\s*°?\s*([NSEWnsew])\s*[,/\s]\s*([+-]?\d+\.?\d*)\s*°?\s*([NSEWnsew])\s*$/
+  const decimalDirMatch = trimmed.match(decimalDirRe)
+  if (decimalDirMatch) {
+    let lat = parseFloat(decimalDirMatch[1])
+    let lng = parseFloat(decimalDirMatch[3])
+    if (decimalDirMatch[2].toUpperCase() === "S") lat = -lat
+    if (decimalDirMatch[4].toUpperCase() === "W") lng = -lng
+    if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) return { lat, lng }
+  }
+
+  // Try DMS: "1°18'30.6\"S 36°53'50.9\"E"
+  const dmsRe = /^(\d+)\s*°\s*(\d+)\s*['′]\s*(\d+\.?\d*)\s*["″]\s*([NSEWnsew])\s*[,/\s]\s*(\d+)\s*°\s*(\d+)\s*['′]\s*(\d+\.?\d*)\s*["″]\s*([NSEWnsew])\s*$/
+  const dmsMatch = trimmed.match(dmsRe)
+  if (dmsMatch) {
+    const lat = toDecimal(parseInt(dmsMatch[1]), parseInt(dmsMatch[2]), parseFloat(dmsMatch[3]), dmsMatch[4])
+    const lng = toDecimal(parseInt(dmsMatch[5]), parseInt(dmsMatch[6]), parseFloat(dmsMatch[7]), dmsMatch[8])
+    if (lat !== null && lng !== null && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) return { lat, lng }
+  }
+
+  // Try DMS with spaces: "1° 18' 30.6\" S, 36° 53' 50.9\" E"  (more loosely formatted)
+  const dmsLooseRe = /^(\d+)\s*°\s*(\d+)\s*['′]\s*(\d+\.?\d*)\s*["″]?\s*([NSEWnsew])\s*(?:\s|,\s)*(\d+)\s*°\s*(\d+)\s*['′]\s*(\d+\.?\d*)\s*["″]?\s*([NSEWnsew])\s*$/
+  const dmsLooseMatch = trimmed.match(dmsLooseRe)
+  if (dmsLooseMatch) {
+    const lat = toDecimal(parseInt(dmsLooseMatch[1]), parseInt(dmsLooseMatch[2]), parseFloat(dmsLooseMatch[3]), dmsLooseMatch[4])
+    const lng = toDecimal(parseInt(dmsLooseMatch[5]), parseInt(dmsLooseMatch[6]), parseFloat(dmsLooseMatch[7]), dmsLooseMatch[8])
+    if (lat !== null && lng !== null && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) return { lat, lng }
+  }
+
+  return null
+}
+
+function toDecimal(deg: number, min: number, sec: number, dir: string): number | null {
+  if (deg < 0 || min >= 60 || sec >= 60) return null
+  let decimal = deg + min / 60 + sec / 3600
+  if (dir.toUpperCase() === "S" || dir.toUpperCase() === "W") decimal = -decimal
+  return decimal
+}
+
 export function LocationPicker({ initialAddress, initialLat, initialLng, onLocationChange }: Props) {
   const mapRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -136,6 +187,15 @@ export function LocationPicker({ initialAddress, initialLat, initialLng, onLocat
       return
     }
 
+    const coords = parseCoordinates(value)
+    if (coords) {
+      setShowSuggestions(false)
+      mapInstanceRef.current?.setView([coords.lat, coords.lng], 18)
+      placeMarker(coords.lat, coords.lng)
+      reverseGeocode(coords.lat, coords.lng)
+      return
+    }
+
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(
@@ -170,7 +230,19 @@ export function LocationPicker({ initialAddress, initialLat, initialLng, onLocat
           type="text"
           value={query}
           onChange={(e) => handleInputChange(e.target.value)}
-          placeholder="Search for a location..."
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              const coords = parseCoordinates(query)
+              if (coords) {
+                e.preventDefault()
+                setShowSuggestions(false)
+                mapInstanceRef.current?.setView([coords.lat, coords.lng], 18)
+                placeMarker(coords.lat, coords.lng)
+                reverseGeocode(coords.lat, coords.lng)
+              }
+            }
+          }}
+          placeholder="Search for a location or paste coordinates..."
           className="w-full rounded-lg border border-border bg-surface pl-9 pr-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
         />
       </div>
