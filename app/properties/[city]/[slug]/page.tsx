@@ -5,7 +5,10 @@ import { getPropertyBySlug, getOtherPropertiesByAgent } from "@/lib/services/pro
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
 import dynamic from "next/dynamic";
-const PropertyMap = dynamic(() => import("@/components/shared/PropertyMap").then(m => m.PropertyMap), { ssr: false });
+const PropertyMap = dynamic(() => import("@/components/shared/PropertyMap").then(m => m.PropertyMap), {
+  ssr: false,
+  loading: () => <div className="h-48 rounded-xl bg-surface-secondary animate-pulse" />,
+});
 import { Building2, Bed, Bath, Maximize2, Phone, Mail, Globe, Sparkles, MessageCircle } from "lucide-react";
 
 interface Props {
