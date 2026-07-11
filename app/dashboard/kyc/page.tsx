@@ -556,7 +556,7 @@ export default function KycPage() {
 
       {deleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setDeleteConfirm(null)}>
-          <div className="mx-4 w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="mx-4 w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <h3 className="flex items-center gap-2 text-lg font-semibold"><XCircle size={20} className="text-red-500" /> Delete submission?</h3>
             <p className="mt-2 text-sm text-muted">Permanently deletes this rejected document. You can submit a new one later.</p>
             <div className="mt-4 flex justify-end gap-3">
