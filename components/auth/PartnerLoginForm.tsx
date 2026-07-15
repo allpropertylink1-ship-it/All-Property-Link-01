@@ -8,7 +8,7 @@ interface Props {
   onForgotPassword?: () => void
 }
 
-export function AgentLoginForm({ onForgotPassword }: Props) {
+export function PartnerLoginForm({ onForgotPassword }: Props) {
   const router = useRouter()
   const { agentLogin } = useAuth()
   const [error, setError] = useState("")
@@ -20,10 +20,10 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
     setError("")
 
     const form = new FormData(e.currentTarget)
-    const agentCode = form.get("agentCode") as string
+    const partnerCode = form.get("partnerCode") as string
     const password = form.get("password") as string
 
-    const result = await agentLogin(agentCode, password)
+    const result = await agentLogin(partnerCode, password)
 
     if (result?.error) {
       setError(result.error)
@@ -48,18 +48,18 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
         </div>
       )}
       <div>
-        <label htmlFor="agentCode" className="block text-sm font-medium text-text-primary">
-          Agent Code
+        <label htmlFor="partnerCode" className="block text-sm font-medium text-text-primary">
+          Partner Code
         </label>
         <input
-          id="agentCode"
-          name="agentCode"
+          id="partnerCode"
+          name="partnerCode"
           type="text"
           required
           autoComplete="off"
           className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
           style={{ fontSize: "16px" }}
-          placeholder="APL-XXX-000-00/00"
+          placeholder="PRT-XXX-000-00/00"
         />
       </div>
       <div>

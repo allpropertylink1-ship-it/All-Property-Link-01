@@ -45,7 +45,7 @@ export default function AgentDisputesPage() {
     setLoading(true)
     const params = new URLSearchParams({ page: String(page), limit: "20" })
     if (statusFilter) params.set("status", statusFilter)
-    const { data, error } = await api.get<{ disputes: Dispute[]; total: number; totalPages: number }>(`/api/agent/disputes?${params}`)
+    const { data, error } = await api.get<{ disputes: Dispute[]; total: number; totalPages: number }>(`/api/referral-partner/disputes?${params}`)
     if (data) {
       setDisputes(data.disputes)
       setTotal(data.total)
@@ -64,7 +64,7 @@ export default function AgentDisputesPage() {
         <div className="max-w-md text-center">
           <Building2 size={48} className="mx-auto mb-4 text-muted" />
           <h2 className="mb-2 font-heading text-xl font-bold text-text-primary">Access Restricted</h2>
-          <p className="text-sm text-text-secondary">Only APL Representatives can view this page.</p>
+          <p className="text-sm text-text-secondary">Only Referral Partners can view this page.</p>
         </div>
       </div>
     )

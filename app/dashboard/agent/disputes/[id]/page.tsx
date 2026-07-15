@@ -40,7 +40,7 @@ export default function AgentDisputeDetailPage() {
 
   const fetchDispute = useCallback(async () => {
     setLoading(true)
-    const { data, error } = await api.get<{ dispute: Dispute }>(`/api/agent/disputes/${params.id}`)
+    const { data, error } = await api.get<{ dispute: Dispute }>(`/api/referral-partner/disputes/${params.id}`)
     if (data) setDispute(data.dispute)
     else setError(error || "Failed to load")
     setLoading(false)

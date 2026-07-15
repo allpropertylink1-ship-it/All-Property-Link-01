@@ -3,13 +3,13 @@
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { LoginForm } from "@/components/auth/LoginForm"
-import { AgentLoginForm } from "@/components/auth/AgentLoginForm"
-import { AgentForgotPasswordForm } from "@/components/auth/AgentForgotPasswordForm"
+import { PartnerLoginForm } from "@/components/auth/PartnerLoginForm"
+import { PartnerForgotPasswordForm } from "@/components/auth/PartnerForgotPasswordForm"
 import { cn } from "@/lib/utils"
 
 const tabs = [
   { id: "user", label: "User Login" },
-  { id: "agent", label: "APL Representative" },
+  { id: "agent", label: "Referral Partner" },
 ] as const
 
 function LoginContent() {
@@ -36,7 +36,7 @@ function LoginContent() {
           Welcome back
         </h1>
         <p className="mt-2 text-sm text-text-secondary">
-          {showAgentForgot ? "Reset your APL Representative password" : "Sign in to your account"}
+          {showAgentForgot ? "Reset your Referral Partner password" : "Sign in to your account"}
         </p>
       </div>
 
@@ -63,9 +63,9 @@ function LoginContent() {
       {activeTab === "user" ? (
         <LoginForm />
       ) : showAgentForgot ? (
-        <AgentForgotPasswordForm />
+        <PartnerForgotPasswordForm />
       ) : (
-        <AgentLoginForm onForgotPassword={() => setShowAgentForgot(true)} />
+        <PartnerLoginForm onForgotPassword={() => setShowAgentForgot(true)} />
       )}
     </>
   )

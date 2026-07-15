@@ -38,7 +38,7 @@ export default function NewDisputePage() {
     setLoading(true)
     setError("")
 
-    const { error } = await api.post("/api/agent/disputes", {
+    const { error } = await api.post("/api/referral-partner/disputes", {
       title: title.trim(),
       description: description.trim(),
       amount: amount ? parseFloat(amount) : 0,

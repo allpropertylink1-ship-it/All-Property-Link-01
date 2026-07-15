@@ -17,7 +17,7 @@ export default function AgentForceChangePasswordPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface px-4">
         <div className="w-full max-w-md text-center">
-          <p className="text-text-secondary">You must log in as an APL Representative to access this page.</p>
+          <p className="text-text-secondary">You must log in as a Referral Partner to access this page.</p>
           <a href="/auth/login" className="mt-4 inline-block text-accent-300 hover:text-accent-400">Go to login</a>
         </div>
       </div>

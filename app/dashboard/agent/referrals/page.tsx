@@ -40,7 +40,7 @@ export default function AgentReferralsPage() {
     setLoading(true)
     const params = new URLSearchParams({ page: String(page), limit: "20" })
     if (debouncedSearch) params.set("search", debouncedSearch)
-    const { data, error } = await api.get<{ referrals: Referral[]; total: number; totalPages: number }>(`/api/agent/referrals?${params}`)
+    const { data, error } = await api.get<{ referrals: Referral[]; total: number; totalPages: number }>(`/api/referral-partner/referrals?${params}`)
     if (data) {
       setReferrals(data.referrals)
       setTotal(data.total)
@@ -59,7 +59,7 @@ export default function AgentReferralsPage() {
         <div className="max-w-md text-center">
           <Building2 size={48} className="mx-auto mb-4 text-muted" />
           <h2 className="mb-2 font-heading text-xl font-bold text-text-primary">Access Restricted</h2>
-          <p className="text-sm text-text-secondary">Only APL Representatives can view this page.</p>
+          <p className="text-sm text-text-secondary">Only Referral Partners can view this page.</p>
         </div>
       </div>
     )

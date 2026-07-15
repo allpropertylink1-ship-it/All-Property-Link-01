@@ -47,7 +47,7 @@ export default function AgentReferralDetailPage() {
 
   const fetchReferral = useCallback(async () => {
     setLoading(true)
-    const { data, error } = await api.get<{ referral: ReferralDetail }>(`/api/agent/referrals/${params.id}`)
+    const { data, error } = await api.get<{ referral: ReferralDetail }>(`/api/referral-partner/referrals/${params.id}`)
     if (data) setReferral(data.referral)
     else setError(error || "Failed to load")
     setLoading(false)

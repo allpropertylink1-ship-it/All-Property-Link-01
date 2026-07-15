@@ -145,7 +145,7 @@ export default function AgentResetPasswordPage() {
               Set new password
             </h1>
             <p className="mt-2 text-sm text-text-secondary">
-              Enter your new APL Representative password
+              Enter your new Referral Partner password
             </p>
           </div>
           <Suspense fallback={<div className="text-center text-text-secondary">Loading...</div>}>

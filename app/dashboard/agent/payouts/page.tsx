@@ -38,7 +38,7 @@ export default function AgentPayoutsPage() {
     setLoading(true)
     const params = new URLSearchParams({ page: String(page), limit: "20" })
     if (statusFilter) params.set("status", statusFilter)
-    const { data, error } = await api.get<{ payouts: Payout[]; total: number; totalPages: number }>(`/api/agent/payouts?${params}`)
+    const { data, error } = await api.get<{ payouts: Payout[]; total: number; totalPages: number }>(`/api/referral-partner/payouts?${params}`)
     if (data) {
       setPayouts(data.payouts)
       setTotal(data.total)
@@ -57,7 +57,7 @@ export default function AgentPayoutsPage() {
         <div className="max-w-md text-center">
           <Building2 size={48} className="mx-auto mb-4 text-muted" />
           <h2 className="mb-2 font-heading text-xl font-bold text-text-primary">Access Restricted</h2>
-          <p className="text-sm text-text-secondary">Only APL Representatives can view this page.</p>
+          <p className="text-sm text-text-secondary">Only Referral Partners can view this page.</p>
         </div>
       </div>
     )

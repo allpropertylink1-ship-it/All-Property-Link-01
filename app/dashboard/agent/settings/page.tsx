@@ -51,7 +51,7 @@ export default function AgentSettingsPage() {
       return
     }
 
-    const { error } = await api.patch("/api/agent/profile", body)
+    const { error } = await api.patch("/api/referral-partner/profile", body)
     if (error) setProfileError(error)
     else setProfileSuccess(true)
     setProfileLoading(false)
@@ -75,7 +75,7 @@ export default function AgentSettingsPage() {
       return
     }
 
-    const { error } = await api.post("/api/agent/change-password", {
+    const { error } = await api.post("/api/referral-partner/change-password", {
       currentPassword,
       newPassword,
     })
@@ -89,7 +89,7 @@ export default function AgentSettingsPage() {
     setPwLoading(false)
   }
 
-  const referralLink = user.agentCode ? `https://allpropertylink-amber.vercel.app/auth/register?ref=${user.agentCode}` : ""
+  const referralLink = user.partnerCode ? `https://allpropertylink-amber.vercel.app/auth/register?ref=${user.partnerCode}` : ""
 
   async function copyReferralLink() {
     if (!referralLink) return
@@ -105,7 +105,7 @@ export default function AgentSettingsPage() {
       <div>
         <h1 className="font-heading text-2xl font-bold text-text-primary">Settings</h1>
         <p className="mt-1 text-sm text-text-secondary">
-          {user.fullName || `${user.firstName} ${user.lastName}`} &middot; Code: {user.agentCode}
+          {user.fullName || `${user.firstName} ${user.lastName}`} &middot; Code: {user.partnerCode}
         </p>
       </div>
 
