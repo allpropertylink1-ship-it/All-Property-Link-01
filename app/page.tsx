@@ -188,10 +188,10 @@ export default async function HomePage() {
           </form>
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
-              href="/properties"
+              href="/browse"
               className="touch-target inline-flex items-center gap-2 rounded-lg bg-white px-8 py-4 text-base font-semibold text-primary-600 shadow-lg transition-transform hover:scale-105"
             >
-              Browse properties
+              Browse all
               <ArrowRightIcon className="h-4 w-4" />
             </Link>
             <Link
