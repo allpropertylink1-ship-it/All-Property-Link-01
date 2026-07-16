@@ -152,6 +152,9 @@ model AplAgent {
   passwordHash        String?
   passwordChangedAt   DateTime?
   mustChangePassword  Boolean            @default(false)
+  pendingEmail        String?
+  emailChangeToken    String?
+  emailChangeTokenExpiry DateTime?
   status              String             @default("ACTIVE")
   suspendedReason     String?
   suspendedAt         DateTime?
