@@ -63,16 +63,6 @@ async function getCategories() {
         bedrooms: true, bathrooms: true, images: true,
       },
     }),
-    prisma.property.findMany({
-      where: { deletedAt: null, listingPurpose: "FOR_RENT_SHORT_TERM" },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-      select: {
-        slug: true, title: true, price: true, currency: true,
-        propertyType: true, listingPurpose: true, city: true, region: true,
-        bedrooms: true, bathrooms: true, images: true,
-      },
-    }),
     prisma.serviceListing.findMany({
       where: { status: "ACTIVE", moderationStatus: "APPROVED" },
       orderBy: { createdAt: "desc" },

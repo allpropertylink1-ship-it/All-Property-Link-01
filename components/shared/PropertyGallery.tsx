@@ -84,7 +84,6 @@ export function PropertyGallery({ images, title }: Props) {
                 alt={`${title} — image ${current + 1} of ${images.length}`}
                 fill
                 className="object-cover transition-opacity duration-300"
-                priority={current === 0}
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
             </button>
