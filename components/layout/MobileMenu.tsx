@@ -11,8 +11,7 @@ const menuItems = [
   { href: "/", label: "Home" },
   { href: "/properties", label: "Properties" },
   { href: "#", label: "Airbnbs" },
-  { href: "#", label: "Fundis" },
-  { href: "#", label: "Services" },
+  { href: "/services", label: "Fundis" },
   { href: "/properties?type=LAND", label: "Plots & Land" },
   { href: "/about", label: "About" },
 ];
