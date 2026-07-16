@@ -101,7 +101,7 @@ export function MobileMenu() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-primary">
-                      {user.firstName} {user.lastName}
+                      {[user.firstName, user.lastName].filter(Boolean).join(" ") || user.email}
                     </p>
                     <p className="truncate text-xs text-muted">{user.email}</p>
                   </div>

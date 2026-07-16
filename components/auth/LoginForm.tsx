@@ -193,7 +193,7 @@ export function LoginForm() {
             onClick={() => setMagicSent(false)}
             className="text-sm font-medium text-accent-300 hover:text-accent-400"
           >
-            {magicSent ? "Send again" : "Send magic link"}
+            {magicSent ? "Send again" : "Use magic link"}
           </button>
           <a
             href="/auth/forgot-password"

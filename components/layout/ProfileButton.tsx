@@ -40,6 +40,7 @@ export function ProfileButton() {
     )
   }
 
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email
   const initial = (user.firstName || user.email).charAt(0).toUpperCase()
 
   async function handleLogout() {
@@ -58,7 +59,7 @@ export function ProfileButton() {
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent-300 text-xs font-bold text-white">
           {initial}
         </span>
-        <span>{user.firstName || user.email}</span>
+        <span>{displayName}</span>
         <svg
           className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
           viewBox="0 0 20 20"
@@ -77,7 +78,7 @@ export function ProfileButton() {
         <div className="absolute right-4 top-14 z-50 w-48 rounded-lg border border-border bg-surface py-1 shadow-lg">
           <div className="border-b border-border px-4 py-2">
             <p className="text-sm font-medium text-text-primary truncate">
-              {user.firstName} {user.lastName}
+              {displayName}
             </p>
             <p className="text-xs text-text-secondary truncate">{user.email}</p>
           </div>
