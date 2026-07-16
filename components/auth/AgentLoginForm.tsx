@@ -49,7 +49,7 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
       )}
       <div>
         <label htmlFor="agentCode" className="block text-sm font-medium text-text-primary">
-          Agent Code
+          APL Representative Code
         </label>
         <input
           id="agentCode"

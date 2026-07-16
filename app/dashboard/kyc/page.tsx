@@ -353,34 +353,34 @@ export default function KycPage() {
 
           <div className="rounded-xl border border-border bg-surface p-6">
             <h2 className="mb-4 text-lg font-semibold text-foreground">
-              Agent Code <span className="text-sm font-normal text-muted">(Optional — fill if an APL Representative introduced you to the platform)</span>
+              APL Representative Code <span className="text-sm font-normal text-muted">(Optional — fill if an APL Representative introduced you to the platform)</span>
             </h2>
 
             {agentCodeState === "confirmed" ? (
               <div className="rounded-lg border border-green-200 bg-green-50 p-4">
                 <div className="flex items-center gap-2">
                   <CheckCircle size={18} className="text-green-600" />
-                  <p className="text-sm font-medium text-green-800">Agent Confirmed</p>
+                  <p className="text-sm font-medium text-green-800">APL Representative Confirmed</p>
                 </div>
                 <p className="mt-2 text-sm text-green-700"><strong>Name:</strong> {agentName}</p>
                 <p className="text-sm text-green-700"><strong>Phone:</strong> {agentPhone}</p>
                 <p className="mt-1 text-xs text-green-500">This APL Representative will be credited with your referral.</p>
                 <button type="button" onClick={resetAgentCode}
                   className="mt-3 text-sm font-medium text-primary hover:underline">
-                  Change Agent
+                  Change APL Representative
                 </button>
               </div>
             ) : (
               <div className="flex flex-wrap items-end gap-3">
                 <div className="flex-1 min-w-[200px]">
-                  <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="agentCode">Agent Code</label>
+                  <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="agentCode">APL Representative Code</label>
                   <input id="agentCode" value={agentCode} onChange={e => setAgentCode(e.target.value.toUpperCase())} placeholder="e.g. APL-JOE-001-07/26"
                     className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm uppercase font-mono focus:outline-none focus:ring-2 focus:ring-primary/50" />
                 </div>
                 <button type="button" onClick={handleRevealAgent} disabled={agentLookupLoading || !agentCode.trim()}
                   className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-50">
                   {agentLookupLoading ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
-                  {agentLookupLoading ? "Revealing..." : "Reveal Agent"}
+                  {agentLookupLoading ? "Revealing..." : "Reveal APL Representative"}
                 </button>
               </div>
             )}

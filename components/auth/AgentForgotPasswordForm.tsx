@@ -50,7 +50,7 @@ export function AgentForgotPasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <p className="text-sm text-text-secondary">
-        Enter your Agent Code or registered email address and we'll send you a reset link.
+        Enter your APL Representative Code or registered email address and we'll send you a reset link.
       </p>
 
       {error && (
@@ -61,7 +61,7 @@ export function AgentForgotPasswordForm() {
 
       <div>
         <label htmlFor="agent-identifier" className="block text-sm font-medium text-text-primary">
-          Agent Code or Email
+          APL Representative Code or Email
         </label>
         <input
           id="agent-identifier"
