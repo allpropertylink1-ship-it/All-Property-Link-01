@@ -28,11 +28,13 @@ const primary: NavLink[] = [
   { href: "/dashboard", label: "Business Summary", icon: Briefcase },
 ]
 
-const secondary: NavLink[] = [
-  { href: "/dashboard/listings", label: "My Listings", icon: Building2 },
-  { href: "/dashboard/services", label: "My Services", icon: Building2 },
-  { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
-]
+function getSecondaryNav(hasServiceAccess: boolean): NavLink[] {
+  return [
+    { href: "/dashboard/listings", label: "My Listings", icon: Building2 },
+    ...(hasServiceAccess ? [{ href: "/dashboard/services", label: "My Services", icon: Building2 }] : []),
+    { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
+  ]
+}
 
 const tertiary: NavLink[] = [
   { href: "/dashboard/profile", label: "Personal Profile", icon: User },
@@ -100,6 +102,9 @@ export function DashboardNav() {
   const { user, logout } = useAuth()
   const [open, setOpen] = useState(false)
 
+  const userTypes = user?.userTypes ?? []
+  const hasServiceAccess = userTypes.includes("FUNDI") || userTypes.includes("SERVICE_PROVIDER")
+
   return (
     <>
       <button
@@ -137,7 +142,7 @@ export function DashboardNav() {
           ) : (
             <>
               <NavGroup links={primary} section="primary" />
-              <NavGroup links={secondary} section="secondary" />
+              <NavGroup links={getSecondaryNav(hasServiceAccess)} section="secondary" />
               <NavGroup links={tertiary} section="tertiary" />
             </>
           )}

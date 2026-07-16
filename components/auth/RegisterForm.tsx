@@ -5,14 +5,23 @@ import { useAuth } from "@/lib/auth-context"
 import { PasswordStrength } from "./PasswordStrength"
 import { PasswordToggle } from "./PasswordToggle"
 import { GoogleSignInButton } from "./GoogleSignInButton"
+import { Home, Handshake, Wrench, Briefcase, ArrowLeft } from "lucide-react"
 
 type ContactMethod = "email" | "phone"
-type Step = "form" | "otp"
+type Step = "userType" | "form" | "otp"
+
+const userTypeOptions = [
+  { value: "PROPERTY_OWNER", label: "Property Owner", description: "I want to list properties for sale or rent", icon: Home },
+  { value: "AGENT", label: "Agent", description: "I want to list properties on behalf of clients", icon: Handshake },
+  { value: "FUNDI", label: "Fundi", description: "I offer trade services like plumbing, electrical, carpentry", icon: Wrench },
+  { value: "SERVICE_PROVIDER", label: "Service Provider", description: "I offer services like cleaning, security, property management", icon: Briefcase },
+]
 
 export function RegisterForm({ referralCode: initialReferralCode }: { referralCode?: string }) {
   const router = useRouter()
   const { signup, sendOtp, verifyOtp, refreshUser } = useAuth()
-  const [step, setStep] = useState<Step>("form")
+  const [step, setStep] = useState<Step>("userType")
+  const [userType, setUserType] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [contactMethod, setContactMethod] = useState<ContactMethod>("email")
@@ -64,6 +73,11 @@ export function RegisterForm({ referralCode: initialReferralCode }: { referralCo
     }, 1000)
   }
 
+  function handleUserTypeNext() {
+    if (!userType) return
+    setStep("form")
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
@@ -97,7 +111,7 @@ export function RegisterForm({ referralCode: initialReferralCode }: { referralCo
       }
     }
 
-    const { error: signupError, otp } = await signup({ firstName, lastName, password, email, phone, referralCode: referralCode || undefined })
+    const { error: signupError, otp } = await signup({ firstName, lastName, password, email, phone, referralCode: referralCode || undefined, userType: userType || undefined })
     if (signupError) {
       setError(signupError)
       setLoading(false)
@@ -255,6 +269,48 @@ export function RegisterForm({ referralCode: initialReferralCode }: { referralCo
     )
   }
 
+  if (step === "userType") {
+    return (
+      <div className="space-y-6">
+        <h2 className="font-heading text-xl font-bold text-text-primary">Choose your account type</h2>
+        <p className="text-sm text-text-secondary">Select the type of account that best describes you.</p>
+
+        {error && (
+          <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{error}</div>
+        )}
+
+        <div className="grid gap-3">
+          {userTypeOptions.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setUserType(opt.value)}
+              className={`flex items-center gap-4 rounded-xl border-2 p-4 text-left transition-all ${
+                userType === opt.value
+                  ? "border-accent-300 bg-accent-300/10"
+                  : "border-border hover:border-accent-300"
+              }`}
+            >
+              <opt.icon size={24} className={userType === opt.value ? "text-accent-300" : "text-text-secondary"} />
+              <div>
+                <p className="font-medium text-text-primary">{opt.label}</p>
+                <p className="text-sm text-text-secondary">{opt.description}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={handleUserTypeNext}
+          disabled={!userType}
+          className="touch-target w-full rounded-sm bg-accent-300 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-400 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Continue
+        </button>
+      </div>
+    )
+  }
+
   return (
     <>
       <div className="mb-6">
@@ -273,6 +329,10 @@ export function RegisterForm({ referralCode: initialReferralCode }: { referralCo
           <span className="bg-surface px-2 text-text-secondary">or continue with</span>
         </div>
       </div>
+
+      <button type="button" onClick={() => setStep("userType")} className="mb-4 flex items-center gap-1 text-sm text-accent-300 hover:text-accent-400">
+        <ArrowLeft size={16} /> Back
+      </button>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (

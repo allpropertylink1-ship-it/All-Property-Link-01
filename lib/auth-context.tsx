@@ -20,6 +20,7 @@ interface User {
   fullName?: string
   authMethod?: "user" | "agent"
   mustChangePassword?: boolean
+  userTypes?: string[]
 }
 
 interface OtpResponse {
@@ -37,7 +38,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ error?: string }>
   logout: () => Promise<void>
   phoneLogin: (phone: string) => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
-  signup: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
+  signup: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string; userType?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
   sendOtp: (identifier: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
   verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string }>
   refreshUser: () => Promise<void>
@@ -104,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }, [])
 
-  const signup = useCallback(async (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string }) => {
+  const signup = useCallback(async (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string; userType?: string }) => {
     const { data: result, error } = await api.post<OtpResponse>("/api/auth/register", data)
     if (error) return { error }
     return { otp: result }

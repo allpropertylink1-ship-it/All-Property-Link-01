@@ -99,6 +99,7 @@ model User {
   location         String?
   propertyInterest String[]
   isAgent          Boolean   @default(false)
+  userTypes        UserType[]
   agentLicense     String?
   agencyName       String?
   notificationPrefs Json?

@@ -11,6 +11,7 @@ interface SessionUser {
   accountStatus?: string
   isAgent?: boolean
   companyName?: string
+  userTypes?: string[]
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://delightful-encouragement-production-878d.up.railway.app"
