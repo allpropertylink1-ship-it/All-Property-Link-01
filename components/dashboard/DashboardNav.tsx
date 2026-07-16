@@ -30,6 +30,7 @@ const primary: NavLink[] = [
 
 const secondary: NavLink[] = [
   { href: "/dashboard/listings", label: "My Listings", icon: Building2 },
+  { href: "/dashboard/services", label: "My Services", icon: Building2 },
   { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
 ]
 

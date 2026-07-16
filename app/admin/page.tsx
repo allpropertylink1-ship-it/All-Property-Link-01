@@ -15,7 +15,7 @@ export default async function AdminDashboard() {
     recentProperties,
   ] = await Promise.all([
     prisma.user.count({ where: { deletedAt: null } }),
-    prisma.aplAgent.count(),
+    prisma.referralPartner.count(),
     prisma.property.count({ where: { deletedAt: null } }),
     prisma.user.count({ where: { kycStatus: "PENDING" } }),
     prisma.property.findMany({

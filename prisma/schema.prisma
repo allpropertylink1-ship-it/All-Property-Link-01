@@ -52,6 +52,27 @@ enum NotificationType {
   KYC_REJECTED
 }
 
+enum UserType {
+  PROPERTY_OWNER
+  AGENT
+  FUNDI
+  SERVICE_PROVIDER
+}
+
+enum ListingPurpose {
+  FOR_SALE
+  FOR_RENT_LONG_TERM
+  FOR_RENT_SHORT_TERM
+}
+
+enum PricePeriod {
+  TOTAL
+  PER_MONTH
+  PER_NIGHT
+  PER_WEEK
+  PER_SQM
+}
+
 model User {
   id                String    @id @default(uuid())
   email             String?   @unique
@@ -103,8 +124,8 @@ model User {
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
 
-  aplAgent         AplAgent?  @relation(fields: [aplAgentId], references: [id], onDelete: SetNull)
-  aplAgentId       String?
+  referralPartner         ReferralPartner?  @relation(fields: [referralPartnerId], references: [id], onDelete: SetNull)
+  referralPartnerId       String?
 
   properties       Property[]
   auditLogs        AuditLog[]
@@ -114,22 +135,56 @@ model User {
   refreshTokens    RefreshToken[]
   magicLinkTokens  MagicLinkToken[]
   kycDocuments     KycDocument[]
+  serviceListings  ServiceListing[]
+  reviews          Review[]
+  commissions      Commission[]
 
   @@map("users")
 }
 
-model AplAgent {
-  id        String   @id @default(uuid())
-  fullName  String
-  email     String   @unique
-  phone     String
-  agentCode String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model ReferralPartner {
+  id                  String             @id @default(uuid())
+  fullName            String
+  email               String             @unique
+  phone               String
+  partnerCode         String             @unique
+  passwordHash        String?
+  passwordChangedAt   DateTime?
+  mustChangePassword  Boolean            @default(false)
+  status              String             @default("ACTIVE")
+  suspendedReason     String?
+  suspendedAt         DateTime?
+  reactivatedAt       DateTime?
+  referredByPartnerId String?
+  totalReferrals      Int                @default(0)
+  successfulReferrals Int                @default(0)
+  commissionRate      Decimal            @default(3) @db.Decimal(5, 2)
+  totalEarned         Decimal            @default(0) @db.Decimal(12, 2)
+  totalPaid           Decimal            @default(0) @db.Decimal(12, 2)
+  bankAccountName     String?
+  bankAccountNumber   String?
+  bankName            String?
+  bankBranch          String?
+  bankCode            String?
+  mpesaPhone          String?
+  payoutMethod        String             @default("MPESA")
+  notes               String?
+  lastLoginAt         DateTime?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
 
-  users User[]
+  users            User[]
+  referredPartners ReferralPartner[] @relation("PartnerReferrals")
+  parentPartner    ReferralPartner?  @relation("PartnerReferrals", fields: [referredByPartnerId], references: [id])
+  commissions      Commission[]
+  payouts          Payout[]
+  disputes         Dispute[]
+  paymentClaims    PaymentClaim[]
 
-  @@map("apl_agents")
+  @@index([partnerCode])
+  @@index([email])
+  @@index([status])
+  @@map("referral_partners")
 }
 
 model KycDocument {
@@ -193,8 +248,11 @@ model Property {
   title         String
   description   String
   price         Decimal  @db.Decimal(12, 2)
+  pricePeriod   PricePeriod @default(TOTAL)
   currency      String   @default("KES")
   propertyType  PropertyType
+  listingPurpose ListingPurpose?
+  subType       String?
   status        PropertyStatus @default(AVAILABLE)
 
   moderationStatus ModerationStatus @default(DRAFT)
@@ -231,14 +289,19 @@ model Property {
   publishedAt   DateTime?
   deletedAt     DateTime?
 
-  agent     User?   @relation(fields: [agentId], references: [id])
+  agent     User?   @relation(fields: [agentId], references: [id], onDelete: SetNull)
   agentId   String?
 
+  commissions Commission[]
+  payouts     PayoutProperty[]
+
+  @@index([agentId])
   @@index([city, propertyType, moderationStatus])
   @@index([isPublished, status, createdAt])
   @@index([city, isPublished, price])
   @@index([moderationStatus])
   @@index([expiresAt])
+  @@index([listingPurpose])
 
   @@map("properties")
 }
@@ -332,4 +395,175 @@ model MagicLinkToken {
   @@index([email])
   @@index([token])
   @@map("magic_link_tokens")
+}
+
+model ServiceCategory {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  icon        String?
+  type        String   @default("BOTH")
+  parentId    String?
+  parent      ServiceCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    ServiceCategory[] @relation("CategoryHierarchy")
+  createdAt   DateTime @default(now())
+
+  serviceListings ServiceListing[]
+
+  @@index([parentId])
+  @@index([slug])
+  @@map("service_categories")
+}
+
+model ServiceListing {
+  id                String          @id @default(uuid())
+  userId            String
+  categoryId        String
+  title             String
+  description       String
+  price             Decimal?        @db.Decimal(12, 2)
+  currency          String          @default("KES")
+  pricePeriod       PricePeriod     @default(TOTAL)
+  location          String?
+  city              String?
+  region            String?
+  images            Json?
+  status            String          @default("ACTIVE")
+  moderationStatus  ModerationStatus @default(DRAFT)
+  viewCount         Int             @default(0)
+  reviewedAt        DateTime?
+  reviewedBy        String?
+  rejectionReason   String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category ServiceCategory @relation(fields: [categoryId], references: [id])
+
+  @@index([userId])
+  @@index([categoryId])
+  @@index([city])
+  @@index([status])
+  @@index([moderationStatus])
+  @@map("service_listings")
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  userId     String
+  targetType String
+  targetId   String
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([targetType, targetId])
+  @@index([userId])
+  @@map("reviews")
+}
+
+model Commission {
+  id                String    @id @default(uuid())
+  referralPartnerId String?
+  propertyId        String
+  userId            String
+  amount            Decimal   @default(0) @db.Decimal(12, 2)
+  currency          String    @default("KES")
+  status            String    @default("PENDING")
+  paidAt            DateTime?
+  notes             String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  referralPartner ReferralPartner? @relation(fields: [referralPartnerId], references: [id], onDelete: Cascade)
+  property        Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  disputes        Dispute[]
+
+  @@index([referralPartnerId])
+  @@index([propertyId])
+  @@index([userId])
+  @@index([status])
+  @@map("commissions")
+}
+
+model Payout {
+  id                String    @id @default(uuid())
+  referralPartnerId String?
+  amount            Decimal   @db.Decimal(12, 2)
+  currency          String    @default("KES")
+  method            String    @default("MPESA")
+  reference         String?
+  status            String    @default("PENDING")
+  notes             String?
+  paidAt            DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  referralPartner ReferralPartner? @relation(fields: [referralPartnerId], references: [id], onDelete: Cascade)
+  properties      PayoutProperty[]
+  disputes        Dispute[]
+
+  @@index([referralPartnerId])
+  @@index([status])
+  @@map("payouts")
+}
+
+model PayoutProperty {
+  payoutId   String
+  propertyId String
+  payout     Payout   @relation(fields: [payoutId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@id([payoutId, propertyId])
+  @@map("payout_properties")
+}
+
+model Dispute {
+  id                String    @id @default(uuid())
+  referralPartnerId String?
+  commissionId      String?
+  payoutId          String?
+  title             String
+  description       String
+  amount            Decimal   @default(0) @db.Decimal(12, 2)
+  currency          String    @default("KES")
+  status            String    @default("PENDING")
+  resolution        String?
+  resolvedBy        String?
+  resolvedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  referralPartner ReferralPartner? @relation(fields: [referralPartnerId], references: [id], onDelete: Cascade)
+  commission      Commission?     @relation(fields: [commissionId], references: [id], onDelete: SetNull)
+  payout          Payout?         @relation(fields: [payoutId], references: [id], onDelete: SetNull)
+
+  @@index([referralPartnerId])
+  @@index([status])
+  @@map("disputes")
+}
+
+model PaymentClaim {
+  id                String    @id @default(uuid())
+  referralPartnerId String?
+  amount            Decimal   @db.Decimal(12, 2)
+  currency          String    @default("KES")
+  periodLabel       String?
+  notes             String?
+  status            String    @default("PENDING")
+  adminNotes        String?
+  reviewedById      String?
+  reviewedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  referralPartner ReferralPartner? @relation(fields: [referralPartnerId], references: [id], onDelete: Cascade)
+
+  @@index([referralPartnerId])
+  @@index([status])
+  @@map("payment_claims")
 }
