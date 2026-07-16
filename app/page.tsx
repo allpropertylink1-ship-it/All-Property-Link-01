@@ -12,7 +12,7 @@ const categories = [
   },
   {
     title: "Airbnbs",
-    slug: "#",
+    slug: "/properties?purpose=FOR_RENT_SHORT_TERM",
     count: "300+ stays",
     image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80",
     gradient: "from-primary-900/80 via-primary-800/60 to-transparent",
@@ -44,7 +44,7 @@ async function getFeaturedProperties() {
     take: 4,
     select: {
       slug: true, title: true, price: true, currency: true,
-      propertyType: true, status: true, city: true, region: true,
+      propertyType: true, listingPurpose: true, city: true, region: true,
       images: true, isFeatured: true, createdAt: true,
     },
   });
@@ -304,8 +304,8 @@ export default async function HomePage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {featuredProperties.map((prop) => {
               const images = Array.isArray(prop.images) ? prop.images : [];
-              const imageUrl = images.length > 0 ? String(images[0]) : "/placeholder.jpg";
-              const isRent = prop.status === "RENTED";
+                const imageUrl = images.length > 0 ? String(images[0]) : "/placeholder.jpg";
+              const purpose = prop.listingPurpose;
               return (
                 <Link
                   key={prop.slug}
@@ -321,8 +321,8 @@ export default async function HomePage() {
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute left-2 top-2 z-10 flex gap-2">
-                      <span className={`rounded-full px-3 py-1 text-xs font-semibold text-white ${isRent ? "bg-accent-300" : "bg-primary-500"}`}>
-                        {isRent ? "Rent" : "Sale"}
+                      <span className={`rounded-full px-3 py-1 text-xs font-semibold text-white ${purpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-300" : purpose === "FOR_RENT_LONG_TERM" ? "bg-warning-500" : "bg-primary-500"}`}>
+                        {purpose === "FOR_RENT_SHORT_TERM" ? "Airbnb" : purpose === "FOR_RENT_LONG_TERM" ? "Rent" : "Sale"}
                       </span>
                       {prop.isFeatured && (
                         <span className="rounded-full bg-warning-500 px-3 py-1 text-xs font-semibold text-white">

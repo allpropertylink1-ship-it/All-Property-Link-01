@@ -155,6 +155,16 @@ export default async function PropertyDetailPage({ params }: Props) {
               <p className="mt-2.5 font-heading text-2xl sm:text-3xl font-bold text-primary-600">
                 {property.currency} {Number(property.price).toLocaleString()}
               </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {property.listingPurpose && (
+                  <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold text-white ${property.listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-300" : property.listingPurpose === "FOR_RENT_LONG_TERM" ? "bg-warning-500" : "bg-primary-500"}`}>
+                    {property.listingPurpose === "FOR_RENT_SHORT_TERM" ? "Short-term / Airbnb" : property.listingPurpose === "FOR_RENT_LONG_TERM" ? "Long-term rent" : "For Sale"}
+                  </span>
+                )}
+                <span className="inline-block rounded-full bg-surface-secondary px-3 py-1 text-xs font-semibold text-text-secondary capitalize">
+                  {property.propertyType.toLowerCase()}
+                </span>
+              </div>
             </div>
 
             {(property.bedrooms || property.bathrooms || property.area) && (

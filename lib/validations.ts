@@ -31,6 +31,7 @@ export const propertySchema = z.object({
     (v) => (v === "" || v === undefined ? undefined : Number(v)),
     z.number().optional()
   ),
+  listingPurpose: z.enum(["FOR_SALE", "FOR_RENT_LONG_TERM", "FOR_RENT_SHORT_TERM"]).optional(),
   features: z.array(z.string()).optional(),
   images: z.array(z.string()).optional(),
   seoTitle: z.string().optional(),

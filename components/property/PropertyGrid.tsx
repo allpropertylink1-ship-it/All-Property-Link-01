@@ -8,6 +8,7 @@ interface PropertyGridProps {
     price: number;
     currency: string;
     propertyType: string;
+    listingPurpose?: string | null;
     city: string;
     region: string;
     bedrooms: number | null;
@@ -16,7 +17,6 @@ interface PropertyGridProps {
     images: unknown;
     isFeatured: boolean;
     createdAt: Date;
-    isRent?: boolean;
     urgencyText?: "Trending" | "Just listed" | "Popular";
     isVerified?: boolean;
   }[];

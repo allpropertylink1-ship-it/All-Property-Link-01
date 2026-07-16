@@ -17,6 +17,7 @@ const listingSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters"),
   price: z.coerce.number().positive("Price must be positive"),
   propertyType: z.enum(["APARTMENT", "HOUSE", "LAND", "COMMERCIAL"]),
+  listingPurpose: z.enum(["FOR_SALE", "FOR_RENT_LONG_TERM", "FOR_RENT_SHORT_TERM"]).optional(),
   city: z.string().min(1, "City is required"),
   region: z.string().min(1, "Region is required"),
   address: z.string().min(1, "Address is required"),
@@ -107,6 +108,16 @@ export function ListingForm() {
             <option value="COMMERCIAL">Commercial</option>
           </select>
           {errors.propertyType && <p className="text-xs text-error-500">{errors.propertyType.message}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="listingPurpose">Listing purpose</Label>
+          <select id="listingPurpose" className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" {...register("listingPurpose")}>
+            <option value="">Select purpose</option>
+            <option value="FOR_SALE">For Sale</option>
+            <option value="FOR_RENT_LONG_TERM">For Rent (long-term)</option>
+            <option value="FOR_RENT_SHORT_TERM">For Rent (short-term / Airbnb)</option>
+          </select>
+          {errors.listingPurpose && <p className="text-xs text-error-500">{errors.listingPurpose.message}</p>}
         </div>
         <div className="space-y-2 sm:col-span-2">
           <Label>Location</Label>

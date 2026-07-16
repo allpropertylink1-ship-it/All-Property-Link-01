@@ -2,6 +2,7 @@ interface PropertyFiltersProps {
   cities: { city: string; _count: { city: number } }[];
   selectedCity?: string;
   selectedType?: string;
+  selectedPurpose?: string;
   minPrice?: string;
   maxPrice?: string;
   bedrooms?: string;
@@ -11,6 +12,7 @@ export function PropertyFilters({
   cities,
   selectedCity,
   selectedType,
+  selectedPurpose,
   minPrice,
   maxPrice,
   bedrooms,
@@ -33,6 +35,23 @@ export function PropertyFilters({
               {c.city} ({c._count.city})
             </option>
           ))}
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor="purpose" className="mb-1 block text-sm font-medium text-text-primary">
+          Purpose
+        </label>
+        <select
+          id="purpose"
+          name="purpose"
+          defaultValue={selectedPurpose || ""}
+          className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+        >
+          <option value="">All purposes</option>
+          <option value="FOR_SALE">For Sale</option>
+          <option value="FOR_RENT_LONG_TERM">For Rent (long-term)</option>
+          <option value="FOR_RENT_SHORT_TERM">For Rent (short-term / Airbnb)</option>
         </select>
       </div>
 

@@ -7,6 +7,7 @@ import { propertyApprovedEmail, propertyRejectedEmail } from "@/lib/emails/templ
 export interface PropertyFilters {
   city?: string;
   propertyType?: string;
+  purpose?: string;
   minPrice?: number;
   maxPrice?: number;
   bedrooms?: number;
@@ -33,6 +34,7 @@ async function uniqueSlug(base: string) {
 const propertyFields = (data: PropertyInput) => ({
   title: data.title, description: data.description, price: data.price,
   currency: data.currency, propertyType: data.propertyType, status: data.status,
+  listingPurpose: data.listingPurpose,
   address: data.address, city: data.city, region: data.region, country: data.country,
   bedrooms: data.bedrooms, bathrooms: data.bathrooms, area: data.area,
   latitude: data.latitude, longitude: data.longitude,
@@ -51,6 +53,7 @@ export async function getProperties(filters: PropertyFilters = {}) {
 
   if (filters.city) where.city = filters.city;
   if (filters.propertyType) where.propertyType = filters.propertyType as Prisma.EnumPropertyTypeFilter["equals"];
+  if (filters.purpose) where.listingPurpose = filters.purpose as Prisma.EnumListingPurposeNullableFilter["equals"];
   if (filters.bedrooms) where.bedrooms = { gte: filters.bedrooms };
   if (filters.minPrice || filters.maxPrice) {
     where.price = {};
@@ -74,15 +77,15 @@ export async function getProperties(filters: PropertyFilters = {}) {
       take: pageSize,
       select: {
         id: true, slug: true, title: true, price: true, currency: true,
-        propertyType: true, status: true, city: true, region: true, bedrooms: true,
-        bathrooms: true, area: true, images: true, isFeatured: true, createdAt: true,
+        propertyType: true, listingPurpose: true, status: true, city: true, region: true,
+        bedrooms: true, bathrooms: true, area: true, images: true, isFeatured: true, createdAt: true,
       },
     }),
     prisma.property.count({ where }),
   ]);
 
   return {
-    properties: properties.map(({ status: _, ...p }) => ({ ...p, price: Number(p.price), isRent: _ === "RENTED" })),
+    properties: properties.map(({ status: _, ...p }) => ({ ...p, price: Number(p.price) })),
     total, page, pageSize,
     totalPages: Math.ceil(total / pageSize),
   };

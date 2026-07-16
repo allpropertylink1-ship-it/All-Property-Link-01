@@ -7,6 +7,7 @@ interface PropertyCardProps {
   price: number;
   currency: string;
   propertyType: string;
+  listingPurpose?: string | null;
   city: string;
   region: string;
   bedrooms: number | null;
@@ -14,7 +15,6 @@ interface PropertyCardProps {
   area: number | null;
   images: unknown;
   isFeatured: boolean;
-  isRent?: boolean;
   urgencyText?: "Trending" | "Just listed" | "Popular";
   isVerified?: boolean;
   priority?: boolean;
@@ -62,7 +62,7 @@ export function PropertyCard({
   area,
   images,
   isFeatured: _isFeatured,
-  isRent,
+  listingPurpose,
   urgencyText,
   isVerified = true,
   priority,
@@ -87,10 +87,10 @@ export function PropertyCard({
           />
           <span
             className={`absolute left-2 top-2 z-10 rounded-md px-2.5 py-1 text-xs font-semibold text-white ${
-              isRent ? "bg-accent-300" : "bg-primary-500"
+              listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-300" : listingPurpose === "FOR_RENT_LONG_TERM" ? "bg-warning-500" : "bg-primary-500"
             }`}
           >
-            {isRent ? "Rent" : "Sale"}
+            {listingPurpose === "FOR_RENT_SHORT_TERM" ? "Airbnb" : listingPurpose === "FOR_RENT_LONG_TERM" ? "Rent" : "Sale"}
           </span>
           {urgencyText && (
             <span className="absolute right-2 top-2 z-10 flex items-center gap-1 rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-600 shadow-sm backdrop-blur-sm">

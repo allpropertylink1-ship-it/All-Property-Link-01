@@ -8,11 +8,12 @@ interface Props {
 }
 
 export default async function PropertiesPage({ searchParams }: Props) {
-  const { city, propertyType, minPrice, maxPrice, bedrooms, page } = searchParams;
+  const { city, propertyType, purpose, minPrice, maxPrice, bedrooms, page } = searchParams;
   const [data, cities] = await Promise.all([
     getProperties({
       city,
       propertyType,
+      purpose,
       minPrice: minPrice ? Number(minPrice) : undefined,
       maxPrice: maxPrice ? Number(maxPrice) : undefined,
       bedrooms: bedrooms ? Number(bedrooms) : undefined,
@@ -32,6 +33,7 @@ export default async function PropertiesPage({ searchParams }: Props) {
             cities={cities}
             selectedCity={city}
             selectedType={propertyType}
+            selectedPurpose={purpose}
             minPrice={minPrice}
             maxPrice={maxPrice}
             bedrooms={bedrooms}
@@ -47,7 +49,7 @@ export default async function PropertiesPage({ searchParams }: Props) {
               {Array.from({ length: data.totalPages }, (_, i) => i + 1).map((p) => (
                 <a
                   key={p}
-                  href={`/properties?page=${p}${city ? `&city=${city}` : ""}${propertyType ? `&propertyType=${propertyType}` : ""}`}
+                  href={`/properties?page=${p}${city ? `&city=${city}` : ""}${propertyType ? `&propertyType=${propertyType}` : ""}${purpose ? `&purpose=${purpose}` : ""}`}
                   className={`touch-target inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm ${
                     p === data.page
                       ? "border-primary-600 bg-primary-600 text-white"
