@@ -18,9 +18,9 @@ const categories = [
     gradient: "from-primary-900/80 via-primary-800/60 to-transparent",
   },
   {
-    title: "Fundis",
+    title: "Services",
     slug: "/services",
-    count: "500+ professionals",
+    count: "500+ pros",
     image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80",
     gradient: "from-primary-900/80 via-primary-800/60 to-transparent",
   },
