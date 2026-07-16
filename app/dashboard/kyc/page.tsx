@@ -87,49 +87,49 @@ export default function KycPage() {
   const [bioLastName, setBioLastName] = useState("")
   const [bioPhone, setBioPhone] = useState("")
   const [bioEmail, setBioEmail] = useState("")
-  const [partnerCode, setPartnerCode] = useState("")
-  const [referralPartnerId, setReferralPartnerId] = useState<string | null>(null)
-  const [partnerName, setPartnerName] = useState<string | null>(null)
-  const [partnerPhone, setPartnerPhone] = useState<string | null>(null)
-  const [partnerConfirmed, setPartnerConfirmed] = useState(false)
-  const [partnerCodeState, setPartnerCodeState] = useState<"idle" | "confirmed">("idle")
-  const [partnerLookupLoading, setPartnerLookupLoading] = useState(false)
-  const [partnerLookupError, setPartnerLookupError] = useState("")
+  const [agentCode, setAgentCode] = useState("")
+  const [aplAgentId, setAplAgentId] = useState<string | null>(null)
+  const [agentName, setAgentName] = useState<string | null>(null)
+  const [agentPhone, setAgentPhone] = useState<string | null>(null)
+  const [agentConfirmed, setAgentConfirmed] = useState(false)
+  const [agentCodeState, setAgentCodeState] = useState<"idle" | "confirmed">("idle")
+  const [agentLookupLoading, setAgentLookupLoading] = useState(false)
+  const [agentLookupError, setAgentLookupError] = useState("")
 
-  const resetPartnerCode = useCallback(() => {
-    setPartnerCode("")
-    setReferralPartnerId(null)
-    setPartnerName(null)
-    setPartnerPhone(null)
-    setPartnerConfirmed(false)
-    setPartnerCodeState("idle")
-    setPartnerLookupError("")
+  const resetAgentCode = useCallback(() => {
+    setAgentCode("")
+    setAplAgentId(null)
+    setAgentName(null)
+    setAgentPhone(null)
+    setAgentConfirmed(false)
+    setAgentCodeState("idle")
+    setAgentLookupError("")
   }, [])
 
-  const handleRevealPartner = async () => {
-    if (!partnerCode.trim()) return
-    setPartnerLookupLoading(true)
-    setPartnerLookupError("")
-    setReferralPartnerId(null)
-    setPartnerName(null)
-    setPartnerPhone(null)
-    setPartnerConfirmed(false)
-    setPartnerCodeState("idle")
+  const handleRevealAgent = async () => {
+    if (!agentCode.trim()) return
+    setAgentLookupLoading(true)
+    setAgentLookupError("")
+    setAplAgentId(null)
+    setAgentName(null)
+    setAgentPhone(null)
+    setAgentConfirmed(false)
+    setAgentCodeState("idle")
     try {
-      const res = await api.post<{ partner: { id: string; fullName: string; phone: string } }>("/api/partners/lookup", { partnerCode: partnerCode.trim().toUpperCase() })
-      if (!res.data?.partner) {
-        setPartnerLookupError(res.error || "Invalid code")
+      const res = await api.post<{ agent: { id: string; fullName: string; phone: string } }>("/api/apl-agents/lookup", { agentCode: agentCode.trim().toUpperCase() })
+      if (!res.data?.agent) {
+        setAgentLookupError(res.error || "Invalid code")
         return
       }
-      setReferralPartnerId(res.data.partner.id)
-      setPartnerName(res.data.partner.fullName)
-      setPartnerPhone(res.data.partner.phone)
-      setPartnerConfirmed(true)
-      setPartnerCodeState("confirmed")
+      setAplAgentId(res.data.agent.id)
+      setAgentName(res.data.agent.fullName)
+      setAgentPhone(res.data.agent.phone)
+      setAgentConfirmed(true)
+      setAgentCodeState("confirmed")
     } catch {
-      setPartnerLookupError("Failed to look up code. Try again.")
+      setAgentLookupError("Failed to look up code. Try again.")
     } finally {
-      setPartnerLookupLoading(false)
+      setAgentLookupLoading(false)
     }
   }
 
@@ -254,7 +254,7 @@ export default function KycPage() {
       }
       if (backUrl_) body.backImage = backUrl_
       if (businessPermitUrl_) body.businessPermit = businessPermitUrl_
-      if (referralPartnerId && partnerConfirmed) body.referralPartnerId = referralPartnerId
+      if (aplAgentId && agentConfirmed) body.aplAgentId = aplAgentId
 
       const res = coreDoc?.status === "REJECTED"
         ? await api.patch(`/api/user/kyc/${coreDoc.id}`, body)
@@ -266,7 +266,7 @@ export default function KycPage() {
       setDocNumber(""); setFrontFile(null); setBackFile(null); setFrontUrl(""); setBackUrl(""); setCropping(null)
       setBusinessPermitFile(null); setBusinessPermitUrl("")
       setBioFirstName(""); setBioMiddleName(""); setBioLastName(""); setBioPhone(""); setBioEmail("")
-      resetPartnerCode()
+      resetAgentCode()
       fetchKyc()
     } catch (err) {
       setMessage({ type: "error", text: err instanceof Error ? err.message : "Something went wrong" })
@@ -353,38 +353,38 @@ export default function KycPage() {
 
           <div className="rounded-xl border border-border bg-surface p-6">
             <h2 className="mb-4 text-lg font-semibold text-foreground">
-              Partner Code <span className="text-sm font-normal text-muted">(Optional — fill if a Referral Partner introduced you to the platform)</span>
+              Agent Code <span className="text-sm font-normal text-muted">(Optional — fill if an APL Representative introduced you to the platform)</span>
             </h2>
 
-            {partnerCodeState === "confirmed" ? (
+            {agentCodeState === "confirmed" ? (
               <div className="rounded-lg border border-green-200 bg-green-50 p-4">
                 <div className="flex items-center gap-2">
                   <CheckCircle size={18} className="text-green-600" />
-                  <p className="text-sm font-medium text-green-800">Partner Confirmed</p>
+                  <p className="text-sm font-medium text-green-800">Agent Confirmed</p>
                 </div>
-                <p className="mt-2 text-sm text-green-700"><strong>Name:</strong> {partnerName}</p>
-                <p className="text-sm text-green-700"><strong>Phone:</strong> {partnerPhone}</p>
-                <p className="mt-1 text-xs text-green-500">This partner will be credited with your referral.</p>
-                <button type="button" onClick={resetPartnerCode}
+                <p className="mt-2 text-sm text-green-700"><strong>Name:</strong> {agentName}</p>
+                <p className="text-sm text-green-700"><strong>Phone:</strong> {agentPhone}</p>
+                <p className="mt-1 text-xs text-green-500">This APL Representative will be credited with your referral.</p>
+                <button type="button" onClick={resetAgentCode}
                   className="mt-3 text-sm font-medium text-primary hover:underline">
-                  Change Partner
+                  Change Agent
                 </button>
               </div>
             ) : (
               <div className="flex flex-wrap items-end gap-3">
                 <div className="flex-1 min-w-[200px]">
-                  <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="partnerCode">Partner Code</label>
-                  <input id="partnerCode" value={partnerCode} onChange={e => setPartnerCode(e.target.value.toUpperCase())} placeholder="e.g. PRT-JOE-001-07/26"
+                  <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="agentCode">Agent Code</label>
+                  <input id="agentCode" value={agentCode} onChange={e => setAgentCode(e.target.value.toUpperCase())} placeholder="e.g. APL-JOE-001-07/26"
                     className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm uppercase font-mono focus:outline-none focus:ring-2 focus:ring-primary/50" />
                 </div>
-                <button type="button" onClick={handleRevealPartner} disabled={partnerLookupLoading || !partnerCode.trim()}
+                <button type="button" onClick={handleRevealAgent} disabled={agentLookupLoading || !agentCode.trim()}
                   className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-50">
-                  {partnerLookupLoading ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
-                  {partnerLookupLoading ? "Revealing..." : "Reveal Partner"}
+                  {agentLookupLoading ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                  {agentLookupLoading ? "Revealing..." : "Reveal Agent"}
                 </button>
               </div>
             )}
-            {partnerLookupError && <p className="mt-2 text-sm text-red-500">{partnerLookupError}</p>}
+            {agentLookupError && <p className="mt-2 text-sm text-red-500">{agentLookupError}</p>}
           </div>
 
           <div className="rounded-xl border border-border bg-surface p-6">

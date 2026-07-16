@@ -14,9 +14,9 @@ interface User {
   kycStatus?: string
   accountStatus?: string
   isAgent?: boolean
-  referralPartnerId?: string
+  aplAgentId?: string
   companyName?: string
-  partnerCode?: string
+  agentCode?: string
   fullName?: string
   authMethod?: "user" | "agent"
   mustChangePassword?: boolean
@@ -43,7 +43,7 @@ interface AuthContextType {
   verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string }>
   refreshUser: () => Promise<void>
   sendMagicLink: (email: string) => Promise<{ error?: string }>
-  agentLogin: (partnerCode: string, password: string) => Promise<{ error?: string; requiresPasswordChange?: boolean }>
+  agentLogin: (agentCode: string, password: string) => Promise<{ error?: string; requiresPasswordChange?: boolean }>
   agentForgotPassword: (identifier: string) => Promise<{ error?: string }>
   agentResetPassword: (token: string, password: string) => Promise<{ error?: string }>
   firstPasswordChange: (newPassword: string) => Promise<{ error?: string }>
@@ -136,8 +136,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {}
   }, [])
 
-  const agentLogin = useCallback(async (partnerCode: string, password: string) => {
-    const { data, error } = await api.post<{ user: User; requiresPasswordChange?: boolean }>("/api/auth/partner-login", { partnerCode, password })
+  const agentLogin = useCallback(async (agentCode: string, password: string) => {
+    const { data, error } = await api.post<{ user: User; requiresPasswordChange?: boolean }>("/api/auth/agent-login", { agentCode, password })
     if (data?.user) {
       setUser(data.user)
       return { requiresPasswordChange: data.requiresPasswordChange }
@@ -146,14 +146,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const agentForgotPassword = useCallback(async (identifier: string) => {
-    const identifierKey = identifier.includes("@") ? "email" : "partnerCode"
-    const { error } = await api.post("/api/auth/partner-forgot-password", { [identifierKey]: identifier })
+    const identifierKey = identifier.includes("@") ? "email" : "agentCode"
+    const { error } = await api.post("/api/auth/agent-forgot-password", { [identifierKey]: identifier })
     if (error) return { error }
     return {}
   }, [])
 
   const agentResetPassword = useCallback(async (token: string, password: string) => {
-    const { error } = await api.post("/api/auth/partner-reset-password", { token, password })
+    const { error } = await api.post("/api/auth/agent-reset-password", { token, password })
     if (error) return { error }
     return {}
   }, [])

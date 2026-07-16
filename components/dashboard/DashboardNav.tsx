@@ -55,7 +55,7 @@ const SECTION_LABELS: Record<string, string> = {
   primary: "Verification",
   secondary: "Activity",
   tertiary: "Settings",
-  agent: "Referral Partner",
+  agent: "APL Representative",
 }
 
 function NavGroup({ links, section }: { links: NavLink[]; section: keyof typeof SECTION_LABELS }) {

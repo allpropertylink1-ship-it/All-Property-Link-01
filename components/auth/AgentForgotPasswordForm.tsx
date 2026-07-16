@@ -3,7 +3,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 
-export function PartnerForgotPasswordForm() {
+export function AgentForgotPasswordForm() {
   const router = useRouter()
   const { agentForgotPassword } = useAuth()
   const [identifier, setIdentifier] = useState("")
@@ -50,7 +50,7 @@ export function PartnerForgotPasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <p className="text-sm text-text-secondary">
-        Enter your Partner Code or registered email address and we'll send you a reset link.
+        Enter your Agent Code or registered email address and we'll send you a reset link.
       </p>
 
       {error && (
@@ -60,17 +60,17 @@ export function PartnerForgotPasswordForm() {
       )}
 
       <div>
-        <label htmlFor="partner-identifier" className="block text-sm font-medium text-text-primary">
-          Partner Code or Email
+        <label htmlFor="agent-identifier" className="block text-sm font-medium text-text-primary">
+          Agent Code or Email
         </label>
         <input
-          id="partner-identifier"
+          id="agent-identifier"
           type="text"
           required
           value={identifier}
           onChange={(e) => setIdentifier(e.target.value)}
           className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
-          placeholder="PRT-XXX-000-00/00 or partner@example.com"
+          placeholder="APL-XXX-000-00/00 or agent@example.com"
         />
       </div>
 

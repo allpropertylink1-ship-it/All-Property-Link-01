@@ -13,7 +13,7 @@ interface AgentData {
     fullName: string
     email: string
     phone: string
-    partnerCode: string
+    agentCode: string
     commissionRate: number
     commissionType: string
     createdAt: string
@@ -86,7 +86,7 @@ export default function AgentDashboardPage() {
         <div className="max-w-md text-center">
           <Building2 size={48} className="mx-auto mb-4 text-muted" />
           <h2 className="mb-2 font-heading text-xl font-bold text-text-primary">Access Restricted</h2>
-          <p className="text-sm text-text-secondary">You don&apos;t have access to the Referral Partner Dashboard. Only registered partners can view this page.</p>
+          <p className="text-sm text-text-secondary">You don&apos;t have access to the APL Representative Dashboard. Only registered representatives can view this page.</p>
         </div>
       </div>
     )
@@ -161,9 +161,9 @@ export default function AgentDashboardPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="mb-1 font-heading text-2xl font-bold text-text-primary">Referral Partner Dashboard</h1>
+        <h1 className="mb-1 font-heading text-2xl font-bold text-text-primary">APL Representative Dashboard</h1>
         <p className="text-sm text-text-secondary">
-          {data.agent.fullName} &middot; Code: {data.agent.partnerCode}
+          {data.agent.fullName} &middot; Code: {data.agent.agentCode}
         </p>
       </div>
 

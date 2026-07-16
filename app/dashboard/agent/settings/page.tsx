@@ -89,7 +89,7 @@ export default function AgentSettingsPage() {
     setPwLoading(false)
   }
 
-  const referralLink = user.partnerCode ? `https://allpropertylink-amber.vercel.app/auth/register?ref=${user.partnerCode}` : ""
+  const referralLink = user.agentCode ? `https://allpropertylink-amber.vercel.app/auth/register?ref=${user.agentCode}` : ""
 
   async function copyReferralLink() {
     if (!referralLink) return
@@ -105,7 +105,7 @@ export default function AgentSettingsPage() {
       <div>
         <h1 className="font-heading text-2xl font-bold text-text-primary">Settings</h1>
         <p className="mt-1 text-sm text-text-secondary">
-          {user.fullName || `${user.firstName} ${user.lastName}`} &middot; Code: {user.partnerCode}
+          {user.fullName || `${user.firstName} ${user.lastName}`} &middot; Code: {user.agentCode}
         </p>
       </div>
 

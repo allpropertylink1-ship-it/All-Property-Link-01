@@ -125,8 +125,8 @@ model User {
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
 
-  referralPartner         ReferralPartner?  @relation(fields: [referralPartnerId], references: [id], onDelete: SetNull)
-  referralPartnerId       String?
+  aplAgent         AplAgent?  @relation(fields: [aplAgentId], references: [id], onDelete: SetNull)
+  aplAgentId       String?
 
   properties       Property[]
   auditLogs        AuditLog[]
@@ -143,12 +143,12 @@ model User {
   @@map("users")
 }
 
-model ReferralPartner {
+model AplAgent {
   id                  String             @id @default(uuid())
   fullName            String
   email               String             @unique
   phone               String
-  partnerCode         String             @unique
+  agentCode           String             @unique
   passwordHash        String?
   passwordChangedAt   DateTime?
   mustChangePassword  Boolean            @default(false)
@@ -156,7 +156,7 @@ model ReferralPartner {
   suspendedReason     String?
   suspendedAt         DateTime?
   reactivatedAt       DateTime?
-  referredByPartnerId String?
+  referredByAplAgentId String?
   totalReferrals      Int                @default(0)
   successfulReferrals Int                @default(0)
   commissionRate      Decimal            @default(3) @db.Decimal(5, 2)
@@ -175,17 +175,17 @@ model ReferralPartner {
   updatedAt           DateTime           @updatedAt
 
   users            User[]
-  referredPartners ReferralPartner[] @relation("PartnerReferrals")
-  parentPartner    ReferralPartner?  @relation("PartnerReferrals", fields: [referredByPartnerId], references: [id])
+  referredAgents   AplAgent[] @relation("AplAgentReferrals")
+  parentAgent      AplAgent?  @relation("AplAgentReferrals", fields: [referredByAplAgentId], references: [id])
   commissions      Commission[]
   payouts          Payout[]
   disputes         Dispute[]
   paymentClaims    PaymentClaim[]
 
-  @@index([partnerCode])
+  @@index([agentCode])
   @@index([email])
   @@index([status])
-  @@map("referral_partners")
+  @@map("apl_agents")
 }
 
 model KycDocument {
@@ -468,7 +468,7 @@ model Review {
 
 model Commission {
   id                String    @id @default(uuid())
-  referralPartnerId String?
+  aplAgentId String?
   propertyId        String
   userId            String
   amount            Decimal   @default(0) @db.Decimal(12, 2)
@@ -479,12 +479,12 @@ model Commission {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  referralPartner ReferralPartner? @relation(fields: [referralPartnerId], references: [id], onDelete: Cascade)
-  property        Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  disputes        Dispute[]
+  aplAgent  AplAgent?  @relation(fields: [aplAgentId], references: [id], onDelete: Cascade)
+  property  Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  disputes  Dispute[]
 
-  @@index([referralPartnerId])
+  @@index([aplAgentId])
   @@index([propertyId])
   @@index([userId])
   @@index([status])
@@ -493,7 +493,7 @@ model Commission {
 
 model Payout {
   id                String    @id @default(uuid())
-  referralPartnerId String?
+  aplAgentId String?
   amount            Decimal   @db.Decimal(12, 2)
   currency          String    @default("KES")
   method            String    @default("MPESA")
@@ -504,11 +504,11 @@ model Payout {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  referralPartner ReferralPartner? @relation(fields: [referralPartnerId], references: [id], onDelete: Cascade)
-  properties      PayoutProperty[]
-  disputes        Dispute[]
+  aplAgent    AplAgent?        @relation(fields: [aplAgentId], references: [id], onDelete: Cascade)
+  properties  PayoutProperty[]
+  disputes    Dispute[]
 
-  @@index([referralPartnerId])
+  @@index([aplAgentId])
   @@index([status])
   @@map("payouts")
 }
@@ -525,7 +525,7 @@ model PayoutProperty {
 
 model Dispute {
   id                String    @id @default(uuid())
-  referralPartnerId String?
+  aplAgentId String?
   commissionId      String?
   payoutId          String?
   title             String
@@ -539,18 +539,18 @@ model Dispute {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  referralPartner ReferralPartner? @relation(fields: [referralPartnerId], references: [id], onDelete: Cascade)
-  commission      Commission?     @relation(fields: [commissionId], references: [id], onDelete: SetNull)
-  payout          Payout?         @relation(fields: [payoutId], references: [id], onDelete: SetNull)
+  aplAgent    AplAgent?    @relation(fields: [aplAgentId], references: [id], onDelete: Cascade)
+  commission  Commission?  @relation(fields: [commissionId], references: [id], onDelete: SetNull)
+  payout      Payout?      @relation(fields: [payoutId], references: [id], onDelete: SetNull)
 
-  @@index([referralPartnerId])
+  @@index([aplAgentId])
   @@index([status])
   @@map("disputes")
 }
 
 model PaymentClaim {
   id                String    @id @default(uuid())
-  referralPartnerId String?
+  aplAgentId String?
   amount            Decimal   @db.Decimal(12, 2)
   currency          String    @default("KES")
   periodLabel       String?
@@ -562,9 +562,9 @@ model PaymentClaim {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  referralPartner ReferralPartner? @relation(fields: [referralPartnerId], references: [id], onDelete: Cascade)
+  aplAgent AplAgent? @relation(fields: [aplAgentId], references: [id], onDelete: Cascade)
 
-  @@index([referralPartnerId])
+  @@index([aplAgentId])
   @@index([status])
   @@map("payment_claims")
 }

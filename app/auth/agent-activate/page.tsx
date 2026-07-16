@@ -36,7 +36,7 @@ function ActivateForm() {
 
     setLoading(true)
 
-    const { error: err } = await api.post("/api/auth/partner-activate", { token, password })
+    const { error: err } = await api.post("/api/auth/agent-activate", { token, password })
     if (err) {
       setError(err)
       setLoading(false)
@@ -74,7 +74,7 @@ function ActivateForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <p className="text-sm text-text-secondary">
-        Set your password to activate your Referral Partner account.
+        Set your password to activate your APL Representative account.
       </p>
 
       {!token && (
