@@ -47,9 +47,14 @@ function BriefcaseIcon({ className }: { className?: string }) {
 }
 
 async function getCategories() {
-  const [properties, airbnbs, services, plots] = await Promise.all([
+  const [allProperties, airbnbs, services, plots] = await Promise.all([
     prisma.property.findMany({
-      where: { deletedAt: null, listingPurpose: { not: "FOR_RENT_SHORT_TERM" } },
+      where: { deletedAt: null },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    }),
+    prisma.property.findMany({
+      where: { deletedAt: null, listingPurpose: "FOR_RENT_SHORT_TERM" },
       orderBy: { createdAt: "desc" },
       take: 6,
       select: {
@@ -91,7 +96,7 @@ async function getCategories() {
     }),
   ]);
 
-  return { properties, airbnbs, services, plots };
+  return { allProperties, airbnbs, services, plots };
 }
 
 interface PropertyItem {
@@ -162,7 +167,10 @@ function ServiceCard({ item }: { item: ServiceItem }) {
 }
 
 export default async function BrowsePage() {
-  const { properties, airbnbs, services, plots } = await getCategories();
+  const { allProperties, airbnbs, services, plots } = await getCategories();
+
+  const properties = allProperties.filter((p) => p.listingPurpose !== "FOR_RENT_SHORT_TERM").slice(0, 6);
+  const plotsFiltered = plots.length > 0 ? plots : allProperties.filter((p) => p.propertyType === "LAND").slice(0, 6);
 
   const sectionList: {
     id: string; title: string; icon: React.ComponentType<{ className?: string }>;
@@ -198,7 +206,7 @@ export default async function BrowsePage() {
     },
     {
       id: "plots", title: "Plots & Land", icon: MapPin,
-      items: plots, viewAllLink: "/properties?type=LAND",
+      items: plotsFiltered, viewAllLink: "/properties?type=LAND",
       viewAllLabel: "View all plots", emptyMsg: "No plots listed yet.",
       renderItem: (item: unknown) => {
         const i = item as PropertyItem;
