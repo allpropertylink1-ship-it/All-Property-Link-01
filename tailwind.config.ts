@@ -9,18 +9,22 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        background: "var(--color-surface)",
+        foreground: "var(--color-text)",
+        muted: {
+          DEFAULT: "var(--color-muted)",
+          foreground: "var(--color-muted)",
+        },
         primary: {
           DEFAULT: "#286255",
-          50: "#E5F0ED",
-          100: "#CBE0DA",
-          200: "#97C2B5",
-          300: "#63A390",
-          400: "#44917A",
-          500: "#286255",
-          600: "#1C4A40",
-          700: "#1A3D35",
-          800: "#152F29",
-          900: "#0F201C",
+          foreground: "#FFFFFF",
+          50: "#E5F0ED", 100: "#CBE0DA", 200: "#97C2B5", 300: "#63A390",
+          400: "#44917A", 500: "#286255", 600: "#1C4A40",
+          700: "#1A3D35", 800: "#152F29", 900: "#0F201C",
+        },
+        error: {
+          DEFAULT: "#EF4444",
+          50: "#FEF2F2", 500: "#EF4444", 700: "#B91C1C",
         },
         accent: {
           50: "#F4ECDD",
@@ -38,11 +42,6 @@ const config: Config = {
           50: "#F0FDF4",
           500: "#22C55E",
           700: "#15803D",
-        },
-        error: {
-          50: "#FEF2F2",
-          500: "#EF4444",
-          700: "#B91C1C",
         },
         warning: {
           50: "#FFFBEB",

@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 const menuItems = [
   { href: "/", label: "Home" },
   { href: "/properties", label: "Properties" },
-  { href: "#", label: "Airbnbs" },
+  { href: "/properties?purpose=FOR_RENT_SHORT_TERM", label: "Airbnbs" },
   { href: "/services", label: "Services" },
   { href: "/properties?type=LAND", label: "Plots & Land" },
   { href: "/about", label: "About" },

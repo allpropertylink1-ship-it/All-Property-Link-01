@@ -5,13 +5,7 @@ import { getServiceById, getServiceReviews } from "@/lib/services/service";
 import type { ServiceReview } from "@/lib/services/service";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
-import dynamic from "next/dynamic";
 import { Phone, Mail, Globe, Sparkles, MessageCircle, Star, MapPin, Briefcase } from "lucide-react";
-
-const PropertyMap = dynamic(() => import("@/components/shared/PropertyMap").then((m) => m.PropertyMap), {
-  ssr: false,
-  loading: () => <div className="h-48 animate-pulse rounded-xl bg-surface-secondary" />,
-});
 
 interface Props {
   params: { id: string };
@@ -131,11 +125,6 @@ export default async function ServiceDetailPage({ params }: Props) {
             </div>
           )}
 
-          <PropertyMap
-            lat={null}
-            lng={null}
-            address={`${service.city || ""}, ${service.region || ""}, Kenya`}
-          />
         </aside>
 
         {/* ─── CENTER: Gallery + Details + Reviews ─── */}

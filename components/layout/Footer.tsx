@@ -34,7 +34,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/properties?purpose=FOR_RENT_SHORT_TERM"
                   className="transition-colors hover:text-primary"
                 >
                   Airbnbs
@@ -42,7 +42,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/services"
                   className="transition-colors hover:text-primary"
                 >
                   Fundis
@@ -50,7 +50,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/services"
                   className="transition-colors hover:text-primary"
                 >
                   Services
@@ -106,7 +106,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-secondary">
               <li>
                 <Link
-                  href="#"
+                  href="/auth/register"
                   className="transition-colors hover:text-primary"
                 >
                   List a property
@@ -114,7 +114,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/auth/register"
                   className="transition-colors hover:text-primary"
                 >
                   Register as fundi
@@ -122,7 +122,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/auth/register"
                   className="transition-colors hover:text-primary"
                 >
                   Register as provider

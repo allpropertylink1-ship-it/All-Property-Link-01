@@ -122,7 +122,7 @@ export function PropertyFilters({
 
       <button
         type="submit"
-        className="touch-target w-full rounded-lg bg-accent-300 px-4 py-3 text-sm font-medium text-white hover:bg-accent-400"
+        className="touch-target w-full rounded-lg bg-accent-400 px-4 py-3 text-sm font-medium text-white hover:bg-accent-500"
       >
         Apply filters
       </button>

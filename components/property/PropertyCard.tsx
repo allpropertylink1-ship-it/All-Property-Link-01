@@ -87,7 +87,7 @@ export function PropertyCard({
           />
           <span
             className={`absolute left-2 top-2 z-10 rounded-md px-2.5 py-1 text-xs font-semibold text-white ${
-              listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-300" : listingPurpose === "FOR_RENT_LONG_TERM" ? "bg-warning-500" : "bg-primary-500"
+              listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-400" : listingPurpose === "FOR_RENT_LONG_TERM" ? "bg-primary-600" : "bg-primary-500"
             }`}
           >
             {listingPurpose === "FOR_RENT_SHORT_TERM" ? "Airbnb" : listingPurpose === "FOR_RENT_LONG_TERM" ? "Rent" : "Sale"}

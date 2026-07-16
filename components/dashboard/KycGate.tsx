@@ -21,14 +21,14 @@ export function KycGate({ children, kycStatus, isAgent }: KycGateProps) {
   if (kycStatus === "NONE") {
     return (
       <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-        <ShieldX size={64} className="mb-4 text-muted-foreground" />
-        <h2 className="mb-2 text-xl font-bold text-foreground">Identity Verification Required</h2>
-        <p className="mb-6 max-w-md text-sm text-muted-foreground">
+        <ShieldX size={64} className="mb-4 text-text-secondary" />
+        <h2 className="mb-2 text-xl font-bold text-text-primary">Identity Verification Required</h2>
+        <p className="mb-6 max-w-md text-sm text-text-secondary">
           You must verify your identity before accessing other features. Please submit your KYC documents.
         </p>
         <Link
           href="/dashboard/kyc"
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary/90"
         >
           <Shield size={18} />
           Complete KYC Verification
@@ -41,13 +41,13 @@ export function KycGate({ children, kycStatus, isAgent }: KycGateProps) {
     return (
       <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
         <ShieldX size={64} className="mb-4 text-error-500" />
-        <h2 className="mb-2 text-xl font-bold text-foreground">KYC Documents Rejected</h2>
-        <p className="mb-6 max-w-md text-sm text-muted-foreground">
+        <h2 className="mb-2 text-xl font-bold text-text-primary">KYC Documents Rejected</h2>
+        <p className="mb-6 max-w-md text-sm text-text-secondary">
           Your submitted documents did not meet requirements. Please check the rejection reason and resubmit.
         </p>
         <Link
           href="/dashboard/kyc"
-          className="inline-flex items-center gap-2 rounded-lg bg-error px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-error/90"
+          className="inline-flex items-center gap-2 rounded-lg bg-error-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-error-700"
         >
           <Shield size={18} />
           Resubmit KYC Documents

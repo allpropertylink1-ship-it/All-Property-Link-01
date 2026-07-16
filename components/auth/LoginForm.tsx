@@ -204,7 +204,7 @@ export function LoginForm() {
         </div>
 
         {magicSent ? (
-          <div className="rounded-lg bg-primary-light px-4 py-3 text-sm text-primary">
+          <div className="rounded-lg bg-accent-300/10 px-4 py-3 text-sm text-accent-600">
             Magic link sent! Check your email inbox.
           </div>
         ) : (

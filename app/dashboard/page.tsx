@@ -2,32 +2,36 @@ import { requireAuth } from "@/lib/auth-utils"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import {
-  Building2, Bell,
+  Building2, Bell, Wrench,
   Plus, ArrowRight,
 } from "lucide-react"
 import Link from "next/link"
 
 async function getStats(userId: string) {
-  const [totalListings, unreadNotifications] = await Promise.all([
+  const [totalListings, totalServices, unreadNotifications] = await Promise.all([
     prisma.property.count({ where: { agentId: userId, deletedAt: null } }),
+    prisma.serviceListing.count({ where: { userId, status: { not: "INACTIVE" } } }),
     prisma.notification.count({ where: { userId, read: false } }),
   ])
 
   return {
     totalListings,
+    totalServices,
     unreadNotifications,
   }
 }
 
 const statCards = [
   { key: "totalListings", label: "Total Listings", icon: Building2, href: "/dashboard/listings" },
+  { key: "totalServices", label: "Services", icon: Wrench, href: "/dashboard/services" },
   { key: "unreadNotifications", label: "Notifications", icon: Bell, href: "/dashboard/notifications" },
 ] as const
 
 const quickActions = [
   { label: "New Listing", icon: Plus, href: "/dashboard/listings/new", color: "text-primary-600 bg-primary-50" },
-  { label: "Edit Profile", icon: Building2, href: "/dashboard/profile/business", color: "text-gold-600 bg-gold-50" },
-  { label: "Notifications", icon: Bell, href: "/dashboard/notifications", color: "text-error-600 bg-error-50" },
+  { label: "New Service", icon: Wrench, href: "/dashboard/services/new", color: "text-accent-500 bg-accent-50" },
+  { label: "Edit Profile", icon: Building2, href: "/dashboard/profile/business", color: "text-text-secondary bg-surface-secondary" },
+  { label: "Notifications", icon: Bell, href: "/dashboard/notifications", color: "text-error-500 bg-error-50" },
 ]
 
 export default async function DashboardPage() {
@@ -64,7 +68,7 @@ export default async function DashboardPage() {
 
       <div>
         <h2 className="mb-4 font-heading text-lg font-semibold text-text-primary">Quick Actions</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {quickActions.map((action) => {
             const Icon = action.icon
             return (

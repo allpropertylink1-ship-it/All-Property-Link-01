@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getPropertyBySlug, getOtherPropertiesByAgent } from "@/lib/services/property";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
+
 import dynamic from "next/dynamic";
 const PropertyMap = dynamic(() => import("@/components/shared/PropertyMap").then(m => m.PropertyMap), {
   ssr: false,
@@ -157,7 +158,7 @@ export default async function PropertyDetailPage({ params }: Props) {
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {property.listingPurpose && (
-                  <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold text-white ${property.listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-300" : property.listingPurpose === "FOR_RENT_LONG_TERM" ? "bg-warning-500" : "bg-primary-500"}`}>
+                  <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold text-white ${property.listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-400" : property.listingPurpose === "FOR_RENT_LONG_TERM" ? "bg-primary-600" : "bg-primary-500"}`}>
                     {property.listingPurpose === "FOR_RENT_SHORT_TERM" ? "Short-term / Airbnb" : property.listingPurpose === "FOR_RENT_LONG_TERM" ? "Long-term rent" : "For Sale"}
                   </span>
                 )}
@@ -221,6 +222,15 @@ export default async function PropertyDetailPage({ params }: Props) {
               </div>
             )}
 
+            {/* Map (mobile only — desktop map is in left sidebar) */}
+            <div className="lg:hidden">
+              <PropertyMap
+                lat={property.latitude ? Number(property.latitude) : null}
+                lng={property.longitude ? Number(property.longitude) : null}
+                address={`${property.city}, ${property.region || ""}, ${property.country}`}
+              />
+            </div>
+
             {/* Mobile: condensed business + contact */}
             {property.agent && (
               <div className="rounded-xl border border-border bg-surface p-4 lg:hidden">
@@ -273,7 +283,7 @@ export default async function PropertyDetailPage({ params }: Props) {
           </div>
 
           {/* ─── RIGHT SIDEBAR ─── */}
-          <aside className="space-y-5">
+          <aside className="hidden lg:block space-y-5">
             {property.agent && (
               <>
                 <div className="rounded-xl border border-border bg-surface p-5">

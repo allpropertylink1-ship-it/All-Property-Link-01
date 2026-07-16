@@ -321,7 +321,7 @@ export default async function HomePage() {
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute left-2 top-2 z-10 flex gap-2">
-                      <span className={`rounded-full px-3 py-1 text-xs font-semibold text-white ${purpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-300" : purpose === "FOR_RENT_LONG_TERM" ? "bg-warning-500" : "bg-primary-500"}`}>
+                      <span className={`rounded-full px-3 py-1 text-xs font-semibold text-white ${purpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-400" : purpose === "FOR_RENT_LONG_TERM" ? "bg-primary-600" : "bg-primary-500"}`}>
                         {purpose === "FOR_RENT_SHORT_TERM" ? "Airbnb" : purpose === "FOR_RENT_LONG_TERM" ? "Rent" : "Sale"}
                       </span>
                       {prop.isFeatured && (

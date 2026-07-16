@@ -88,11 +88,11 @@ export function ShareButtons({ title }: { title: string }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-11 w-11 rounded-full text-foreground hover:bg-muted"
+          className="h-11 w-11 rounded-full text-[#000000] hover:bg-[#000000]/10 hover:text-[#000000]"
           title="Share on X"
           onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`, "_blank", "noopener")}
         >
-          <XIcon className="h-4 w-4" />
+          <XIcon className="h-5 w-5" />
         </Button>
 
         {/* Telegram */}
@@ -121,7 +121,7 @@ export function ShareButtons({ title }: { title: string }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-11 w-11 rounded-full text-foreground hover:bg-muted"
+          className="h-11 w-11 rounded-full text-[#000000] hover:bg-[#000000]/10 hover:text-[#000000]"
           title={copied === "tiktok" ? "Link copied!" : "Copy link for TikTok"}
           onClick={() => copyToClipboard("tiktok")}
         >
@@ -132,7 +132,7 @@ export function ShareButtons({ title }: { title: string }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-11 w-11 rounded-full text-text-secondary hover:bg-muted"
+          className="h-11 w-11 rounded-full text-text-secondary hover:bg-surface-secondary"
           title={copied === "link" ? "Copied!" : "Copy link"}
           onClick={() => copyToClipboard("link")}
         >

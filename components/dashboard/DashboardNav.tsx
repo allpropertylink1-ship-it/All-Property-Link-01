@@ -131,8 +131,8 @@ export function DashboardNav() {
             AP
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-foreground">All Property Link</p>
-            <p className="truncate text-xs text-muted">{user?.firstName || ""}</p>
+            <p className="truncate text-sm font-semibold text-text-primary">All Property Link</p>
+            <p className="truncate text-xs text-text-secondary">{user?.firstName || ""}</p>
           </div>
         </div>
 
