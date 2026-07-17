@@ -12,6 +12,7 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false)
   const [magicEmail, setMagicEmail] = useState("")
   const [magicSent, setMagicSent] = useState(false)
+  const [showMagicLink, setShowMagicLink] = useState(false)
   const [magicError, setMagicError] = useState("")
   const [phoneStep, setPhoneStep] = useState<"phone" | "otp">("phone")
   const [phone, setPhone] = useState("")
@@ -190,10 +191,13 @@ export function LoginForm() {
         <div className="flex items-center justify-between">
           <button
             type="button"
-            onClick={() => setMagicSent(false)}
+            onClick={() => {
+              if (magicSent) { setMagicSent(false); setMagicEmail(""); setMagicError("") }
+              setShowMagicLink(!showMagicLink)
+            }}
             className="text-sm font-medium text-accent-300 hover:text-accent-400"
           >
-            {magicSent ? "Send again" : "Use magic link"}
+            {showMagicLink ? "Cancel magic link" : "Use magic link"}
           </button>
           <a
             href="/auth/forgot-password"
@@ -203,31 +207,44 @@ export function LoginForm() {
           </a>
         </div>
 
-        {magicSent ? (
-          <div className="rounded-lg bg-accent-300/10 px-4 py-3 text-sm text-accent-600">
-            Magic link sent! Check your email inbox.
-          </div>
-        ) : (
-          <div className="flex gap-2">
-            <input
-              type="email"
-              value={magicEmail}
-              onChange={(e) => setMagicEmail(e.target.value)}
-              placeholder="your@email.com"
-              className="block flex-1 rounded-sm border border-border bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
-            />
-            <button
-              type="button"
-              onClick={handleMagicLink}
-              disabled={!magicEmail}
-              className="touch-target rounded-sm border border-accent-300 px-4 py-3 text-sm font-medium text-accent-300 transition-colors hover:bg-accent-300/10 disabled:opacity-50"
-            >
-              Send
-            </button>
-          </div>
-        )}
-        {magicError && (
-          <p className="text-xs text-error-500">{magicError}</p>
+        {showMagicLink && (
+          magicSent ? (
+            <div className="space-y-3">
+              <div className="rounded-lg bg-accent-300/10 px-4 py-3 text-sm text-accent-600">
+                Magic link sent! Check your email inbox.
+              </div>
+              <button
+                type="button"
+                onClick={() => { setMagicSent(false); setMagicEmail(""); setMagicError("") }}
+                className="touch-target w-full rounded-sm border border-accent-300 px-4 py-3 text-sm font-medium text-accent-300 transition-colors hover:bg-accent-300/10"
+              >
+                Send again
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  value={magicEmail}
+                  onChange={(e) => setMagicEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="block flex-1 rounded-sm border border-border bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+                />
+                <button
+                  type="button"
+                  onClick={handleMagicLink}
+                  disabled={!magicEmail}
+                  className="touch-target rounded-sm border border-accent-300 px-4 py-3 text-sm font-medium text-accent-300 transition-colors hover:bg-accent-300/10 disabled:opacity-50"
+                >
+                  Send
+                </button>
+              </div>
+              {magicError && (
+                <p className="text-xs text-error-500">{magicError}</p>
+              )}
+            </div>
+          )
         )}
 
         <div className="relative">
