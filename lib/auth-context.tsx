@@ -23,7 +23,7 @@ interface User {
   userTypes?: string[]
 }
 
-interface OtpResponse {
+export interface OtpResponse {
   otpSent: boolean
   otpDestination: string
   identifier: string
@@ -41,6 +41,7 @@ interface AuthContextType {
   signup: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string; userType?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
   sendOtp: (identifier: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
   verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string }>
+  updateRegistration: (data: { oldIdentifier: string; email?: string; phone?: string; firstName?: string; lastName?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
   refreshUser: () => Promise<void>
   sendMagicLink: (email: string) => Promise<{ error?: string }>
   agentLogin: (agentCode: string, password: string) => Promise<{ error?: string; requiresPasswordChange?: boolean }>
@@ -64,6 +65,7 @@ const AuthContext = createContext<AuthContextType>({
   agentForgotPassword: async () => ({}),
   agentResetPassword: async () => ({}),
   firstPasswordChange: async () => ({}),
+  updateRegistration: async () => ({}),
 })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -168,8 +170,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {}
   }, [])
 
+  const updateRegistration = useCallback(async (data: { oldIdentifier: string; email?: string; phone?: string; firstName?: string; lastName?: string }) => {
+    const { data: result, error } = await api.post<OtpResponse>("/api/auth/update-registration", data)
+    if (error) return { error }
+    return { otp: result }
+  }, [])
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, phoneLogin, signup, sendOtp, verifyOtp, refreshUser: fetchUser, sendMagicLink, agentLogin, agentForgotPassword, agentResetPassword, firstPasswordChange }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, phoneLogin, signup, sendOtp, verifyOtp, refreshUser: fetchUser, sendMagicLink, agentLogin, agentForgotPassword, agentResetPassword, firstPasswordChange, updateRegistration }}>
       {children}
     </AuthContext.Provider>
   )

@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth, type OtpResponse } from "@/lib/auth-context"
 import { PasswordStrength } from "./PasswordStrength"
 import { PasswordToggle } from "./PasswordToggle"
 import { GoogleSignInButton } from "./GoogleSignInButton"
@@ -19,7 +19,7 @@ const userTypeOptions = [
 
 export function RegisterForm({ referralCode: initialReferralCode }: { referralCode?: string }) {
   const router = useRouter()
-  const { signup, sendOtp, verifyOtp, refreshUser } = useAuth()
+  const { signup, sendOtp, verifyOtp, refreshUser, updateRegistration } = useAuth()
   const [step, setStep] = useState<Step>("userType")
   const [userType, setUserType] = useState("")
   const [error, setError] = useState("")
@@ -111,19 +111,36 @@ export function RegisterForm({ referralCode: initialReferralCode }: { referralCo
       }
     }
 
-    const { error: signupError, otp } = await signup({ firstName, lastName, password, email, phone, referralCode: referralCode || undefined, userType: userType || undefined })
-    if (signupError) {
-      setError(signupError)
+    let result: { error?: string; otp?: OtpResponse }
+
+    if (otpIdentifier) {
+      result = await updateRegistration({
+        oldIdentifier: otpIdentifier,
+        ...(email ? { email } : {}),
+        ...(phone ? { phone } : {}),
+        firstName, lastName,
+      })
+      if (!result.otp) {
+        setOtpIdentifier("")
+        setOtpType("EMAIL_VERIFICATION")
+        setOtpDestination("")
+      }
+    } else {
+      result = await signup({ firstName, lastName, password, email, phone, referralCode: referralCode || undefined, userType: userType || undefined })
+    }
+
+    if (result.error) {
+      setError(result.error)
       setLoading(false)
       return
     }
 
-    if (otp) {
-      setOtpIdentifier(otp.identifier)
-      setOtpType(otp.type)
-      setOtpDestination(otp.otpDestination)
-      startCooldown(otp.retryAfter)
-      startExpiryTimer(otp.expiresIn)
+    if (result.otp) {
+      setOtpIdentifier(result.otp.identifier)
+      setOtpType(result.otp.type)
+      setOtpDestination(result.otp.otpDestination)
+      startCooldown(result.otp.retryAfter)
+      startExpiryTimer(result.otp.expiresIn)
       setStep("otp")
     }
     setLoading(false)
@@ -214,6 +231,13 @@ export function RegisterForm({ referralCode: initialReferralCode }: { referralCo
         <h2 className="mb-2 font-heading text-xl font-bold text-text-primary">Verify your {otpType === "EMAIL_VERIFICATION" ? "email" : "phone"}</h2>
         <p className="mb-6 text-sm text-text-secondary">
           We sent a code to <strong className="text-text-primary">{otpDestination}</strong>
+          <button
+            type="button"
+            onClick={() => { setStep("form"); setOtpValues(["", "", "", "", "", ""]) }}
+            className="ml-2 inline-flex items-center gap-1 text-xs font-medium text-accent-300 hover:text-accent-400"
+          >
+            Edit
+          </button>
         </p>
 
         {error && (
