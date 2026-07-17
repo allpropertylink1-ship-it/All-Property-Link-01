@@ -35,7 +35,7 @@ interface OtpResponse {
 interface AuthContextType {
   user: User | null
   loading: boolean
-  login: (email: string, password: string) => Promise<{ error?: string }>
+  login: (emailOrPhone: string, password: string) => Promise<{ error?: string }>
   logout: () => Promise<void>
   phoneLogin: (phone: string) => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
   signup: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string; userType?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
@@ -91,8 +91,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchUser()
   }, [fetchUser])
 
-  const login = useCallback(async (email: string, password: string) => {
-    const { data, error } = await api.post<{ user: User }>("/api/auth/login", { email, password })
+  const login = useCallback(async (emailOrPhone: string, password: string) => {
+    const isPhone = /^(\+254|0?7\d{8})$/.test(emailOrPhone.replace(/\s/g, ""))
+    const payload = isPhone
+      ? { phone: emailOrPhone.replace(/\s/g, "").replace(/^0/, "+254"), password }
+      : { email: emailOrPhone, password }
+    const { data, error } = await api.post<{ user: User }>("/api/auth/login", payload)
     if (data?.user) {
       setUser(data.user)
       return {}
