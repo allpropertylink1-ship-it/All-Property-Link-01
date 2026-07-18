@@ -4,8 +4,13 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { MapPin } from "lucide-react";
 
-function formatPrice(price: number, currency: string) {
-  return `${currency} ${price.toLocaleString()}`;
+export const dynamic = "force-dynamic";
+
+function formatPrice(price: number, currency: string, listingPurpose?: string | null) {
+  const formatted = `${currency} ${price.toLocaleString()}`;
+  if (listingPurpose === "FOR_RENT_SHORT_TERM") return `${formatted}/night`;
+  if (listingPurpose === "FOR_RENT_LONG_TERM") return `${formatted}/month`;
+  return formatted;
 }
 
 function ArrowRightIcon({ className }: { className?: string }) {
@@ -116,7 +121,7 @@ function PropertyCard({ item, link }: { item: PropertyItem; link: string }) {
           {item.bedrooms != null && item.bedrooms > 0 && <span>{item.bedrooms} beds</span>}
           {item.bathrooms != null && item.bathrooms > 0 && <span>{item.bathrooms} baths</span>}
         </div>
-        <p className="mt-1.5 font-heading text-base font-bold text-primary-500">{formatPrice(Number(item.price), item.currency)}</p>
+        <p className="mt-1.5 font-heading text-base font-bold text-primary-500">{formatPrice(Number(item.price), item.currency, item.listingPurpose)}</p>
       </div>
     </Link>
   );
@@ -146,7 +151,7 @@ function ServiceCard({ item }: { item: ServiceItem }) {
         <h3 className="line-clamp-1 font-heading text-sm font-semibold text-text-primary">{item.title}</h3>
         <p className="mt-1 text-xs text-text-secondary">{item.city || item.region || "Kenya"}</p>
         {item.price != null && (
-          <p className="mt-1.5 font-heading text-base font-bold text-primary-500">{formatPrice(Number(item.price), item.currency)}</p>
+        <p className="mt-1.5 font-heading text-base font-bold text-primary-500">{formatPrice(Number(item.price), item.currency)}</p>
         )}
         {item.user && (
           <p className="mt-1 text-xs text-text-secondary">{item.user.firstName} {item.user.lastName}</p>

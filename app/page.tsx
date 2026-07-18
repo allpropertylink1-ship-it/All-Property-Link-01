@@ -2,35 +2,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
-const categories = [
-  {
-    title: "Properties",
-    slug: "/properties",
-    count: "1,200+ listings",
-    image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&q=80",
-  },
-  {
-    title: "Airbnbs",
-    slug: "/properties?purpose=FOR_RENT_SHORT_TERM",
-    count: "300+ stays",
-    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80",
-  },
-  {
-    title: "Fundis",
-    slug: "/services",
-    count: "500+ pros",
-    image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80",
-  },
-  {
-    title: "Plots & Land",
-    slug: "/properties?type=LAND",
-    count: "400+ plots",
-    image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80",
-  },
-];
+function formatCount(count: number, singular: string, plural?: string) {
+  const label = count === 1 ? singular : plural ?? `${singular}s`;
+  return `${count.toLocaleString()} ${label}`;
+}
 
-function formatPrice(price: number, currency: string) {
-  return `${currency} ${price.toLocaleString()}`;
+function formatPrice(price: number, currency: string, listingPurpose?: string | null) {
+  const formatted = `${currency} ${price.toLocaleString()}`;
+  if (listingPurpose === "FOR_RENT_SHORT_TERM") return `${formatted}/night`;
+  if (listingPurpose === "FOR_RENT_LONG_TERM") return `${formatted}/month`;
+  return formatted;
 }
 
 function SearchIcon({ className }: { className?: string }) {
@@ -167,13 +148,54 @@ interface ServiceRow {
 export const dynamic = "force-dynamic"
 
 export default async function HomePage() {
-  const [featuredProperties, featuredAirbnbs, featuredFundis, featuredProviders, cities] = await Promise.all([
+  const [
+    featuredProperties, featuredAirbnbs, featuredFundis, featuredProviders, cities,
+    propertiesCount, airbnbsCount, fundisCount, landCount, providersCount,
+  ] = await Promise.all([
     getFeaturedProperties(),
     getFeaturedAirbnbs(),
     getFeaturedFundis(),
     getFeaturedProviders(),
-    prisma.property.groupBy({ by: ["city"], where: { deletedAt: null }, _count: { city: true } }),
+    prisma.property.groupBy({ by: ["city"], where: { deletedAt: null }, _count: { city: true }, orderBy: { city: "asc" } }),
+    prisma.property.count({ where: { deletedAt: null, listingPurpose: { not: "FOR_RENT_SHORT_TERM" } } }),
+    prisma.property.count({ where: { deletedAt: null, listingPurpose: "FOR_RENT_SHORT_TERM" } }),
+    prisma.serviceListing.count({ where: { status: "ACTIVE", moderationStatus: "APPROVED", user: { userTypes: { has: "FUNDI" } } } }),
+    prisma.property.count({ where: { deletedAt: null, propertyType: "LAND" } }),
+    prisma.serviceListing.count({ where: { status: "ACTIVE", moderationStatus: "APPROVED", user: { userTypes: { has: "SERVICE_PROVIDER" } } } }),
   ]);
+
+  const categories = [
+    {
+      title: "Properties",
+      slug: "/properties",
+      count: formatCount(propertiesCount, "listing"),
+      image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&q=80",
+    },
+    {
+      title: "Airbnbs",
+      slug: "/properties?purpose=FOR_RENT_SHORT_TERM",
+      count: formatCount(airbnbsCount, "stay"),
+      image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80",
+    },
+    {
+      title: "Fundis",
+      slug: "/services",
+      count: formatCount(fundisCount, "pro"),
+      image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80",
+    },
+    {
+      title: "Plots & Land",
+      slug: "/properties?type=LAND",
+      count: formatCount(landCount, "plot"),
+      image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80",
+    },
+    {
+      title: "Service Providers",
+      slug: "/services",
+      count: formatCount(providersCount, "provider"),
+      image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&q=80",
+    },
+  ];
 
   return (
     <>
@@ -237,7 +259,7 @@ export default async function HomePage() {
               What are you looking for?
             </h2>
           </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             {categories.map((cat) => (
               <Link
                 key={cat.title}
@@ -248,7 +270,7 @@ export default async function HomePage() {
                   src={cat.image}
                   alt={cat.title}
                   fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 20vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary-900/80 via-primary-800/60 to-transparent" />
@@ -407,7 +429,7 @@ export default async function HomePage() {
                         {prop.region}, {prop.city}
                       </div>
                       <p className="font-heading text-base font-bold text-primary-500">
-                        {formatPrice(Number(prop.price), prop.currency)}
+                        {formatPrice(Number(prop.price), prop.currency, prop.listingPurpose)}
                       </p>
                     </div>
                   </Link>
@@ -493,7 +515,7 @@ export default async function HomePage() {
                         {prop.region}, {prop.city}
                       </div>
                       <p className="font-heading text-base font-bold text-accent-500">
-                        {formatPrice(Number(prop.price), prop.currency)}
+                        {formatPrice(Number(prop.price), prop.currency, prop.listingPurpose)}
                       </p>
                     </div>
                   </Link>

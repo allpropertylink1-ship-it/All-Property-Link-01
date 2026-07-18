@@ -154,7 +154,7 @@ export default async function PropertyDetailPage({ params }: Props) {
                 {property.region && `${property.region}, `}{property.city}, {property.country}
               </p>
               <p className="mt-2.5 font-heading text-2xl sm:text-3xl font-bold text-primary-600">
-                {property.currency} {Number(property.price).toLocaleString()}
+                {property.currency} {Number(property.price).toLocaleString()}{property.listingPurpose === "FOR_RENT_SHORT_TERM" ? "/night" : property.listingPurpose === "FOR_RENT_LONG_TERM" ? "/month" : ""}
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {property.listingPurpose && (
@@ -360,7 +360,7 @@ export default async function PropertyDetailPage({ params }: Props) {
                               </p>
                               <p className="text-xs text-text-secondary mt-0.5">{op.city}</p>
                               <p className="text-xs font-bold text-primary-600 mt-0.5">
-                                {op.currency} {Number(op.price).toLocaleString()}
+                                {op.currency} {Number(op.price).toLocaleString()}{op.listingPurpose === "FOR_RENT_SHORT_TERM" ? "/night" : op.listingPurpose === "FOR_RENT_LONG_TERM" ? "/month" : ""}
                               </p>
                             </div>
                           </Link>

@@ -45,8 +45,11 @@ function MapPinIcon() {
   );
 }
 
-function formatPrice(price: number, currency: string) {
-  return `${currency} ${Number(price).toLocaleString()}`;
+function formatPrice(price: number, currency: string, listingPurpose?: string | null) {
+  const formatted = `${currency} ${Number(price).toLocaleString()}`;
+  if (listingPurpose === "FOR_RENT_SHORT_TERM") return `${formatted}/night`;
+  if (listingPurpose === "FOR_RENT_LONG_TERM") return `${formatted}/month`;
+  return formatted;
 }
 
 export function PropertyCard({
@@ -122,7 +125,7 @@ export function PropertyCard({
           <span className="capitalize">{propertyType.toLowerCase()}</span>
         </div>
         <p className="mt-1.5 font-heading text-xl font-semibold text-accent-400">
-          {formatPrice(price, currency)}
+          {formatPrice(price, currency, listingPurpose)}
         </p>
       </div>
     </Link>

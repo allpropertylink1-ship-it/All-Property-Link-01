@@ -105,7 +105,7 @@ export async function getOtherPropertiesByAgent(agentId: string, currentProperty
     where: { agentId, id: { not: currentPropertyId }, deletedAt: null },
     take: 6,
     orderBy: { createdAt: "desc" },
-    select: { id: true, title: true, slug: true, price: true, city: true, currency: true, images: true },
+    select: { id: true, title: true, slug: true, price: true, city: true, currency: true, images: true, listingPurpose: true },
   });
   return properties.map(p => ({ ...p, price: Number(p.price) }));
 }

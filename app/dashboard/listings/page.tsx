@@ -16,6 +16,7 @@ export default async function ListingsPage() {
       title: true,
       price: true,
       currency: true,
+      listingPurpose: true,
       status: true,
       moderationStatus: true,
       city: true,
@@ -76,7 +77,7 @@ export default async function ListingsPage() {
                 </td>
                 <td className="px-4 py-3 text-text-secondary">{listing.city}</td>
                 <td className="px-4 py-3 text-text-primary">
-                  {listing.currency} {Number(listing.price).toLocaleString()}
+                  {listing.currency} {Number(listing.price).toLocaleString()}{listing.listingPurpose === "FOR_RENT_SHORT_TERM" ? "/night" : listing.listingPurpose === "FOR_RENT_LONG_TERM" ? "/month" : ""}
                 </td>
                 <td className="px-4 py-3">
                   <span
