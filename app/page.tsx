@@ -386,8 +386,8 @@ export default async function HomePage() {
             </Link>
           </div>
           {featuredProperties.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {featuredProperties.map((prop) => {
+            <div className="grid grid-cols-2 gap-4 lg:gap-6 lg:grid-cols-3">
+              {featuredProperties.map((prop) => {
                 const images = Array.isArray(prop.images) ? prop.images : [];
                 const imageUrl = images.length > 0 ? String(images[0]) : "/placeholder.jpg";
                 const purpose = prop.listingPurpose;
@@ -482,7 +482,7 @@ export default async function HomePage() {
             </Link>
           </div>
           {featuredAirbnbs.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 lg:gap-6 lg:grid-cols-3">
               {featuredAirbnbs.map((prop) => {
                 const images = Array.isArray(prop.images) ? prop.images : [];
                 const imageUrl = images.length > 0 ? String(images[0]) : "/placeholder.jpg";
@@ -568,7 +568,7 @@ export default async function HomePage() {
             </Link>
           </div>
           {featuredFundis.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 lg:gap-6 lg:grid-cols-3">
               {featuredFundis.map((svc) => (
                 <Link
                   key={svc.id}
@@ -668,7 +668,7 @@ export default async function HomePage() {
             </Link>
           </div>
           {featuredProviders.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 lg:gap-6 lg:grid-cols-3">
               {featuredProviders.map((svc) => (
                 <Link
                   key={svc.id}
