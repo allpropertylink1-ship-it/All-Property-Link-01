@@ -164,6 +164,8 @@ interface ServiceRow {
   user: { id: string; firstName: string; lastName: string; avatar: string | null; city: string | null };
 }
 
+export const dynamic = "force-dynamic"
+
 export default async function HomePage() {
   const [featuredProperties, featuredAirbnbs, featuredFundis, featuredProviders, cities] = await Promise.all([
     getFeaturedProperties(),
