@@ -5,7 +5,7 @@ import Link from "next/link"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
 import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
-import { Loader2, AlertCircle, Building2, Search, ChevronRight } from "lucide-react"
+import { Loader2, AlertCircle, Building2, Search, ChevronRight, Users, Archive } from "lucide-react"
 
 interface Referral {
   id: string
@@ -16,12 +16,16 @@ interface Referral {
   category: string | null
   accountStatus: string
   createdAt: string
+  deletedAt: string | null
   _count: { properties: number }
 }
+
+type Tab = "ACTIVE" | "DELETED"
 
 export default function AgentReferralsPage() {
   const { user } = useAuth()
   useAgentPasswordGuard()
+  const [tab, setTab] = useState<Tab>("ACTIVE")
   const [referrals, setReferrals] = useState<Referral[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -38,7 +42,8 @@ export default function AgentReferralsPage() {
 
   const fetchReferrals = useCallback(async () => {
     setLoading(true)
-    const params = new URLSearchParams({ page: String(page), limit: "20" })
+    const status = tab === "DELETED" ? "DELETED" : "ACTIVE"
+    const params = new URLSearchParams({ page: String(page), limit: "20", status })
     if (debouncedSearch) params.set("search", debouncedSearch)
     const { data, error } = await api.get<{ referrals: Referral[]; total: number; totalPages: number }>(`/api/referral-partner/referrals?${params}`)
     if (data) {
@@ -49,9 +54,11 @@ export default function AgentReferralsPage() {
       setError(error || "Failed to load")
     }
     setLoading(false)
-  }, [page, debouncedSearch])
+  }, [page, debouncedSearch, tab])
 
   useEffect(() => { fetchReferrals() }, [fetchReferrals])
+
+  useEffect(() => { setSearch(""); setPage(1) }, [tab])
 
   if (user?.authMethod !== "agent") {
     return (
@@ -69,7 +76,18 @@ export default function AgentReferralsPage() {
     <div>
       <div className="mb-6">
         <h1 className="font-heading text-2xl font-bold text-text-primary">Referrals</h1>
-        <p className="mt-1 text-sm text-text-secondary">{total} total referral{total !== 1 ? "s" : ""}</p>
+        <p className="mt-1 text-sm text-text-secondary">{total} {tab === "DELETED" ? "deleted" : "active"} referral{total !== 1 ? "s" : ""}</p>
+      </div>
+
+      <div className="mb-4 flex gap-1 rounded-lg bg-surface-secondary p-1">
+        <button type="button" onClick={() => setTab("ACTIVE")}
+          className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors ${tab === "ACTIVE" ? "bg-surface text-text-primary shadow-sm" : "text-text-secondary hover:text-text-primary"}`}>
+          <Users size={16} /> Active
+        </button>
+        <button type="button" onClick={() => setTab("DELETED")}
+          className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors ${tab === "DELETED" ? "bg-surface text-text-primary shadow-sm" : "text-text-secondary hover:text-text-primary"}`}>
+          <Archive size={16} /> Deleted
+        </button>
       </div>
 
       <div className="relative mb-4">
@@ -88,7 +106,9 @@ export default function AgentReferralsPage() {
           <button type="button" onClick={fetchReferrals} className="touch-target rounded-lg bg-primary-600 px-5 py-2 text-sm font-medium text-white">Retry</button>
         </div>
       ) : referrals.length === 0 ? (
-        <div className="py-20 text-center text-sm text-text-secondary">No referrals found</div>
+        <div className="py-20 text-center text-sm text-text-secondary">
+          {tab === "DELETED" ? "No deleted referrals" : "No referrals found"}
+        </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
@@ -98,18 +118,20 @@ export default function AgentReferralsPage() {
                 <th className="px-4 py-3 font-medium">Email</th>
                 <th className="px-4 py-3 font-medium">Phone</th>
                 <th className="px-4 py-3 font-medium">Properties</th>
-                <th className="px-4 py-3 font-medium">Joined</th>
+                <th className="px-4 py-3 font-medium">{tab === "DELETED" ? "Deleted" : "Joined"}</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {referrals.map((r) => (
-                <tr key={r.id} className="bg-surface hover:bg-surface-secondary">
+                <tr key={r.id} className={`bg-surface hover:bg-surface-secondary ${r.deletedAt ? "opacity-70" : ""}`}>
                   <td className="px-4 py-3 text-text-primary">{r.firstName} {r.lastName}</td>
                   <td className="px-4 py-3 text-text-secondary">{r.email}</td>
                   <td className="px-4 py-3 text-text-secondary">{r.phone || "-"}</td>
                   <td className="px-4 py-3 text-text-secondary">{r._count.properties}</td>
-                  <td className="px-4 py-3 text-text-secondary">{new Date(r.createdAt).toLocaleDateString()}</td>
+                  <td className="px-4 py-3 text-text-secondary">
+                    {r.deletedAt ? new Date(r.deletedAt).toLocaleDateString() : new Date(r.createdAt).toLocaleDateString()}
+                  </td>
                   <td className="px-4 py-3">
                     <Link href={`/dashboard/agent/referrals/${r.id}`} className="touch-target inline-flex items-center gap-1 text-sm font-medium text-accent-300 hover:text-accent-400">
                       View <ChevronRight size={14} />

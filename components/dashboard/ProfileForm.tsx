@@ -425,7 +425,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
           title="Delete account"
           description={
             <div className="space-y-3">
-              <p>This will deactivate your account. Your listings will remain active but unlinked. You cannot log in after this. Contact an admin to restore your account.</p>
+              <p>This will permanently delete your account and all associated data — listings, KYC documents, reviews, and everything linked to you. This cannot be undone. APL Representatives and Admin will still be able to see your name and contact info in the Deleted Accounts section.</p>
               <p className="text-sm text-text-secondary">Type <strong>delete-account</strong> to confirm:</p>
             </div>
           }
