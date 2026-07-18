@@ -259,7 +259,7 @@ export default async function HomePage() {
               What are you looking for?
             </h2>
           </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+          <div className="grid grid-cols-3 gap-4 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5">
             {categories.map((cat) => (
               <Link
                 key={cat.title}
@@ -270,7 +270,7 @@ export default async function HomePage() {
                   src={cat.image}
                   alt={cat.title}
                   fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 20vw"
+                  sizes="(max-width: 1024px) 33vw, 20vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary-900/80 via-primary-800/60 to-transparent" />
@@ -330,7 +330,7 @@ export default async function HomePage() {
                     <option key={c.city} value={c.city}>{c.city} ({c._count.city})</option>
                   ))}
                 </select>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="number"
                     name="minPrice"
@@ -387,7 +387,7 @@ export default async function HomePage() {
           </div>
           {featuredProperties.length > 0 ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {featuredProperties.map((prop) => {
+                {featuredProperties.map((prop) => {
                 const images = Array.isArray(prop.images) ? prop.images : [];
                 const imageUrl = images.length > 0 ? String(images[0]) : "/placeholder.jpg";
                 const purpose = prop.listingPurpose;
@@ -397,7 +397,7 @@ export default async function HomePage() {
                     href={`/properties/${prop.city.toLowerCase()}/${prop.slug}`}
                     className="reveal group overflow-hidden rounded-xl border border-border bg-surface transition-all hover:-translate-y-1 hover:shadow-lg"
                   >
-                    <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
+                    <div className="relative aspect-[16/10] overflow-hidden bg-surface-secondary sm:aspect-[4/3]">
                       <Image
                         src={imageUrl}
                         alt={prop.title}
@@ -492,7 +492,7 @@ export default async function HomePage() {
                     href={`/properties/${prop.city.toLowerCase()}/${prop.slug}`}
                     className="reveal group overflow-hidden rounded-xl border border-border bg-surface transition-all hover:-translate-y-1 hover:shadow-lg"
                   >
-                    <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
+                    <div className="relative aspect-[16/10] overflow-hidden bg-surface-secondary sm:aspect-[4/3]">
                       <Image
                         src={imageUrl}
                         alt={prop.title}
@@ -575,7 +575,7 @@ export default async function HomePage() {
                   href={`/services/${svc.id}`}
                   className="reveal group overflow-hidden rounded-xl border border-border bg-surface transition-all hover:-translate-y-1 hover:shadow-lg"
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
+                  <div className="relative aspect-[16/10] overflow-hidden bg-surface-secondary sm:aspect-[4/3]">
                     {svc.images && Array.isArray(svc.images) && svc.images.length > 0 ? (
                       <Image
                         src={String(svc.images[0])}
@@ -675,7 +675,7 @@ export default async function HomePage() {
                   href={`/services/${svc.id}`}
                   className="reveal group overflow-hidden rounded-xl border border-border bg-surface transition-all hover:-translate-y-1 hover:shadow-lg"
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
+                  <div className="relative aspect-[16/10] overflow-hidden bg-surface-secondary sm:aspect-[4/3]">
                     {svc.images && Array.isArray(svc.images) && svc.images.length > 0 ? (
                       <Image
                         src={String(svc.images[0])}
