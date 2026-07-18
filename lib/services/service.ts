@@ -8,6 +8,7 @@ export interface ServiceFilters {
   search?: string;
   page?: string;
   limit?: string;
+  type?: string;
 }
 
 export interface ServiceCategory {
@@ -102,6 +103,7 @@ export async function getServiceListings(filters: ServiceFilters = {}): Promise<
   if (filters.search) params.set("search", filters.search);
   if (filters.page) params.set("page", filters.page);
   if (filters.limit) params.set("limit", filters.limit);
+  if (filters.type) params.set("type", filters.type);
 
   const res = await fetch(`${API_BASE}/api/services?${params}`, {
     next: { revalidate: 60 },

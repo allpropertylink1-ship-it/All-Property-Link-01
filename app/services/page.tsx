@@ -3,15 +3,16 @@ import Image from "next/image";
 import { getServiceListings, getServiceCategories } from "@/lib/services/service";
 import type { ServiceCategory, ServiceListingCard } from "@/lib/services/service";
 import { Search, MapPin, Briefcase } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Props {
   searchParams: { [key: string]: string | undefined };
 }
 
 export default async function ServicesPage({ searchParams }: Props) {
-  const { category, city, search, page } = searchParams;
+  const { category, city, search, page, type } = searchParams;
   const [data, categories] = await Promise.all([
-    getServiceListings({ category, city, search, page }),
+    getServiceListings({ category, city, search, page, type }),
     getServiceCategories(),
   ]);
 
@@ -54,6 +55,12 @@ export default async function ServicesPage({ searchParams }: Props) {
           </div>
         </div>
       )}
+
+      <div className="mb-6 flex gap-2">
+        <Link href="/services" className={cn("rounded-lg px-4 py-2 text-sm font-medium transition-colors", !type ? "bg-primary-600 text-white" : "bg-surface border border-border text-text-secondary hover:bg-surface-secondary")}>All</Link>
+        <Link href="/services?type=FUNDI" className={cn("rounded-lg px-4 py-2 text-sm font-medium transition-colors", type === "FUNDI" ? "bg-primary-600 text-white" : "bg-surface border border-border text-text-secondary hover:bg-surface-secondary")}>Fundis</Link>
+        <Link href="/services?type=SERVICE_PROVIDER" className={cn("rounded-lg px-4 py-2 text-sm font-medium transition-colors", type === "SERVICE_PROVIDER" ? "bg-primary-600 text-white" : "bg-surface border border-border text-text-secondary hover:bg-surface-secondary")}>Service Providers</Link>
+      </div>
 
       <div className="mb-8">
         <form method="GET" className="flex flex-wrap gap-3">

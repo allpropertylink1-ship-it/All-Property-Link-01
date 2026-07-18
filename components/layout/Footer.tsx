@@ -42,7 +42,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/services"
+                  href="/services?type=FUNDI"
                   className="transition-colors hover:text-primary"
                 >
                   Fundis
@@ -50,7 +50,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/services"
+                  href="/services?type=SERVICE_PROVIDER"
                   className="transition-colors hover:text-primary"
                 >
                   Services
