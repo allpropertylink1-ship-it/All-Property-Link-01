@@ -4,7 +4,7 @@ import { redirect } from "next/navigation"
 import {
   Building2, Bell, Wrench,
   Plus, ArrowRight,
-} from "lucide-react"
+} from "@/components/ui/icons"
 import Link from "next/link"
 
 async function getStats(userId: string) {

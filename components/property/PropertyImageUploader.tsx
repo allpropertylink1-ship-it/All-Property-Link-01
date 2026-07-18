@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useId } from "react";
-import { Upload, Loader2, X } from "lucide-react";
+import { Upload, Loader2, X } from "@/components/ui/icons";
 import { api } from "@/lib/api-client";
 
 interface PropertyImageUploaderProps {

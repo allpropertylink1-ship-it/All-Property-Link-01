@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
 const categories = [

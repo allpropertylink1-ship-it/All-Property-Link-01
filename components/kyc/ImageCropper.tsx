@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useCallback, useEffect } from "react"
-import { Loader2, Check, X, ZoomIn, ZoomOut } from "lucide-react"
+import { Loader2, Check, X, ZoomIn, ZoomOut } from "@/components/ui/icons"
 
 interface ImageCropperProps {
   imageUrl: string

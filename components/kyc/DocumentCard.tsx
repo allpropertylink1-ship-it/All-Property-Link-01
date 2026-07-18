@@ -1,6 +1,6 @@
 "use client"
 
-import { Trash2, Loader2, FileText, ImageIcon, CheckCircle, XCircle } from "lucide-react"
+import { Trash2, Loader2, FileText, ImageIcon, CheckCircle, XCircle } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
 import { resolvePdfUrl } from "@/lib/pdf-utils"
 

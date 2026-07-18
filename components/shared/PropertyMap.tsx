@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useEffect, useState } from "react"
-import { Globe, Loader2, AlertCircle } from "lucide-react"
+import { Globe, Loader2, AlertCircle } from "@/components/ui/icons"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 

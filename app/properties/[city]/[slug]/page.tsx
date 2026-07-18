@@ -10,7 +10,7 @@ const PropertyMap = dynamic(() => import("@/components/shared/PropertyMap").then
   ssr: false,
   loading: () => <div className="h-48 rounded-xl bg-surface-secondary animate-pulse" />,
 });
-import { Building2, Bed, Bath, Maximize2, Phone, Mail, Globe, Sparkles, MessageCircle } from "lucide-react";
+import { Building2, Bed, Bath, Maximize2, Phone, Mail, Globe, Sparkles, MessageCircle } from "@/components/ui/icons";
 
 interface Props {
   params: { slug: string };

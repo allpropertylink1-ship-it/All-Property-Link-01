@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useEffect, useState } from "react"
-import { MapPin, Loader2, AlertCircle, Search } from "lucide-react"
+import { MapPin, Loader2, AlertCircle, Search } from "@/components/ui/icons"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 

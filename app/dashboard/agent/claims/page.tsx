@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
 import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
-import { Loader2, AlertCircle, Building2, Plus, X, CheckCircle, XCircle } from "lucide-react"
+import { Loader2, AlertCircle, Building2, Plus, X, CheckCircle, XCircle } from "@/components/ui/icons"
 
 interface Claim {
   id: string

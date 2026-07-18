@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Check, Loader2, Save, Camera, User, Building2 } from "lucide-react"
+import { Check, Loader2, Save, Camera, User, Building2 } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
 

@@ -5,7 +5,7 @@ import { getServiceById, getServiceReviews } from "@/lib/services/service";
 import type { ServiceReview } from "@/lib/services/service";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
-import { Phone, Mail, Globe, Sparkles, MessageCircle, Star, MapPin, Briefcase } from "lucide-react";
+import { Phone, Mail, Globe, Sparkles, MessageCircle, Star, MapPin, Briefcase } from "@/components/ui/icons";
 
 interface Props {
   params: { id: string };

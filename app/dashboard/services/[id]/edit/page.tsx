@@ -2,7 +2,7 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { requireAuth } from "@/lib/auth-utils"
 import { notFound } from "next/navigation"
-import { Building2 } from "lucide-react"
+import { Building2 } from "@/components/ui/icons"
 import { EditServiceForm } from "./EditServiceForm"
 
 export default async function EditServicePage({ params }: { params: { id: string } }) {

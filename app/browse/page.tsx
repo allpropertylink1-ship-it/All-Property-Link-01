@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { MapPin } from "lucide-react";
+import { MapPin } from "@/components/ui/icons";
 
 export const dynamic = "force-dynamic";
 

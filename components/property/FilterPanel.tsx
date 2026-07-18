@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X } from "@/components/ui/icons";
 
 export function FilterPanel({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);

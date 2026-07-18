@@ -13,7 +13,7 @@ import {
   Menu,
   X,
   UserCheck,
-} from "lucide-react";
+} from "@/components/ui/icons";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 

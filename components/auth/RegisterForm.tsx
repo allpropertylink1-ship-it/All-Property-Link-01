@@ -5,7 +5,7 @@ import { useAuth, type OtpResponse } from "@/lib/auth-context"
 import { PasswordStrength } from "./PasswordStrength"
 import { PasswordToggle } from "./PasswordToggle"
 import { GoogleSignInButton } from "./GoogleSignInButton"
-import { Home, Handshake, Wrench, Briefcase, ArrowLeft } from "lucide-react"
+import { Home, Handshake, Wrench, Briefcase, ArrowLeft } from "@/components/ui/icons"
 
 type ContactMethod = "email" | "phone"
 type Step = "userType" | "form" | "otp"

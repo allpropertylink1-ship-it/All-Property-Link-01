@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCheck, ExternalLink } from "lucide-react";
+import { CheckCheck, ExternalLink } from "@/components/ui/icons";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { cn } from "@/lib/utils";

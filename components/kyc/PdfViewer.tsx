@@ -1,6 +1,6 @@
 "use client"
 
-import { FileText, ExternalLink, Download } from "lucide-react"
+import { FileText, ExternalLink, Download } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
 import { resolvePdfUrl } from "@/lib/pdf-utils"
 

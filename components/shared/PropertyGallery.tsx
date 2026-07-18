@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, X, Expand } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Expand } from "@/components/ui/icons";
 import {
   Dialog,
   DialogContent,

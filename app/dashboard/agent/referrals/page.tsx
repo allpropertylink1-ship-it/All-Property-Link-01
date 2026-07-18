@@ -5,7 +5,7 @@ import Link from "next/link"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
 import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
-import { Loader2, AlertCircle, Building2, Search, ChevronRight, Users, Archive } from "lucide-react"
+import { Loader2, AlertCircle, Building2, Search, ChevronRight, Users, Archive } from "@/components/ui/icons"
 
 interface Referral {
   id: string

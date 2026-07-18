@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useId } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, Loader2, X } from "lucide-react";
+import { Upload, Loader2, X } from "@/components/ui/icons";
 import { api } from "@/lib/api-client";
 
 interface Category {

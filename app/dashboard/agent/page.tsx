@@ -5,7 +5,7 @@ import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
 import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
 import Link from "next/link"
-import { Building2, Users, DollarSign, Clock, Wallet, ArrowRight, Eye } from "lucide-react"
+import { Building2, Users, DollarSign, Clock, Wallet, ArrowRight, Eye } from "@/components/ui/icons"
 
 interface AgentData {
   agent: {

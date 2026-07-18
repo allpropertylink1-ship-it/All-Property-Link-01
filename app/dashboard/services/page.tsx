@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireAuth } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { Building2, Plus } from "lucide-react";
+import { Building2, Plus } from "@/components/ui/icons";
 
 export default async function MyServicesPage() {
   const session = await requireAuth();

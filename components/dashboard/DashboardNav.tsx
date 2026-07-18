@@ -14,7 +14,7 @@ import {
   LogOut,
   Menu,
   X,
-} from "lucide-react"
+} from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
 
 interface NavLink {

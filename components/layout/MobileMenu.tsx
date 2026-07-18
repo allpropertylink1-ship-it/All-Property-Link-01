@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { X, ChevronRight, LogOut, User, LayoutDashboard } from "lucide-react";
+import { X, ChevronRight, LogOut, User, LayoutDashboard } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
 const menuItems = [

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, XCircle, ShieldAlert } from "lucide-react";
+import { Clock, XCircle, ShieldAlert } from "@/components/ui/icons";
 
 interface DashboardBannerProps {
   accountStatus: string;

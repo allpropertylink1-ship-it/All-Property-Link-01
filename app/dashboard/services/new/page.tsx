@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-utils";
-import { Building2 } from "lucide-react";
+import { Building2 } from "@/components/ui/icons";
 import { NewServiceForm } from "./NewServiceForm";
 
 export default async function NewServicePage() {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Star, User } from "lucide-react";
+import { Star, User } from "@/components/ui/icons";
 import Link from "next/link";
 import { api } from "@/lib/api-client";
 

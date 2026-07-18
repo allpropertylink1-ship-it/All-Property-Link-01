@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { Camera, Save, Key, Trash2, Shield, CheckCircle, Clock, XCircle, Loader2 } from "lucide-react";
+import { Camera, Save, Key, Trash2, Shield, CheckCircle, Clock, XCircle, Loader2 } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api-client";
 import ImageCropper from "@/components/kyc/ImageCropper";

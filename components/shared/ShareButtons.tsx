@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Link, Check } from "lucide-react";
+import { Link, Check } from "@/components/ui/icons";
 
 const url = () => (typeof window !== "undefined" ? window.location.href : "");
 

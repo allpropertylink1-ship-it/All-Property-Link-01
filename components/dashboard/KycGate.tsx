@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { Shield, ShieldX, Clock } from "lucide-react"
+import { Shield, ShieldX, Clock } from "@/components/ui/icons"
 
 interface KycGateProps {
   children: React.ReactNode

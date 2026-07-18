@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, Trash2, FileText, Lock } from "lucide-react"
+import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, Trash2, FileText, Lock } from "@/components/ui/icons"
 import { api } from "@/lib/api-client"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/lib/auth-context"

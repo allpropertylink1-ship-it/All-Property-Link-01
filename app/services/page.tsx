@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getServiceListings, getServiceCategories } from "@/lib/services/service";
 import type { ServiceCategory, ServiceListingCard } from "@/lib/services/service";
-import { Search, MapPin, Briefcase } from "lucide-react";
+import { Search, MapPin, Briefcase } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
 interface Props {
