@@ -290,24 +290,36 @@ export default function OnboardingPage() {
         {selectedSpecialties.length > 0 && (
           <div className="space-y-2">
             <label className="block text-sm font-medium text-text-primary">
-              Specialties <span className="text-error-500">*</span>
+              Select your specialties <span className="text-error-500">*</span>
+              <span className="ml-2 text-xs font-normal text-text-secondary">(tap to select multiple)</span>
             </label>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {selectedSpecialties.map((spec) => (
-                <button
-                  key={spec.value}
-                  type="button"
-                  onClick={() => toggleSpecialty(spec.value)}
-                  className={cn(
-                    "rounded-lg border px-3 py-2 text-xs font-medium transition-colors",
-                    form.specialties.includes(spec.value)
-                      ? "border-primary-500 bg-primary-50 text-primary-600"
-                      : "border-border text-text-secondary hover:border-primary-300"
-                  )}
-                >
-                  {spec.group}
-                </button>
-              ))}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {selectedSpecialties.map((spec) => {
+                const isSelected = form.specialties.includes(spec.value);
+                return (
+                  <button
+                    key={spec.value}
+                    type="button"
+                    onClick={() => toggleSpecialty(spec.value)}
+                    className={cn(
+                      "relative flex items-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all",
+                      isSelected
+                        ? "border-accent-400 bg-accent-50 text-accent-700 shadow-sm"
+                        : "border-border bg-surface text-text-secondary hover:border-accent-300 hover:bg-accent-50/50"
+                    )}
+                  >
+                    <div className={cn(
+                      "flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors",
+                      isSelected
+                        ? "border-accent-400 bg-accent-400 text-white"
+                        : "border-border bg-surface"
+                    )}>
+                      {isSelected && <Check className="h-3.5 w-3.5" />}
+                    </div>
+                    <span className="text-left leading-tight">{spec.group}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
