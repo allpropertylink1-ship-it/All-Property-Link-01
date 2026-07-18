@@ -425,7 +425,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
           title="Delete account"
           description={
             <div className="space-y-3">
-              <p>This will permanently delete your account, listings, KYC documents, and all associated data. This cannot be undone.</p>
+              <p>This will deactivate your account. Your listings will remain active but unlinked. You cannot log in after this. Contact an admin to restore your account.</p>
               <p className="text-sm text-text-secondary">Type <strong>delete-account</strong> to confirm:</p>
             </div>
           }
