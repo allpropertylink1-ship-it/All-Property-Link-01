@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, Trash2, FileText } from "lucide-react"
+import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, Trash2, FileText, Lock } from "lucide-react"
 import { api } from "@/lib/api-client"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/lib/auth-context"
 import ImageCropper from "@/components/kyc/ImageCropper"
 import PdfViewer from "@/components/kyc/PdfViewer"
 
@@ -68,6 +69,7 @@ function FilePreview({ url, onRemove }: { url: string; onRemove?: () => void }) 
 }
 
 export default function KycPage() {
+  const { user } = useAuth()
   const [data, setData] = useState<KycData | null>(null)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -168,8 +170,15 @@ export default function KycPage() {
 
   useEffect(() => { fetchKyc() }, [fetchKyc])
 
-  const coreDoc = data?.documents?.find(d => CORE_TYPES.includes(d.documentType))
   const kycStatus = data?.kycStatus || "NONE"
+
+  useEffect(() => {
+    if ((kycStatus === "NONE" || kycStatus === "REJECTED") && (user?.phone) && !bioPhone) {
+      setBioPhone(user.phone)
+    }
+  }, [kycStatus, user?.phone, bioPhone])
+
+  const coreDoc = data?.documents?.find(d => CORE_TYPES.includes(d.documentType))
   const coreRejection = coreDoc?.rejectionReason
   const statusConfig = STATUS[kycStatus] || STATUS.NONE
 
@@ -339,9 +348,22 @@ export default function KycPage() {
             </div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Phone Number <span className="text-red-500">*</span></label>
+                <label className="mb-1 block text-sm font-medium text-foreground">
+                  Phone Number <span className="text-red-500">*</span>
+                  {user?.phone && (
+                    <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-teal-50 px-2 py-0.5 text-[11px] font-medium text-teal-700">
+                      <Lock size={10} /> Verified from account
+                    </span>
+                  )}
+                </label>
                 <input value={bioPhone} onChange={e => setBioPhone(e.target.value)} type="tel" placeholder="e.g. +254 712 345 678"
-                  className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                  readOnly={!!(user?.phone && bioPhone === user.phone)}
+                  className={cn(
+                    "block w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors",
+                    user?.phone && bioPhone === user.phone
+                      ? "border-teal-200 bg-teal-50/50 text-teal-800 cursor-not-allowed"
+                      : "border-input bg-background focus:ring-2 focus:ring-primary/50"
+                  )} />
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Email <span className="text-xs text-muted">(optional)</span></label>
