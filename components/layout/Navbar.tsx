@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { MobileMenu } from "./MobileMenu";
 import { ProfileButton } from "./ProfileButton";
 
 const navLinks = [
@@ -39,7 +38,6 @@ export function Navbar() {
           <ProfileButton />
         </div>
 
-        <MobileMenu />
       </div>
     </nav>
   );
