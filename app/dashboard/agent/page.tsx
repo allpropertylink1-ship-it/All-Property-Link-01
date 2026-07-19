@@ -5,7 +5,7 @@ import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
 import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
 import Link from "next/link"
-import { Building2, Users, DollarSign, Clock, Wallet, ArrowRight, Eye } from "@/components/ui/icons"
+import { Building2, Users, DollarSign, Clock, Wallet, ArrowRight, Eye, Receipt } from "@/components/ui/icons"
 
 interface AgentData {
   agent: {
@@ -14,18 +14,14 @@ interface AgentData {
     email: string
     phone: string
     agentCode: string
-    commissionRate: number
-    commissionType: string
     createdAt: string
   }
   stats: {
     totalReferrals: number
     totalProperties: number
-    pendingCommissions: number
-    paidCommissions: number
-    totalEarned: number
-    pendingPayouts: number
-    totalPaidOut: number
+    pendingClaims: number
+    paidClaims: number
+    totalPaid: number
   }
   recentReferrals: {
     id: string
@@ -35,21 +31,13 @@ interface AgentData {
     createdAt: string
     properties: { id: string; title: string; status: string }[]
   }[]
-  recentCommissions: {
+  recentClaims: {
     id: string
     amount: number
     status: string
     paidAt: string | null
-    property: { title: string }
-    user: { firstName: string; lastName: string }
-  }[]
-  recentPayouts: {
-    id: string
-    amount: number
-    method: string
-    reference: string | null
-    status: string
-    paidAt: string | null
+    adminModifiedAmount: number | null
+    property: { title: string } | null
   }[]
 }
 
@@ -146,15 +134,15 @@ export default function AgentDashboardPage() {
 
   const statCards = [
     { label: "Total Referrals", value: data.stats.totalReferrals, icon: Users, color: "bg-primary-50 text-primary-600", href: "/dashboard/agent/referrals" },
-    { label: "Total Earned", value: `KES ${data.stats.totalEarned.toLocaleString()}`, icon: DollarSign, color: "bg-success-50 text-success-700", href: "/dashboard/agent/payouts" },
-    { label: "Pending Commissions", value: data.stats.pendingCommissions, icon: Clock, color: "bg-warning-50 text-warning-500", href: "/dashboard/agent/commissions" },
-    { label: "Pending Payouts", value: data.stats.pendingPayouts, icon: Wallet, color: "bg-accent-50 text-accent-500", href: "/dashboard/agent/payouts" },
+    { label: "Total Paid", value: `KES ${data.stats.totalPaid.toLocaleString()}`, icon: DollarSign, color: "bg-success-50 text-success-700", href: "/dashboard/agent/claims" },
+    { label: "Pending Claims", value: data.stats.pendingClaims, icon: Clock, color: "bg-warning-50 text-warning-500", href: "/dashboard/agent/claims" },
+    { label: "Paid Claims", value: data.stats.paidClaims, icon: Receipt, color: "bg-accent-50 text-accent-500", href: "/dashboard/agent/claims" },
   ]
 
   const quickActions = [
-    { label: "View Commissions", href: "/dashboard/agent/commissions", icon: DollarSign, color: "bg-primary-50 text-primary-600" },
-    { label: "View Payouts", href: "/dashboard/agent/payouts", icon: Wallet, color: "bg-success-50 text-success-700" },
-    { label: "View Referrals", href: "/dashboard/agent/referrals", icon: Users, color: "bg-warning-50 text-warning-500" },
+    { label: "Submit a Claim", href: "/dashboard/agent/claims", icon: Receipt, color: "bg-primary-50 text-primary-600" },
+    { label: "View Referrals", href: "/dashboard/agent/referrals", icon: Users, color: "bg-success-50 text-success-700" },
+    { label: "View Claims", href: "/dashboard/agent/claims", icon: DollarSign, color: "bg-warning-50 text-warning-500" },
     { label: "View Disputes", href: "/dashboard/agent/disputes", icon: Eye, color: "bg-accent-50 text-accent-500" },
   ]
 
@@ -224,54 +212,42 @@ export default function AgentDashboardPage() {
         </div>
 
         <div className="rounded-xl border border-border bg-surface p-6">
-          <h3 className="mb-4 font-heading text-base font-semibold text-text-primary">Recent Commissions</h3>
-          {data.recentCommissions.length === 0 ? (
-            <p className="text-sm text-text-secondary">No commissions yet</p>
+          <h3 className="mb-4 font-heading text-base font-semibold text-text-primary">Recent Claims</h3>
+          {data.recentClaims.length === 0 ? (
+            <p className="text-sm text-text-secondary">No claims yet</p>
           ) : (
             <div className="space-y-3">
-              {data.recentCommissions.map((c) => (
+              {data.recentClaims.map((c) => (
                 <div key={c.id} className="rounded-lg bg-surface-secondary p-3">
-                  <p className="truncate text-sm font-medium text-text-primary">{c.property.title}</p>
-                  <p className="text-xs text-text-secondary">{c.user.firstName} {c.user.lastName}</p>
+                  <p className="truncate text-sm font-medium text-text-primary">{c.property?.title || "No property"}</p>
                   <div className="mt-1 flex items-center justify-between">
                     <span className="text-sm font-semibold text-text-primary">KES {c.amount.toLocaleString()}</span>
                     <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${
                       c.status === "PAID" ? "bg-success-500/10 text-success-700" : "bg-warning-50 text-warning-500"
-                    }`}>{c.status}</span>
+                    }`}>{c.status === "AWAITING_AGENT_ACCEPTANCE" ? "AWAITING YOU" : c.status}</span>
                   </div>
                   {c.paidAt && <p className="mt-0.5 text-[10px] text-text-secondary">{new Date(c.paidAt).toLocaleDateString()}</p>}
                 </div>
               ))}
             </div>
           )}
-          <Link href="/dashboard/agent/commissions" className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-700">
+          <Link href="/dashboard/agent/claims" className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-700">
             View all <ArrowRight size={12} />
           </Link>
         </div>
 
         <div className="rounded-xl border border-border bg-surface p-6">
-          <h3 className="mb-4 font-heading text-base font-semibold text-text-primary">Recent Payouts</h3>
-          {data.recentPayouts.length === 0 ? (
-            <p className="text-sm text-text-secondary">No payouts yet</p>
-          ) : (
-            <div className="space-y-3">
-              {data.recentPayouts.map((p) => (
-                <div key={p.id} className="rounded-lg bg-surface-secondary p-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-text-primary">KES {p.amount.toLocaleString()}</span>
-                    <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                      p.status === "PAID" ? "bg-success-500/10 text-success-700" : "bg-warning-50 text-warning-500"
-                    }`}>{p.status}</span>
-                  </div>
-                  <p className="text-xs text-text-secondary">{p.method}{p.reference ? ` - ${p.reference}` : ""}</p>
-                  {p.paidAt && <p className="text-[10px] text-text-secondary">{new Date(p.paidAt).toLocaleDateString()}</p>}
-                </div>
-              ))}
-            </div>
-          )}
-          <Link href="/dashboard/agent/payouts" className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-700">
-            View all <ArrowRight size={12} />
-          </Link>
+          <h3 className="mb-4 font-heading text-base font-semibold text-text-primary">Quick Links</h3>
+          <div className="space-y-2">
+            <Link href="/dashboard/agent/settings" className="flex items-center justify-between rounded-lg bg-surface-secondary p-3 transition-colors hover:bg-surface">
+              <span className="text-sm font-medium text-text-primary">Share Referral Link</span>
+              <ArrowRight size={16} className="shrink-0 text-muted" />
+            </Link>
+            <Link href="/dashboard/agent/disputes" className="flex items-center justify-between rounded-lg bg-surface-secondary p-3 transition-colors hover:bg-surface">
+              <span className="text-sm font-medium text-text-primary">Open a Dispute</span>
+              <ArrowRight size={16} className="shrink-0 text-muted" />
+            </Link>
+          </div>
         </div>
       </div>
     </div>

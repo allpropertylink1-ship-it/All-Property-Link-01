@@ -138,8 +138,6 @@ model User {
   kycDocuments     KycDocument[]
   serviceListings  ServiceListing[]
   reviews          Review[]
-  commissions      Commission[]
-
   @@map("users")
 }
 
@@ -162,7 +160,6 @@ model AplAgent {
   referredByAplAgentId String?
   totalReferrals      Int                @default(0)
   successfulReferrals Int                @default(0)
-  commissionRate      Decimal            @default(3) @db.Decimal(5, 2)
   totalEarned         Decimal            @default(0) @db.Decimal(12, 2)
   totalPaid           Decimal            @default(0) @db.Decimal(12, 2)
   bankAccountName     String?
@@ -180,8 +177,6 @@ model AplAgent {
   users            User[]
   referredAgents   AplAgent[] @relation("AplAgentReferrals")
   parentAgent      AplAgent?  @relation("AplAgentReferrals", fields: [referredByAplAgentId], references: [id])
-  commissions      Commission[]
-  payouts          Payout[]
   disputes         Dispute[]
   paymentClaims    PaymentClaim[]
 
@@ -293,11 +288,13 @@ model Property {
   publishedAt   DateTime?
   deletedAt     DateTime?
 
+  isClaimed Boolean  @default(false)
+  claimedAt DateTime?
+
   agent     User?   @relation(fields: [agentId], references: [id], onDelete: SetNull)
   agentId   String?
 
-  commissions Commission[]
-  payouts     PayoutProperty[]
+  claims PaymentClaim[]
 
   @@index([agentId])
   @@index([city, propertyType, moderationStatus])
@@ -469,68 +466,10 @@ model Review {
   @@map("reviews")
 }
 
-model Commission {
-  id                String    @id @default(uuid())
-  aplAgentId String?
-  propertyId        String
-  userId            String
-  amount            Decimal   @default(0) @db.Decimal(12, 2)
-  currency          String    @default("KES")
-  status            String    @default("PENDING")
-  paidAt            DateTime?
-  notes             String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  aplAgent  AplAgent?  @relation(fields: [aplAgentId], references: [id], onDelete: Cascade)
-  property  Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  disputes  Dispute[]
-
-  @@index([aplAgentId])
-  @@index([propertyId])
-  @@index([userId])
-  @@index([status])
-  @@map("commissions")
-}
-
-model Payout {
-  id                String    @id @default(uuid())
-  aplAgentId String?
-  amount            Decimal   @db.Decimal(12, 2)
-  currency          String    @default("KES")
-  method            String    @default("MPESA")
-  reference         String?
-  status            String    @default("PENDING")
-  notes             String?
-  paidAt            DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  aplAgent    AplAgent?        @relation(fields: [aplAgentId], references: [id], onDelete: Cascade)
-  properties  PayoutProperty[]
-  disputes    Dispute[]
-
-  @@index([aplAgentId])
-  @@index([status])
-  @@map("payouts")
-}
-
-model PayoutProperty {
-  payoutId   String
-  propertyId String
-  payout     Payout   @relation(fields: [payoutId], references: [id], onDelete: Cascade)
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-
-  @@id([payoutId, propertyId])
-  @@map("payout_properties")
-}
-
 model Dispute {
   id                String    @id @default(uuid())
   aplAgentId String?
-  commissionId      String?
-  payoutId          String?
+  claimId           String?
   title             String
   description       String
   amount            Decimal   @default(0) @db.Decimal(12, 2)
@@ -542,9 +481,8 @@ model Dispute {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  aplAgent    AplAgent?    @relation(fields: [aplAgentId], references: [id], onDelete: Cascade)
-  commission  Commission?  @relation(fields: [commissionId], references: [id], onDelete: SetNull)
-  payout      Payout?      @relation(fields: [payoutId], references: [id], onDelete: SetNull)
+  aplAgent AplAgent?  @relation(fields: [aplAgentId], references: [id], onDelete: Cascade)
+  claim   PaymentClaim? @relation(fields: [claimId], references: [id], onDelete: SetNull)
 
   @@index([aplAgentId])
   @@index([status])
@@ -554,20 +492,25 @@ model Dispute {
 model PaymentClaim {
   id                String    @id @default(uuid())
   aplAgentId String?
+  propertyId        String?
   amount            Decimal   @db.Decimal(12, 2)
   currency          String    @default("KES")
-  periodLabel       String?
-  notes             String?
+  adminModifiedAmount Decimal? @db.Decimal(12, 2)
   status            String    @default("PENDING")
   adminNotes        String?
+  agentNotes        String?
   reviewedById      String?
   reviewedAt        DateTime?
+  paidAt            DateTime?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  aplAgent AplAgent? @relation(fields: [aplAgentId], references: [id], onDelete: Cascade)
+  aplAgent AplAgent?  @relation(fields: [aplAgentId], references: [id], onDelete: Cascade)
+  property Property?  @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  disputes  Dispute[]
 
   @@index([aplAgentId])
+  @@index([propertyId])
   @@index([status])
   @@map("payment_claims")
 }
