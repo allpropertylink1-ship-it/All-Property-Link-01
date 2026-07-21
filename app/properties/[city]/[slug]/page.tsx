@@ -32,7 +32,7 @@ export default async function PropertyDetailPage({ params }: Props) {
     "@type": "RealEstateListing",
     name: property.title,
     description: property.description,
-    url: `https://allpropertylink.vercel.app/properties/${encodeURIComponent(property.city.toLowerCase())}/${property.slug}`,
+    url: `https://allpropertylink.co.ke/properties/${encodeURIComponent(property.city.toLowerCase())}/${property.slug}`,
     image: imageUrls[0],
     offers: {
       "@type": "Offer",

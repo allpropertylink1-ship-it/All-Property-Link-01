@@ -6,7 +6,7 @@ export const revalidate = 3600;
 function baseUrl() {
   const url = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL;
   if (url) return url.startsWith("http") ? url : `https://${url}`;
-  return "https://allpropertylink.vercel.app";
+  return "https://allpropertylink.co.ke";
 }
 
 const staticPages = (base: string): MetadataRoute.Sitemap => [

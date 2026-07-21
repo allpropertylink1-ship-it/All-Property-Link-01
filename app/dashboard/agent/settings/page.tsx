@@ -89,7 +89,7 @@ export default function AgentSettingsPage() {
     setPwLoading(false)
   }
 
-  const referralLink = user.agentCode ? `https://allpropertylink-amber.vercel.app/auth/register?ref=${user.agentCode}` : ""
+  const referralLink = user.agentCode ? `https://allpropertylink.co.ke/auth/register?ref=${user.agentCode}` : ""
 
   async function copyReferralLink() {
     if (!referralLink) return

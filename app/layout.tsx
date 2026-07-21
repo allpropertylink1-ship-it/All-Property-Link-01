@@ -27,7 +27,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: { default: "All Property Link — Kenya's Marketplace", template: "%s | All Property Link" },
   description: "Kenya's most reliable marketplace connecting you to properties, short-term stays, trusted fundis, and service providers across the country.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://allpropertylink.vercel.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://allpropertylink.co.ke"),
   openGraph: {
     title: "All Property Link — Kenya's Marketplace",
     description: "Kenya's most reliable marketplace connecting you to properties, short-term stays, trusted fundis, and service providers across the country.",
@@ -59,8 +59,8 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               name: "All Property Link",
-              url: "https://allpropertylink.vercel.app",
-              logo: "https://allpropertylink.vercel.app/favicon.ico",
+              url: "https://allpropertylink.co.ke",
+              logo: "https://allpropertylink.co.ke/favicon.ico",
               description: "Kenya's most reliable marketplace connecting you to properties, short-term stays, trusted fundis, and service providers across the country.",
               contactPoint: {
                 "@type": "ContactPoint",

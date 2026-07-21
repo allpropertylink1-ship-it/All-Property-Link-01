@@ -14,7 +14,7 @@ interface SessionUser {
   userTypes?: string[]
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://delightful-encouragement-production-878d.up.railway.app"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.allpropertylink.co.ke"
 
 export async function getSession() {
   try {

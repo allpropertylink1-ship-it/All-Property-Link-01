@@ -1,6 +1,6 @@
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ||
-  "https://delightful-encouragement-production-878d.up.railway.app";
+  "https://api.allpropertylink.co.ke";
 
 export interface ServiceFilters {
   category?: string;

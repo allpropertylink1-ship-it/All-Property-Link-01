@@ -40,7 +40,7 @@ export function welcomeEmail(name: string) {
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px">
       <tr>
         <td style="background:#D49A44;border-radius:6px;padding:12px 24px">
-          <a href="https://allpropertylink.vercel.app/properties" style="color:#fff;text-decoration:none;font-size:14px;font-weight:600;display:inline-block">Browse Properties</a>
+          <a href="https://allpropertylink.co.ke/properties" style="color:#fff;text-decoration:none;font-size:14px;font-weight:600;display:inline-block">Browse Properties</a>
         </td>
       </tr>
     </table>
@@ -70,7 +70,7 @@ export function propertyApprovedEmail(props: { title: string }) {
     <table role="presentation" cellpadding="0" cellspacing="0">
       <tr>
         <td style="background:#286255;border-radius:6px;padding:12px 24px">
-          <a href="https://allpropertylink.vercel.app/dashboard/listings" style="color:#fff;text-decoration:none;font-size:14px;font-weight:600;display:inline-block">View My Listings</a>
+          <a href="https://allpropertylink.co.ke/dashboard/listings" style="color:#fff;text-decoration:none;font-size:14px;font-weight:600;display:inline-block">View My Listings</a>
         </td>
       </tr>
     </table>

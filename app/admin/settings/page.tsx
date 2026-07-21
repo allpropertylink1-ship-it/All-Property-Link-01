@@ -36,7 +36,7 @@ export default async function AdminSettingsPage() {
             <input
               type="text"
               name="platformUrl"
-              defaultValue="https://allpropertylink.vercel.app"
+              defaultValue="https://allpropertylink.co.ke"
               className="w-full max-w-xs rounded-lg border border-border px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
           </div>
