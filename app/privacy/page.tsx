@@ -1,3 +1,5 @@
+export const revalidate = 86400;
+
 const LAST_UPDATED = "July 3, 2026";
 
 export const metadata = {

@@ -19,11 +19,14 @@ class ApiClient {
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 30000)
+      const method = options.method || "GET"
+      const cacheControl = method === "GET" ? "max-age=30, stale-while-revalidate=120" : "no-store"
       const res = await fetch(`${this.baseUrl}${path}`, {
         ...options,
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
+          "Cache-Control": cacheControl,
           ...options.headers,
         },
         signal: controller.signal,

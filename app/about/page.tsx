@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+export const revalidate = 3600;
+
 export const metadata = {
   title: "About Us",
   description: "All Property Link - Kenya's trusted real estate marketplace. Connecting buyers, renters, and agents across Kenya.",

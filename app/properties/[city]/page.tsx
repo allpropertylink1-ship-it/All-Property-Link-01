@@ -5,6 +5,8 @@ import { PropertyFilters } from "@/components/property/PropertyFilters";
 import { FilterPanel } from "@/components/property/FilterPanel";
 import { Pagination } from "@/components/shared/Pagination";
 
+export const revalidate = 60;
+
 interface Props {
   params: { city: string };
   searchParams: { [key: string]: string | undefined };

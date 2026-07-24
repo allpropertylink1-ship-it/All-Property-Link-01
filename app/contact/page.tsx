@@ -1,6 +1,8 @@
 ﻿import Link from "next/link";
 import ContactForm from "@/components/contact/ContactForm";
 
+export const revalidate = 300;
+
 export const metadata = {
   title: "Contact Us",
   description: "Get in touch with All Property Link. Contact our team for support, inquiries, or partnership opportunities.",

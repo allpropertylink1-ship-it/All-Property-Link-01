@@ -1,6 +1,8 @@
 import { getProperties, getCities } from "@/lib/services/property";
 import { PropertyGrid } from "@/components/property/PropertyGrid";
 
+export const revalidate = 60;
+
 interface Props {
   searchParams: { q?: string; page?: string };
 }

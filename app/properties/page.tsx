@@ -3,6 +3,8 @@ import { PropertyGrid } from "@/components/property/PropertyGrid";
 import { PropertyFilters } from "@/components/property/PropertyFilters";
 import { FilterPanel } from "@/components/property/FilterPanel";
 
+export const revalidate = 60;
+
 interface Props {
   searchParams: { [key: string]: string | undefined };
 }

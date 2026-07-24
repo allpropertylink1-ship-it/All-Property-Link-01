@@ -5,6 +5,8 @@ import type { ServiceCategory, ServiceListingCard } from "@/lib/services/service
 import { Search, MapPin, Briefcase } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
+export const revalidate = 60;
+
 interface Props {
   searchParams: { [key: string]: string | undefined };
 }

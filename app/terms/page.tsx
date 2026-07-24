@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+export const revalidate = 86400;
+
 export const metadata = {
   title: "Terms of Service",
   description: "Terms of Service for All Property Link Kenya - Terms and conditions governing the use of our real estate platform for buyers, sellers, and agents in Kenya.",
