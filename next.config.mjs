@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
 
-const API_BACKEND = process.env.API_BACKEND_URL || "https://api.allpropertylink.co.ke";
-
 const isDev = process.env.NODE_ENV === "development";
 const scriptSrc = isDev ? "'self' 'unsafe-inline' 'unsafe-eval'" : "'self' 'unsafe-inline'";
 
@@ -33,14 +31,6 @@ const nextConfig = {
         hostname: "delightful-encouragement-production-878d.up.railway.app",
       },
     ],
-  },
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${API_BACKEND}/api/:path*`,
-      },
-    ];
   },
   async headers() {
     return [

@@ -1,5 +1,4 @@
 import { cache } from "react"
-import { prisma } from "@/lib/prisma"
 import { HeroSection } from "@/components/home/HeroSection"
 import { CategoryGrid } from "@/components/home/CategoryGrid"
 import { QuickSearch } from "@/components/home/QuickSearch"
@@ -9,51 +8,64 @@ import { ServiceCard } from "@/components/home/ServiceCard"
 import { PropertyCard } from "@/components/property/PropertyCard"
 import { Wrench, Briefcase } from "@/components/ui/icons"
 
-const getFeaturedProperties = cache(async () =>
-  prisma.property.findMany({
-    where: { deletedAt: null, listingPurpose: { not: "FOR_RENT_SHORT_TERM" } },
-    orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
-    take: 6,
-    select: { slug: true, title: true, price: true, currency: true, propertyType: true, listingPurpose: true, city: true, region: true, images: true, isFeatured: true, createdAt: true },
-  })
-)
+const API = process.env.API_BACKEND_URL || "https://api.allpropertylink.co.ke"
 
-const getFeaturedAirbnbs = cache(async () =>
-  prisma.property.findMany({
-    where: { deletedAt: null, listingPurpose: "FOR_RENT_SHORT_TERM" },
-    orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
-    take: 6,
-    select: { slug: true, title: true, price: true, currency: true, propertyType: true, listingPurpose: true, city: true, region: true, images: true, isFeatured: true, createdAt: true },
-  })
-)
+interface ApiProperty {
+  slug: string; title: string; price: number; currency: string;
+  propertyType: string; listingPurpose: string | null;
+  city: string; region: string; images: unknown;
+  isFeatured: boolean; createdAt: string;
+}
 
-const getFeaturedFundis = cache(async () =>
-  prisma.serviceListing.findMany({
-    where: { status: "ACTIVE", moderationStatus: "APPROVED", user: { userTypes: { has: "FUNDI" }, deletedAt: null } },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-    select: { id: true, title: true, price: true, currency: true, city: true, region: true, images: true, userId: true, categoryId: true, category: { select: { id: true, name: true } }, user: { select: { id: true, firstName: true, lastName: true, avatar: true, city: true } } },
-  })
-)
+interface ApiService {
+  id: string; title: string; price: string | null; currency: string;
+  city: string | null; region: string | null; images: unknown;
+  userId: string; categoryId: string;
+  category: { id: string; name: string } | null;
+  user: { id: string; firstName: string; lastName: string; avatar: string | null; city: string | null };
+}
 
-const getFeaturedProviders = cache(async () =>
-  prisma.serviceListing.findMany({
-    where: { status: "ACTIVE", moderationStatus: "APPROVED", user: { userTypes: { has: "SERVICE_PROVIDER" }, deletedAt: null } },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-    select: { id: true, title: true, price: true, currency: true, city: true, region: true, images: true, userId: true, categoryId: true, category: { select: { id: true, name: true } }, user: { select: { id: true, firstName: true, lastName: true, avatar: true, city: true } } },
-  })
-)
+async function fetchApi<T>(path: string): Promise<T | null> {
+  try {
+    const res = await fetch(`${API}${path}`, { next: { revalidate: 60 } })
+    if (!res.ok) return null
+    return res.json()
+  } catch { return null }
+}
+
+const getFeaturedProperties = cache(async () => {
+  const data = await fetchApi<{ properties: ApiProperty[] }>("/api/properties?limit=6")
+  return (data?.properties || []).filter(p => p.listingPurpose !== "FOR_RENT_SHORT_TERM")
+})
+
+const getFeaturedAirbnbs = cache(async () => {
+  const data = await fetchApi<{ properties: ApiProperty[] }>("/api/properties?purpose=FOR_RENT_SHORT_TERM&limit=6")
+  return data?.properties || []
+})
+
+const getFeaturedFundis = cache(async () => {
+  const data = await fetchApi<{ services: ApiService[] }>("/api/services?type=FUNDI&limit=6")
+  return (data?.services || []).filter(s => s.user)
+})
+
+const getFeaturedProviders = cache(async () => {
+  const data = await fetchApi<{ services: ApiService[] }>("/api/services?type=SERVICE_PROVIDER&limit=6")
+  return (data?.services || []).filter(s => s.user)
+})
+
+const getCities = cache(async () => {
+  const data = await fetchApi<{ cities: { city: string; count: number }[] }>("/api/properties?limit=1")
+  return data?.cities || []
+})
 
 export const dynamic = "force-dynamic"
 
 export default async function HomePage() {
   const [featuredProperties, featuredAirbnbs, featuredFundis, featuredProviders, cities] = await Promise.all([
-    getFeaturedProperties(), getFeaturedAirbnbs(), getFeaturedFundis(), getFeaturedProviders(),
-    prisma.property.groupBy({ by: ["city"], where: { deletedAt: null }, _count: { city: true }, orderBy: { city: "asc" } }),
+    getFeaturedProperties(), getFeaturedAirbnbs(), getFeaturedFundis(), getFeaturedProviders(), getCities(),
   ])
 
-  const cityItems = cities.map((c) => ({ city: c.city, _count: c._count.city }))
+  const cityItems = cities.map((c) => ({ city: c.city, _count: c.count }))
 
   return (
     <>
