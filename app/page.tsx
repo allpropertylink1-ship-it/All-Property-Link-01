@@ -25,7 +25,12 @@ interface ApiService {
 
 const fetchApi = cache(async <T,>(path: string): Promise<T | null> => {
   try {
-    const res = await fetch(`https://delightful-encouragement-production-878d.up.railway.app${path}`, { cache: "no-store" })
+    const res = await fetch(`https://api.allpropertylink.co.ke${path}`, { cache: "no-store" })
+    if (!res.ok) {
+      const text = await res.text().catch(() => "")
+      console.error(`[HOMEPAGE] API ${path} returned ${res.status}: ${text.slice(0, 200)}`)
+      return null
+    }
     if (!res.ok) return null
     return res.json()
   } catch { return null }
