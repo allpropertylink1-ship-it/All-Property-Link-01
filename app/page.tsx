@@ -8,8 +8,6 @@ import { ServiceCard } from "@/components/home/ServiceCard"
 import { PropertyCard } from "@/components/property/PropertyCard"
 import { Wrench, Briefcase } from "@/components/ui/icons"
 
-const API = process.env.API_BACKEND_URL || "https://api.allpropertylink.co.ke"
-
 interface ApiProperty {
   slug: string; title: string; price: number; currency: string;
   propertyType: string; listingPurpose: string | null;
@@ -25,13 +23,13 @@ interface ApiService {
   user: { id: string; firstName: string; lastName: string; avatar: string | null; city: string | null };
 }
 
-async function fetchApi<T>(path: string): Promise<T | null> {
+const fetchApi = cache(async <T,>(path: string): Promise<T | null> => {
   try {
-    const res = await fetch(`${API}${path}`, { next: { revalidate: 60 } })
+    const res = await fetch(`https://api.allpropertylink.co.ke${path}`, { next: { revalidate: 30 } })
     if (!res.ok) return null
     return res.json()
   } catch { return null }
-}
+})
 
 const getFeaturedProperties = cache(async () => {
   const data = await fetchApi<{ properties: ApiProperty[] }>("/api/properties?limit=6")

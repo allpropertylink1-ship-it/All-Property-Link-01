@@ -1,24 +1,24 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-export default function middleware(request: NextRequest) {
-  const devAuth = process.env.DEV_AUTH
-  if (devAuth) {
-    const auth = request.headers.get("authorization")
-    const expected = "Basic " + Buffer.from(devAuth).toString("base64")
-    if (auth !== expected) {
-      return new NextResponse("Access denied", {
-        status: 401,
-        headers: { "WWW-Authenticate": 'Basic realm="All Property Link (Dev)"' },
-      })
-    }
+const API_BACKEND = process.env.API_BACKEND_URL || "https://api.allpropertylink.co.ke"
+
+export default async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  if (pathname.startsWith("/api/")) {
+    const url = new URL(request.url)
+    url.host = new URL(API_BACKEND).host
+    url.protocol = "https"
+    url.port = ""
+    return NextResponse.rewrite(url.toString())
   }
 
-  if (request.nextUrl.pathname.startsWith("/dashboard")) {
+  if (pathname.startsWith("/dashboard")) {
     const token = request.cookies.get("access_token")?.value
     if (!token) {
       const loginUrl = new URL("/auth/login", request.url)
-      loginUrl.searchParams.set("redirect", request.nextUrl.pathname)
+      loginUrl.searchParams.set("redirect", pathname)
       return NextResponse.redirect(loginUrl)
     }
   }
