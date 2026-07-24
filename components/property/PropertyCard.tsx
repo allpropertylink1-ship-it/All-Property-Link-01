@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { formatPrice } from "@/lib/utils";
 
 interface PropertyCardProps {
   slug: string;
@@ -45,13 +45,6 @@ function MapPinIcon() {
   );
 }
 
-function formatPrice(price: number, currency: string, listingPurpose?: string | null) {
-  const formatted = `${currency} ${Number(price).toLocaleString()}`;
-  if (listingPurpose === "FOR_RENT_SHORT_TERM") return `${formatted}/night`;
-  if (listingPurpose === "FOR_RENT_LONG_TERM") return `${formatted}/month`;
-  return formatted;
-}
-
 export function PropertyCard({
   slug,
   title,
@@ -80,13 +73,11 @@ export function PropertyCard({
     >
       <div className="relative w-full overflow-hidden md:w-[28%] md:shrink-0">
         <div className="relative aspect-[4/3] w-full overflow-hidden md:h-full">
-          <Image
+          <img
             src={imageUrl}
             alt={title}
-            width={400}
-            height={300}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            priority={priority}
+            onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg" }}
           />
           <span
             className={`absolute left-2 top-2 z-10 rounded-md px-2.5 py-1 text-xs font-semibold text-white ${
@@ -125,7 +116,7 @@ export function PropertyCard({
           <span className="capitalize">{propertyType.toLowerCase()}</span>
         </div>
         <p className="mt-1.5 font-heading text-xl font-semibold text-accent-400">
-          {formatPrice(price, currency, listingPurpose)}
+          {formatPrice(price, listingPurpose ?? undefined)}
         </p>
       </div>
     </Link>

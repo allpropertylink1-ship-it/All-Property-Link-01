@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import Image from "next/image";
 import { ChevronLeft, ChevronRight, X, Expand } from "@/components/ui/icons";
 import {
   Dialog,
@@ -79,12 +78,11 @@ export function PropertyGallery({ images, title }: Props) {
         <div className="relative overflow-hidden rounded-lg" style={{ aspectRatio: "4 / 3" }}>
           <div className="relative h-full w-full">
             <button type="button" onClick={() => openLightbox(current)} className="relative block h-full w-full" aria-label="View image full-screen">
-              <Image
+              <img
                 src={images[current]}
                 alt={`${title} — image ${current + 1} of ${images.length}`}
-                fill
-                className="object-cover transition-opacity duration-300"
-                sizes="(max-width: 768px) 100vw, 50vw"
+                className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
+                onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg" }}
               />
             </button>
           </div>
@@ -159,7 +157,7 @@ export function PropertyGallery({ images, title }: Props) {
                 style={{ width: 72, height: 54 }}
                 aria-label={`View image ${i + 1}`}
               >
-                <Image src={url} alt="" fill className="object-cover" sizes="72px" />
+                <img src={url} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }} />
               </button>
             ))}
           </div>
@@ -205,13 +203,11 @@ export function PropertyGallery({ images, title }: Props) {
           </button>
 
           <div className="flex h-full w-full items-center justify-center p-4">
-            <Image
+            <img
               src={images[lightboxIndex]}
               alt={`${title} — image ${lightboxIndex + 1}`}
-              width={1200}
-              height={800}
               className="max-h-full max-w-full rounded-lg object-contain"
-              priority
+              onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg" }}
             />
           </div>
         </DialogContent>

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { getProperties, viewProperty } from "@/lib/admin-actions";
+import { getProperties } from "@/lib/admin-actions";
 
 interface PropertyRow {
   id: string;
@@ -17,11 +18,12 @@ interface PropertyRow {
   city: string;
   moderationStatus: string;
   isPublished: boolean;
-  createdAt: Date;
-  agent: { firstName: string; lastName: string; avatar: string } | null;
+  createdAt: string;
+  agent: { firstName: string; lastName: string; avatar: string | null } | null;
 }
 
 export default function AdminListingsPage() {
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [properties, setProperties] = useState<PropertyRow[]>([]);
@@ -34,7 +36,7 @@ export default function AdminListingsPage() {
       setProperties([]);
       const result = await getProperties(page);
       setTotal(result.total);
-      setProperties(result.properties as unknown as PropertyRow[]);
+      setProperties(result.properties);
       setLoading(false);
     };
     fetchProperties();
@@ -175,7 +177,7 @@ export default function AdminListingsPage() {
                     <td className="px-4 py-3 space-x-2">
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => viewProperty(prop.id)}
+                          onClick={() => router.push(`/properties/${prop.city.toLowerCase()}/${prop.slug}`)}
                           className="touch-target flex items-center gap-1 rounded-lg bg-primary-600 px-3 py-2 text-sm font-medium text-text-on-primary hover:bg-primary-700"
                         >
                           View

@@ -30,17 +30,20 @@ export async function getProperties(page: number) {
     }),
   ]);
 
-  return { total: count, properties: data };
-}
-
-export async function viewProperty(_propertyId: string) {
-  const { requireRole } = await import("@/lib/auth-utils");
-  await requireRole(["ADMIN"]);
-
-  return { success: true };
-}
-
-export async function saveSettings(_formData: FormData) {
-  const { requireRole } = await import("@/lib/auth-utils");
-  await requireRole(["ADMIN"]);
+  return {
+    total: count,
+    properties: data.map((p) => ({
+      id: p.id,
+      slug: p.slug,
+      title: p.title,
+      price: Number(p.price),
+      currency: p.currency,
+      propertyType: p.propertyType,
+      city: p.city,
+      moderationStatus: p.moderationStatus,
+      isPublished: p.isPublished,
+      createdAt: p.createdAt.toISOString(),
+      agent: p.agent,
+    })),
+  };
 }

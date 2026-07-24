@@ -1,5 +1,4 @@
-import React from "react";
-import Image from "next/image";
+import React, { cache } from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { MapPin, ArrowRight, Home, BedDouble, Briefcase } from "@/components/ui/icons";
@@ -7,7 +6,7 @@ import { formatPrice } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-async function getCategories() {
+const getCategories = cache(async () => {
   const [allProperties, airbnbs, services, plots] = await Promise.all([
     prisma.property.findMany({
       where: { deletedAt: null },
@@ -48,7 +47,7 @@ async function getCategories() {
   ]);
 
   return { allProperties, airbnbs, services, plots };
-}
+})
 
 interface PropertyItem {
   slug: string; title: string; price: number | { toString(): string }; currency: string;
@@ -62,7 +61,7 @@ function PropertyCard({ item, link }: { item: PropertyItem; link: string }) {
   return (
     <Link href={link} className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
-        <Image src={imageUrl} alt={item.title} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover transition-transform duration-300 group-hover:scale-105" />
+        <img src={imageUrl} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg" }} />
         <span className={`absolute left-2 top-2 z-10 rounded-md px-2.5 py-1 text-xs font-semibold text-white ${item.listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-400" : "bg-primary-500"}`}>
           {item.listingPurpose === "FOR_RENT_SHORT_TERM" ? "Airbnb" : item.propertyType === "LAND" ? "Land" : item.propertyType === "COMMERCIAL" ? "Commercial" : item.propertyType === "APARTMENT" ? "Apartment" : "House"}
         </span>
@@ -96,7 +95,7 @@ function ServiceCard({ item }: { item: ServiceItem }) {
   return (
     <Link href={`/services/${item.id}`} className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
-        <Image src={imageUrl} alt={item.title} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover transition-transform duration-300 group-hover:scale-105" />
+        <img src={imageUrl} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg" }} />
         {item.category && (
           <span className="absolute left-2 top-2 z-10 rounded-md bg-accent-400 px-2.5 py-1 text-xs font-semibold text-white">
             {item.category.name}

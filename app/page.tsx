@@ -29,7 +29,7 @@ const getFeaturedAirbnbs = cache(async () =>
 
 const getFeaturedFundis = cache(async () =>
   prisma.serviceListing.findMany({
-    where: { status: "ACTIVE", moderationStatus: "APPROVED", user: { userTypes: { has: "FUNDI" } } },
+    where: { status: "ACTIVE", moderationStatus: "APPROVED", user: { userTypes: { has: "FUNDI" }, deletedAt: null } },
     orderBy: { createdAt: "desc" },
     take: 6,
     select: { id: true, title: true, price: true, currency: true, city: true, region: true, images: true, userId: true, categoryId: true, category: { select: { id: true, name: true } }, user: { select: { id: true, firstName: true, lastName: true, avatar: true, city: true } } },
@@ -38,7 +38,7 @@ const getFeaturedFundis = cache(async () =>
 
 const getFeaturedProviders = cache(async () =>
   prisma.serviceListing.findMany({
-    where: { status: "ACTIVE", moderationStatus: "APPROVED", user: { userTypes: { has: "SERVICE_PROVIDER" } } },
+    where: { status: "ACTIVE", moderationStatus: "APPROVED", user: { userTypes: { has: "SERVICE_PROVIDER" }, deletedAt: null } },
     orderBy: { createdAt: "desc" },
     take: 6,
     select: { id: true, title: true, price: true, currency: true, city: true, region: true, images: true, userId: true, categoryId: true, category: { select: { id: true, name: true } }, user: { select: { id: true, firstName: true, lastName: true, avatar: true, city: true } } },

@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Shield, CheckCircle, XCircle, Clock, Upload, Loader2, Trash2, FileText, Lock } from "@/components/ui/icons"
+import { Shield, CheckCircle, Clock, XCircle, Loader2 } from "@/components/ui/icons"
 import { api } from "@/lib/api-client"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/lib/auth-context"
-import ImageCropper from "@/components/kyc/ImageCropper"
-import PdfViewer from "@/components/kyc/PdfViewer"
+import { PersonalDetailsForm } from "./PersonalDetailsForm"
+import { DocumentUpload } from "./DocumentUpload"
+import { SubmissionHistory } from "./SubmissionHistory"
 
 interface KycDocument {
   id: string
@@ -26,12 +27,6 @@ interface KycData {
   documents: KycDocument[]
 }
 
-const LABELS: Record<string, string> = {
-  NATIONAL_ID: "National ID Card", DRIVERS_LICENSE: "Driver's License", PASSPORT: "Passport",
-}
-
-const CORE_TYPES = ["NATIONAL_ID", "DRIVERS_LICENSE", "PASSPORT"]
-
 const STATUS: Record<string, { label: string; icon: React.ElementType; color: string; bg: string; border: string }> = {
   NONE: { label: "Not Verified", icon: Shield, color: "text-gray-500", bg: "bg-gray-50", border: "border-gray-200" },
   PENDING: { label: "Pending Review", icon: Clock, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
@@ -45,26 +40,6 @@ function Badge({ status }: { status: string }) {
     <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium", s.color, s.bg)}>
       <s.icon size={12} /> {s.label}
     </span>
-  )
-}
-
-function FilePreview({ url, onRemove }: { url: string; onRemove?: () => void }) {
-  const isPdf = /\.pdf$/i.test(url)
-  return (
-    <div className="relative">
-      {isPdf ? (
-        <PdfViewer url={url} compact />
-      ) : (
-        <a href={url} target="_blank" rel="noopener noreferrer" className="relative block overflow-hidden rounded-lg border border-border hover:ring-2 hover:ring-primary/50 transition-all">
-          <img src={url} alt="" className="h-44 w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }} />
-        </a>
-      )}
-      {onRemove && (
-        <button type="button" onClick={onRemove} className="absolute -right-2 -top-2 rounded-full bg-white p-1 text-red-500 shadow hover:bg-red-50 transition-colors">
-          <XCircle size={16} />
-        </button>
-      )}
-    </div>
   )
 }
 
@@ -178,7 +153,7 @@ export default function KycPage() {
     }
   }, [kycStatus, user?.phone, bioPhone])
 
-  const coreDoc = data?.documents?.find(d => CORE_TYPES.includes(d.documentType))
+  const coreDoc = data?.documents?.find(d => ["NATIONAL_ID", "DRIVERS_LICENSE", "PASSPORT"].includes(d.documentType))
   const coreRejection = coreDoc?.rejectionReason
   const statusConfig = STATUS[kycStatus] || STATUS.NONE
 
@@ -297,8 +272,13 @@ export default function KycPage() {
     }
   }
 
-  const isPdf = (url: string) => /\.pdf$/i.test(url)
-  const previewUrl = (f: File | null) => f ? URL.createObjectURL(f) : null
+  const handleBioChange = (field: string, value: string) => {
+    const setters: Record<string, (v: string) => void> = {
+      bioFirstName: setBioFirstName, bioMiddleName: setBioMiddleName, bioLastName: setBioLastName,
+      bioPhone: setBioPhone, bioEmail: setBioEmail,
+    }
+    setters[field]?.(value)
+  }
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
@@ -325,53 +305,11 @@ export default function KycPage() {
 
       {(kycStatus === "NONE" || kycStatus === "REJECTED") && (
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <div className="rounded-xl border border-border bg-surface p-6">
-            <h2 className="mb-4 text-lg font-semibold text-foreground">
-              Personal Details <span className="text-sm font-normal text-muted">(as they appear on your ID)</span>
-            </h2>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">First Name <span className="text-red-500">*</span></label>
-                <input value={bioFirstName} onChange={e => setBioFirstName(e.target.value)} placeholder="e.g. John"
-                  className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Middle Name <span className="text-xs text-muted">(optional)</span></label>
-                <input value={bioMiddleName} onChange={e => setBioMiddleName(e.target.value)} placeholder="e.g. Michael"
-                  className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Last Name <span className="text-red-500">*</span></label>
-                <input value={bioLastName} onChange={e => setBioLastName(e.target.value)} placeholder="e.g. Doe"
-                  className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
-              </div>
-            </div>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">
-                  Phone Number <span className="text-red-500">*</span>
-                  {user?.phone && (
-                    <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-teal-50 px-2 py-0.5 text-[11px] font-medium text-teal-700">
-                      <Lock size={10} /> Verified from account
-                    </span>
-                  )}
-                </label>
-                <input value={bioPhone} onChange={e => setBioPhone(e.target.value)} type="tel" placeholder="e.g. +254 712 345 678"
-                  readOnly={!!(user?.phone && bioPhone === user.phone)}
-                  className={cn(
-                    "block w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors",
-                    user?.phone && bioPhone === user.phone
-                      ? "border-teal-200 bg-teal-50/50 text-teal-800 cursor-not-allowed"
-                      : "border-input bg-background focus:ring-2 focus:ring-primary/50"
-                  )} />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Email <span className="text-xs text-muted">(optional)</span></label>
-                <input value={bioEmail} onChange={e => setBioEmail(e.target.value)} type="email" placeholder="e.g. john@example.com"
-                  className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
-              </div>
-            </div>
-          </div>
+          <PersonalDetailsForm
+            bioFirstName={bioFirstName} bioMiddleName={bioMiddleName} bioLastName={bioLastName}
+            bioPhone={bioPhone} bioEmail={bioEmail} userPhone={user?.phone}
+            onChange={handleBioChange}
+          />
 
           <div className="rounded-xl border border-border bg-surface p-6">
             <h2 className="mb-4 text-lg font-semibold text-foreground">
@@ -409,114 +347,17 @@ export default function KycPage() {
             {agentLookupError && <p className="mt-2 text-sm text-red-500">{agentLookupError}</p>}
           </div>
 
-          <div className="rounded-xl border border-border bg-surface p-6">
-            <h2 className="mb-4 text-lg font-semibold text-foreground">
-              Core Identity Document <span className="text-sm font-normal text-muted">(Required)</span>
-            </h2>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Document type</label>
-                <select value={docType} onChange={e => setDocType(e.target.value)}
-                  className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
-                  {CORE_TYPES.map(t => <option key={t} value={t}>{LABELS[t]}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Document number</label>
-                <input value={docNumber} onChange={e => setDocNumber(e.target.value)} placeholder="Enter ID number"
-                  className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
-              </div>
-            </div>
-
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Front image</label>
-                {frontFile ? (
-                  <div className="space-y-2">
-                    {cropping === "front" && frontFile ? (
-                      <ImageCropper imageUrl={previewUrl(frontFile)!} onCropComplete={handleCropComplete} onCancel={() => setCropping(null)} sideLabel="Front" />
-                    ) : (
-                      <>
-                        <FilePreview url={previewUrl(frontFile)!} onRemove={() => { setFrontFile(null); URL.revokeObjectURL(previewUrl(frontFile)!) }} />
-                        <button type="button" onClick={() => setCropping("front")} className="text-xs text-primary hover:underline">Re-crop</button>
-                      </>
-                    )}
-                  </div>
-                ) : frontUrl ? (
-                  <div className="space-y-2">
-                    {isPdf(frontUrl) ? <PdfViewer url={frontUrl} compact /> : <img src={frontUrl} alt="" className="h-44 w-full rounded-lg object-cover" />}
-                  </div>
-                ) : (
-                  <label className="flex h-44 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background hover:border-primary/50 hover:bg-primary/5 transition-colors">
-                    <Upload className="mb-2 h-6 w-6 text-muted" />
-                    <span className="text-sm text-muted">Upload front image</span>
-                    <span className="mt-1 text-xs text-muted">JPG or PNG, max 10MB</span>
-                    <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={e => handleFileSelect(e, "front")} className="hidden" />
-                  </label>
-                )}
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Back image <span className="text-xs text-muted">(optional)</span></label>
-                {backFile ? (
-                  <div className="space-y-2">
-                    {cropping === "back" && backFile ? (
-                      <ImageCropper imageUrl={previewUrl(backFile)!} onCropComplete={handleCropComplete} onCancel={() => setCropping(null)} sideLabel="Back" />
-                    ) : (
-                      <>
-                        <FilePreview url={previewUrl(backFile)!} onRemove={() => { setBackFile(null); URL.revokeObjectURL(previewUrl(backFile)!) }} />
-                        <button type="button" onClick={() => setCropping("back")} className="text-xs text-primary hover:underline">Re-crop</button>
-                      </>
-                    )}
-                  </div>
-                ) : backUrl ? (
-                  <div className="space-y-2">
-                    {isPdf(backUrl) ? <PdfViewer url={backUrl} compact /> : <img src={backUrl} alt="" className="h-44 w-full rounded-lg object-cover" />}
-                  </div>
-                ) : (
-                  <label className="flex h-44 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background hover:border-primary/50 hover:bg-primary/5 transition-colors">
-                    <Upload className="mb-2 h-6 w-6 text-muted" />
-                    <span className="text-sm text-muted">Upload back image</span>
-                    <span className="mt-1 text-xs text-muted">JPG or PNG</span>
-                    <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={e => handleFileSelect(e, "back")} className="hidden" />
-                  </label>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-border bg-surface p-6">
-            <h2 className="mb-4 text-lg font-semibold text-foreground">
-              Business Permit <span className="text-sm font-normal text-muted">(Optional — upload your business permit document)</span>
-            </h2>
-            {businessPermitFile ? (
-              <div className="flex items-center gap-3 rounded-lg border border-border bg-background p-4">
-                <FileText size={24} className="text-primary shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground truncate">{businessPermitFile.name}</p>
-                  <p className="text-xs text-muted">{(businessPermitFile.size / 1024 / 1024).toFixed(1)} MB</p>
-                </div>
-                <button type="button" onClick={() => { setBusinessPermitFile(null); URL.revokeObjectURL(previewUrl(businessPermitFile)!) }} className="rounded p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors">
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            ) : businessPermitUrl ? (
-              <div className="flex items-center gap-3 rounded-lg border border-border bg-background p-4">
-                <FileText size={24} className="text-primary shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground">Business Permit</p>
-                </div>
-                <a href={businessPermitUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">View</a>
-              </div>
-            ) : (
-              <label className="flex h-32 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background hover:border-primary/50 hover:bg-primary/5 transition-colors">
-                <FileText className="mb-2 h-6 w-6 text-muted" />
-                <span className="text-sm text-muted">Upload business permit (PDF)</span>
-                <span className="mt-1 text-xs text-muted">PDF only, max 10MB</span>
-                <input type="file" accept="application/pdf" onChange={handleBusinessPermitSelect} className="hidden" />
-              </label>
-            )}
-          </div>
+          <DocumentUpload
+            docType={docType} docNumber={docNumber}
+            frontFile={frontFile} backFile={backFile} frontUrl={frontUrl} backUrl={backUrl}
+            businessPermitFile={businessPermitFile} businessPermitUrl={businessPermitUrl}
+            onDocTypeChange={setDocType} onDocNumberChange={setDocNumber}
+            onFileSelect={handleFileSelect} onBusinessPermitSelect={handleBusinessPermitSelect}
+            onRemoveFile={(side) => side === "front" ? setFrontFile(null) : setBackFile(null)}
+            onRemoveBusinessPermit={() => setBusinessPermitFile(null)}
+            onStartCrop={setCropping} onCropComplete={handleCropComplete} onCancelCrop={() => setCropping(null)}
+            cropping={cropping} setMessage={setMessage}
+          />
 
           <button type="submit" disabled={submitting || !docNumber.trim() || !frontFile}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-base font-medium text-white shadow-lg transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -526,68 +367,12 @@ export default function KycPage() {
         </form>
       )}
 
-      <div className="mt-8 rounded-xl border border-border bg-surface">
-        <div className="border-b border-border px-6 py-4">
-          <h2 className="text-lg font-semibold text-foreground">Submission History</h2>
-        </div>
-        {data?.documents != null && data.documents.length > 0 ? (
-          <div className="divide-y divide-border">
-            {data.documents.map(doc => (
-              <div key={doc.id} className="flex items-start justify-between gap-4 px-6 py-4">
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-medium text-foreground">{LABELS[doc.documentType] || doc.documentType}</span>
-                    <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">Required</span>
-                    <Badge status={doc.status} />
-                  </div>
-                  <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-                    {doc.documentNumber && <span>#{doc.documentNumber}</span>}
-                    <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
-                    {doc.rejectionReason && <span className="text-red-500">Reason: {doc.rejectionReason}</span>}
-                  </div>
-                  {doc.bioData && (
-                    <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-muted">
-                      <span>{doc.bioData.firstName} {doc.bioData.middleName} {doc.bioData.lastName}</span>
-                      {doc.bioData.phone && <span>· {doc.bioData.phone}</span>}
-                      {doc.bioData.email && <span>· {doc.bioData.email}</span>}
-                    </div>
-                  )}
-                  {(doc.frontImage || doc.backImage || doc.businessPermit) && (
-                    <div className="mt-3 flex flex-wrap gap-3">
-                      {doc.frontImage && (isPdf(doc.frontImage) ? <PdfViewer url={doc.frontImage} compact /> : <img src={doc.frontImage} alt="" className="h-14 w-20 rounded object-cover" />)}
-                      {doc.backImage && (isPdf(doc.backImage) ? <PdfViewer url={doc.backImage} compact /> : <img src={doc.backImage} alt="" className="h-14 w-20 rounded object-cover" />)}
-                      {doc.businessPermit && <PdfViewer url={doc.businessPermit} compact />}
-                    </div>
-                  )}
-                </div>
-                {doc.status === "REJECTED" && (
-                  <button type="button" onClick={() => setDeleteConfirm(doc.id)} className="shrink-0 rounded p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors">
-                    <Trash2 size={14} />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="px-6 py-10 text-center">
-            <Shield size={32} className="mx-auto text-muted" />
-            <p className="mt-2 text-sm text-muted">No submissions yet</p>
-          </div>
-        )}
-      </div>
-
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setDeleteConfirm(null)}>
-          <div className="mx-4 w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <h3 className="flex items-center gap-2 text-lg font-semibold"><XCircle size={20} className="text-red-500" /> Delete submission?</h3>
-            <p className="mt-2 text-sm text-muted">Permanently deletes this rejected document. You can submit a new one later.</p>
-            <div className="mt-4 flex justify-end gap-3">
-              <button type="button" onClick={() => setDeleteConfirm(null)} className="rounded-lg border border-input px-4 py-2 text-sm font-medium hover:bg-gray-50">Cancel</button>
-              <button type="button" onClick={() => handleDelete(deleteConfirm)} className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">Delete</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <SubmissionHistory
+        documents={data?.documents || []}
+        onDelete={handleDelete}
+        deleteConfirm={deleteConfirm}
+        setDeleteConfirm={setDeleteConfirm}
+      />
     </div>
   )
 }
