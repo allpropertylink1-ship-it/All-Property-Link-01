@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import type { PropertyInput } from "@/lib/validations";
@@ -43,7 +44,10 @@ const propertyFields = (data: PropertyInput) => ({
   images: (data.images ?? []) as Prisma.InputJsonValue,
 })
 
-export async function getProperties(filters: PropertyFilters = {}) {
+export const getProperties = cache(async (filters: PropertyFilters = {}): Promise<{
+  properties: Array<{ id: string; slug: string; title: string; price: number; currency: string; propertyType: string; listingPurpose: string | null; city: string; region: string; bedrooms: number | null; bathrooms: number | null; area: number | null; images: unknown; isFeatured: boolean; createdAt: Date }>;
+  total: number; page: number; pageSize: number; totalPages: number;
+}> => {
   const page = filters.page || 1;
   const pageSize = filters.pageSize || 20;
   const skip = (page - 1) * pageSize;
@@ -90,18 +94,18 @@ export async function getProperties(filters: PropertyFilters = {}) {
     total, page, pageSize,
     totalPages: Math.ceil(total / pageSize),
   };
-}
+});
 
-export async function getPropertyBySlug(slug: string) {
+export const getPropertyBySlug = cache(async (slug: string) => {
   const property = await prisma.property.findFirst({
     where: { slug, deletedAt: null },
     include: { agent: { select: { firstName: true, lastName: true, phone: true, email: true, avatar: true, businessLogo: true, companyName: true, category: true, specialties: true, website: true, id: true } } },
   });
   if (!property) return null;
   return { ...property, price: Number(property.price) };
-}
+});
 
-export async function getOtherPropertiesByAgent(agentId: string, currentPropertyId: string) {
+export const getOtherPropertiesByAgent = cache(async (agentId: string, currentPropertyId: string) => {
   const properties = await prisma.property.findMany({
     where: { agentId, id: { not: currentPropertyId }, deletedAt: null },
     take: 6,
@@ -109,30 +113,30 @@ export async function getOtherPropertiesByAgent(agentId: string, currentProperty
     select: { id: true, title: true, slug: true, price: true, city: true, currency: true, images: true, listingPurpose: true },
   });
   return properties.map(p => ({ ...p, price: Number(p.price) }));
-}
+});
 
-export async function getCities() {
+export const getCities = cache(async () => {
   return prisma.property.groupBy({
     by: ["city"],
     where: { deletedAt: null },
     _count: { city: true },
     orderBy: { _count: { city: "desc" } },
   });
-}
+});
 
-export async function createProperty(data: PropertyInput, userId: string) {
+export const createProperty = cache(async (data: PropertyInput, userId: string) => {
   const slug = await uniqueSlug(slugify(data.title));
   return prisma.property.create({
     data: { ...propertyFields(data), slug, agentId: userId, moderationStatus: "APPROVED", isPublished: true, publishedAt: new Date(), version: 1 },
   });
-}
+});
 
-export async function updateProperty(
+export const updateProperty = cache(async (
   id: string,
   data: PropertyInput,
   userId: string,
   userRole: string,
-) {
+) => {
   const existing = await prisma.property.findUnique({ where: { id } });
   if (!existing) return { success: false, error: "Property not found" } as const;
   if (existing.agentId !== userId && userRole !== "ADMIN") {
@@ -151,9 +155,9 @@ export async function updateProperty(
     }
     throw e;
   }
-}
+});
 
-export async function deleteProperty(id: string, userId: string, userRole: string) {
+export const deleteProperty = cache(async (id: string, userId: string, userRole: string) => {
   const existing = await prisma.property.findUnique({ where: { id } });
   if (!existing) return { success: false, error: "Property not found" } as const;
   if (existing.agentId !== userId && userRole !== "ADMIN") {
@@ -161,9 +165,9 @@ export async function deleteProperty(id: string, userId: string, userRole: strin
   }
   await prisma.property.update({ where: { id }, data: { deletedAt: new Date() } });
   return { success: true } as const;
-}
+});
 
-export async function approveProperty(id: string, reviewerId: string) {
+export const approveProperty = cache(async (id: string, reviewerId: string) => {
   const property = await prisma.property.findUnique({
     where: { id },
     select: { title: true, agentId: true },
@@ -195,9 +199,9 @@ export async function approveProperty(id: string, reviewerId: string) {
       );
     }
   }
-}
+});
 
-export async function rejectProperty(id: string, reason: string, reviewerId: string) {
+export const rejectProperty = cache(async (id: string, reason: string, reviewerId: string) => {
   const property = await prisma.property.findUnique({
     where: { id },
     select: { title: true, agentId: true },
@@ -228,9 +232,9 @@ export async function rejectProperty(id: string, reason: string, reviewerId: str
       );
     }
   }
-}
+});
 
-export async function publishProperty(id: string) {
+export const publishProperty = cache(async (id: string) => {
   const property = await prisma.property.findUnique({
     where: { id },
     select: { title: true, agentId: true },
@@ -255,4 +259,4 @@ export async function publishProperty(id: string) {
       );
     }
   }
-}
+});

@@ -2,7 +2,7 @@ import { RegisterForm } from "@/components/auth/RegisterForm";
 
 export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
   const { ref } = await searchParams
-  const isDev = process.env.NODE_ENV !== 'production'
+  const isDev = process.env.VERCEL_ENV !== 'production'
 
   return (
     <div className={`flex min-h-screen items-center justify-center bg-surface px-4 ${isDev ? 'pt-10' : ''}`}>

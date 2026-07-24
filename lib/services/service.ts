@@ -1,3 +1,5 @@
+import { cache } from "react"
+
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ||
   "https://api.allpropertylink.co.ke";
@@ -96,7 +98,7 @@ export interface ServiceReviewsResponse {
   total: number;
 }
 
-export async function getServiceListings(filters: ServiceFilters = {}): Promise<ServiceListingsResponse> {
+export const getServiceListings = cache(async (filters: ServiceFilters = {}): Promise<ServiceListingsResponse> => {
   const params = new URLSearchParams();
   if (filters.category) params.set("category", filters.category);
   if (filters.city) params.set("city", filters.city);
@@ -110,18 +112,18 @@ export async function getServiceListings(filters: ServiceFilters = {}): Promise<
   });
   if (!res.ok) return { services: [], total: 0, page: 1, totalPages: 0 };
   return res.json();
-}
+})
 
-export async function getServiceCategories(): Promise<ServiceCategory[]> {
+export const getServiceCategories = cache(async (): Promise<ServiceCategory[]> => {
   const res = await fetch(`${API_BASE}/api/services/categories`, {
     next: { revalidate: 300 },
   });
   if (!res.ok) return [];
   const data = await res.json();
   return (data.categories || []) as ServiceCategory[];
-}
+})
 
-export async function getServiceById(id: string): Promise<ServiceDetail | null> {
+export const getServiceById = cache(async (id: string): Promise<ServiceDetail | null> => {
   const res = await fetch(
     `${API_BASE}/api/services/${encodeURIComponent(id)}`,
     { next: { revalidate: 60 } },
@@ -129,13 +131,13 @@ export async function getServiceById(id: string): Promise<ServiceDetail | null> 
   if (!res.ok) return null;
   const data = await res.json();
   return (data.service || null) as ServiceDetail | null;
-}
+})
 
-export async function getServiceReviews(targetId: string): Promise<ServiceReviewsResponse> {
+export const getServiceReviews = cache(async (targetId: string): Promise<ServiceReviewsResponse> => {
   const res = await fetch(
     `${API_BASE}/api/reviews/SERVICE_LISTING/${encodeURIComponent(targetId)}`,
     { next: { revalidate: 30 } },
   );
   if (!res.ok) return { reviews: [], total: 0 };
   return res.json();
-}
+})

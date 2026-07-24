@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { PasswordToggle } from "./PasswordToggle"
 import { GoogleSignInButton } from "./GoogleSignInButton"
+import { OtpInput } from "./OtpInput"
 
 export function LoginForm() {
   const router = useRouter()
@@ -22,7 +23,6 @@ export function LoginForm() {
   const [otpLoading, setOtpLoading] = useState(false)
   const [otpCooldown, setOtpCooldown] = useState(0)
   const cooldownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -84,7 +84,6 @@ export function LoginForm() {
         return prev - 1
       })
     }, 1000)
-    otpInputRefs.current[0]?.focus()
   }
 
   async function handlePhoneVerify() {
@@ -102,29 +101,6 @@ export function LoginForm() {
     }
     router.push("/dashboard")
     router.refresh()
-  }
-
-  function handleOtpInput(index: number, value: string) {
-    if (value.length > 1) {
-      const digits = value.replace(/\D/g, "").split("")
-      const newValues = [...otpValues]
-      for (let i = 0; i < 6 && i < digits.length; i++) newValues[i] = digits[i]
-      setOtpValues(newValues)
-      const nextIndex = Math.min(digits.length, 5)
-      otpInputRefs.current[nextIndex]?.focus()
-      return
-    }
-    if (!/^\d*$/.test(value)) return
-    const newValues = [...otpValues]
-    newValues[index] = value
-    setOtpValues(newValues)
-    if (value && index < 5) otpInputRefs.current[index + 1]?.focus()
-  }
-
-  function handleOtpKeyDown(index: number, e: React.KeyboardEvent) {
-    if (e.key === "Backspace" && !otpValues[index] && index > 0) {
-      otpInputRefs.current[index - 1]?.focus()
-    }
   }
 
   useEffect(() => {
@@ -297,22 +273,15 @@ export function LoginForm() {
             <p className="text-sm text-text-secondary text-center">
               We sent a code to <strong className="text-text-primary">+254{phone.replace(/\D/g, "")}</strong>
             </p>
-            <div className="flex justify-center gap-2">
-              {otpValues.map((digit, i) => (
-                <input
-                  key={i}
-                  ref={(el) => { otpInputRefs.current[i] = el }}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={6}
-                  value={digit}
-                  onChange={(e) => handleOtpInput(i, e.target.value)}
-                  onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                  autoFocus={i === 0}
-                  className="h-14 w-12 rounded-sm border border-border bg-surface text-center text-xl font-bold text-text-primary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
-                />
-              ))}
-            </div>
+            <OtpInput
+              value={otpValues.join("")}
+              onChange={(val) => {
+                const arr = new Array(6).fill("")
+                val.split("").forEach((d, i) => { if (i < 6) arr[i] = d })
+                setOtpValues(arr)
+              }}
+              disabled={otpLoading}
+            />
             <button
               type="button"
               onClick={handlePhoneVerify}

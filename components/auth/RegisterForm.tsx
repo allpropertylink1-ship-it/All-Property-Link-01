@@ -5,6 +5,7 @@ import { useAuth, type OtpResponse } from "@/lib/auth-context"
 import { PasswordStrength } from "./PasswordStrength"
 import { PasswordToggle } from "./PasswordToggle"
 import { GoogleSignInButton } from "./GoogleSignInButton"
+import { OtpInput } from "./OtpInput"
 import { Home, Handshake, Wrench, Briefcase, ArrowLeft } from "@/components/ui/icons"
 
 type ContactMethod = "email" | "phone"
@@ -36,7 +37,6 @@ export function RegisterForm({ referralCode: initialReferralCode }: { referralCo
   const [otpExpiresIn, setOtpExpiresIn] = useState(600)
   const otpTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const cooldownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   useEffect(() => {
     return () => {
@@ -176,47 +176,6 @@ export function RegisterForm({ referralCode: initialReferralCode }: { referralCo
     }
     startCooldown(60)
     setOtpValues(["", "", "", "", "", ""])
-    otpInputRefs.current[0]?.focus()
-  }
-
-  function handleOtpInput(index: number, value: string) {
-    if (value.length > 1) {
-      const digits = value.replace(/\D/g, "").split("")
-      const newValues = [...otpValues]
-      for (let i = 0; i < 6 && i < digits.length; i++) {
-        newValues[i] = digits[i]
-      }
-      setOtpValues(newValues)
-      const nextIndex = Math.min(digits.length, 5)
-      otpInputRefs.current[nextIndex]?.focus()
-      return
-    }
-    if (!/^\d*$/.test(value)) return
-    const newValues = [...otpValues]
-    newValues[index] = value
-    setOtpValues(newValues)
-    if (value && index < 5) {
-      otpInputRefs.current[index + 1]?.focus()
-    }
-  }
-
-  function handleOtpKeyDown(index: number, e: React.KeyboardEvent) {
-    if (e.key === "Backspace" && !otpValues[index] && index > 0) {
-      otpInputRefs.current[index - 1]?.focus()
-    }
-  }
-
-  function handleOtpPaste(e: React.ClipboardEvent) {
-    e.preventDefault()
-    const text = e.clipboardData.getData("text").replace(/\D/g, "")
-    const digits = text.split("").slice(0, 6)
-    const newValues = [...otpValues]
-    for (let i = 0; i < 6; i++) {
-      newValues[i] = digits[i] || ""
-    }
-    setOtpValues(newValues)
-    const focusIndex = Math.min(digits.length, 5)
-    otpInputRefs.current[focusIndex]?.focus()
   }
 
   const formatTime = (seconds: number) => {
@@ -244,22 +203,8 @@ export function RegisterForm({ referralCode: initialReferralCode }: { referralCo
           <div className="mb-4 rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{error}</div>
         )}
 
-        <div className="flex justify-center gap-2 mb-6" onPaste={handleOtpPaste}>
-          {otpValues.map((digit, i) => (
-            <input
-              key={i}
-              ref={(el) => { otpInputRefs.current[i] = el }}
-              type="text"
-              inputMode="numeric"
-              maxLength={6}
-              value={digit}
-              onChange={(e) => handleOtpInput(i, e.target.value)}
-              onKeyDown={(e) => handleOtpKeyDown(i, e)}
-              autoFocus={i === 0}
-              className="h-14 w-12 rounded-sm border border-border bg-surface text-center text-xl font-bold text-text-primary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
-              style={{ fontSize: "20px" }}
-            />
-          ))}
+        <div className="mb-6">
+          <OtpInput value={otpValues.join("")} onChange={(val) => { const arr = new Array(6).fill(""); val.split("").forEach((d, i) => { if (i < 6) arr[i] = d }); setOtpValues(arr) }} disabled={otpLoading} />
         </div>
 
         <button

@@ -2,54 +2,10 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { MapPin } from "@/components/ui/icons";
+import { MapPin, ArrowRight, Home, BedDouble, Briefcase } from "@/components/ui/icons";
+import { formatPrice } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
-
-function formatPrice(price: number, currency: string, listingPurpose?: string | null) {
-  const formatted = `${currency} ${price.toLocaleString()}`;
-  if (listingPurpose === "FOR_RENT_SHORT_TERM") return `${formatted}/night`;
-  if (listingPurpose === "FOR_RENT_LONG_TERM") return `${formatted}/month`;
-  return formatted;
-}
-
-function ArrowRightIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </svg>
-  );
-}
-
-function HomeIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
-      <polyline points="9 22 9 12 15 12 15 22" />
-    </svg>
-  );
-}
-
-function BedIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 4v16" />
-      <path d="M2 8h18a2 2 0 0 1 2 2v10" />
-      <path d="M2 17h20" />
-      <path d="M6 8v9" />
-    </svg>
-  );
-}
-
-function BriefcaseIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-    </svg>
-  );
-}
 
 async function getCategories() {
   const [allProperties, airbnbs, services, plots] = await Promise.all([
@@ -96,7 +52,7 @@ async function getCategories() {
 
 interface PropertyItem {
   slug: string; title: string; price: number | { toString(): string }; currency: string;
-  propertyType: string; listingPurpose?: string | null; city: string; region: string;
+  propertyType: string; listingPurpose?: string; city: string; region: string;
   bedrooms: number | null; bathrooms: number | null; images: unknown;
 }
 
@@ -121,7 +77,7 @@ function PropertyCard({ item, link }: { item: PropertyItem; link: string }) {
           {item.bedrooms != null && item.bedrooms > 0 && <span>{item.bedrooms} beds</span>}
           {item.bathrooms != null && item.bathrooms > 0 && <span>{item.bathrooms} baths</span>}
         </div>
-        <p className="mt-1.5 font-heading text-base font-bold text-primary-500">{formatPrice(Number(item.price), item.currency, item.listingPurpose)}</p>
+        <p className="mt-1.5 font-heading text-base font-bold text-primary-500">{formatPrice(Number(item.price), item.listingPurpose)}</p>
       </div>
     </Link>
   );
@@ -151,7 +107,7 @@ function ServiceCard({ item }: { item: ServiceItem }) {
         <h3 className="line-clamp-1 font-heading text-sm font-semibold text-text-primary">{item.title}</h3>
         <p className="mt-1 text-xs text-text-secondary">{item.city || item.region || "Kenya"}</p>
         {item.price != null && (
-        <p className="mt-1.5 font-heading text-base font-bold text-primary-500">{formatPrice(Number(item.price), item.currency)}</p>
+        <p className="mt-1.5 font-heading text-base font-bold text-primary-500">{formatPrice(Number(item.price))}</p>
         )}
         {item.user && (
           <p className="mt-1 text-xs text-text-secondary">{item.user.firstName} {item.user.lastName}</p>
@@ -169,44 +125,33 @@ export default async function BrowsePage() {
 
   const sectionList: {
     id: string; title: string; icon: React.ComponentType<{ className?: string }>;
-    items: unknown[]; viewAllLink: string; viewAllLabel: string; emptyMsg: string;
-    renderItem: (item: unknown) => React.ReactNode;
+    items: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+    viewAllLink: string; viewAllLabel: string; emptyMsg: string;
+    renderItem: (item: any) => React.ReactNode; // eslint-disable-line @typescript-eslint/no-explicit-any
   }[] = [
     {
-      id: "properties", title: "Properties for Sale", icon: HomeIcon,
+      id: "properties", title: "Properties for Sale", icon: Home,
       items: properties, viewAllLink: "/properties?purpose=FOR_SALE",
       viewAllLabel: "View all properties", emptyMsg: "No properties for sale yet.",
-      renderItem: (item: unknown) => {
-        const i = item as PropertyItem;
-        return <PropertyCard key={i.slug} item={i} link={`/properties/${i.city.toLowerCase()}/${i.slug}`} />;
-      },
+      renderItem: (item) => <PropertyCard key={item.slug} item={item} link={`/properties/${item.city.toLowerCase()}/${item.slug}`} />,
     },
     {
-      id: "airbnbs", title: "Airbnbs & Short-term Stays", icon: BedIcon,
+      id: "airbnbs", title: "Airbnbs & Short-term Stays", icon: BedDouble,
       items: airbnbs, viewAllLink: "/properties?purpose=FOR_RENT_SHORT_TERM",
       viewAllLabel: "View all stays", emptyMsg: "No short-term rentals listed yet.",
-      renderItem: (item: unknown) => {
-        const i = item as PropertyItem;
-        return <PropertyCard key={i.slug} item={i} link={`/properties/${i.city.toLowerCase()}/${i.slug}`} />;
-      },
+      renderItem: (item) => <PropertyCard key={item.slug} item={item} link={`/properties/${item.city.toLowerCase()}/${item.slug}`} />,
     },
     {
-      id: "services", title: "Fundis & Service Providers", icon: BriefcaseIcon,
+      id: "services", title: "Fundis & Service Providers", icon: Briefcase,
       items: services, viewAllLink: "/services",
       viewAllLabel: "View all services", emptyMsg: "No services listed yet.",
-      renderItem: (item: unknown) => {
-        const i = item as ServiceItem;
-        return <ServiceCard key={i.id} item={i} />;
-      },
+      renderItem: (item) => <ServiceCard key={item.id} item={item} />,
     },
     {
       id: "plots", title: "Plots & Land", icon: MapPin,
       items: plotsFiltered, viewAllLink: "/properties?type=LAND",
       viewAllLabel: "View all plots", emptyMsg: "No plots listed yet.",
-      renderItem: (item: unknown) => {
-        const i = item as PropertyItem;
-        return <PropertyCard key={i.slug} item={i} link={`/properties/${i.city.toLowerCase()}/${i.slug}`} />;
-      },
+      renderItem: (item) => <PropertyCard key={item.slug} item={item} link={`/properties/${item.city.toLowerCase()}/${item.slug}`} />,
     },
   ];
 
@@ -234,7 +179,7 @@ export default async function BrowsePage() {
                   className="touch-target flex items-center gap-1 text-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors"
                 >
                   {section.viewAllLabel}
-                  <ArrowRightIcon className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
 

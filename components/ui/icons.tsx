@@ -56,6 +56,16 @@ export const Banknote = ({ className, size = 24 }: IconProps) => (
   </svg>
 );
 
+export const BedDouble = ({ className, size = 24 }: IconProps) => (
+  <svg {...s(size)} className={className}>
+    <path d="M2 8v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8" />
+    <path d="M6 12h4v-2H6v2z" />
+    <path d="M14 12h4v-2h-4v2z" />
+    <path d="M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v2" />
+    <rect x="9" y="6" width="6" height="2" fill={GOLD} stroke="none" rx="0.5" />
+  </svg>
+);
+
 export const Bath = ({ className, size = 24 }: IconProps) => (
   <svg {...s(size)} className={className}>
     <path d="M3 12h18l-2 8H5l-2-8z" />
@@ -552,6 +562,22 @@ export const Settings = ({ className, size = 24 }: IconProps) => (
     <circle cx="12" cy="12" r="3" />
     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
     <circle cx="12" cy="12" r="1.5" fill={GOLD} stroke="none" />
+  </svg>
+);
+
+export const Trees = ({ className, size = 24 }: IconProps) => (
+  <svg {...s(size)} className={className}>
+    <path d="M12 2L6 12h3l-4 8h14l-4-8h3L12 2z" />
+    <line x1="12" y1="12" x2="12" y2="22" />
+    <circle cx="12" cy="6" r="1.5" fill={GOLD} stroke="none" />
+  </svg>
+);
+
+export const ConciergeBell = ({ className, size = 24 }: IconProps) => (
+  <svg {...s(size)} className={className}>
+    <path d="M12 4a7 7 0 0 0-7 7v4l-2 3h18l-2-3v-4a7 7 0 0 0-7-7z" />
+    <line x1="9" y1="21" x2="15" y2="21" />
+    <circle cx="12" cy="2" r="1.5" fill={GOLD} stroke="none" />
   </svg>
 );
 
