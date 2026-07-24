@@ -1,9 +1,6 @@
 import { cache } from "react";
-import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
-import type { PropertyInput } from "@/lib/validations";
-import { sendEmail } from "@/lib/resend";
-import { propertyApprovedEmail, propertyRejectedEmail } from "@/lib/emails/templates";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.allpropertylink.co.ke";
 
 export interface PropertyFilters {
   city?: string;
@@ -17,246 +14,143 @@ export interface PropertyFilters {
   pageSize?: number;
 }
 
-function slugify(title: string) {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
+ const slugify = (title: string) =>
+  title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+
+export interface PropertyCard {
+  id: string; slug: string; title: string; price: number; currency: string;
+  propertyType: string; listingPurpose: string | null;
+  city: string; region: string; bedrooms: number | null; bathrooms: number | null;
+  area: number | null; images: unknown; isFeatured: boolean; createdAt: Date;
 }
 
-async function uniqueSlug(base: string) {
-  let slug = base, i = 1;
-  while (await prisma.property.findUnique({ where: { slug } })) {
-    slug = `${base}-${i++}`;
-  }
-  return slug;
+interface PropertyDetailAgent {
+  id: string; firstName: string; lastName: string; phone: string | null; email: string | null;
+  avatar: string | null; businessLogo: string | null; companyName: string | null;
+  category: string | null; specialties: string[]; website: string | null;
 }
 
-const propertyFields = (data: PropertyInput) => ({
-  title: data.title, description: data.description, price: data.price,
-  currency: data.currency, propertyType: data.propertyType, status: data.status,
-  listingPurpose: data.listingPurpose,
-  address: data.address, city: data.city, region: data.region, country: data.country,
-  bedrooms: data.bedrooms, bathrooms: data.bathrooms, area: data.area,
-  latitude: data.latitude, longitude: data.longitude,
-  features: data.features ?? [], seoTitle: data.seoTitle, seoDescription: data.seoDescription,
-  images: (data.images ?? []) as Prisma.InputJsonValue,
-})
+export interface PropertyDetail {
+  id: string; slug: string; title: string; description: string; price: number; currency: string;
+  propertyType: string; listingPurpose: string | null; status: string;
+  city: string; region: string; country: string;
+  bedrooms: number | null; bathrooms: number | null; area: number | null;
+  latitude: unknown; longitude: unknown; images: unknown; features: string[];
+  isFeatured: boolean; createdAt: Date;
+  agent: PropertyDetailAgent | null;
+}
+
+interface OtherProperty {
+  id: string; title: string; slug: string; price: number; city: string;
+  currency: string; images: unknown; listingPurpose: string | null;
+}
+
+const fetchApi = cache(async <T>(path: string): Promise<T | null> => {
+  try {
+    const res = await fetch(`${API_BASE}${path}`, { next: { revalidate: 60 } });
+    if (!res.ok) return null;
+    return res.json();
+  } catch { return null }
+});
 
 export const getProperties = cache(async (filters: PropertyFilters = {}): Promise<{
-  properties: Array<{ id: string; slug: string; title: string; price: number; currency: string; propertyType: string; listingPurpose: string | null; city: string; region: string; bedrooms: number | null; bathrooms: number | null; area: number | null; images: unknown; isFeatured: boolean; createdAt: Date }>;
+  properties: PropertyCard[];
   total: number; page: number; pageSize: number; totalPages: number;
 }> => {
-  const page = filters.page || 1;
-  const pageSize = filters.pageSize || 20;
-  const skip = (page - 1) * pageSize;
+  const params = new URLSearchParams();
+  if (filters.city) params.set("city", filters.city);
+  if (filters.propertyType) params.set("type", filters.propertyType);
+  if (filters.purpose) params.set("purpose", filters.purpose);
+  if (filters.minPrice) params.set("minPrice", String(filters.minPrice));
+  if (filters.maxPrice) params.set("maxPrice", String(filters.maxPrice));
+  if (filters.bedrooms) params.set("bedrooms", String(filters.bedrooms));
+  if (filters.query) params.set("search", filters.query);
+  if (filters.page) params.set("page", String(filters.page));
+  if (filters.pageSize) params.set("limit", String(filters.pageSize));
+  params.set("limit", String(filters.pageSize || 20));
 
-  const where: Prisma.PropertyWhereInput = {
-    deletedAt: null,
-  };
-
-  if (filters.city) where.city = filters.city;
-  if (filters.propertyType) where.propertyType = filters.propertyType as Prisma.EnumPropertyTypeFilter["equals"];
-  if (filters.purpose) where.listingPurpose = filters.purpose as Prisma.EnumListingPurposeNullableFilter["equals"];
-  if (filters.bedrooms) where.bedrooms = { gte: filters.bedrooms };
-  if (filters.minPrice || filters.maxPrice) {
-    where.price = {};
-    if (filters.minPrice) where.price.gte = filters.minPrice;
-    if (filters.maxPrice) where.price.lte = filters.maxPrice;
-  }
-  if (filters.query) {
-    where.OR = [
-      { title: { contains: filters.query, mode: "insensitive" } },
-      { description: { contains: filters.query, mode: "insensitive" } },
-      { city: { contains: filters.query, mode: "insensitive" } },
-      { region: { contains: filters.query, mode: "insensitive" } },
-    ];
-  }
-
-  const [properties, total] = await Promise.all([
-    prisma.property.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: pageSize,
-      select: {
-        id: true, slug: true, title: true, price: true, currency: true,
-        propertyType: true, listingPurpose: true, status: true, city: true, region: true,
-        bedrooms: true, bathrooms: true, area: true, images: true, isFeatured: true, createdAt: true,
-      },
-    }),
-    prisma.property.count({ where }),
-  ]);
-
-  return {
-    properties: properties.map(({ status: _, ...p }) => ({ ...p, price: Number(p.price) })),
-    total, page, pageSize,
-    totalPages: Math.ceil(total / pageSize),
-  };
+  const data = await fetchApi<{ properties: PropertyCard[]; total: number; page: number; pageSize: number; totalPages: number }>(`/api/properties?${params}`);
+  return data || { properties: [], total: 0, page: 1, pageSize: filters.pageSize || 20, totalPages: 0 };
 });
 
-export const getPropertyBySlug = cache(async (slug: string) => {
-  const property = await prisma.property.findFirst({
-    where: { slug, deletedAt: null },
-    include: { agent: { select: { firstName: true, lastName: true, phone: true, email: true, avatar: true, businessLogo: true, companyName: true, category: true, specialties: true, website: true, id: true } } },
-  });
-  if (!property) return null;
-  return { ...property, price: Number(property.price) };
+export const getPropertyBySlug = cache(async (slug: string): Promise<PropertyDetail | null> => {
+  const data = await fetchApi<PropertyDetail>(`/api/properties/${encodeURIComponent(slug)}`);
+  return data;
 });
 
-export const getOtherPropertiesByAgent = cache(async (agentId: string, currentPropertyId: string) => {
-  const properties = await prisma.property.findMany({
-    where: { agentId, id: { not: currentPropertyId }, deletedAt: null },
-    take: 6,
-    orderBy: { createdAt: "desc" },
-    select: { id: true, title: true, slug: true, price: true, city: true, currency: true, images: true, listingPurpose: true },
-  });
-  return properties.map(p => ({ ...p, price: Number(p.price) }));
+export const getOtherPropertiesByAgent = cache(async (agentId: string, currentPropertyId: string): Promise<OtherProperty[]> => {
+  const data = await fetchApi<{ properties: OtherProperty[] }>(`/api/properties?agentId=${encodeURIComponent(agentId)}&limit=6`);
+  return (data?.properties || []).filter(p => p.id !== currentPropertyId);
 });
 
-export const getCities = cache(async () => {
-  return prisma.property.groupBy({
-    by: ["city"],
-    where: { deletedAt: null },
-    _count: { city: true },
-    orderBy: { _count: { city: "desc" } },
-  });
+export const getCities = cache(async (): Promise<{ city: string; _count: { city: number } }[]> => {
+  const data = await fetchApi<{ cities: { city: string; count: number }[] }>("/api/properties?limit=1");
+  return (data?.cities || []).map(c => ({ city: c.city, _count: { city: c.count } }));
 });
 
-export const createProperty = cache(async (data: PropertyInput, userId: string) => {
-  const slug = await uniqueSlug(slugify(data.title));
-  return prisma.property.create({
-    data: { ...propertyFields(data), slug, agentId: userId, moderationStatus: "APPROVED", isPublished: true, publishedAt: new Date(), version: 1 },
-  });
-});
+type MutateResult<T = undefined> = { success: boolean; error?: string; data?: T };
 
-export const updateProperty = cache(async (
-  id: string,
-  data: PropertyInput,
-  userId: string,
-  userRole: string,
-) => {
-  const existing = await prisma.property.findUnique({ where: { id } });
-  if (!existing) return { success: false, error: "Property not found" } as const;
-  if (existing.agentId !== userId && userRole !== "ADMIN") {
-    return { success: false, error: "Unauthorized" } as const;
-  }
-
+export const createProperty = cache(async (data: Record<string, unknown>, userId: string): Promise<MutateResult<{ id: string }>> => {
   try {
-    await prisma.property.update({
-      where: { id, version: existing.version },
-      data: { ...propertyFields(data), version: { increment: 1 } },
+    const res = await fetch(`${API_BASE}/api/properties`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...data, userId }),
     });
-    return { success: true } as const;
-  } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
-      return { success: false, error: "Conflict: modified by another user. Refresh and try again." } as const;
-    }
-    throw e;
-  }
+    if (!res.ok) return { success: false, error: `API returned ${res.status}` };
+    return { success: true, data: await res.json() };
+  } catch (e) { return { success: false, error: String(e) }; }
 });
 
-export const deleteProperty = cache(async (id: string, userId: string, userRole: string) => {
-  const existing = await prisma.property.findUnique({ where: { id } });
-  if (!existing) return { success: false, error: "Property not found" } as const;
-  if (existing.agentId !== userId && userRole !== "ADMIN") {
-    return { success: false, error: "Unauthorized" } as const;
-  }
-  await prisma.property.update({ where: { id }, data: { deletedAt: new Date() } });
-  return { success: true } as const;
+export const updateProperty = cache(async (id: string, data: Record<string, unknown>, userId: string, userRole: string): Promise<MutateResult> => {
+  try {
+    const res = await fetch(`${API_BASE}/api/properties/${encodeURIComponent(id)}`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...data, userId, userRole }),
+    });
+    if (!res.ok) return { success: false, error: `API returned ${res.status}` };
+    return { success: true };
+  } catch (e) { return { success: false, error: String(e) }; }
 });
 
-export const approveProperty = cache(async (id: string, reviewerId: string) => {
-  const property = await prisma.property.findUnique({
-    where: { id },
-    select: { title: true, agentId: true },
-  });
-  if (!property) return;
-
-  await prisma.property.update({
-    where: { id },
-    data: {
-      moderationStatus: "APPROVED",
-      isPublished: true,
-      publishedAt: new Date(),
-      reviewedAt: new Date(),
-      reviewedBy: reviewerId,
-      version: { increment: 1 },
-    },
-  });
-
-  if (property.agentId) {
-    const agent = await prisma.user.findUnique({
-      where: { id: property.agentId },
-      select: { email: true },
+export const deleteProperty = cache(async (id: string, userId: string, userRole: string): Promise<MutateResult> => {
+  try {
+    const res = await fetch(`${API_BASE}/api/properties/${encodeURIComponent(id)}`, {
+      method: "DELETE", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, userRole }),
     });
-    if (agent?.email) {
-      await sendEmail(
-        agent.email,
-        `Your property "${property.title}" has been approved`,
-        propertyApprovedEmail({ title: property.title }),
-      );
-    }
-  }
+    if (!res.ok) return { success: false, error: `API returned ${res.status}` };
+    return { success: true };
+  } catch (e) { return { success: false, error: String(e) }; }
 });
 
-export const rejectProperty = cache(async (id: string, reason: string, reviewerId: string) => {
-  const property = await prisma.property.findUnique({
-    where: { id },
-    select: { title: true, agentId: true },
-  });
-  if (!property) return;
-
-  await prisma.property.update({
-    where: { id },
-    data: {
-      moderationStatus: "REJECTED",
-      rejectionReason: reason,
-      reviewedAt: new Date(),
-      reviewedBy: reviewerId,
-      version: { increment: 1 },
-    },
-  });
-
-  if (property.agentId) {
-    const agent = await prisma.user.findUnique({
-      where: { id: property.agentId },
-      select: { email: true },
+export const approveProperty = cache(async (id: string, reviewerId: string): Promise<MutateResult> => {
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/properties/${encodeURIComponent(id)}/approve`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reviewerId }),
     });
-    if (agent?.email) {
-      await sendEmail(
-        agent.email,
-        `Update on "${property.title}"`,
-        propertyRejectedEmail({ title: property.title, reason }),
-      );
-    }
-  }
+    if (!res.ok) return { success: false, error: `API returned ${res.status}` };
+    return { success: true };
+  } catch (e) { return { success: false, error: String(e) }; }
 });
 
-export const publishProperty = cache(async (id: string) => {
-  const property = await prisma.property.findUnique({
-    where: { id },
-    select: { title: true, agentId: true },
-  });
-  if (!property) return;
-
-  await prisma.property.update({
-    where: { id },
-    data: { isPublished: true, moderationStatus: "APPROVED", publishedAt: new Date() },
-  });
-
-  if (property.agentId) {
-    const agent = await prisma.user.findUnique({
-      where: { id: property.agentId },
-      select: { email: true },
+export const rejectProperty = cache(async (id: string, reason: string, reviewerId: string): Promise<MutateResult> => {
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/properties/${encodeURIComponent(id)}/reject`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason, reviewerId }),
     });
-    if (agent?.email) {
-      await sendEmail(
-        agent.email,
-        `Your property "${property.title}" is now live`,
-        propertyApprovedEmail({ title: property.title }),
-      );
-    }
-  }
+    if (!res.ok) return { success: false, error: `API returned ${res.status}` };
+    return { success: true };
+  } catch (e) { return { success: false, error: String(e) }; }
+});
+
+export const publishProperty = cache(async (id: string): Promise<MutateResult> => {
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/properties/${encodeURIComponent(id)}/publish`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+    });
+    if (!res.ok) return { success: false, error: `API returned ${res.status}` };
+    return { success: true };
+  } catch (e) { return { success: false, error: String(e) }; }
 });

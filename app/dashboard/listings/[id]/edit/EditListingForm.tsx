@@ -89,7 +89,7 @@ export default function EditListingForm({ propertyId, property }: { propertyId: 
     formData.append("images", JSON.stringify(imageUrls));
     try {
       const result = await updateProperty(propertyId, formData);
-      if (result && !result.success) { setError(result.error); return }
+      if (result && !result.success) { setError(result.error || "Update failed"); return }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update listing");
       return;

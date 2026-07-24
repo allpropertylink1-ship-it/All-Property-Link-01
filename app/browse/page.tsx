@@ -1,61 +1,52 @@
 import React, { cache } from "react";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
 import { MapPin, ArrowRight, Home, BedDouble, Briefcase } from "@/components/ui/icons";
 import { formatPrice } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-const getCategories = cache(async () => {
-  const [allProperties, airbnbs, services, plots] = await Promise.all([
-    prisma.property.findMany({
-      where: { deletedAt: null },
-      orderBy: { createdAt: "desc" },
-      take: 20,
-    }),
-    prisma.property.findMany({
-      where: { deletedAt: null, listingPurpose: "FOR_RENT_SHORT_TERM" },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-      select: {
-        slug: true, title: true, price: true, currency: true,
-        propertyType: true, listingPurpose: true, city: true, region: true,
-        bedrooms: true, bathrooms: true, images: true,
-      },
-    }),
-    prisma.serviceListing.findMany({
-      where: { status: "ACTIVE", moderationStatus: "APPROVED" },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-      select: {
-        id: true, title: true, price: true, currency: true,
-        city: true, region: true, images: true,
-        category: { select: { name: true, slug: true } },
-        user: { select: { firstName: true, lastName: true, avatar: true } },
-      },
-    }),
-    prisma.property.findMany({
-      where: { deletedAt: null, propertyType: "LAND" },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-      select: {
-        slug: true, title: true, price: true, currency: true,
-        propertyType: true, city: true, region: true,
-        bedrooms: true, bathrooms: true, images: true,
-      },
-    }),
-  ]);
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.allpropertylink.co.ke";
 
-  return { allProperties, airbnbs, services, plots };
-})
-
-interface PropertyItem {
-  slug: string; title: string; price: number | { toString(): string }; currency: string;
+interface BrowseProperty {
+  slug: string; title: string; price: number; currency: string;
   propertyType: string; listingPurpose?: string; city: string; region: string;
   bedrooms: number | null; bathrooms: number | null; images: unknown;
 }
 
-function PropertyCard({ item, link }: { item: PropertyItem; link: string }) {
+interface BrowseService {
+  id: string; title: string; price: number | null; currency: string;
+  city: string | null; region: string | null; images: unknown;
+  category: { name: string; slug: string } | null;
+  user: { firstName: string; lastName: string; avatar: string | null } | null;
+}
+
+const fetchApi = cache(async <T,>(path: string): Promise<T | null> => {
+  try {
+    const res = await fetch(`${API_BASE}${path}`, { next: { revalidate: 60 } });
+    if (!res.ok) return null;
+    return res.json();
+  } catch { return null }
+});
+
+const getCategories = cache(async () => {
+  const [allData, airbnbData, serviceData, plotData] = await Promise.all([
+    fetchApi<{ properties: BrowseProperty[] }>("/api/properties?limit=20"),
+    fetchApi<{ properties: BrowseProperty[] }>("/api/properties?purpose=FOR_RENT_SHORT_TERM&limit=6"),
+    fetchApi<{ services: BrowseService[] }>("/api/services?limit=6"),
+    fetchApi<{ properties: BrowseProperty[] }>("/api/properties?type=LAND&limit=6"),
+  ]);
+
+  return {
+    allProperties: allData?.properties || [],
+    airbnbs: airbnbData?.properties || [],
+    services: serviceData?.services || [],
+    plots: plotData?.properties || [],
+  };
+})
+
+type PropertyItem = BrowseProperty;
+
+function PropertyCard({ item, link }: { item: BrowseProperty; link: string }) {
   const images = Array.isArray(item.images) ? item.images : [];
   const imageUrl = images.length > 0 ? String(images[0]) : "/placeholder.svg";
   return (
@@ -82,14 +73,9 @@ function PropertyCard({ item, link }: { item: PropertyItem; link: string }) {
   );
 }
 
-interface ServiceItem {
-  id: string; title: string; price: number | { toString(): string } | null; currency: string;
-  city: string | null; region: string | null; images: unknown;
-  category: { name: string; slug: string } | null;
-  user: { firstName: string; lastName: string; avatar: string | null } | null;
-}
+type ServiceItem = BrowseService;
 
-function ServiceCard({ item }: { item: ServiceItem }) {
+function ServiceCard({ item }: { item: BrowseService }) {
   const images = Array.isArray(item.images) ? item.images : [];
   const imageUrl = images.length > 0 ? String(images[0]) : "/placeholder.svg";
   return (
@@ -124,33 +110,33 @@ export default async function BrowsePage() {
 
   const sectionList: {
     id: string; title: string; icon: React.ComponentType<{ className?: string }>;
-    items: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+    items: (PropertyItem | ServiceItem)[];
     viewAllLink: string; viewAllLabel: string; emptyMsg: string;
-    renderItem: (item: any) => React.ReactNode; // eslint-disable-line @typescript-eslint/no-explicit-any
+    renderItem: (item: PropertyItem | ServiceItem) => React.ReactNode;
   }[] = [
     {
       id: "properties", title: "Properties for Sale", icon: Home,
       items: properties, viewAllLink: "/properties?purpose=FOR_SALE",
       viewAllLabel: "View all properties", emptyMsg: "No properties for sale yet.",
-      renderItem: (item) => <PropertyCard key={item.slug} item={item} link={`/properties/${item.city.toLowerCase()}/${item.slug}`} />,
+      renderItem: (item) => <PropertyCard key={(item as PropertyItem).slug} item={item as PropertyItem} link={`/properties/${(item as PropertyItem).city.toLowerCase()}/${(item as PropertyItem).slug}`} />,
     },
     {
       id: "airbnbs", title: "Airbnbs & Short-term Stays", icon: BedDouble,
       items: airbnbs, viewAllLink: "/properties?purpose=FOR_RENT_SHORT_TERM",
       viewAllLabel: "View all stays", emptyMsg: "No short-term rentals listed yet.",
-      renderItem: (item) => <PropertyCard key={item.slug} item={item} link={`/properties/${item.city.toLowerCase()}/${item.slug}`} />,
+      renderItem: (item) => <PropertyCard key={(item as PropertyItem).slug} item={item as PropertyItem} link={`/properties/${(item as PropertyItem).city.toLowerCase()}/${(item as PropertyItem).slug}`} />,
     },
     {
       id: "services", title: "Fundis & Service Providers", icon: Briefcase,
       items: services, viewAllLink: "/services",
       viewAllLabel: "View all services", emptyMsg: "No services listed yet.",
-      renderItem: (item) => <ServiceCard key={item.id} item={item} />,
+      renderItem: (item) => <ServiceCard key={(item as ServiceItem).id} item={item as ServiceItem} />,
     },
     {
       id: "plots", title: "Plots & Land", icon: MapPin,
       items: plotsFiltered, viewAllLink: "/properties?type=LAND",
       viewAllLabel: "View all plots", emptyMsg: "No plots listed yet.",
-      renderItem: (item) => <PropertyCard key={item.slug} item={item} link={`/properties/${item.city.toLowerCase()}/${item.slug}`} />,
+      renderItem: (item) => <PropertyCard key={(item as PropertyItem).slug} item={item as PropertyItem} link={`/properties/${(item as PropertyItem).city.toLowerCase()}/${(item as PropertyItem).slug}`} />,
     },
   ];
 
