@@ -20,7 +20,8 @@ function slugify(title: string) {
   return title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$|(-)+/g, "$1");
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 async function uniqueSlug(base: string) {

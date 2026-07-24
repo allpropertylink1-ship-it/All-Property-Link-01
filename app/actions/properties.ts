@@ -3,8 +3,6 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { propertySchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
-import { withRateLimit } from "@/lib/rate-limiter";
-
 const REDIRECT_ERROR_CODE = "NEXT_REDIRECT";
 
 function isRedirect(err: unknown): boolean {
@@ -37,8 +35,6 @@ function fail(error: string) {
 
 export async function createProperty(formData: FormData) {
   try {
-    const { allowed } = await withRateLimit({ max: 10, windowMs: 60_000 });
-    if (!allowed) return fail("Too many requests. Try again later.");
     const session = await requireAuth();
     const userId = (session.user as { id: string }).id;
     const kycStatus = (session.user as { kycStatus?: string }).kycStatus;

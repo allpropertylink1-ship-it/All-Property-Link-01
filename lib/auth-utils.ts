@@ -16,7 +16,9 @@ interface SessionUser {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.allpropertylink.co.ke"
 
-export async function getSession() {
+import { cache } from "react";
+
+export const getSession = cache(async () => {
   try {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
@@ -33,7 +35,7 @@ export async function getSession() {
   } catch {
     return null;
   }
-}
+});
 
 export async function requireAuth(): Promise<{ user: SessionUser }> {
   const session = await getSession();

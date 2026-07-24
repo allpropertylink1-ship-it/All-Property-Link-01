@@ -1,6 +1,11 @@
 "use client";
 
-export default function ErrorPage({ error: _error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+import { useEffect } from "react";
+
+export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  useEffect(() => {
+    console.error("Page error:", error);
+  }, [error]);
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center px-4 text-center">
       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-warning-50">
