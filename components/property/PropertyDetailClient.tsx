@@ -76,13 +76,14 @@ export default function PropertyDetailClient({ slug }: { slug: string }) {
         if (!r.ok) throw new Error("Not found");
         return r.json();
       })
-      .then((data: PropertyData) => {
-        setProperty(data);
-        if (data.agent?.id) {
-          fetch(`/api/properties?agentId=${data.agent.id}&limit=6`)
+      .then((raw: { property: PropertyData }) => {
+        const p = raw.property || raw;
+        setProperty(p);
+        if (p.agent?.id) {
+          fetch(`/api/properties?agentId=${p.agent.id}&limit=6`)
             .then((r) => r.json())
             .then((res: { properties: OtherProperty[] }) => {
-              setOtherProperties(res.properties?.filter((p) => p.id !== data.id) || []);
+              setOtherProperties(res.properties?.filter((op) => op.id !== p.id) || []);
             })
             .catch(() => {});
         }
