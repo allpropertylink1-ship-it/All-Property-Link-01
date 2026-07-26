@@ -1,6 +1,6 @@
 "use client"
 import Link from "next/link"
-import { Building2, Home, Tent, Trees, Wrench, ConciergeBell, UserCheck } from "@/components/ui/icons"
+import { Building2, Home, Tent, Trees, Wrench, ConciergeBell } from "@/components/ui/icons"
 
 const categories = [
   { title: "For Sale", href: "/browse?type=sale", icon: Building2, desc: "Houses & apartments" },
@@ -9,7 +9,6 @@ const categories = [
   { title: "Land & Plots", href: "/browse?type=land", icon: Trees, desc: "Development land" },
   { title: "Fundis", href: "/services?category=fundi", icon: Wrench, desc: "Skilled trades" },
   { title: "Services", href: "/services", icon: ConciergeBell, desc: "Property services" },
-  { title: "Agents", href: "/agents", icon: UserCheck, desc: "APL representatives" },
 ]
 
 export function CategoryGrid() {
