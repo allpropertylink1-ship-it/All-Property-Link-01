@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronLeft, ChevronRight, X, Expand } from "@/components/ui/icons";
+import { PLACEHOLDER_GALLERY } from "@/lib/placeholders";
 import {
   Dialog,
   DialogContent,
@@ -82,7 +83,7 @@ export function PropertyGallery({ images, title }: Props) {
                 src={images[current]}
                 alt={`${title} — image ${current + 1} of ${images.length}`}
                 className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
-                onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg" }}
+                onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_GALLERY }}
               />
             </button>
           </div>
@@ -207,7 +208,7 @@ export function PropertyGallery({ images, title }: Props) {
               src={images[lightboxIndex]}
               alt={`${title} — image ${lightboxIndex + 1}`}
               className="max-h-full max-w-full rounded-lg object-contain"
-              onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg" }}
+              onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_GALLERY }}
             />
           </div>
         </DialogContent>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
+import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders";
 
 interface PropertyCardProps {
   slug: string;
@@ -64,7 +65,7 @@ export function PropertyCard({
   priority,
 }: PropertyCardProps) {
   const imageUrls = Array.isArray(images) ? images : [];
-  const imageUrl = imageUrls.length > 0 ? imageUrls[0] : "/placeholder.svg";
+  const imageUrl = imageUrls.length > 0 ? imageUrls[0] : PLACEHOLDER_PROPERTY;
 
   return (
     <Link
@@ -77,7 +78,7 @@ export function PropertyCard({
             src={imageUrl}
             alt={title}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg" }}
+            onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_PROPERTY }}
           />
           <span
             className={`absolute left-2 top-2 z-10 rounded-md px-2.5 py-1 text-xs font-semibold text-white ${

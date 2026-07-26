@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Wrench, MapPin } from "@/components/ui/icons"
+import { PLACEHOLDER_SERVICE } from "@/lib/placeholders"
 
 export interface ServiceRow {
   id: string; title: string; price: unknown; currency: string;
@@ -16,7 +17,7 @@ export function ServiceCard({ item, icon }: { item: ServiceRow; icon: typeof Wre
     <Link href={`/services/${item.id}`} className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
         {imageUrl ? (
-          <img src={imageUrl} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg" }} />
+          <img src={imageUrl} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_SERVICE }} />
         ) : (
           <div className="flex h-full items-center justify-center">
             <Icon className="h-12 w-12 text-text-secondary" />

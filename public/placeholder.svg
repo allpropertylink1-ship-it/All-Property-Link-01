@@ -1,5 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300" fill="none">
-  <rect width="400" height="300" fill="#e5e7eb"/>
-  <path d="M160 120l40 60 40-60-30-50-20 30-20-30-30 50z" fill="#9ca3af"/>
-  <circle cx="160" cy="100" r="15" fill="#9ca3af"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <rect width="400" height="300" fill="#f5f0eb"/>
+  <g transform="translate(200,150)">
+    <path d="M-80 40V-20l80-60 80 60v60h-30V-10l-50-38-50 38v50z" fill="#e8cfa6"/>
+    <rect x="-30" y="-10" width="60" height="50" rx="2" fill="#d4a76a"/>
+    <rect x="-10" y="10" width="20" height="30" rx="1" fill="#8b7355"/>
+    <circle cx="0" cy="-40" r="6" fill="#f5d742"/>
+    <path d="M-20-28L0-48 20-28" stroke="#e8cfa6" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="200" y="210" text-anchor="middle" font-family="system-ui" font-size="14" fill="#9ca3af">All Property Link</text>
 </svg>

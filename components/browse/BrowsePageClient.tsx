@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MapPin, ArrowRight, Home, BedDouble, Briefcase, Loader2 } from "@/components/ui/icons";
 import { formatPrice } from "@/lib/utils";
+import { PLACEHOLDER_PROPERTY, PLACEHOLDER_SERVICE } from "@/lib/placeholders";
 
 interface BrowseProperty {
   slug: string; title: string; price: number; currency: string;
@@ -30,11 +31,11 @@ type ServiceItem = BrowseService;
 
 function PropertyCard({ item, link }: { item: BrowseProperty; link: string }) {
   const images = Array.isArray(item.images) ? item.images : [];
-  const imageUrl = images.length > 0 ? String(images[0]) : "/placeholder.svg";
+  const imageUrl = images.length > 0 ? String(images[0]) : PLACEHOLDER_PROPERTY;
   return (
     <Link href={link} className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
-        <img src={imageUrl} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg" }} />
+        <img src={imageUrl} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_PROPERTY }} />
         <span className={`absolute left-2 top-2 z-10 rounded-md px-2.5 py-1 text-xs font-semibold text-white ${item.listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-400" : "bg-primary-500"}`}>
           {item.listingPurpose === "FOR_RENT_SHORT_TERM" ? "Airbnb" : item.propertyType === "LAND" ? "Land" : item.propertyType === "COMMERCIAL" ? "Commercial" : item.propertyType === "APARTMENT" ? "Apartment" : "House"}
         </span>
@@ -57,11 +58,11 @@ function PropertyCard({ item, link }: { item: BrowseProperty; link: string }) {
 
 function ServiceCard({ item }: { item: BrowseService }) {
   const images = Array.isArray(item.images) ? item.images : [];
-  const imageUrl = images.length > 0 ? String(images[0]) : "/placeholder.svg";
+  const imageUrl = images.length > 0 ? String(images[0]) : PLACEHOLDER_SERVICE;
   return (
     <Link href={`/services/${item.id}`} className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
-        <img src={imageUrl} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg" }} />
+        <img src={imageUrl} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_SERVICE }} />
         {item.category && (
           <span className="absolute left-2 top-2 z-10 rounded-md bg-accent-400 px-2.5 py-1 text-xs font-semibold text-white">
             {item.category.name}
