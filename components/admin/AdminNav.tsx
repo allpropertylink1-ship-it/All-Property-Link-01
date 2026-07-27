@@ -7,12 +7,11 @@ import {
   LayoutDashboard,
   Users,
   Building2,
-  Shield,
   Settings,
   LogOut,
   Menu,
   X,
-  UserCheck,
+  ExternalLink,
 } from "@/components/ui/icons";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -21,9 +20,8 @@ const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/listings", label: "Listings", icon: Building2 },
-  { href: "/admin/approvals", label: "Approvals", icon: UserCheck },
-  { href: "/admin/kyc", label: "KYC Verification", icon: Shield },
   { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "https://admin-panel-eight-tawny.vercel.app", label: "Admin Panel", icon: ExternalLink, external: true },
 ];
 
 export function AdminNav() {
@@ -63,11 +61,14 @@ export function AdminNav() {
 
           <nav className="flex-1 space-y-1 p-4" aria-label="Admin navigation">
             {navItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+              const isExternal = "external" in item && item.external
+              const isActive = !isExternal && (pathname === item.href || pathname.startsWith(item.href + "/"))
+              const Comp = isExternal ? "a" : Link
               return (
-                <Link
+                <Comp
                   key={item.href}
                   href={item.href}
+                  {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                   className={cn(
                     "touch-target flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                     isActive
@@ -77,7 +78,7 @@ export function AdminNav() {
                 >
                   <item.icon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
                   {item.label}
-                </Link>
+                </Comp>
               );
             })}
           </nav>
