@@ -36,7 +36,7 @@ export function PropertyGrid({ properties, viewToggle = "grid" }: PropertyGridPr
     <div
       className={
         viewToggle === "grid"
-          ? "grid gap-6 sm:grid-cols-1 lg:grid-cols-2"
+          ? "grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3"
           : "flex flex-col gap-4"
       }
     >

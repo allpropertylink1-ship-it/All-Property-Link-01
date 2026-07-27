@@ -17,7 +17,7 @@ export function CategoryGrid() {
       <div className="container mx-auto max-w-7xl px-4">
         <h2 className="mb-2 text-2xl font-bold text-foreground sm:text-3xl">Browse by Category</h2>
         <p className="mb-8 text-sm text-muted">Find exactly what you&apos;re looking for</p>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
           {categories.map((cat) => {
             const Icon = cat.icon
             return (
