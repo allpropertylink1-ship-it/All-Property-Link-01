@@ -4,24 +4,48 @@ import { useState, useEffect, useCallback } from "react"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
 import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
-import { Loader2, AlertCircle, Building2, Plus, X, CheckCircle, XCircle } from "@/components/ui/icons"
+import { Loader2, AlertCircle, Building2, Plus, X, CheckCircle, XCircle, Clock } from "@/components/ui/icons"
+
+interface AvailableListing {
+  id: string
+  title: string
+  slug: string
+  price: number
+  currency: string
+  city: string
+  propertyType: string
+}
 
 interface Claim {
   id: string
   amount: number
   currency: string
-  periodLabel: string | null
-  notes: string | null
+  adminModifiedAmount: number | null
   status: string
   adminNotes: string | null
+  agentNotes: string | null
   reviewedAt: string | null
+  paidAt: string | null
   createdAt: string
+  property: { id: string; title: string; slug: string; city: string; price: number } | null
 }
 
 const fmt = (n: number) => new Intl.NumberFormat("en-KE", { style: "currency", currency: "KES", minimumFractionDigits: 0 }).format(n)
 
-const statuses = ["", "PENDING", "APPROVED", "REJECTED"] as const
-const statusLabels: Record<string, string> = { "": "All", PENDING: "Pending", APPROVED: "Approved", REJECTED: "Rejected" }
+const statuses = ["", "PENDING", "AWAITING_AGENT_ACCEPTANCE", "PAID", "REJECTED"] as const
+const statusLabels: Record<string, string> = {
+  "": "All",
+  PENDING: "Pending",
+  AWAITING_AGENT_ACCEPTANCE: "Awaiting You",
+  PAID: "Paid",
+  REJECTED: "Rejected",
+}
+const statusStyles: Record<string, string> = {
+  PENDING: "bg-warning-50 text-warning-500",
+  AWAITING_AGENT_ACCEPTANCE: "bg-accent-50 text-accent-700",
+  PAID: "bg-success/10 text-success-700",
+  REJECTED: "bg-error/10 text-error-500",
+}
 
 export default function AgentClaimsPage() {
   const { user } = useAuth()
@@ -34,8 +58,9 @@ export default function AgentClaimsPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [statusFilter, setStatusFilter] = useState("")
   const [showForm, setShowForm] = useState(false)
+  const [listings, setListings] = useState<AvailableListing[]>([])
+  const [selectedListing, setSelectedListing] = useState("")
   const [formAmount, setFormAmount] = useState("")
-  const [formPeriod, setFormPeriod] = useState("")
   const [formNotes, setFormNotes] = useState("")
   const [submitting, setSubmitting] = useState(false)
 
@@ -56,24 +81,40 @@ export default function AgentClaimsPage() {
 
   useEffect(() => { fetchClaims() }, [fetchClaims])
 
+  async function openForm() {
+    setShowForm(true)
+    setSelectedListing("")
+    setFormAmount("")
+    setFormNotes("")
+    const { data } = await api.get<{ listings: AvailableListing[] }>("/api/claims/available-listings")
+    if (data) setListings(data.listings)
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const amount = parseFloat(formAmount)
     if (!amount || amount <= 0) return
     setSubmitting(true)
     const { data } = await api.post("/api/claims", {
+      propertyId: selectedListing || undefined,
       amount,
-      periodLabel: formPeriod || null,
-      notes: formNotes || null,
+      agentNotes: formNotes || null,
     })
     if (data) {
       setShowForm(false)
-      setFormAmount("")
-      setFormPeriod("")
-      setFormNotes("")
       await fetchClaims()
     }
     setSubmitting(false)
+  }
+
+  async function handleAccept(id: string) {
+    await api.patch(`/api/claims/${id}/accept-modified`)
+    await fetchClaims()
+  }
+
+  async function handleReject(id: string) {
+    await api.patch(`/api/claims/${id}/reject-modified`)
+    await fetchClaims()
   }
 
   if (user?.authMethod !== "agent") {
@@ -95,7 +136,7 @@ export default function AgentClaimsPage() {
           <h1 className="font-heading text-2xl font-bold text-text-primary">Payment Claims</h1>
           <p className="mt-1 text-sm text-text-secondary">{total} total claim{total !== 1 ? "s" : ""}</p>
         </div>
-        <button type="button" onClick={() => setShowForm(true)}
+        <button type="button" onClick={openForm}
           className="touch-target rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-700 transition-all inline-flex items-center gap-2"
         ><Plus size={18} />New Claim</button>
       </div>
@@ -123,29 +164,45 @@ export default function AgentClaimsPage() {
           <table className="w-full text-left text-sm">
             <thead className="bg-surface-secondary text-text-secondary">
               <tr>
+                <th className="px-4 py-3 font-medium">Property</th>
                 <th className="px-4 py-3 font-medium">Amount</th>
-                <th className="px-4 py-3 font-medium">Period</th>
                 <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Admin Notes</th>
+                <th className="px-4 py-3 font-medium">Notes</th>
                 <th className="px-4 py-3 font-medium">Date</th>
+                <th className="px-4 py-3 font-medium">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {claims.map((c) => (
                 <tr key={c.id} className="bg-surface hover:bg-surface-secondary">
-                  <td className="px-4 py-3 font-medium text-text-primary">{fmt(c.amount)}</td>
-                  <td className="px-4 py-3 text-text-secondary">{c.periodLabel || "-"}</td>
+                  <td className="px-4 py-3 text-text-primary font-medium">
+                    {c.property ? `${c.property.title} (${c.property.city})` : "-"}
+                  </td>
+                  <td className="px-4 py-3 text-text-primary">
+                    {c.adminModifiedAmount ? (
+                      <span><span className="line-through text-muted">{fmt(c.amount)}</span> → {fmt(Number(c.adminModifiedAmount))}</span>
+                    ) : fmt(c.amount)}
+                  </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                      c.status === "APPROVED" ? "bg-success/10 text-success-700" : c.status === "REJECTED" ? "bg-error/10 text-error-500" : "bg-warning-50 text-warning-500"
-                    }`}>
-                      {c.status === "APPROVED" && <CheckCircle size={12} className="mr-1 inline" />}
-                      {c.status === "REJECTED" && <XCircle size={12} className="mr-1 inline" />}
-                      {c.status}
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${statusStyles[c.status] || ""}`}>
+                      {c.status === "PAID" && <CheckCircle size={12} />}
+                      {c.status === "REJECTED" && <XCircle size={12} />}
+                      {c.status === "AWAITING_AGENT_ACCEPTANCE" && <Clock size={12} />}
+                      {statusLabels[c.status] || c.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-text-secondary max-w-[200px] truncate">{c.adminNotes || "-"}</td>
+                  <td className="px-4 py-3 text-text-secondary max-w-[200px] truncate">{c.agentNotes || c.adminNotes || "-"}</td>
                   <td className="px-4 py-3 text-text-secondary">{new Date(c.createdAt).toLocaleDateString()}</td>
+                  <td className="px-4 py-3">
+                    {c.status === "AWAITING_AGENT_ACCEPTANCE" && (
+                      <div className="flex gap-1">
+                        <button type="button" onClick={() => handleAccept(c.id)}
+                          className="rounded-md bg-success/10 px-2.5 py-1 text-xs font-medium text-success-700 hover:bg-success/20 transition-colors">Accept</button>
+                        <button type="button" onClick={() => handleReject(c.id)}
+                          className="rounded-md bg-error/10 px-2.5 py-1 text-xs font-medium text-error-500 hover:bg-error/20 transition-colors">Reject</button>
+                      </div>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -170,13 +227,22 @@ export default function AgentClaimsPage() {
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-text-primary mb-1">Amount (KES) *</label>
-                <input type="number" min="1" step="0.01" required value={formAmount} onChange={(e) => setFormAmount(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm placeholder:text-muted/60 focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15" />
+                <label className="block text-sm font-medium text-text-primary mb-1">Listing (optional)</label>
+                <select value={selectedListing} onChange={(e) => setSelectedListing(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15"
+                >
+                  <option value="">No specific listing</option>
+                  {listings.map((l) => (
+                    <option key={l.id} value={l.id}>{l.title} — {l.city} ({fmt(Number(l.price))})</option>
+                  ))}
+                </select>
+                {listings.length === 0 && (
+                  <p className="mt-1 text-xs text-muted">No unclaimed listings available from your referrals.</p>
+                )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-primary mb-1">Period</label>
-                <input type="text" value={formPeriod} onChange={(e) => setFormPeriod(e.target.value)} placeholder="e.g. July 2026"
+                <label className="block text-sm font-medium text-text-primary mb-1">Amount (KES) *</label>
+                <input type="number" min="1" step="0.01" required value={formAmount} onChange={(e) => setFormAmount(e.target.value)}
                   className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm placeholder:text-muted/60 focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15" />
               </div>
               <div>
