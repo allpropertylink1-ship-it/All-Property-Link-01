@@ -190,7 +190,7 @@ export default function BrowsePageClient() {
               </div>
 
               {section.items.length > 0 ? (
-                <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
                   {section.items.map(section.renderItem)}
                 </div>
               ) : (

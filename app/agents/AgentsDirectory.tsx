@@ -60,7 +60,7 @@ export function AgentsDirectory() {
       {filtered.length === 0 ? (
         <div className="py-20 text-center text-sm text-text-secondary">No representatives found.</div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((agent) => (
             <div key={agent.id} className="rounded-xl border border-border bg-surface p-6 transition-shadow hover:shadow-md">
               <div className="mb-3 flex items-center gap-3">

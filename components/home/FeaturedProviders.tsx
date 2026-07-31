@@ -31,7 +31,7 @@ export function FeaturedProviders() {
   return (
     <FeaturedSection title="Service Providers" viewAllHref="/services" loading={loading} error={error ?? undefined} emptyMessage={!loading && !error && services.length === 0 ? "No service providers yet." : undefined}>
       {services.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
           {services.map((s) => <ServiceCard key={s.id} item={s} icon={Briefcase} />)}
         </div>
       )}

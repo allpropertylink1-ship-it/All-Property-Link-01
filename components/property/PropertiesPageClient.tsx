@@ -24,13 +24,16 @@ export function PropertiesPageClient({ searchParams }: Props) {
   const [cities, setCities] = useState<City[]>([])
   const [error, setError] = useState<string | null>(null)
 
-  const { city, propertyType, purpose, page } = searchParams
+  const { city, propertyType, purpose, minPrice, maxPrice, bedrooms, page } = searchParams
 
   useEffect(() => {
     const params = new URLSearchParams()
     if (city) params.set("city", city)
     if (propertyType) params.set("type", propertyType)
     if (purpose) params.set("purpose", purpose)
+    if (minPrice) params.set("minPrice", minPrice)
+    if (maxPrice) params.set("maxPrice", maxPrice)
+    if (bedrooms) params.set("bedrooms", bedrooms)
     if (page) params.set("page", page)
     params.set("limit", "20")
 
@@ -41,7 +44,7 @@ export function PropertiesPageClient({ searchParams }: Props) {
       setData(propData)
       setCities((cityData?.cities || []).map((c: { city: string; count: number }) => ({ city: c.city, _count: { city: c.count } })))
     }).catch(e => setError(e.message))
-  }, [city, propertyType, purpose, page])
+  }, [city, propertyType, purpose, minPrice, maxPrice, bedrooms, page])
 
   if (error) return <div className="mx-auto max-w-7xl px-4 py-8"><p className="text-center text-red-600">{error}</p></div>
   if (!data) return <div className="mx-auto max-w-7xl px-4 py-8"><p className="text-center text-text-secondary">Loading properties...</p></div>
@@ -72,7 +75,7 @@ export function PropertiesPageClient({ searchParams }: Props) {
             <div className="mt-8 flex justify-center gap-2">
               {Array.from({ length: data.totalPages }, (_, i) => i + 1).map((p) => (
                 <a key={p}
-                  href={`/properties?page=${p}${city ? `&city=${city}` : ""}${propertyType ? `&propertyType=${propertyType}` : ""}${purpose ? `&purpose=${purpose}` : ""}`}
+                  href={`/properties?page=${p}${city ? `&city=${city}` : ""}${propertyType ? `&propertyType=${propertyType}` : ""}${purpose ? `&purpose=${purpose}` : ""}${minPrice ? `&minPrice=${minPrice}` : ""}${maxPrice ? `&maxPrice=${maxPrice}` : ""}${bedrooms ? `&bedrooms=${bedrooms}` : ""}`}
                   className={`touch-target inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm ${p === data.page ? "border-primary-600 bg-primary-600 text-white" : "border-border text-text-secondary hover:bg-surface-secondary"}`}>
                   {p}
                 </a>

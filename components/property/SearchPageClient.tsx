@@ -53,7 +53,7 @@ export default function SearchPageClient({
 
     if (q) {
       const params = new URLSearchParams();
-      params.set("q", q);
+      params.set("search", q);
       params.set("page", String(currentPage));
       fetches.push(
         fetch(`/api/properties?${params.toString()}`)
