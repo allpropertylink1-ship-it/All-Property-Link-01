@@ -31,7 +31,7 @@ export function FeaturedProperties() {
       {properties.length > 0 && (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
           {properties.map((p) => (
-            <PropertyCard key={p.slug} slug={p.slug} title={p.title} price={Number(p.price)} currency={p.currency}
+            <PropertyCard key={p.slug} slug={p.slug} title={p.title} price={p.price == null ? null : Number(p.price)} currency={p.currency}
               propertyType={p.propertyType} listingPurpose={p.listingPurpose} city={p.city} region={p.region}
               images={p.images} isFeatured={p.isFeatured} bedrooms={null} bathrooms={null} area={null} />
           ))}

@@ -129,7 +129,7 @@ export default function AdminListingsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-text-end">
-                      {prop.currency} {Number(prop.price).toLocaleString()}
+                      {prop.price == null ? "Price on request" : `${prop.currency} ${Number(prop.price).toLocaleString()}`}
                     </td>
                     <td className="px-4 py-3 text-text-center capitalize">
                       {prop.propertyType}

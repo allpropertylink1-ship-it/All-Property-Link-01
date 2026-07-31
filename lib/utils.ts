@@ -5,9 +5,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatPrice(price: number | string | { toString: () => string }, listingPurpose?: string) {
+export function formatPrice(price: number | string | null | undefined | { toString: () => string }, listingPurpose?: string) {
+  if (price == null) return "Price on request"
   const num = typeof price === "object" ? Number(price) : Number(price)
-  if (isNaN(num)) return "KES 0"
+  if (isNaN(num)) return "Price on request"
   const formatted = new Intl.NumberFormat("en-KE", { style: "currency", currency: "KES", minimumFractionDigits: 0 }).format(num)
   if (listingPurpose === "FOR_RENT_SHORT_TERM") return `${formatted}/night`
   if (listingPurpose === "FOR_RENT_LONG_TERM") return `${formatted}/month`

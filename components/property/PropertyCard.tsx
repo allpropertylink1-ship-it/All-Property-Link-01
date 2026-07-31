@@ -5,7 +5,7 @@ import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders";
 interface PropertyCardProps {
   slug: string;
   title: string;
-  price: number;
+  price: number | null;
   currency: string;
   propertyType: string;
   listingPurpose?: string | null;

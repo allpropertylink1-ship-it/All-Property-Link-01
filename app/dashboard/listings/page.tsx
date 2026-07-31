@@ -77,7 +77,7 @@ export default async function ListingsPage() {
                 </td>
                 <td className="px-4 py-3 text-text-secondary">{listing.city}</td>
                 <td className="px-4 py-3 text-text-primary">
-                  {listing.currency} {Number(listing.price).toLocaleString()}{listing.listingPurpose === "FOR_RENT_SHORT_TERM" ? "/night" : listing.listingPurpose === "FOR_RENT_LONG_TERM" ? "/month" : ""}
+                  {listing.price == null ? "Price on request" : `${listing.currency} ${Number(listing.price).toLocaleString()}${listing.listingPurpose === "FOR_RENT_SHORT_TERM" ? "/night" : listing.listingPurpose === "FOR_RENT_LONG_TERM" ? "/month" : ""}`}
                 </td>
                 <td className="px-4 py-3">
                   <span

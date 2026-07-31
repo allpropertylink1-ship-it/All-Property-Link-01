@@ -50,7 +50,7 @@ function PropertyCard({ item, link }: { item: BrowseProperty; link: string }) {
           {item.bedrooms != null && item.bedrooms > 0 && <span>{item.bedrooms} beds</span>}
           {item.bathrooms != null && item.bathrooms > 0 && <span>{item.bathrooms} baths</span>}
         </div>
-        <p className="mt-1.5 font-heading text-base font-bold text-primary-500">{formatPrice(Number(item.price), item.listingPurpose)}</p>
+        <p className="mt-1.5 font-heading text-base font-bold text-primary-500">{formatPrice(item.price, item.listingPurpose)}</p>
       </div>
     </Link>
   );

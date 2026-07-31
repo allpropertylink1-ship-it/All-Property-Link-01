@@ -15,7 +15,7 @@ import { LocationPicker } from "@/components/shared/LocationPicker";
 interface PropertyData {
   title: string;
   description: string;
-  price: number;
+  price: number | null;
   propertyType: "APARTMENT" | "HOUSE" | "LAND" | "COMMERCIAL";
   listingPurpose?: "FOR_SALE" | "FOR_RENT_LONG_TERM" | "FOR_RENT_SHORT_TERM" | null;
   city: string;
@@ -33,7 +33,10 @@ interface PropertyData {
 const listingSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  price: z.coerce.number().positive("Price must be positive"),
+  price: z.preprocess(
+    (v) => (v === "" || v === undefined ? undefined : Number(v)),
+    z.number().positive("Price must be positive").optional()
+  ).nullable(),
   propertyType: z.enum(["APARTMENT", "HOUSE", "LAND", "COMMERCIAL"]),
   listingPurpose: z.enum(["FOR_SALE", "FOR_RENT_LONG_TERM", "FOR_RENT_SHORT_TERM"]).optional(),
   city: z.string().min(1, "City is required"),

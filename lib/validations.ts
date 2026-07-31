@@ -3,7 +3,10 @@ import { z } from "zod";
 export const propertySchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  price: z.coerce.number().positive("Price must be positive"),
+  price: z.preprocess(
+    (v) => (v === "" || v === undefined ? undefined : Number(v)),
+    z.number().positive("Price must be positive").optional()
+  ).nullable(),
   currency: z.string().default("KES"),
   propertyType: z.enum(["APARTMENT", "HOUSE", "LAND", "COMMERCIAL"]),
   status: z.enum(["AVAILABLE", "SOLD", "RENTED"]).default("AVAILABLE"),

@@ -24,7 +24,7 @@ export default async function EditListingPage({ params }: { params: { id: string
           property={{
             title: property.title,
             description: property.description,
-            price: Number(property.price),
+            price: property.price == null ? null : Number(property.price),
             propertyType: property.propertyType as "APARTMENT" | "HOUSE" | "LAND" | "COMMERCIAL",
             listingPurpose: property.listingPurpose as "FOR_SALE" | "FOR_RENT_LONG_TERM" | "FOR_RENT_SHORT_TERM" | null | undefined,
             city: property.city,
