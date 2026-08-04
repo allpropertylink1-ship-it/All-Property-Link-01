@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { MapPin, Wrench, Briefcase } from "@/components/ui/icons"
-import { PLACEHOLDER_SERVICE } from "@/lib/placeholders"
+import { AVATAR_POOL } from "@/lib/placeholders"
 
 export interface ProfileRow {
   id: string
@@ -24,8 +24,17 @@ export interface ProfileRow {
   }
 }
 
-function getInitials(firstName: string, lastName: string) {
-  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+function hashSeed(str: string): number {
+  let h = 5381
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) + h + str.charCodeAt(i)) >>> 0
+  }
+  return h
+}
+
+function pickAvatar(seed: string): string {
+  const idx = hashSeed(seed) % AVATAR_POOL.length
+  return AVATAR_POOL[idx]
 }
 
 function getDisplayName(user: ProfileRow["user"]) {
@@ -40,9 +49,7 @@ function getSubtitle(user: ProfileRow["user"]) {
 
 function getPhotoUrl(item: ProfileRow): string | null {
   if (item.user.businessLogo) return item.user.businessLogo
-  const images = Array.isArray(item.images) ? item.images : []
-  if (typeof item.images === "string" && item.images) return item.images
-  if (images.length > 0) return String(images[0])
+  if (item.user.avatar) return item.user.avatar
   return null
 }
 
@@ -54,7 +61,7 @@ export function ProfileCard({
   variant?: "fundi" | "provider"
 }) {
   const photoUrl = getPhotoUrl(item)
-  const initials = getInitials(item.user.firstName, item.user.lastName)
+  const fallbackAvatar = pickAvatar(item.id)
   const displayName = getDisplayName(item.user)
   const subtitle = getSubtitle(item.user)
   const location = [item.city, item.user.city].filter(Boolean).join(", ")
@@ -74,15 +81,18 @@ export function ProfileCard({
               alt={displayName}
               className="h-full w-full object-cover"
               onError={(e) => {
-                ;(e.target as HTMLImageElement).src = PLACEHOLDER_SERVICE
+                ;(e.target as HTMLImageElement).src = fallbackAvatar
               }}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-accent-50">
-              <span className="text-2xl font-bold text-accent-400 sm:text-3xl">
-                {initials}
-              </span>
-            </div>
+            <img
+              src={fallbackAvatar}
+              alt={displayName}
+              className="h-full w-full object-cover"
+              onError={(e) => {
+                ;(e.target as HTMLImageElement).style.display = "none"
+              }}
+            />
           )}
         </div>
         {/* Online-style accent dot */}
@@ -95,9 +105,7 @@ export function ProfileCard({
       </h3>
 
       {/* Subtitle (company owner name) */}
-      {subtitle && (
-        <p className="mt-0.5 text-xs text-text-secondary">{subtitle}</p>
-      )}
+      {subtitle && <p className="mt-0.5 text-xs text-text-secondary">{subtitle}</p>}
 
       {/* Category pill */}
       {item.category && (
