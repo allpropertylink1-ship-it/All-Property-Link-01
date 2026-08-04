@@ -7,6 +7,7 @@ import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders"
 
 const ROTATION_DAYS = 2
 const DAY_MS = 24 * 60 * 60 * 1000
+const AUTO_INTERVAL_MS = 6000
 
 interface Slide {
   slug: string
@@ -73,6 +74,7 @@ export function HeroSection() {
   const [slides, setSlides] = useState<Slide[]>([])
   const [active, setActive] = useState(0)
   const [loaded, setLoaded] = useState(false)
+  const [paused, setPaused] = useState(false)
 
   useEffect(() => {
     const purposes = ["FOR_RENT_SHORT_TERM", "FOR_SALE", "FOR_RENT_LONG_TERM"]
@@ -106,16 +108,30 @@ export function HeroSection() {
       .catch(() => setLoaded(true))
   }, [])
 
+  // Auto-advance every 6s, pausing while the user hovers or interacts
+  useEffect(() => {
+    if (slides.length < 2 || paused) return
+    const t = setInterval(
+      () => setActive((a) => (a + 1) % slides.length),
+      AUTO_INTERVAL_MS
+    )
+    return () => clearInterval(t)
+  }, [slides.length, paused])
+
   const go = (dir: number) =>
     setActive((a) => (a + dir + slides.length) % slides.length)
 
   const slide = slides.length > 0 ? slides[active] : null
 
   return (
-    <section className="relative flex min-h-[560px] flex-col overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-accent pb-16 pt-16 sm:min-h-[620px] sm:pb-20 sm:pt-20">
+    <section
+      className="relative flex min-h-[560px] flex-col overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-accent pb-16 pt-16 sm:min-h-[620px] sm:pb-20 sm:pt-20"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
       {/* Featured listing image fills the hero as its background */}
       {slide && (
-        <div className="absolute inset-0">
+        <div key={slide.slug} className="absolute inset-0 animate-[fadeUp_0.6s_ease-out]">
           <img
             src={slide.image}
             alt={`${slide.title} in ${slide.city}`}
