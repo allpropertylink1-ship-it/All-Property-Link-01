@@ -152,10 +152,6 @@ export function HeroSection() {
       )}
       <div className="absolute right-0 top-0 h-96 w-96 translate-x-1/3 -translate-y-1/3 rounded-full bg-white/5 blur-3xl" />
       <div className="container relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center px-4 text-center">
-        <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/25 px-4 py-1.5 text-xs font-medium text-white/90 backdrop-blur-sm">
-          <span className="flex h-1.5 w-1.5 rounded-full bg-teal-300" />
-          Kenya&apos;s Trusted Property Marketplace
-        </div>
         <h1 className="mx-auto max-w-4xl text-4xl font-bold leading-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-5xl lg:text-6xl">
           Find Your Perfect
           <span className="block text-teal-200">Property in Kenya</span>
