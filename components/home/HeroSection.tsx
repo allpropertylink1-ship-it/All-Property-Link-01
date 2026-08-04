@@ -112,23 +112,40 @@ export function HeroSection() {
   const slide = slides.length > 0 ? slides[active] : null
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-accent pb-20 pt-16 sm:pb-24 sm:pt-20">
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-10" />
+    <section className="relative flex min-h-[560px] flex-col overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-accent pb-16 pt-16 sm:min-h-[620px] sm:pb-20 sm:pt-20">
+      {/* Featured listing image fills the hero as its background */}
+      {slide && (
+        <div className="absolute inset-0">
+          <img
+            src={slide.image}
+            alt={`${slide.title} in ${slide.city}`}
+            className="h-full w-full object-cover"
+            onError={(e) => {
+              ;(e.target as HTMLImageElement).src = PLACEHOLDER_PROPERTY
+            }}
+          />
+          {/* Overlay to keep text and controls readable */}
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/85 via-black/45 to-black/75" />
+        </div>
+      )}
+      {!slide && (
+        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-10" />
+      )}
       <div className="absolute right-0 top-0 h-96 w-96 translate-x-1/3 -translate-y-1/3 rounded-full bg-white/5 blur-3xl" />
-      <div className="container relative mx-auto max-w-7xl px-4 text-center">
-        <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-medium text-white/80 backdrop-blur-sm">
+      <div className="container relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center px-4 text-center">
+        <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/25 px-4 py-1.5 text-xs font-medium text-white/90 backdrop-blur-sm">
           <span className="flex h-1.5 w-1.5 rounded-full bg-teal-300" />
           Kenya&apos;s Trusted Property Marketplace
         </div>
-        <h1 className="mx-auto max-w-4xl text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
+        <h1 className="mx-auto max-w-4xl text-4xl font-bold leading-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-5xl lg:text-6xl">
           Find Your Perfect
           <span className="block text-teal-200">Property in Kenya</span>
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-base text-white/70 sm:text-lg">
+        <p className="mx-auto mt-4 max-w-2xl text-base text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)] sm:text-lg">
           Browse thousands of properties for sale, rent, and short-term stays across Kenya.
           Connect directly with verified agents and property owners.
         </p>
-        <div className="mx-auto mt-8 flex max-w-xl items-center gap-2 rounded-2xl border border-white/20 bg-white/10 p-1.5 backdrop-blur-sm">
+        <div className="mx-auto mt-8 flex max-w-xl items-center gap-2 rounded-2xl border border-white/20 bg-black/25 p-1.5 backdrop-blur-md">
           <div className="flex flex-1 items-center gap-2.5 px-4 py-2.5">
             <Search size={18} className="text-white/60" />
             <input
@@ -145,67 +162,63 @@ export function HeroSection() {
           </Link>
         </div>
 
-        {/* Featured listing carousel — rotates every 2 days */}
+        {/* Featured listing caption card — rotates every 2 days */}
         {!loaded && (
-          <div className="mx-auto mt-12 h-64 w-full max-w-4xl animate-pulse rounded-3xl bg-white/10 sm:h-80" />
+          <div className="mx-auto mt-10 w-full max-w-4xl animate-pulse rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
+            <div className="h-3 w-28 rounded bg-white/25" />
+            <div className="mt-3 h-5 w-2/3 rounded bg-white/25" />
+            <div className="mt-2 h-4 w-32 rounded bg-white/25" />
+          </div>
         )}
         {loaded && slide && (
-          <div className="mx-auto mt-12 w-full max-w-4xl">
-            <div className="relative overflow-hidden rounded-3xl border border-white/15 shadow-2xl">
+          <div className="mx-auto mt-10 w-full max-w-4xl rounded-2xl border border-white/20 bg-black/30 p-4 backdrop-blur-md sm:p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <Link
                 href={`/properties/${(slide.city || "kenya").toLowerCase()}/${slide.slug}`}
-                className="group relative block"
+                className="group min-w-0 flex-1 text-left"
               >
-                <div className="relative aspect-[4/3] w-full sm:aspect-[16/9]">
-                  <img
-                    src={slide.image}
-                    alt={`${slide.title} in ${slide.city}`}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    onError={(e) => {
-                      ;(e.target as HTMLImageElement).src = PLACEHOLDER_PROPERTY
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-4 text-left sm:p-6">
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-white/70">
-                      Featured listing
-                    </p>
-                    <h2 className="mt-1 font-heading text-lg font-bold leading-tight text-white sm:text-2xl">
-                      {slide.title}
-                    </h2>
-                    <p className="mt-1 font-heading text-base font-bold text-accent-300 sm:text-xl">
-                      {formatPrice(slide.price, slide.listingPurpose ?? undefined)}
-                    </p>
-                    <span className="mt-3 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-primary transition-colors group-hover:bg-teal-50">
-                      View Listing
-                      <ArrowUpRight />
-                    </span>
-                  </div>
-                </div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-white/70">
+                  Featured listing
+                </p>
+                <h2 className="mt-1 truncate font-heading text-base font-bold leading-tight text-white sm:text-lg">
+                  {slide.title}
+                </h2>
+                <p className="mt-0.5 font-heading text-sm font-bold text-accent-300 sm:text-base">
+                  {formatPrice(slide.price, slide.listingPurpose ?? undefined)}
+                </p>
               </Link>
-              {slides.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    aria-label="Previous listing"
-                    onClick={() => go(-1)}
-                    className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/15 text-white backdrop-blur-sm transition-colors hover:bg-white/30"
-                  >
-                    <ChevronLeft />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Next listing"
-                    onClick={() => go(1)}
-                    className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/15 text-white backdrop-blur-sm transition-colors hover:bg-white/30"
-                  >
-                    <ChevronRight />
-                  </button>
-                </>
-              )}
+              <div className="flex shrink-0 items-center gap-2">
+                <Link
+                  href={`/properties/${(slide.city || "kenya").toLowerCase()}/${slide.slug}`}
+                  className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-teal-50"
+                >
+                  View Listing
+                  <ArrowUpRight />
+                </Link>
+                {slides.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      aria-label="Previous listing"
+                      onClick={() => go(-1)}
+                      className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/15 text-white backdrop-blur-sm transition-colors hover:bg-white/30"
+                    >
+                      <ChevronLeft />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Next listing"
+                      onClick={() => go(1)}
+                      className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/15 text-white backdrop-blur-sm transition-colors hover:bg-white/30"
+                    >
+                      <ChevronRight />
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
             {slides.length > 1 && (
-              <div className="mt-4 flex items-center justify-center gap-1.5">
+              <div className="mt-3 flex items-center justify-center gap-1.5">
                 {slides.map((s, i) => (
                   <button
                     key={s.slug}
