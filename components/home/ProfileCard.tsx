@@ -50,6 +50,14 @@ function getSubtitle(user: ProfileRow["user"]) {
 function getPhotoUrl(item: ProfileRow): string | null {
   if (item.user.businessLogo) return item.user.businessLogo
   if (item.user.avatar) return item.user.avatar
+  const raw = item.images
+  if (typeof raw === "string" && raw.trim()) return raw
+  if (Array.isArray(raw)) {
+    const first = raw.find(
+      (u): u is string => typeof u === "string" && u.trim().length > 0
+    )
+    if (first) return first
+  }
   return null
 }
 
