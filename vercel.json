@@ -1,0 +1,28 @@
+{
+  "headers": [
+    {
+      "source": "/api/properties/:path*",
+      "headers": [
+        { "key": "x-vercel-enable-rewrite-caching", "value": "1" }
+      ]
+    },
+    {
+      "source": "/api/services/:path*",
+      "headers": [
+        { "key": "x-vercel-enable-rewrite-caching", "value": "1" }
+      ]
+    },
+    {
+      "source": "/api/reviews/:path*",
+      "headers": [
+        { "key": "x-vercel-enable-rewrite-caching", "value": "1" }
+      ]
+    },
+    {
+      "source": "/api/health/:path*",
+      "headers": [
+        { "key": "x-vercel-enable-rewrite-caching", "value": "1" }
+      ]
+    }
+  ]
+}

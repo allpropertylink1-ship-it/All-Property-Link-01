@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { MapPin, Wrench, Briefcase } from "@/components/ui/icons"
 import { AVATAR_POOL } from "@/lib/placeholders"
+import { optimizeImageUrl } from "@/lib/images"
 
 export interface ProfileRow {
   id: string
@@ -69,6 +70,7 @@ export function ProfileCard({
   variant?: "fundi" | "provider"
 }) {
   const photoUrl = getPhotoUrl(item)
+  const photoSrc = photoUrl ? optimizeImageUrl(photoUrl, 600) : null
   const fallbackAvatar = pickAvatar(item.id)
   const displayName = getDisplayName(item.user)
   const subtitle = getSubtitle(item.user)
@@ -83,11 +85,13 @@ export function ProfileCard({
       {/* Photo */}
       <div className="relative mb-4">
         <div className="h-24 w-24 overflow-hidden rounded-full border-[3px] border-accent-300 bg-surface-secondary shadow-sm transition-shadow duration-300 group-hover:shadow-md sm:h-28 sm:w-28 md:h-32 md:w-32">
-          {photoUrl ? (
+          {photoSrc ? (
             <img
-              src={photoUrl}
+              src={photoSrc}
               alt={displayName}
               className="h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
               onError={(e) => {
                 ;(e.target as HTMLImageElement).src = fallbackAvatar
               }}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MapPin, ArrowRight, Home, BedDouble, Briefcase, Loader2 } from "@/components/ui/icons";
 import { formatPrice } from "@/lib/utils";
 import { PLACEHOLDER_PROPERTY, PLACEHOLDER_SERVICE } from "@/lib/placeholders";
+import { optimizeImageUrl } from "@/lib/images";
 
 interface BrowseProperty {
   slug: string; title: string; price: number; currency: string;
@@ -31,7 +32,7 @@ type ServiceItem = BrowseService;
 
 function PropertyCard({ item, link }: { item: BrowseProperty; link: string }) {
   const images = Array.isArray(item.images) ? item.images : [];
-  const imageUrl = images.length > 0 ? String(images[0]) : PLACEHOLDER_PROPERTY;
+  const imageUrl = images.length > 0 ? optimizeImageUrl(String(images[0]), 800) : PLACEHOLDER_PROPERTY;
   return (
     <Link href={link} className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
@@ -58,7 +59,7 @@ function PropertyCard({ item, link }: { item: BrowseProperty; link: string }) {
 
 function ServiceCard({ item }: { item: BrowseService }) {
   const images = Array.isArray(item.images) ? item.images : [];
-  const imageUrl = images.length > 0 ? String(images[0]) : PLACEHOLDER_SERVICE;
+  const imageUrl = images.length > 0 ? optimizeImageUrl(String(images[0]), 600) : PLACEHOLDER_SERVICE;
   return (
     <Link href={`/services/${item.id}`} className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">

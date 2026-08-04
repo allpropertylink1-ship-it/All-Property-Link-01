@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
 import { Building2, Bed, Bath, Maximize2, Phone, Mail, Globe, Sparkles, MessageCircle, Loader2 } from "@/components/ui/icons";
+import { optimizeImageUrl } from "@/lib/images";
 
 const PropertyMap = dynamic(() => import("@/components/shared/PropertyMap").then(m => ({ default: m.PropertyMap })), {
   ssr: false,
@@ -111,7 +112,9 @@ export default function PropertyDetailClient({ slug }: { slug: string }) {
   }
 
   const rawImages = Array.isArray(property.images) ? property.images : [];
-  const imageUrls = rawImages.filter((u): u is string => typeof u === "string");
+  const imageUrls = rawImages
+    .filter((u): u is string => typeof u === "string")
+    .map((u) => optimizeImageUrl(u, 1600));
 
   const otherFiltered = otherProperties.filter((op) => op.id !== property.id);
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Search } from "@/components/ui/icons"
 import { formatPrice } from "@/lib/utils"
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders"
+import { optimizeImageUrl } from "@/lib/images"
 
 const ROTATION_DAYS = 2
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -133,9 +134,11 @@ export function HeroSection() {
       {slide && (
         <div key={slide.slug} className="absolute inset-0 animate-[fadeUp_0.6s_ease-out]">
           <img
-            src={slide.image}
+            src={optimizeImageUrl(slide.image, 1920)}
             alt={`${slide.title} in ${slide.city}`}
             className="h-full w-full object-cover"
+            fetchPriority="high"
+            decoding="async"
             onError={(e) => {
               ;(e.target as HTMLImageElement).src = PLACEHOLDER_PROPERTY
             }}

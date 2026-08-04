@@ -7,8 +7,6 @@ import { FeaturedAirbnbs } from "@/components/home/FeaturedAirbnbs"
 import { FeaturedFundis } from "@/components/home/FeaturedFundis"
 import { FeaturedProviders } from "@/components/home/FeaturedProviders"
 
-export const dynamic = "force-dynamic"
-
 export default function HomePage() {
   return (
     <>
