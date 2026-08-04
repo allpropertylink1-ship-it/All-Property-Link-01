@@ -1,9 +1,6 @@
 ﻿"use server";
 
-import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
-import { sendEmail } from "@/lib/resend";
-import { contactFormEmail } from "@/lib/emails/templates";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.allpropertylink.co.ke";
 
 export async function sendContactMessage(formData: FormData) {
   try {
@@ -17,17 +14,17 @@ export async function sendContactMessage(formData: FormData) {
       return { success: false, error: "Name, email, and message are required" };
     }
 
-    const admins = await prisma.user.findMany({
-      where: { role: "ADMIN", email: { not: null } },
-      select: { email: true },
+    const res = await fetch(`${API_URL}/api/contact`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, phone, subject, message }),
     });
-    for (const admin of admins) {
-      if (admin.email) {
-        await sendEmail(admin.email, "Contact Form Submission", contactFormEmail({ name, email, phone, subject, message }));
-      }
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      return { success: false, error: body.error || "Failed to send message. Please try again." };
     }
 
-    revalidatePath("/contact");
     return { success: true };
   } catch {
     return { success: false, error: "Failed to send message. Please try again." };

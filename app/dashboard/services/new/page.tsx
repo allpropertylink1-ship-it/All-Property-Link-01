@@ -1,13 +1,20 @@
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { serverFetch } from "@/lib/auth-utils";
 import { requireAuth } from "@/lib/auth-utils";
 import { Building2 } from "@/components/ui/icons";
 import { NewServiceForm } from "./NewServiceForm";
 
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  children: { id: string; name: string; slug: string }[];
+}
+
 export default async function NewServicePage() {
   const session = await requireAuth();
 
-  const types = session.user.userTypes ?? []
+  const types = (session.user as { userTypes?: string[] }).userTypes ?? []
   if (!types.includes("FUNDI") && !types.includes("SERVICE_PROVIDER")) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -23,12 +30,9 @@ export default async function NewServicePage() {
     )
   }
 
-  const categories = await prisma.serviceCategory.findMany({
-    orderBy: { name: "asc" },
-    include: { children: { orderBy: { name: "asc" } } },
-  });
-
-  const rootCategories = categories.filter((c) => !c.parentId);
+  const res = await serverFetch("/api/services/categories");
+  const data = await res.json().catch(() => null);
+  const rootCategories: Category[] = data?.categories || [];
 
   return (
     <div>

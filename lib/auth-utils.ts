@@ -12,11 +12,35 @@ interface SessionUser {
   isAgent?: boolean
   companyName?: string
   userTypes?: string[]
+  onboardingComplete?: boolean
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.allpropertylink.co.ke"
 
 import { cache } from "react";
+
+/**
+ * Server-side fetch that forwards the user's cookies (access_token, refresh_token,
+ * csrf-token) to the backend API. Mutations also forward the CSRF cookie/header pair.
+ */
+export const serverFetch = cache(async (path: string, init?: RequestInit) => {
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  const cookie = cookieStore.toString();
+  const method = (init?.method || "GET").toUpperCase();
+  const headers: Record<string, string> = {
+    ...(init?.body ? { "Content-Type": "application/json" } : {}),
+    ...(cookie ? { Cookie: cookie } : {}),
+  };
+  if (method !== "GET" && method !== "HEAD" && method !== "OPTIONS") {
+    const csrf = cookieStore.get("csrf-token")?.value;
+    if (csrf) headers["x-csrf-token"] = csrf;
+  }
+  return fetch(`${API_URL}${path}`, {
+    ...init,
+    headers: { ...headers, ...(init?.headers as Record<string, string> | undefined) },
+  });
+});
 
 export const getSession = cache(async () => {
   try {

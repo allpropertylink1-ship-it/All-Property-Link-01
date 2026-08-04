@@ -1,14 +1,21 @@
 import Link from "next/link";
-import { requireAuth } from "@/lib/auth-utils";
-import { prisma } from "@/lib/prisma";
+import { requireAuth, serverFetch } from "@/lib/auth-utils";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Building2, Plus } from "@/components/ui/icons";
 
+interface ServiceRow {
+  id: string;
+  title: string;
+  category: { id: string; name: string; slug: string } | null;
+  city: string | null;
+  moderationStatus: string;
+  reviewCount: number;
+}
+
 export default async function MyServicesPage() {
   const session = await requireAuth();
-  const userId = (session.user as { id: string }).id;
 
-  const types = session.user.userTypes ?? []
+  const types = (session.user as { userTypes?: string[] }).userTypes ?? []
   if (!types.includes("FUNDI") && !types.includes("SERVICE_PROVIDER")) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -24,21 +31,9 @@ export default async function MyServicesPage() {
     )
   }
 
-  const services = await prisma.serviceListing.findMany({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
-    include: {
-      category: { select: { name: true, slug: true } },
-    },
-  });
-
-  const serviceIds = services.map(s => s.id)
-  const reviewCounts = await prisma.review.groupBy({
-    by: ["targetId"],
-    where: { targetType: "SERVICE_LISTING", targetId: { in: serviceIds } },
-    _count: { targetId: true },
-  })
-  const reviewCountMap = new Map(reviewCounts.map(r => [r.targetId, r._count.targetId]))
+  const res = await serverFetch("/api/user/services");
+  const data = await res.json().catch(() => null);
+  const services: ServiceRow[] = data?.services || [];
 
   if (services.length === 0) {
     return (
@@ -91,7 +86,7 @@ export default async function MyServicesPage() {
                   {s.title}
                 </td>
                 <td className="px-4 py-3 text-text-secondary">
-                  {s.category.name}
+                  {s.category?.name}
                 </td>
                 <td className="px-4 py-3 text-text-secondary">
                   {s.city || "\u2014"}
@@ -114,7 +109,7 @@ export default async function MyServicesPage() {
                   </span>
                 </td>
                 <td className="px-4 py-3 text-text-secondary">
-                  {reviewCountMap.get(s.id) ?? 0}
+                  {s.reviewCount ?? 0}
                 </td>
                 <td className="px-4 py-3">
                   <Link

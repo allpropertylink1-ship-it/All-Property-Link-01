@@ -1,5 +1,4 @@
-import { requireAuth } from "@/lib/auth-utils"
-import { prisma } from "@/lib/prisma"
+import { requireAuth, serverFetch } from "@/lib/auth-utils"
 import { redirect } from "next/navigation"
 import {
   Building2, Bell, Wrench,
@@ -8,17 +7,10 @@ import {
 import Link from "next/link"
 
 async function getStats(userId: string) {
-  const [totalListings, totalServices, unreadNotifications] = await Promise.all([
-    prisma.property.count({ where: { agentId: userId, deletedAt: null } }),
-    prisma.serviceListing.count({ where: { userId, status: { not: "INACTIVE" } } }),
-    prisma.notification.count({ where: { userId, read: false } }),
-  ])
-
-  return {
-    totalListings,
-    totalServices,
-    unreadNotifications,
-  }
+  const res = await serverFetch(`/api/user/stats`)
+  if (!res.ok) return { totalListings: 0, totalServices: 0, unreadNotifications: 0 }
+  const data = await res.json().catch(() => null)
+  return data?.stats || { totalListings: 0, totalServices: 0, unreadNotifications: 0 }
 }
 
 const statCards = [
@@ -36,29 +28,29 @@ const quickActions = [
 
 export default async function DashboardPage() {
   const session = await requireAuth()
-  const userId = (session.user as { id: string }).id
+  const user = session.user as {
+    id: string
+    kycStatus?: string
+    onboardingComplete?: boolean
+    companyName?: string | null
+  }
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { onboardingComplete: true, kycStatus: true, category: true, companyName: true },
-  })
-
-  if (user && (user.kycStatus === "NONE" || user.kycStatus === "REJECTED")) {
+  if (user.kycStatus === "NONE" || user.kycStatus === "REJECTED") {
     redirect("/dashboard/kyc")
   }
 
-  if (user && !user.onboardingComplete) {
+  if (user.onboardingComplete === false) {
     redirect("/dashboard/onboarding")
   }
 
-  const stats = await getStats(userId)
+  const stats = await getStats(user.id)
 
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="mb-1 font-heading text-2xl font-bold text-text-primary">
-            Welcome back{user?.companyName ? `, ${user.companyName}` : ""}
+            Welcome back{user.companyName ? `, ${user.companyName}` : ""}
           </h1>
           <p className="text-sm text-text-secondary">
             Here&apos;s an overview of your business activity
@@ -97,7 +89,7 @@ export default async function DashboardPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {statCards.map((card) => {
             const Icon = card.icon
-            const value = stats[card.key as keyof typeof stats] as number
+            const value = stats[card.key] as number
             return (
               <Link
                 key={card.key}

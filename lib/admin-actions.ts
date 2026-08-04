@@ -1,49 +1,35 @@
 "use server";
 
+import { serverFetch } from "@/lib/auth-utils";
+
 export async function getProperties(page: number) {
-  const { prisma } = await import("@/lib/prisma");
-  const { requireRole } = await import("@/lib/auth-utils");
-  await requireRole(["ADMIN"]);
-
-  const where: Record<string, unknown> = { deletedAt: null };
-
-  const [count, data] = await Promise.all([
-    prisma.property.count({ where }),
-    prisma.property.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip: (page - 1) * 20,
-      take: 20,
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        price: true,
-        currency: true,
-        propertyType: true,
-        city: true,
-        moderationStatus: true,
-        isPublished: true,
-        createdAt: true,
-        agent: { select: { firstName: true, lastName: true, avatar: true } },
-      },
-    }),
-  ]);
+  await requireAdmin();
+  const res = await serverFetch(`/api/admin/properties?page=${page}&limit=20`);
+  const data = await res.json().catch(() => null);
 
   return {
-    total: count,
-    properties: data.map((p) => ({
+    total: data?.pagination?.total ?? 0,
+    properties: (data?.properties || []).map((p: {
+      id: string; slug: string; title: string; price: number | null; currency: string;
+      propertyType: string; city: string; moderationStatus: string; isPublished: boolean;
+      createdAt: string; agent: { firstName: string; lastName: string; avatar: string | null } | null;
+    }) => ({
       id: p.id,
       slug: p.slug,
       title: p.title,
-      price: Number(p.price),
+      price: p.price == null ? null : Number(p.price),
       currency: p.currency,
       propertyType: p.propertyType,
       city: p.city,
       moderationStatus: p.moderationStatus,
       isPublished: p.isPublished,
-      createdAt: p.createdAt.toISOString(),
+      createdAt: p.createdAt,
       agent: p.agent,
     })),
   };
+}
+
+async function requireAdmin() {
+  const { requireRole } = await import("@/lib/auth-utils");
+  await requireRole(["ADMIN"]);
 }

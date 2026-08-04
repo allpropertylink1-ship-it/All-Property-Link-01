@@ -1,36 +1,24 @@
 import { Suspense } from "react";
-import { requireRole } from "@/lib/auth-utils";
-import { prisma } from "@/lib/prisma";
+import { requireRole, serverFetch } from "@/lib/auth-utils";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 
 export default async function AdminDashboard() {
   await requireRole(["ADMIN"]);
 
-  const [
-    totalUsers,
-    totalAgents,
-    totalProperties,
-    pendingKyc,
-    recentProperties,
-  ] = await Promise.all([
-    prisma.user.count({ where: { deletedAt: null } }),
-    prisma.aplAgent.count(),
-    prisma.property.count({ where: { deletedAt: null } }),
-    prisma.user.count({ where: { kycStatus: "PENDING" } }),
-    prisma.property.findMany({
-      where: { deletedAt: null },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: { id: true, title: true, city: true, moderationStatus: true, createdAt: true, agent: { select: { firstName: true, lastName: true } } },
-    }),
+  const [dashboardRes, propertiesRes] = await Promise.all([
+    serverFetch("/api/admin/dashboard"),
+    serverFetch("/api/admin/properties?limit=5"),
   ]);
+  const dashboard = await dashboardRes.json().catch(() => null);
+  const propertiesData = await propertiesRes.json().catch(() => null);
+  const recentProperties = propertiesData?.properties || [];
 
   const stats = [
-    { label: "Total Users", value: totalUsers, icon: "Users" },
-    { label: "APL Representatives", value: totalAgents, icon: "Prt" },
-    { label: "Properties", value: totalProperties, icon: "Prop" },
-    { label: "KYC Pending", value: pendingKyc, icon: "KYC" },
+    { label: "Total Users", value: dashboard?.totalUsers ?? 0, icon: "Users" },
+    { label: "APL Representatives", value: dashboard?.totalAgents ?? 0, icon: "Prt" },
+    { label: "Active Properties", value: dashboard?.activeProperties ?? 0, icon: "Prop" },
+    { label: "KYC Pending", value: dashboard?.kycPending ?? 0, icon: "KYC" },
   ];
 
   return (
@@ -66,7 +54,7 @@ export default async function AdminDashboard() {
             <EmptyState title="No properties yet" description="New properties will appear here." />
           ) : (
             <div className="divide-y divide-border">
-              {recentProperties.map((prop) => (
+              {recentProperties.map((prop: { id: string; title: string; city: string; moderationStatus: string; createdAt: string; agent: { firstName: string; lastName: string } | null }) => (
                 <div key={prop.id} className="px-6 py-4 hover:bg-surface-secondary transition-colors">
                   <p className="font-medium text-text-primary">{prop.title}</p>
                   <p className="text-sm text-text-secondary">{prop.city} • {prop.agent?.firstName} {prop.agent?.lastName}</p>

@@ -1,13 +1,15 @@
-import { requireAuth } from "@/lib/auth-utils";
-import { prisma } from "@/lib/prisma";
+import { requireAuth, serverFetch } from "@/lib/auth-utils";
 import EditListingForm from "./EditListingForm";
 
 export default async function EditListingPage({ params }: { params: { id: string } }) {
   await requireAuth();
 
-  const property = await prisma.property.findUnique({
-    where: { id: params.id },
-  });
+  const res = await serverFetch(`/api/user/properties/${encodeURIComponent(params.id)}`);
+  if (!res.ok) {
+    return <div>Property not found</div>;
+  }
+  const data = await res.json().catch(() => null);
+  const property = data?.property;
 
   if (!property) {
     return <div>Property not found</div>;

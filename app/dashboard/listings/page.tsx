@@ -1,28 +1,26 @@
 import Link from "next/link";
-import { requireAuth } from "@/lib/auth-utils";
-import { prisma } from "@/lib/prisma";
+import { requireAuth, serverFetch } from "@/lib/auth-utils";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Plus } from "@/components/ui/icons";
 
+interface ListingRow {
+  id: string;
+  title: string;
+  price: number | null;
+  currency: string;
+  listingPurpose: string | null;
+  status: string;
+  moderationStatus: string;
+  city: string | null;
+  createdAt: string;
+}
+
 export default async function ListingsPage() {
   const session = await requireAuth();
-  const userId = (session.user as { id: string }).id;
 
-  const listings = await prisma.property.findMany({
-    where: { agentId: userId, deletedAt: null },
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      title: true,
-      price: true,
-      currency: true,
-      listingPurpose: true,
-      status: true,
-      moderationStatus: true,
-      city: true,
-      createdAt: true,
-    },
-  });
+  const res = await serverFetch("/api/user/properties");
+  const data = await res.json().catch(() => null);
+  const listings: ListingRow[] = data?.properties || [];
 
   if (listings.length === 0) {
     return (
@@ -94,7 +92,7 @@ export default async function ListingsPage() {
                   {listing.moderationStatus.replace(/_/g, " ")}
                 </td>
                 <td className="px-4 py-3 text-text-secondary">
-                  {listing.createdAt.toLocaleDateString()}
+                  {new Date(listing.createdAt).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-3">
                   <Link

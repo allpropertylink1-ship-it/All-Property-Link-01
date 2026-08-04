@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { getProperties } from "@/lib/services/property";
 import type { MetadataRoute } from "next";
 
 export const revalidate = 3600;
@@ -21,21 +21,27 @@ const staticPages = (base: string): MetadataRoute.Sitemap => [
 
 async function propertyPages(base: string): Promise<MetadataRoute.Sitemap> {
   try {
-    const properties = await prisma.property.findMany({
-      where: { deletedAt: null },
-      select: { slug: true, city: true, updatedAt: true },
-    });
+    const first = await getProperties({ page: 1, pageSize: 50 });
+    const pageCount = Math.max(1, first.totalPages || 1);
+    const pages = [first];
+    for (let p = 2; p <= pageCount; p++) {
+      pages.push(await getProperties({ page: p, pageSize: 50 }));
+    }
+
     const cityMap = new Map<string, Date>();
-    const entries: MetadataRoute.Sitemap = properties.map((p) => {
-      const city = encodeURIComponent(p.city.toLowerCase());
-      cityMap.set(p.city, p.updatedAt);
-      return {
-        url: `${base}/properties/${city}/${p.slug}`,
-        lastModified: p.updatedAt,
-        changeFrequency: "weekly",
-        priority: 0.7,
-      };
-    });
+    const entries: MetadataRoute.Sitemap = [];
+    for (const { properties } of pages) {
+      for (const prop of properties) {
+        const city = encodeURIComponent(prop.city.toLowerCase());
+        cityMap.set(prop.city, prop.createdAt);
+        entries.push({
+          url: `${base}/properties/${city}/${prop.slug}`,
+          lastModified: prop.createdAt,
+          changeFrequency: "weekly",
+          priority: 0.7,
+        });
+      }
+    }
     const cities: MetadataRoute.Sitemap = Array.from(cityMap.entries()).map(([city]) => ({
       url: `${base}/properties/${encodeURIComponent(city.toLowerCase())}`,
       lastModified: new Date(),

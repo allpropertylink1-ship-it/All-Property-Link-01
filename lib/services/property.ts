@@ -90,33 +90,35 @@ export const getCities = cache(async (): Promise<{ city: string; _count: { city:
 
 type MutateResult<T = undefined> = { success: boolean; error?: string; data?: T };
 
-export const createProperty = cache(async (data: Record<string, unknown>, userId: string): Promise<MutateResult<{ id: string }>> => {
+export const createProperty = cache(async (data: Record<string, unknown>): Promise<MutateResult<{ id: string }>> => {
   try {
-    const res = await fetch(`${API_BASE}/api/properties`, {
+    const { serverFetch } = await import("@/lib/auth-utils");
+    const res = await serverFetch("/api/properties", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...data, userId }),
+      body: JSON.stringify(data),
     });
     if (!res.ok) return { success: false, error: `API returned ${res.status}` };
     return { success: true, data: await res.json() };
   } catch (e) { return { success: false, error: String(e) }; }
 });
 
-export const updateProperty = cache(async (id: string, data: Record<string, unknown>, userId: string, userRole: string): Promise<MutateResult> => {
+export const updateProperty = cache(async (id: string, data: Record<string, unknown>): Promise<MutateResult> => {
   try {
-    const res = await fetch(`${API_BASE}/api/properties/${encodeURIComponent(id)}`, {
+    const { serverFetch } = await import("@/lib/auth-utils");
+    const res = await serverFetch(`/api/properties/${encodeURIComponent(id)}`, {
       method: "PATCH", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...data, userId, userRole }),
+      body: JSON.stringify(data),
     });
     if (!res.ok) return { success: false, error: `API returned ${res.status}` };
     return { success: true };
   } catch (e) { return { success: false, error: String(e) }; }
 });
 
-export const deleteProperty = cache(async (id: string, userId: string, userRole: string): Promise<MutateResult> => {
+export const deleteProperty = cache(async (id: string): Promise<MutateResult> => {
   try {
-    const res = await fetch(`${API_BASE}/api/properties/${encodeURIComponent(id)}`, {
-      method: "DELETE", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, userRole }),
+    const { serverFetch } = await import("@/lib/auth-utils");
+    const res = await serverFetch(`/api/properties/${encodeURIComponent(id)}`, {
+      method: "DELETE",
     });
     if (!res.ok) return { success: false, error: `API returned ${res.status}` };
     return { success: true };
@@ -125,7 +127,8 @@ export const deleteProperty = cache(async (id: string, userId: string, userRole:
 
 export const approveProperty = cache(async (id: string, reviewerId: string): Promise<MutateResult> => {
   try {
-    const res = await fetch(`${API_BASE}/api/admin/properties/${encodeURIComponent(id)}/approve`, {
+    const { serverFetch } = await import("@/lib/auth-utils");
+    const res = await serverFetch(`/api/admin/properties/${encodeURIComponent(id)}/approve`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ reviewerId }),
     });
@@ -136,7 +139,8 @@ export const approveProperty = cache(async (id: string, reviewerId: string): Pro
 
 export const rejectProperty = cache(async (id: string, reason: string, reviewerId: string): Promise<MutateResult> => {
   try {
-    const res = await fetch(`${API_BASE}/api/admin/properties/${encodeURIComponent(id)}/reject`, {
+    const { serverFetch } = await import("@/lib/auth-utils");
+    const res = await serverFetch(`/api/admin/properties/${encodeURIComponent(id)}/reject`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ reason, reviewerId }),
     });
@@ -147,7 +151,8 @@ export const rejectProperty = cache(async (id: string, reason: string, reviewerI
 
 export const publishProperty = cache(async (id: string): Promise<MutateResult> => {
   try {
-    const res = await fetch(`${API_BASE}/api/admin/properties/${encodeURIComponent(id)}/publish`, {
+    const { serverFetch } = await import("@/lib/auth-utils");
+    const res = await serverFetch(`/api/admin/properties/${encodeURIComponent(id)}/publish`, {
       method: "POST", headers: { "Content-Type": "application/json" },
     });
     if (!res.ok) return { success: false, error: `API returned ${res.status}` };

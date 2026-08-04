@@ -1,15 +1,20 @@
 import Link from "next/link"
-import { prisma } from "@/lib/prisma"
-import { requireAuth } from "@/lib/auth-utils"
+import { requireAuth, serverFetch } from "@/lib/auth-utils"
 import { notFound } from "next/navigation"
 import { Building2 } from "@/components/ui/icons"
 import { EditServiceForm } from "./EditServiceForm"
 
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  children: { id: string; name: string; slug: string }[];
+}
+
 export default async function EditServicePage({ params }: { params: { id: string } }) {
   const session = await requireAuth()
-  const userId = (session.user as { id: string }).id
 
-  const types = session.user.userTypes ?? []
+  const types = (session.user as { userTypes?: string[] }).userTypes ?? []
   if (!types.includes("FUNDI") && !types.includes("SERVICE_PROVIDER")) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -25,21 +30,17 @@ export default async function EditServicePage({ params }: { params: { id: string
     )
   }
 
-  const service = await prisma.serviceListing.findFirst({
-    where: { id: params.id, userId },
-    include: {
-      category: { select: { id: true, name: true, slug: true } },
-    },
-  })
+  const [serviceRes, categoriesRes] = await Promise.all([
+    serverFetch(`/api/user/services/${encodeURIComponent(params.id)}`),
+    serverFetch("/api/services/categories"),
+  ])
+  const serviceData = await serviceRes.json().catch(() => null)
+  const service = serviceData?.service
 
-  if (!service) notFound()
+  if (!serviceRes.ok || !service) notFound()
 
-  const categories = await prisma.serviceCategory.findMany({
-    orderBy: { name: "asc" },
-    include: { children: { orderBy: { name: "asc" } } },
-  })
-
-  const rootCategories = categories.filter((c) => !c.parentId)
+  const categoriesData = await categoriesRes.json().catch(() => null)
+  const rootCategories: Category[] = categoriesData?.categories || []
 
   return (
     <div>

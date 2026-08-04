@@ -36,7 +36,6 @@ function fail(error: string) {
 export async function createProperty(formData: FormData) {
   try {
     const session = await requireAuth();
-    const userId = (session.user as { id: string }).id;
     const kycStatus = (session.user as { kycStatus?: string }).kycStatus;
     if (kycStatus !== "VERIFIED" && kycStatus !== "NONE") {
       return fail("KYC verification required to post listings.");
@@ -44,7 +43,7 @@ export async function createProperty(formData: FormData) {
     const parsed = propertySchema.safeParse(parseForm(formData));
     if (!parsed.success) return fail(Object.values(parsed.error.flatten().fieldErrors).flat().join(", "));
 
-    await createPropertyService(parsed.data, userId);
+    await createPropertyService(parsed.data);
     revalidatePath("/properties");
     revalidatePath("/dashboard/listings");
     revalidatePath("/dashboard");
@@ -57,13 +56,11 @@ export async function createProperty(formData: FormData) {
 
 export async function updateProperty(id: string, formData: FormData) {
   try {
-    const session = await requireAuth();
-    const userId = (session.user as { id: string }).id;
-    const userRole = (session.user as { role: string }).role;
+    await requireAuth();
     const parsed = propertySchema.safeParse(parseForm(formData));
     if (!parsed.success) return fail(Object.values(parsed.error.flatten().fieldErrors).flat().join(", "));
 
-    const result = await updatePropertyService(id, parsed.data, userId, userRole);
+    const result = await updatePropertyService(id, parsed.data);
     if (!result.success) return result;
 
     revalidatePath("/properties");
@@ -78,11 +75,9 @@ export async function updateProperty(id: string, formData: FormData) {
 
 export async function deleteProperty(id: string) {
   try {
-    const session = await requireAuth();
-    const userId = (session.user as { id: string }).id;
-    const userRole = (session.user as { role: string }).role;
+    await requireAuth();
 
-    const result = await deletePropertyService(id, userId, userRole);
+    const result = await deletePropertyService(id);
     if (!result.success) return result;
 
     revalidatePath("/properties");
