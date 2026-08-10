@@ -514,3 +514,14 @@ model PaymentClaim {
   @@index([status])
   @@map("payment_claims")
 }
+
+model FeatureFlag {
+  key         String   @id
+  enabled     Boolean  @default(false)
+  allowList   Json?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("feature_flags")
+}
