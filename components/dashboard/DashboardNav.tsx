@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import {
@@ -126,11 +127,16 @@ export function DashboardNav() {
         )}
       >
         <div className="flex h-16 shrink-0 items-center gap-3 border-b border-border px-5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-xs font-bold text-white">
-            AP
-          </div>
+          <Link href="/" className="flex shrink-0 items-center">
+            <Image
+              src="/logos/logo.png"
+              alt="All Property Link"
+              width={756}
+              height={319}
+              className="h-8 w-auto"
+            />
+          </Link>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-text-primary">All Property Link</p>
             <p className="truncate text-xs text-text-secondary">{user?.firstName || ""}</p>
           </div>
         </div>
