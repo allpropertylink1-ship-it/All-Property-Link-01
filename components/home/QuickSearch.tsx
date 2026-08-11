@@ -14,11 +14,6 @@ export function QuickSearch() {
   const [needsToggle, setNeedsToggle] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
   const chipsRef = useRef<HTMLDivElement>(null)
-  const expandedRef = useRef(expanded)
-
-  useEffect(() => {
-    expandedRef.current = expanded
-  })
 
   useEffect(() => {
     fetch("/api/properties?limit=6")
@@ -30,23 +25,16 @@ export function QuickSearch() {
   }, [])
 
   useEffect(() => {
-    const el = chipsRef.current
-    if (!el) return
-    setNeedsToggle(el.scrollHeight > COLLAPSED_HEIGHT)
-    if (expandedRef.current) setMaxHeight(el.scrollHeight)
-  }, [cities])
-
-  useEffect(() => {
     const recompute = () => {
       const el = chipsRef.current
       if (!el) return
       setNeedsToggle(el.scrollHeight > COLLAPSED_HEIGHT)
-      if (expandedRef.current) setMaxHeight(el.scrollHeight)
+      if (expanded) setMaxHeight(el.scrollHeight)
     }
     recompute()
     window.addEventListener("resize", recompute)
     return () => window.removeEventListener("resize", recompute)
-  }, [])
+  }, [cities, expanded])
 
   useEffect(() => {
     if (!expanded) return
