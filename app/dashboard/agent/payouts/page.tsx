@@ -1,10 +1,11 @@
+﻿/* eslint-disable @next/next/no-img-element */
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
 import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
-import { Loader2, AlertCircle, Building2, CheckCircle, Download } from "@/components/ui/icons"
+import { Loader2, AlertCircle, Building2, CheckCircle } from "@/components/ui/icons"
 
 interface PayoutClaim {
   id: string
@@ -36,6 +37,7 @@ export default function AgentPayoutsPage() {
     if (data) {
       setClaims(data.claims)
       setTotal(data.total)
+      setTotalPages(data.totalPages || 1)
       const sum = data.claims.reduce((acc, c) => acc + Number(c.amount), 0)
       setTotalAmount(sum)
     } else {

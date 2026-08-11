@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 
 const GOLD = "#D49A44";
@@ -97,7 +97,6 @@ const UserIcon = () => (
 
 export function BottomNav() {
   const pathname = usePathname();
-  const router = useRouter();
   const { user } = useAuth();
   const [browseOpen, setBrowseOpen] = useState(false);
 

@@ -1,3 +1,4 @@
+﻿/* eslint-disable @next/next/no-img-element */
 "use client"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -177,7 +178,7 @@ export function HeroSection() {
           </Link>
         </div>
 
-        {/* Featured listing caption card — rotates every 2 days */}
+        {/* Featured listing caption card â€” rotates every 2 days */}
         {!loaded && (
           <div className="mx-auto mt-10 w-full max-w-4xl animate-pulse rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
             <div className="h-3 w-28 rounded bg-white/25" />

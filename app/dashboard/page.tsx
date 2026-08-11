@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/icons"
 import Link from "next/link"
 
-async function getStats(userId: string) {
+async function getStats() {
   const res = await serverFetch(`/api/user/stats`)
   if (!res.ok) return { totalListings: 0, totalServices: 0, unreadNotifications: 0 }
   const data = await res.json().catch(() => null)
@@ -43,7 +43,7 @@ export default async function DashboardPage() {
     redirect("/dashboard/onboarding")
   }
 
-  const stats = await getStats(user.id)
+  const stats = await getStats()
 
   return (
     <div className="space-y-8">

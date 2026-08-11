@@ -1,3 +1,4 @@
+﻿/* eslint-disable @next/next/no-img-element */
 "use client"
 
 import { useState } from "react"
@@ -180,7 +181,7 @@ export function DocumentUpload(props: Props) {
 
       <div className="rounded-xl border border-border bg-surface p-6">
         <h2 className="mb-4 text-lg font-semibold text-foreground">
-          Business Permit <span className="text-sm font-normal text-muted">(Optional — upload your business permit document)</span>
+          Business Permit <span className="text-sm font-normal text-muted">(Optional â€” upload your business permit document)</span>
         </h2>
         {props.businessPermitFile ? (
           <div className="flex items-center gap-3 rounded-lg border border-border bg-background p-4">

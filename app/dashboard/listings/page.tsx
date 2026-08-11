@@ -1,3 +1,4 @@
+﻿/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { requireAuth, serverFetch } from "@/lib/auth-utils";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -16,7 +17,7 @@ interface ListingRow {
 }
 
 export default async function ListingsPage() {
-  const session = await requireAuth();
+  await requireAuth();
 
   const res = await serverFetch("/api/user/properties");
   const data = await res.json().catch(() => null);

@@ -1,3 +1,4 @@
+﻿/* eslint-disable @next/next/no-img-element */
 import Link from "next/link"
 import { MapPin, Wrench, Briefcase } from "@/components/ui/icons"
 import { AVATAR_POOL } from "@/lib/placeholders"

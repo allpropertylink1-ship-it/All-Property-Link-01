@@ -1,3 +1,4 @@
+﻿/* eslint-disable @next/next/no-img-element */
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
@@ -5,7 +6,7 @@ import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
 import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
 import Link from "next/link"
-import { Building2, Users, DollarSign, Clock, Wallet, ArrowRight, Eye, Receipt } from "@/components/ui/icons"
+import { Building2, Users, DollarSign, Clock, ArrowRight, Eye, Receipt } from "@/components/ui/icons"
 
 interface AgentData {
   agent: {

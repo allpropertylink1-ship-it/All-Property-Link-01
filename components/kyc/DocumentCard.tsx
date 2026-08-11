@@ -1,3 +1,4 @@
+﻿/* eslint-disable @next/next/no-img-element */
 "use client"
 
 import { Trash2, Loader2, FileText, ImageIcon, CheckCircle, XCircle } from "@/components/ui/icons"

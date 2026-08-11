@@ -1,3 +1,4 @@
+﻿/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders";
@@ -51,7 +52,6 @@ export function PropertyCard({
   slug,
   title,
   price,
-  currency,
   propertyType,
   city,
   region,
@@ -63,7 +63,6 @@ export function PropertyCard({
   listingPurpose,
   urgencyText,
   isVerified = true,
-  priority,
 }: PropertyCardProps) {
   const imageUrls = Array.isArray(images) ? images : [];
   const imageUrl = imageUrls.length > 0 ? optimizeImageUrl(String(imageUrls[0]), 800) : PLACEHOLDER_PROPERTY;

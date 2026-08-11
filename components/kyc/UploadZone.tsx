@@ -1,3 +1,4 @@
+﻿/* eslint-disable @next/next/no-img-element */
 "use client"
 
 import { Upload, Loader2, X, FileText } from "@/components/ui/icons"

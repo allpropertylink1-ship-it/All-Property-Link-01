@@ -1,3 +1,4 @@
+﻿/* eslint-disable @next/next/no-img-element */
 "use client"
 
 import { Shield, XCircle, Trash2 } from "@/components/ui/icons"
@@ -71,8 +72,8 @@ export function SubmissionHistory({ documents, onDelete, deleteConfirm, setDelet
                   {doc.bioData && (
                     <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-muted">
                       <span>{doc.bioData.firstName} {doc.bioData.middleName} {doc.bioData.lastName}</span>
-                      {doc.bioData.phone && <span>· {doc.bioData.phone}</span>}
-                      {doc.bioData.email && <span>· {doc.bioData.email}</span>}
+                      {doc.bioData.phone && <span>Â· {doc.bioData.phone}</span>}
+                      {doc.bioData.email && <span>Â· {doc.bioData.email}</span>}
                     </div>
                   )}
                   {(doc.frontImage || doc.backImage || doc.businessPermit) && (

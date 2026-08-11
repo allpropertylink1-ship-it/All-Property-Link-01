@@ -14,9 +14,6 @@ export interface PropertyFilters {
   pageSize?: number;
 }
 
- const slugify = (title: string) =>
-  title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
-
 export interface PropertyCard {
   id: string; slug: string; title: string; price: number | null; currency: string;
   propertyType: string; listingPurpose: string | null;
