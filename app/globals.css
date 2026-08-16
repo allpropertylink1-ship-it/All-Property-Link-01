@@ -145,10 +145,21 @@
   width: 55%;
   z-index: 20;
   overflow: hidden;
-  background: linear-gradient(165deg, #1A3D35 0%, #286255 60%, #1C4A40 100%);
+  background:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.022) 0 2px, transparent 2px 16px),
+    radial-gradient(120% 90% at 82% -5%, rgba(212, 154, 68, 0.22), transparent 55%),
+    radial-gradient(90% 80% at 5% 105%, rgba(10, 25, 21, 0.55), transparent 60%),
+    linear-gradient(165deg, #152F29 0%, #1A3D35 45%, #286255 100%);
+  box-shadow: 16px 0 32px -20px rgba(15, 32, 28, 0.6);
   transform: translateX(var(--park)) skewX(var(--rake));
   transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1);
   will-change: transform;
+}
+
+.auth-strip {
+  background:
+    radial-gradient(120% 90% at 85% -10%, rgba(212, 154, 68, 0.25), transparent 55%),
+    linear-gradient(165deg, #152F29 0%, #1A3D35 45%, #286255 100%);
 }
 
 .auth-band--left {
