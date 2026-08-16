@@ -144,8 +144,27 @@ const faqCategories: FAQCategory[] = [
 ];
 
 export default function FAQPage() {
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqCategories.flatMap((category) =>
+      category.faqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: faq.answer,
+        },
+      }))
+    ),
+  };
+
   return (
     <div className="min-h-screen bg-surface">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <section className="bg-primary-600 py-16 text-center text-text-on-primary sm:py-24">
         <div className="mx-auto max-w-7xl px-4">
           <h1 className="mb-4 font-heading text-4xl font-bold tracking-tight sm:text-5xl">
