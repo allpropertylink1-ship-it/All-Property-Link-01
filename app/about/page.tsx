@@ -6,6 +6,7 @@ export const metadata = {
   title: "About Us",
   description:
     "All Property Link - Kenya's trusted marketplace for properties, short stays, fundis, and service providers. Verified listings, checked by APL representatives.",
+  alternates: { canonical: "/about" },
 };
 
 function SellIcon() {

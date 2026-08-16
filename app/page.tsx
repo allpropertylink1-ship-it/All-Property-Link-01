@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { HeroSection } from "@/components/home/HeroSection"
 import { CategoryGrid } from "@/components/home/CategoryGrid"
 import { QuickSearch } from "@/components/home/QuickSearch"
@@ -6,6 +7,10 @@ import { FeaturedProperties } from "@/components/home/FeaturedProperties"
 import { FeaturedAirbnbs } from "@/components/home/FeaturedAirbnbs"
 import { FeaturedFundis } from "@/components/home/FeaturedFundis"
 import { FeaturedProviders } from "@/components/home/FeaturedProviders"
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+}
 
 export default function HomePage() {
   return (

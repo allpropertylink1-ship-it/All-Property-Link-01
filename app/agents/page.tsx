@@ -4,6 +4,7 @@ import { AgentsDirectory } from "./AgentsDirectory"
 export const metadata: Metadata = {
   title: "APL Representatives — All Property Link",
   description: "Browse our verified APL Representatives across Kenya.",
+  alternates: { canonical: "/agents" },
 }
 
 export default function AgentsPage() {

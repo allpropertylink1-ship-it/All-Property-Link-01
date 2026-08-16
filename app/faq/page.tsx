@@ -6,6 +6,7 @@ export const revalidate = 3600;
 export const metadata = {
   title: "Frequently Asked Questions",
   description: "Find answers to common questions about buying, selling, and renting property in Kenya on All Property Link.",
+  alternates: { canonical: "/faq" },
 };
 
 interface FAQ {

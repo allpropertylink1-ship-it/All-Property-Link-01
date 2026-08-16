@@ -7,6 +7,12 @@ import { cn } from "@/lib/utils";
 
 export const revalidate = 60;
 
+export const metadata = {
+  title: "Services & Fundis in Kenya — All Property Link",
+  description: "Find trusted fundis and service providers in Kenya — plumbing, electrical, carpentry, cleaning, security, property management and more.",
+  alternates: { canonical: "/services" },
+};
+
 interface Props {
   searchParams: { [key: string]: string | undefined };
 }

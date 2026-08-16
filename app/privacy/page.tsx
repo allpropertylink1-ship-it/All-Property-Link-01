@@ -5,6 +5,7 @@ const LAST_UPDATED = "July 3, 2026";
 export const metadata = {
   title: "Privacy Policy",
   description: "All Property Link privacy policy - how we collect, use, and protect your personal data in compliance with the Kenya Data Protection Act, 2019.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {
