@@ -8,6 +8,7 @@ import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
 import { Building2, Bed, Bath, Maximize2, Phone, Mail, Globe, Sparkles, MessageCircle, Loader2 } from "@/components/ui/icons";
 import { optimizeImageUrl } from "@/lib/images";
+import { slugifyCity } from "@/lib/seo";
 
 const PropertyMap = dynamic(() => import("@/components/shared/PropertyMap").then(m => ({ default: m.PropertyMap })), {
   ssr: false,
@@ -33,7 +34,7 @@ interface PropertyData {
   slug: string;
   title: string;
   description: string;
-  price: number;
+  price: number | null;
   currency: string;
   propertyType: string;
   listingPurpose?: string | null;
@@ -43,8 +44,8 @@ interface PropertyData {
   bedrooms?: number | null;
   bathrooms?: number | null;
   area?: number | null;
-  latitude?: number | string | null;
-  longitude?: number | string | null;
+  latitude?: unknown;
+  longitude?: unknown;
   features: string[];
   images: unknown;
   agent?: AgentInfo | null;
@@ -61,10 +62,10 @@ interface OtherProperty {
   listingPurpose?: string | null;
 }
 
-export default function PropertyDetailClient({ slug }: { slug: string }) {
-  const [property, setProperty] = useState<PropertyData | null>(null);
+export default function PropertyDetailClient({ slug, initial }: { slug: string; initial?: PropertyData }) {
+  const [property, setProperty] = useState<PropertyData | null>(initial ?? null);
   const [otherProperties, setOtherProperties] = useState<OtherProperty[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initial);
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -118,33 +119,7 @@ export default function PropertyDetailClient({ slug }: { slug: string }) {
 
   const otherFiltered = otherProperties.filter((op) => op.id !== property.id);
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "RealEstateListing",
-    name: property.title,
-    description: property.description,
-    url: `https://allpropertylink.co.ke/properties/${encodeURIComponent(property.city.toLowerCase())}/${property.slug}`,
-    image: imageUrls[0],
-    offers: {
-      "@type": "Offer",
-      price: property.price == null ? undefined : Number(property.price),
-      priceCurrency: property.currency,
-      availability: "https://schema.org/InStock",
-    },
-    ...(property.bedrooms && { numberOfBedrooms: property.bedrooms }),
-    ...(property.bathrooms && { numberOfBathrooms: property.bathrooms }),
-    ...(property.area && { floorSize: { "@type": "QuantitativeValue", value: property.area, unitCode: "SQFT" } }),
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: property.city,
-      addressRegion: property.region,
-      addressCountry: property.country,
-    },
-  };
-
   return (
-    <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
         <div className="grid gap-6 lg:gap-8 lg:grid-cols-[240px_1fr_280px] xl:grid-cols-[260px_1fr_300px]">
 
@@ -431,7 +406,7 @@ export default function PropertyDetailClient({ slug }: { slug: string }) {
                         return (
                           <Link
                             key={op.id}
-                            href={`/properties/${encodeURIComponent(op.city.toLowerCase())}/${op.slug}`}
+                            href={`/properties/${slugifyCity(op.city)}/${op.slug}`}
                             className="group flex gap-3 rounded-lg border border-border p-2 transition-colors hover:bg-surface-secondary"
                           >
                             <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-md bg-surface-secondary">
@@ -465,6 +440,5 @@ export default function PropertyDetailClient({ slug }: { slug: string }) {
           </aside>
         </div>
       </div>
-    </>
   );
 }

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { getServiceById, getServiceReviews } from "@/lib/services/service";
 import type { ServiceReview } from "@/lib/services/service";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
@@ -9,6 +10,28 @@ import { Phone, Mail, Globe, Sparkles, MessageCircle, Star, MapPin, Briefcase } 
 
 interface Props {
   params: { id: string };
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const service = await getServiceById(params.id);
+  if (!service) return {};
+  const description = (service.description || "").replace(/\s+/g, " ").trim().slice(0, 158);
+  const image = Array.isArray(service.images)
+    ? service.images.find((u): u is string => typeof u === "string")
+    : undefined;
+  return {
+    title: `${service.title} — All Property Link`,
+    description,
+    alternates: { canonical: `/services/${service.id}` },
+    openGraph: {
+      title: `${service.title} — All Property Link`,
+      description,
+      type: "website",
+      locale: "en_KE",
+      siteName: "All Property Link",
+      images: image ? [{ url: image, alt: service.title }] : undefined,
+    },
+  };
 }
 
 function formatServicePrice(price: number | null | undefined, currency: string, period: string) {
@@ -44,8 +67,26 @@ export default async function ServiceDetailPage({ params }: Props) {
 
   const reviewData = await getServiceReviews(service.id);
 
+  const serviceJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: service.title,
+    description: service.description,
+    url: `https://allpropertylink.co.ke/services/${service.id}`,
+    ...(imageUrls[0] ? { image: imageUrls[0] } : {}),
+    provider: {
+      "@type": service.user?.companyName ? "Organization" : "Person",
+      name: service.user?.companyName || `${service.user?.firstName || ""} ${service.user?.lastName || ""}`.trim(),
+      ...(service.user?.phone ? { telephone: service.user.phone } : {}),
+      ...(service.user?.email ? { email: service.user.email } : {}),
+      ...(service.user?.website ? { url: service.user.website } : {}),
+    },
+    ...(service.city ? { areaServed: service.city } : {}),
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }} />
       <div className="grid gap-6 lg:grid-cols-[240px_1fr_280px] lg:gap-8 xl:grid-cols-[260px_1fr_300px]">
         {/* ─── LEFT SIDEBAR: Provider Profile ─── */}
         <aside className="hidden space-y-5 lg:block">

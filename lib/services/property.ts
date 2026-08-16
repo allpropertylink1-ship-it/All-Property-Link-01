@@ -53,6 +53,7 @@ const fetchApi = cache(async <T>(path: string): Promise<T | null> => {
 export const getProperties = cache(async (filters: PropertyFilters = {}): Promise<{
   properties: PropertyCard[];
   total: number; page: number; pageSize: number; totalPages: number;
+  cities?: { city: string; count: number }[];
 }> => {
   const params = new URLSearchParams();
   if (filters.city) params.set("city", filters.city);
@@ -66,7 +67,7 @@ export const getProperties = cache(async (filters: PropertyFilters = {}): Promis
   if (filters.pageSize) params.set("limit", String(filters.pageSize));
   params.set("limit", String(filters.pageSize || 20));
 
-  const data = await fetchApi<{ properties: PropertyCard[]; total: number; page: number; pageSize: number; totalPages: number }>(`/api/properties?${params}`);
+  const data = await fetchApi<{ properties: PropertyCard[]; total: number; page: number; pageSize: number; totalPages: number; cities?: { city: string; count: number }[] }>(`/api/properties?${params}`);
   return data || { properties: [], total: 0, page: 1, pageSize: filters.pageSize || 20, totalPages: 0 };
 });
 
