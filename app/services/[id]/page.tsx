@@ -21,11 +21,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? service.images.find((u): u is string => typeof u === "string")
     : undefined;
   return {
-    title: `${service.title} — All Property Link`,
+    title: service.title,
     description,
     alternates: { canonical: `/services/${service.id}` },
     openGraph: {
-    title: service.title,
+    title: `${service.title} — All Property Link`,
       description,
       type: "website",
       locale: "en_KE",
