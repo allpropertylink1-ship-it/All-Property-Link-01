@@ -7,7 +7,7 @@ import { GoogleSignInButton } from "./GoogleSignInButton"
 import { OtpInput } from "./OtpInput"
 import { FormBanner } from "@/components/shared/FormFeedback"
 
-export function LoginForm() {
+export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => void }) {
   const router = useRouter()
   const { login, sendMagicLink, phoneLogin, verifyOtp, refreshUser } = useAuth()
   const [error, setError] = useState("")
@@ -314,9 +314,15 @@ export function LoginForm() {
         </button>
         <p className="text-center text-sm text-text-secondary">
           Don&apos;t have an account?{" "}
-          <a href="/auth/register" className="font-medium text-accent-300 hover:text-accent-400">
-            Register
-          </a>
+          {onSwitchToRegister ? (
+            <button type="button" onClick={onSwitchToRegister} className="font-medium text-accent-300 hover:text-accent-400">
+              Register
+            </button>
+          ) : (
+            <a href="/auth/register" className="font-medium text-accent-300 hover:text-accent-400">
+              Register
+            </a>
+          )}
         </p>
       </form>
     </>

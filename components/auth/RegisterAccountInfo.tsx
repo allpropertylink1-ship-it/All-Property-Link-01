@@ -20,12 +20,13 @@ interface Props {
   onBack: () => void
   onGoogleSuccess: () => Promise<void>
   onGoogleError: (msg: string) => void
+  onSwitchToLogin?: () => void
 }
 
 export function RegisterAccountInfo({
   contactMethod, password, referralCode, error, loading,
   onContactMethodChange, onPasswordChange, onReferralCodeChange,
-  onBack, onGoogleSuccess, onGoogleError,
+  onBack, onGoogleSuccess, onGoogleError, onSwitchToLogin,
 }: Props) {
   return (
     <>
@@ -139,7 +140,11 @@ export function RegisterAccountInfo({
 
         <p className="text-center text-sm text-text-secondary">
           Already have an account?{" "}
-          <a href="/auth/login" className="font-medium text-accent-300 hover:text-accent-400">Sign in</a>
+          {onSwitchToLogin ? (
+            <button type="button" onClick={onSwitchToLogin} className="font-medium text-accent-300 hover:text-accent-400">Sign in</button>
+          ) : (
+            <a href="/auth/login" className="font-medium text-accent-300 hover:text-accent-400">Sign in</a>
+          )}
         </p>
       </div>
     </>

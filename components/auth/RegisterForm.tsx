@@ -12,7 +12,7 @@ import { FormBanner } from "@/components/shared/FormFeedback"
 type ContactMethod = "email" | "phone"
 type Step = "userType" | "form" | "otp"
 
-export function RegisterForm({ referralCode: initialReferralCode }: { referralCode?: string }) {
+export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogin }: { referralCode?: string; onSwitchToLogin?: () => void }) {
   const router = useRouter()
   const { signup, sendOtp, verifyOtp, refreshUser, updateRegistration } = useAuth()
   const [step, setStep] = useState<Step>("userType")
@@ -239,6 +239,7 @@ export function RegisterForm({ referralCode: initialReferralCode }: { referralCo
         onContactMethodChange={setContactMethod} onPasswordChange={setPassword}
         onReferralCodeChange={setReferralCode} onBack={() => setStep("userType")}
         onGoogleSuccess={handleGoogleSuccess} onGoogleError={handleGoogleError}
+        onSwitchToLogin={onSwitchToLogin}
       />
     </form>
   )
