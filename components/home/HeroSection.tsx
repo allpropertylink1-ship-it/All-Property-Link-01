@@ -7,6 +7,7 @@ import { Search } from "@/components/ui/icons"
 import { formatPrice } from "@/lib/utils"
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders"
 import { optimizeImageUrl } from "@/lib/images"
+import { slugifyCity } from "@/lib/seo"
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const AUTO_INTERVAL_MS = 6000
@@ -451,7 +452,7 @@ export function HeroSection() {
           >
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <Link
-                href={`/properties/${(slide.city || "kenya").toLowerCase()}/${slide.slug}`}
+                href={`/properties/${slugifyCity(slide.city || "kenya")}/${slide.slug}`}
                 className="group min-w-0 flex-1 text-left"
               >
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-white/70">
@@ -466,7 +467,7 @@ export function HeroSection() {
               </Link>
               <div className="flex shrink-0 items-center gap-2">
                 <Link
-                  href={`/properties/${(slide.city || "kenya").toLowerCase()}/${slide.slug}`}
+                  href={`/properties/${slugifyCity(slide.city || "kenya")}/${slide.slug}`}
                   className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-teal-50"
                 >
                   View Listing
@@ -536,7 +537,7 @@ export function HeroSection() {
                 {marquee.map((item) => (
                   <Link
                     key={item.key}
-                    href={`/properties/${(item.city || "kenya").toLowerCase()}/${item.slug}`}
+                    href={`/properties/${slugifyCity(item.city || "kenya")}/${item.slug}`}
                     onMouseEnter={(e) => handleTickerItemEnter(e.currentTarget)}
                     className="group flex shrink-0 items-baseline gap-2.5 whitespace-nowrap rounded-lg px-3 py-1 text-sm text-white/80 transition-all duration-300 hover:scale-110 hover:bg-accent-300/15 hover:shadow-[0_0_18px_rgba(212,154,68,0.55)] hover:text-white"
                   >

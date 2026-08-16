@@ -7,6 +7,7 @@ import { MapPin, ArrowRight, Home, BedDouble, Briefcase, Loader2 } from "@/compo
 import { formatPrice } from "@/lib/utils";
 import { PLACEHOLDER_PROPERTY, PLACEHOLDER_SERVICE } from "@/lib/placeholders";
 import { optimizeImageUrl } from "@/lib/images";
+import { slugifyCity } from "@/lib/seo";
 
 interface BrowseProperty {
   slug: string; title: string; price: number; currency: string;
@@ -141,13 +142,13 @@ export default function BrowsePageClient() {
       id: "properties", title: "Properties for Sale", icon: Home,
       items: properties, viewAllLink: "/properties?purpose=FOR_SALE",
       viewAllLabel: "View all properties", emptyMsg: "No properties for sale yet.",
-      renderItem: (item) => <PropertyCard key={(item as PropertyItem).slug} item={item as PropertyItem} link={`/properties/${(item as PropertyItem).city.toLowerCase()}/${(item as PropertyItem).slug}`} />,
+      renderItem: (item) => <PropertyCard key={(item as PropertyItem).slug} item={item as PropertyItem} link={`/properties/${slugifyCity((item as PropertyItem).city)}/${(item as PropertyItem).slug}`} />,
     },
     {
       id: "airbnbs", title: "Airbnbs & Short-term Stays", icon: BedDouble,
       items: airbnbs, viewAllLink: "/properties?purpose=FOR_RENT_SHORT_TERM",
       viewAllLabel: "View all stays", emptyMsg: "No short-term rentals listed yet.",
-      renderItem: (item) => <PropertyCard key={(item as PropertyItem).slug} item={item as PropertyItem} link={`/properties/${(item as PropertyItem).city.toLowerCase()}/${(item as PropertyItem).slug}`} />,
+      renderItem: (item) => <PropertyCard key={(item as PropertyItem).slug} item={item as PropertyItem} link={`/properties/${slugifyCity((item as PropertyItem).city)}/${(item as PropertyItem).slug}`} />,
     },
     {
       id: "services", title: "Fundis & Service Providers", icon: Briefcase,
@@ -159,7 +160,7 @@ export default function BrowsePageClient() {
       id: "plots", title: "Plots & Land", icon: MapPin,
       items: plotsFiltered, viewAllLink: "/properties?type=LAND",
       viewAllLabel: "View all plots", emptyMsg: "No plots listed yet.",
-      renderItem: (item) => <PropertyCard key={(item as PropertyItem).slug} item={item as PropertyItem} link={`/properties/${(item as PropertyItem).city.toLowerCase()}/${(item as PropertyItem).slug}`} />,
+      renderItem: (item) => <PropertyCard key={(item as PropertyItem).slug} item={item as PropertyItem} link={`/properties/${slugifyCity((item as PropertyItem).city)}/${(item as PropertyItem).slug}`} />,
     },
   ];
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { ChevronDown, ChevronUp } from "@/components/ui/icons"
+import { slugifyCity } from "@/lib/seo"
 
 interface CityItem { city: string; count: number }
 
@@ -88,7 +89,7 @@ export function QuickSearch() {
           {cities.map((c) => (
             <a
               key={c.city}
-              href={`/properties/${encodeURIComponent(c.city.toLowerCase())}`}
+              href={`/properties/${slugifyCity(c.city)}`}
               className="flex h-[30px] items-center rounded-full border border-border bg-card px-3.5 text-xs font-medium text-muted transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
             >
               {c.city} ({c.count})

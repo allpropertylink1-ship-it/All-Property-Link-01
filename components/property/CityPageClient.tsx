@@ -6,6 +6,7 @@ import { PropertyFilters } from "@/components/property/PropertyFilters";
 import { FilterPanel } from "@/components/property/FilterPanel";
 import { Pagination } from "@/components/shared/Pagination";
 import { Loader2 } from "@/components/ui/icons";
+import { slugifyCity } from "@/lib/seo";
 
 interface CityInfo {
   city: string;
@@ -47,6 +48,7 @@ export default function CityPageClient({
 }) {
   const [data, setData] = useState<PropertiesData | null>(null);
   const [cities, setCities] = useState<CityInfo[]>([]);
+  const [resolvedCity, setResolvedCity] = useState(city);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -57,7 +59,6 @@ export default function CityPageClient({
     setNotFound(false);
 
     const params = new URLSearchParams();
-    params.set("city", city);
     if (propertyType) params.set("type", propertyType);
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
@@ -65,18 +66,19 @@ export default function CityPageClient({
     if (page) params.set("page", page);
     params.set("limit", "20");
 
-    Promise.all([
-      fetch(`/api/properties?${params.toString()}`).then((r) => r.json()),
-      fetch(`/api/properties?limit=1`).then((r) => r.json()),
-    ])
-      .then(([propsData, citiesData]: [PropertiesData, PropertiesData]) => {
-        const cityExists = citiesData.cities?.some(
-          (c) => c.city.toLowerCase() === city.toLowerCase()
+    fetch(`/api/properties?limit=1`)
+      .then((r) => r.json())
+      .then(async (citiesData: PropertiesData) => {
+        const match = (citiesData.cities || []).find(
+          (c) => slugifyCity(c.city) === slugifyCity(city)
         );
-        if (!cityExists) {
+        if (!match) {
           setNotFound(true);
           return;
         }
+        setResolvedCity(match.city);
+        params.set("city", match.city);
+        const propsData: PropertiesData = await fetch(`/api/properties?${params.toString()}`).then((r) => r.json());
         setData(propsData);
         setCities(
           (citiesData.cities || []).map((c) => ({
@@ -110,14 +112,14 @@ export default function CityPageClient({
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <h1 className="mb-2 font-heading text-3xl font-bold text-text-primary">
-        Properties in {city}
+        Properties in {resolvedCity}
       </h1>
       <p className="mb-8 text-text-secondary">{data.total} properties found</p>
       <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
         <FilterPanel>
           <PropertyFilters
             cities={cities}
-            selectedCity={city}
+            selectedCity={resolvedCity}
             selectedType={propertyType}
             minPrice={minPrice}
             maxPrice={maxPrice}
@@ -129,7 +131,7 @@ export default function CityPageClient({
           <Pagination
             currentPage={data.page}
             totalPages={data.totalPages}
-            basePath={`/properties/${encodeURIComponent(city.toLowerCase())}`}
+            basePath={`/properties/${slugifyCity(city)}`}
             searchParams={searchParams}
           />
         </div>

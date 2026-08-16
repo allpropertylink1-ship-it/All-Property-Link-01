@@ -3,6 +3,7 @@ import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders";
 import { optimizeImageUrl } from "@/lib/images";
+import { slugifyCity } from "@/lib/seo";
 
 interface PropertyCardProps {
   slug: string;
@@ -69,7 +70,7 @@ export function PropertyCard({
 
   return (
     <Link
-      href={`/properties/${city.toLowerCase()}/${slug}`}
+      href={`/properties/${slugifyCity(city)}/${slug}`}
       className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-all duration-300 md:flex-row md:hover:-translate-y-[3px] md:hover:shadow-lg"
     >
       <div className="relative w-full overflow-hidden md:w-[28%] md:shrink-0">

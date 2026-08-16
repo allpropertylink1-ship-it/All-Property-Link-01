@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { PropertyGrid } from "@/components/property/PropertyGrid";
 import { Loader2 } from "@/components/ui/icons";
+import { slugifyCity } from "@/lib/seo";
 
 interface CityInfo {
   city: string;
@@ -133,7 +134,7 @@ export default function SearchPageClient({
             {cities.map((c) => (
               <a
                 key={c.city}
-                href={`/properties/${c.city.toLowerCase()}`}
+                href={`/properties/${slugifyCity(c.city)}`}
                 className="flex items-center justify-between rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-md"
               >
                 <span className="font-medium text-text-primary">{c.city}</span>
