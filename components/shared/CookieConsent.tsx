@@ -39,7 +39,7 @@ export function CookieConsent() {
   if (!mounted || consent) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface p-4 shadow-lg md:bottom-auto md:top-auto md:p-6">
+    <div className="fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-50 border-t border-border bg-surface p-4 shadow-lg md:bottom-0 md:p-6">
       <div className="mx-auto flex max-w-content flex-col items-start gap-4 md:flex-row md:items-center">
         <div className="flex items-start gap-3">
           <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-50">
