@@ -73,7 +73,7 @@ export function PropertyMap({ lat, lng, address }: Props) {
   }, [coords])
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-surface">
+    <div className="isolate overflow-hidden rounded-xl border border-border bg-surface">
       {status === "loading" && (
         <div className="flex h-[200px] w-full items-center justify-center">
           <Loader2 size={20} className="animate-spin text-text-secondary" />
