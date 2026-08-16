@@ -94,7 +94,25 @@ async function servicePages(base: string): Promise<MetadataRoute.Sitemap> {
   }
 }
 
+async function agentPages(base: string): Promise<MetadataRoute.Sitemap> {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://api.allpropertylink.co.ke"}/api/apl-agents`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return [];
+    const data: { agents: { id: string; _count: { users: number } }[] } = await res.json();
+    return (data.agents || []).map((agent) => ({
+      url: `${base}/agents/${agent.id}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.4,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
-  return [...staticPages(base), ...(await propertyPages(base)), ...(await servicePages(base))];
+  return [...staticPages(base), ...(await propertyPages(base)), ...(await servicePages(base)), ...(await agentPages(base))];
 }

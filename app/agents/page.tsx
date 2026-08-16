@@ -9,12 +9,20 @@ export const metadata: Metadata = {
 
 export default function AgentsPage() {
   return (
-    <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mb-10 text-center">
-        <h1 className="font-heading text-3xl font-bold text-text-primary sm:text-4xl">Our APL Representatives</h1>
-        <p className="mt-3 text-base text-text-secondary">Verified representatives ready to help you find the perfect property</p>
-      </div>
-      <AgentsDirectory />
+    <main className="min-h-screen bg-surface">
+      <section className="bg-primary-600 py-16 text-center text-text-on-primary sm:py-24">
+        <div className="mx-auto max-w-7xl px-4">
+          <h1 className="mb-4 font-heading text-4xl font-bold tracking-tight sm:text-5xl">Our APL Representatives</h1>
+          <p className="mx-auto max-w-2xl text-balance text-lg text-primary-100 sm:text-xl">
+            Verified representatives ready to help you find the perfect property
+          </p>
+        </div>
+      </section>
+      <section className="py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4">
+          <AgentsDirectory />
+        </div>
+      </section>
     </main>
   )
 }
