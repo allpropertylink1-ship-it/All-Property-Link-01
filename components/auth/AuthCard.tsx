@@ -1,17 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useSearchParams } from "next/navigation"
-import {
-  Link as LinkIcon,
-  ArrowRight,
-  ShieldCheck,
-  Phone,
-  LayoutDashboard,
-  Home,
-  Briefcase,
-  UserCheck,
-} from "@/components/ui/icons"
+import { Link as LinkIcon, ArrowRight } from "@/components/ui/icons"
 import { LoginForm } from "./LoginForm"
 import { AgentLoginForm } from "./AgentLoginForm"
 import { AgentForgotPasswordForm } from "./AgentForgotPasswordForm"
@@ -23,21 +14,11 @@ const tabs = [
   { id: "agent", label: "APL Representative" },
 ] as const
 
+const SWEEP_MS = 700
+
 interface Props {
   referralCode?: string
 }
-
-const loginPoints = [
-  { icon: ShieldCheck, text: "Verified listings and trusted representatives" },
-  { icon: Phone, text: "Sign in with email, phone, or Google" },
-  { icon: LayoutDashboard, text: "Manage listings, services, and claims in one place" },
-]
-
-const registerPoints = [
-  { icon: Home, text: "List properties for sale or rent in minutes" },
-  { icon: Briefcase, text: "Offer trade services as a fundi or provider" },
-  { icon: UserCheck, text: "Get matched with an APL representative" },
-]
 
 function LoginContent({
   activeTab,
@@ -94,8 +75,6 @@ function WelcomeContent({
   compact?: boolean
   onToggle: () => void
 }) {
-  const points = view === "login" ? loginPoints : registerPoints
-
   return (
     <div className="flex w-full flex-col items-center px-6 text-center">
       <span
@@ -115,7 +94,13 @@ function WelcomeContent({
           compact ? "text-2xl" : "text-3xl lg:text-4xl"
         )}
       >
-        {view === "login" ? "Welcome back." : "Welcome."}
+        {view === "login" ? (
+          <>
+            Welcome <em className="italic text-accent-200">back.</em>
+          </>
+        ) : (
+          "Welcome."
+        )}
       </h1>
       <p
         className={cn(
@@ -129,26 +114,14 @@ function WelcomeContent({
       </p>
       <div className="mt-6 h-px w-16 bg-gradient-to-r from-accent-300 to-transparent" />
       {!compact && (
-        <>
-          <ul className="mt-6 w-full max-w-sm space-y-3.5">
-            {points.map((p) => (
-              <li key={p.text} className="flex items-center gap-3 text-sm text-white/85">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10">
-                  <p.icon size={13} className="text-accent-200" />
-                </span>
-                {p.text}
-              </li>
-            ))}
-          </ul>
-          <button
-            type="button"
-            onClick={onToggle}
-            className="mt-8 inline-flex touch-target items-center justify-center gap-2 rounded-lg border border-white/25 bg-white/10 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/20"
-          >
-            {view === "login" ? "Create an account" : "Sign in"}
-            <ArrowRight size={16} className="text-accent-200" />
-          </button>
-        </>
+        <button
+          type="button"
+          onClick={onToggle}
+          className="mt-8 inline-flex touch-target items-center justify-center gap-2 rounded-lg border border-white/25 bg-white/10 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/20"
+        >
+          {view === "login" ? "Create an account" : "Sign in"}
+          <ArrowRight size={16} className="text-accent-200" />
+        </button>
       )}
     </div>
   )
@@ -157,6 +130,14 @@ function WelcomeContent({
 export function AuthCard({ referralCode }: Props) {
   const searchParams = useSearchParams()
   const [view, setView] = useState<"login" | "register">(referralCode ? "register" : "login")
+  const [settledView, setSettledView] = useState<"login" | "register">(
+    referralCode ? "register" : "login"
+  )
+  const sweepTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const loginPaneRef = useRef<HTMLDivElement>(null)
+  const registerPaneRef = useRef<HTMLDivElement>(null)
+  const loginPageRef = useRef<HTMLDivElement>(null)
+  const registerPageRef = useRef<HTMLDivElement>(null)
   const [activeTab, setActiveTab] = useState<"user" | "agent">("user")
   const [showAgentForgot, setShowAgentForgot] = useState(false)
 
@@ -165,6 +146,39 @@ export function AuthCard({ referralCode }: Props) {
       setActiveTab("agent")
     }
   }, [searchParams])
+
+  useEffect(() => {
+    return () => {
+      if (sweepTimerRef.current) clearTimeout(sweepTimerRef.current)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (loginPaneRef.current) loginPaneRef.current.inert = settledView !== "login"
+  }, [settledView])
+
+  useEffect(() => {
+    if (registerPaneRef.current) registerPaneRef.current.inert = settledView !== "register"
+  }, [settledView])
+
+  useEffect(() => {
+    if (loginPageRef.current) loginPageRef.current.inert = settledView !== "login"
+  }, [settledView])
+
+  useEffect(() => {
+    if (registerPageRef.current) registerPageRef.current.inert = settledView !== "register"
+  }, [settledView])
+
+  function toggleView(next: "login" | "register") {
+    if (next === view) return
+    setView(next)
+    if (sweepTimerRef.current) clearTimeout(sweepTimerRef.current)
+    if (window.matchMedia("(min-width: 1024px)").matches) {
+      sweepTimerRef.current = setTimeout(() => setSettledView(next), SWEEP_MS)
+    } else {
+      setSettledView(next)
+    }
+  }
 
   function handleTabChange(tab: "user" | "agent") {
     setActiveTab(tab)
@@ -176,19 +190,21 @@ export function AuthCard({ referralCode }: Props) {
       {/* Mobile welcome strip */}
       <div className="auth-strip relative px-6 py-10 lg:hidden">
         {view === "login" ? (
-          <WelcomeContent compact view="login" onToggle={() => setView("register")} />
+          <WelcomeContent compact view="login" onToggle={() => toggleView("register")} />
         ) : (
-          <WelcomeContent compact view="register" onToggle={() => setView("login")} />
+          <WelcomeContent compact view="register" onToggle={() => toggleView("login")} />
         )}
       </div>
 
       <div className="grid lg:grid-cols-2">
-        {/* Left panel — login */}
+        {/* Left pane — login */}
         <div
-          aria-hidden={view !== "login"}
+          ref={loginPaneRef}
+          aria-hidden={settledView !== "login"}
           className={cn(
-            "p-6 sm:p-8 lg:p-10",
-            view !== "login" && "hidden lg:block lg:invisible lg:pointer-events-none"
+            "p-6 transition-opacity duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] sm:p-8 lg:p-10",
+            view !== "login" && "hidden lg:block",
+            settledView !== "login" && "lg:opacity-0"
           )}
         >
           <h2 className="font-heading text-2xl font-bold text-text-primary">
@@ -203,17 +219,19 @@ export function AuthCard({ referralCode }: Props) {
               showAgentForgot={showAgentForgot}
               onTabChange={handleTabChange}
               onShowAgentForgot={() => setShowAgentForgot(true)}
-              onSwitchToRegister={() => setView("register")}
+              onSwitchToRegister={() => toggleView("register")}
             />
           </div>
         </div>
 
-        {/* Right panel — register */}
+        {/* Right pane — register */}
         <div
-          aria-hidden={view !== "register"}
+          ref={registerPaneRef}
+          aria-hidden={settledView !== "register"}
           className={cn(
-            "p-6 sm:p-8 lg:p-10",
-            view !== "register" && "hidden lg:block lg:invisible lg:pointer-events-none"
+            "p-6 transition-opacity duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] sm:p-8 lg:p-10",
+            view !== "register" && "hidden lg:block",
+            settledView !== "register" && "lg:opacity-0"
           )}
         >
           <h2 className="font-heading text-2xl font-bold text-text-primary">
@@ -223,37 +241,34 @@ export function AuthCard({ referralCode }: Props) {
             Join the All Property Link community.
           </p>
           <div className="mt-6">
-            <RegisterForm referralCode={referralCode} onSwitchToLogin={() => setView("login")} />
+            <RegisterForm referralCode={referralCode} onSwitchToLogin={() => toggleView("login")} />
           </div>
         </div>
       </div>
 
-      {/* Sliding blade (desktop) */}
+      {/* Sliding blade (desktop) — VERSO wipe */}
       <div
-        aria-hidden
         className={cn(
           "auth-band hidden lg:block",
           view === "register" ? "auth-band--left" : "auth-band--right"
         )}
       >
+        <span className="band-edge band-edge--lead" />
+        <span className="band-edge band-edge--trail" />
         <div className="auth-band-inner">
           <div
-            aria-hidden={view !== "login"}
-            className={cn(
-              "absolute inset-0 flex items-center justify-center transition-opacity duration-500",
-              view === "login" ? "opacity-100" : "pointer-events-none opacity-0"
-            )}
+            ref={loginPageRef}
+            aria-hidden={settledView !== "login"}
+            className={cn("band-page band-page--login", settledView !== "login" && "is-covered")}
           >
-            <WelcomeContent view="login" onToggle={() => setView("register")} />
+            <WelcomeContent view="login" onToggle={() => toggleView("register")} />
           </div>
           <div
-            aria-hidden={view !== "register"}
-            className={cn(
-              "absolute inset-0 flex items-center justify-center transition-opacity duration-500",
-              view === "register" ? "opacity-100" : "pointer-events-none opacity-0"
-            )}
+            ref={registerPageRef}
+            aria-hidden={settledView !== "register"}
+            className={cn("band-page band-page--register", settledView !== "register" && "is-covered")}
           >
-            <WelcomeContent view="register" onToggle={() => setView("login")} />
+            <WelcomeContent view="register" onToggle={() => toggleView("login")} />
           </div>
         </div>
       </div>

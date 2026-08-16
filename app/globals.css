@@ -137,7 +137,7 @@
 
 .auth-band {
   --rake: -12deg;
-  --park: 86.4%;
+  --sweep: 86.4%;
   position: absolute;
   top: 0;
   bottom: 0;
@@ -151,7 +151,7 @@
     radial-gradient(90% 80% at 5% 105%, rgba(10, 25, 21, 0.55), transparent 60%),
     linear-gradient(165deg, #152F29 0%, #1A3D35 45%, #286255 100%);
   box-shadow: 16px 0 32px -20px rgba(15, 32, 28, 0.6);
-  transform: translateX(var(--park)) skewX(var(--rake));
+  transform: skewX(var(--rake)) translateX(var(--sweep));
   transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1);
   will-change: transform;
 }
@@ -163,17 +163,65 @@
 }
 
 .auth-band--left {
-  --park: -4.6%;
+  --sweep: -4.6%;
 }
 
 .auth-band-inner {
   position: absolute;
   inset: 0;
+  transform: translateX(calc(-1 * var(--sweep))) skewX(calc(-1 * var(--rake)));
+  transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.band-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.band-edge--lead {
+  left: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(221, 187, 132, 0.7) 50%, rgba(255, 255, 255, 0.9));
+  box-shadow: 0 0 14px 2px rgba(221, 187, 132, 0.4);
+}
+
+.band-edge--trail {
+  right: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(221, 187, 132, 0.4) 50%, rgba(255, 255, 255, 0.55));
+  box-shadow: 0 0 10px 1px rgba(221, 187, 132, 0.25);
+}
+
+.band-page {
+  position: absolute;
+  top: 0;
+  bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: skewX(calc(var(--rake) * -1));
-  transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.band-page.is-covered {
+  opacity: 0;
+}
+
+.band-page button {
+  pointer-events: auto;
+}
+
+.band-page--register {
+  left: 0;
+  width: 100%;
+}
+
+.band-page--login {
+  left: 91%;
+  width: 100%;
 }
 
 @keyframes fadeUp {
