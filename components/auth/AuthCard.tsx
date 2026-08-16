@@ -104,7 +104,7 @@ function WelcomeText({ view }: { view: "login" | "register" }) {
 
 export function AuthCard({ referralCode }: Props) {
   const searchParams = useSearchParams()
-  const [view, setView] = useState<"login" | "register">("login")
+  const [view, setView] = useState<"login" | "register">(referralCode ? "register" : "login")
   const [activeTab, setActiveTab] = useState<"user" | "agent">("user")
   const [showAgentForgot, setShowAgentForgot] = useState(false)
 
