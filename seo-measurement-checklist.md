@@ -16,6 +16,9 @@ Verify after each main-site deploy (and ~weekly afterward). Anything unchecked �
 | City page | `/properties/kisumu` | 200; `<title>` = `Properties in Kisumu | All Property Link`; canonical correct | ☐ |
 | Service detail | `/services/<id>` from sitemap | title = `service title | All Property Link` (no doubled brand); `Service` JSON-LD with www URL | ☐ |
 | Legacy URL handling | hit `/properties/Kisumu/<slug>` (wrong case) or `/properties/nairobi/<slug>` (wrong city) | 200 + `<meta id="__next-page-redirect" http-equiv="refresh" content="1;url=/properties/kisumu/...">` + canonical to the canonical URL (soft redirect — Google consolidates via canonical+refresh) | ☐ |
+| Agent pages | `/agents/<id>` from sitemap | 200; title = `Name — APL Representative | All Property Link`; canonical www; `RealEstateAgent` + `BreadcrumbList` JSON-LD; 50-card listings grid (client `AgentListingsGrid` — PropertyCard has `onError` so it cannot be rendered in a server page); unknown id → not-found UI (HTTP 200 + `noindex`, streaming shell — matches listing-page behavior) | ☐ |
+| Agent directory | `/agents` | 200; title = `APL Representatives | All Property Link`; cards link to `/agents/<id>` with Call + WhatsApp + View profile | ☐ |
+| Sitemap agent URLs | `curl https://www.allpropertylink.co.ke/sitemap.xml` | contains 11 `/agents/<id>` entries (priority 0.4, monthly), all www | ☐ |
 
 ## Weekly (Google Search Console)
 
