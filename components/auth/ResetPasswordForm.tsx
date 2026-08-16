@@ -3,6 +3,7 @@ import { useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { api } from "@/lib/api-client"
 import { PasswordToggle } from "./PasswordToggle"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 export function ResetPasswordForm() {
   const searchParams = useSearchParams()
@@ -50,7 +51,7 @@ export function ResetPasswordForm() {
 
   if (success) {
     return (
-      <div className="rounded-lg bg-accent-300/10 px-4 py-8 text-center">
+      <div className="rounded-lg bg-success-500/10 px-4 py-8 text-center">
         <p className="mb-4 text-sm text-text-primary">
           Password reset successful! You can now sign in with your new password.
         </p>
@@ -67,9 +68,7 @@ export function ResetPasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">
-          {error}
-        </div>
+        <FormBanner variant="error">{error}</FormBanner>
       )}
       <div>
         <label htmlFor="password" className="block text-sm font-medium text-text-primary">

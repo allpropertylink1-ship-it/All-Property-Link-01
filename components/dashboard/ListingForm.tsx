@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { createProperty } from "@/app/actions/properties";
 import PropertyImageUploader from "@/components/property/PropertyImageUploader";
 import { LocationPicker } from "@/components/shared/LocationPicker";
+import { FormBanner } from "@/components/shared/FormFeedback";
 
 const listingSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -82,7 +83,7 @@ export function ListingForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {error && <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{error}</div>}
+      {error && <FormBanner variant="error">{error}</FormBanner>}
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="title">Title</Label>
@@ -155,7 +156,7 @@ export function ListingForm() {
         />
       </div>
       <div className="flex items-center gap-4 pt-2">
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
           {isSubmitting ? "Creating..." : "Create listing"}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>

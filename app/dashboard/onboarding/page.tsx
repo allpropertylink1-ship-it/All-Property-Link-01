@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Check } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
+import { FormBanner } from "@/components/shared/FormFeedback";
 
 const categories = [
   { value: "AGENT", label: "Agent" },
@@ -193,7 +194,9 @@ export default function OnboardingPage() {
       </div>
 
       {error && (
-        <div className="mb-6 rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{error}</div>
+        <div className="mb-6">
+          <FormBanner variant="error">{error}</FormBanner>
+        </div>
       )}
 
       {loading && (
@@ -369,6 +372,7 @@ export default function OnboardingPage() {
           <button
             type="submit"
             disabled={loading || !form.contactPerson || !form.phone || !form.email || !form.category}
+            aria-busy={loading}
             className="touch-target rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Submitting..." : "Submit for Approval"}

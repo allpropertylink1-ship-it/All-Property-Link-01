@@ -7,6 +7,7 @@ import { OtpInput } from "./OtpInput"
 import { RegisterUserTypeSelector } from "./RegisterUserTypeSelector"
 import { RegisterAccountInfo } from "./RegisterAccountInfo"
 import { formatTime } from "./RegisterForm.utils"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 type ContactMethod = "email" | "phone"
 type Step = "userType" | "form" | "otp"
@@ -191,7 +192,9 @@ export function RegisterForm({ referralCode: initialReferralCode }: { referralCo
         </p>
 
         {error && (
-          <div className="mb-4 rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{error}</div>
+          <div className="mb-4">
+            <FormBanner variant="error">{error}</FormBanner>
+          </div>
         )}
 
         <div className="mb-6">

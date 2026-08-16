@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { PasswordToggle } from "@/components/auth/PasswordToggle"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 export default function AgentForceChangePasswordPage() {
   const router = useRouter()
@@ -72,9 +73,9 @@ export default function AgentForceChangePasswordPage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">
+              <FormBanner variant="error">
                 {error}
-              </div>
+              </FormBanner>
             )}
 
             <div>

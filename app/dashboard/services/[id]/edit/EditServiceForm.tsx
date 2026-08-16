@@ -5,6 +5,7 @@ import { useState, useCallback, useRef, useId } from "react";
 import { useRouter } from "next/navigation";
 import { Upload, Loader2, X } from "@/components/ui/icons";
 import { api } from "@/lib/api-client";
+import { FormBanner } from "@/components/shared/FormFeedback";
 
 interface Category {
   id: string;
@@ -185,10 +186,8 @@ export function EditServiceForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">
-          {error}
-        </div>
+{error && (
+        <FormBanner variant="error">{error}</FormBanner>
       )}
 
       <div className="grid gap-6 sm:grid-cols-2">
@@ -428,8 +427,9 @@ export function EditServiceForm({
 
       <div className="flex items-center gap-4 pt-2">
         <button
-          type="submit"
+type="submit"
           disabled={submitting}
+          aria-busy={submitting}
           className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-3 text-sm font-medium text-text-on-primary transition-colors hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting && <Loader2 size={16} className="animate-spin" />}

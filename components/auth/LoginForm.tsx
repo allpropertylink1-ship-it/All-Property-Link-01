@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context"
 import { PasswordToggle } from "./PasswordToggle"
 import { GoogleSignInButton } from "./GoogleSignInButton"
 import { OtpInput } from "./OtpInput"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 export function LoginForm() {
   const router = useRouter()
@@ -130,9 +131,7 @@ export function LoginForm() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
-          <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">
-            {error}
-          </div>
+          <FormBanner variant="error">{error}</FormBanner>
         )}
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-text-primary">
@@ -185,10 +184,10 @@ export function LoginForm() {
 
         {showMagicLink && (
           magicSent ? (
-            <div className="space-y-3">
-              <div className="rounded-lg bg-accent-300/10 px-4 py-3 text-sm text-accent-600">
-                Magic link sent! Check your email inbox.
-              </div>
+<div className="space-y-3">
+                <FormBanner variant="success">
+                  Magic link sent! Check your email inbox.
+                </FormBanner>
               <button
                 type="button"
                 onClick={() => { setMagicSent(false); setMagicEmail(""); setMagicError("") }}
@@ -235,7 +234,7 @@ export function LoginForm() {
         {phoneStep === "phone" ? (
           <div className="space-y-3">
             {phoneError && (
-              <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{phoneError}</div>
+              <FormBanner variant="error">{phoneError}</FormBanner>
             )}
             <div>
               <label className="block text-sm font-medium text-text-primary mb-1">Phone number</label>
@@ -268,7 +267,7 @@ export function LoginForm() {
         ) : (
           <div className="space-y-3">
             {phoneError && (
-              <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{phoneError}</div>
+              <FormBanner variant="error">{phoneError}</FormBanner>
             )}
             <p className="text-sm text-text-secondary text-center">
               We sent a code to <strong className="text-text-primary">+254{phone.replace(/\D/g, "")}</strong>

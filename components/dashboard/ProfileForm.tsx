@@ -12,6 +12,7 @@ import { Camera, Save, Key, Trash2, Shield, CheckCircle, Clock, XCircle, Loader2
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api-client";
 import ImageCropper from "@/components/kyc/ImageCropper";
+import { FormBanner } from "@/components/shared/FormFeedback";
 
 interface ProfileFormProps {
   user: {
@@ -208,17 +209,10 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
   return (
     <div className="space-y-8">
-      {message && (
-        <div
-          className={cn(
-            "rounded-lg px-4 py-3 text-sm",
-            message.type === "success"
-              ? "bg-success-500/10 text-success-700"
-              : "bg-error-500/10 text-error-500"
-          )}
-        >
+{message && (
+        <FormBanner variant={message.type === "success" ? "success" : "error"}>
           {message.text}
-        </div>
+        </FormBanner>
       )}
 
       <div className="flex items-center gap-6">

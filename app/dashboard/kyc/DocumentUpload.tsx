@@ -5,6 +5,7 @@ import { useState } from "react"
 import { Upload, XCircle, FileText, Trash2 } from "@/components/ui/icons"
 import PdfViewer from "@/components/kyc/PdfViewer"
 import ImageCropper from "@/components/kyc/ImageCropper"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 interface Props {
   docType: string
@@ -97,9 +98,11 @@ export function DocumentUpload(props: Props) {
 
   return (
     <>
-      {msg && (
-        <div className={`mb-4 rounded-lg border px-4 py-3 text-sm ${msg.type === "success" ? "border-green-200 bg-green-50 text-green-700" : "border-red-200 bg-red-50 text-red-700"}`}>
-          {msg.text}
+{msg && (
+        <div className="mb-4">
+          <FormBanner variant={msg.type === "success" ? "success" : "error"}>
+            {msg.text}
+          </FormBanner>
         </div>
       )}
 

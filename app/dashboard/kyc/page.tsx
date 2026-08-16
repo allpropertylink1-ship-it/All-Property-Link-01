@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth-context"
 import { PersonalDetailsForm } from "./PersonalDetailsForm"
 import { DocumentUpload } from "./DocumentUpload"
 import { SubmissionHistory } from "./SubmissionHistory"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 interface KycDocument {
   id: string
@@ -298,8 +299,10 @@ export default function KycPage() {
       </div>
 
       {message && (
-        <div className={cn("mt-4 rounded-lg border px-4 py-3 text-sm", message.type === "success" ? "border-green-200 bg-green-50 text-green-700" : "border-red-200 bg-red-50 text-red-700")}>
-          {message.text}
+        <div className="mt-4">
+          <FormBanner variant={message.type === "success" ? "success" : "error"}>
+            {message.text}
+          </FormBanner>
         </div>
       )}
 
@@ -359,7 +362,7 @@ export default function KycPage() {
             cropping={cropping} setMessage={setMessage}
           />
 
-          <button type="submit" disabled={submitting || !docNumber.trim() || !frontFile}
+          <button type="submit" disabled={submitting || !docNumber.trim() || !frontFile} aria-busy={submitting}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-base font-medium text-white shadow-lg transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed">
             {submitting ? <Loader2 size={18} className="animate-spin" /> : <Shield size={18} />}
             {submitting ? "Submitting..." : "Submit for Verification"}

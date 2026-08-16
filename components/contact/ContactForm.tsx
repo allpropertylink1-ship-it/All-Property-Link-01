@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { sendContactMessage } from '@/app/actions/contact';
 import { useState } from 'react';
+import { FormBanner } from '@/components/shared/FormFeedback';
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -28,7 +29,7 @@ export default function ContactForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
   });
@@ -130,23 +131,24 @@ export default function ContactForm() {
 
       <Button
         type="submit"
-        disabled={isSubmitting || !isValid}
+        disabled={isSubmitting}
+        aria-busy={isSubmitting}
         className="w-full bg-accent-300 text-white hover:bg-accent-400 min-h-11 py-2.5"
       >
         {isSubmitting ? "Sending..." : "Send Message"}
       </Button>
 
       {isSuccess && (
-        <div className="mt-4 rounded-lg border border-success-500/20 bg-success-50 p-4">
-          <p className="text-sm text-success-700">
+        <div className="mt-4">
+          <FormBanner variant="success">
             Your message has been sent! We&apos;ll get back to you soon.
-          </p>
+          </FormBanner>
         </div>
       )}
 
       {error && (
-        <div className="mt-4 rounded-lg border border-error-500/20 bg-error-50 p-4">
-          <p className="text-sm text-error-700">{error}</p>
+        <div className="mt-4">
+          <FormBanner variant="error">{error}</FormBanner>
         </div>
       )}
     </form>

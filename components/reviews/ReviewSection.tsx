@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Star, User } from "@/components/ui/icons";
 import Link from "next/link";
 import { api } from "@/lib/api-client";
+import { FormBanner } from "@/components/shared/FormFeedback";
 
 interface Review {
   id: string;
@@ -194,11 +195,12 @@ export function ReviewSection({
             />
           </div>
           {error && (
-            <p className="text-sm text-error-500">{error}</p>
+            <FormBanner variant="error">{error}</FormBanner>
           )}
           <button
             type="submit"
             disabled={loading}
+            aria-busy={loading}
             className="touch-target inline-flex items-center rounded-lg bg-accent-300 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Submitting..." : "Submit Review"}

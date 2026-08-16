@@ -6,7 +6,8 @@ import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
 import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
 import Link from "next/link"
-import { ArrowLeft, Loader2, AlertCircle, Building2 } from "@/components/ui/icons"
+import { ArrowLeft, Loader2, Building2 } from "@/components/ui/icons"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 export default function NewDisputePage() {
   const router = useRouter()
@@ -64,9 +65,7 @@ export default function NewDisputePage() {
 
       <form onSubmit={handleSubmit} className="space-y-6 rounded-xl border border-border bg-surface p-6">
         {error && (
-          <div className="flex items-center gap-2 rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">
-            <AlertCircle size={16} /> {error}
-          </div>
+          <FormBanner variant="error">{error}</FormBanner>
         )}
 
         <div>
@@ -97,7 +96,7 @@ export default function NewDisputePage() {
           <Link href="/dashboard/agent/disputes" className="touch-target rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary">
             Cancel
           </Link>
-          <button type="submit" disabled={loading}
+          <button type="submit" disabled={loading} aria-busy={loading}
             className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
           >
             {loading && <Loader2 size={16} className="animate-spin" />}

@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { PasswordToggle } from "@/components/auth/PasswordToggle"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 function ResetForm() {
   const router = useRouter()
@@ -58,9 +59,9 @@ function ResetForm() {
   if (success) {
     return (
       <div className="space-y-6">
-        <div className="rounded-lg bg-success-500/10 px-4 py-3 text-sm text-success-700">
+        <FormBanner variant="success">
           Your password has been reset successfully. Redirecting to login...
-        </div>
+        </FormBanner>
         <button
           type="button"
           onClick={() => router.push("/auth/login?tab=agent")}
@@ -75,15 +76,15 @@ function ResetForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {!token && (
-        <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">
+        <FormBanner variant="error">
           Invalid reset link. Please request a new one.
-        </div>
+        </FormBanner>
       )}
 
       {error && (
-        <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">
+        <FormBanner variant="error">
           {error}
-        </div>
+        </FormBanner>
       )}
 
       <div>

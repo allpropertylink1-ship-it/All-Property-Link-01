@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 import { api } from "@/lib/api-client"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("")
@@ -26,7 +27,7 @@ export function ForgotPasswordForm() {
 
   if (sent) {
     return (
-      <div className="rounded-lg bg-accent-300/10 px-4 py-8 text-center">
+      <div className="rounded-lg bg-success-500/10 px-4 py-8 text-center">
         <p className="text-sm text-text-primary">
           If an account exists with that email, we&apos;ve sent a reset link.
         </p>
@@ -37,9 +38,7 @@ export function ForgotPasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">
-          {error}
-        </div>
+        <FormBanner variant="error">{error}</FormBanner>
       )}
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-text-primary">

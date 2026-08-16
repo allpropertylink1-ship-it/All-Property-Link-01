@@ -2,6 +2,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 export function AgentForgotPasswordForm() {
   const router = useRouter()
@@ -32,10 +33,10 @@ export function AgentForgotPasswordForm() {
   if (sent) {
     return (
       <div className="space-y-6">
-        <div className="rounded-lg bg-success-500/10 px-4 py-3 text-sm text-success-700">
+        <FormBanner variant="success">
           If an account with that information exists, a password reset link has been sent to the registered email address.
-          If you don't receive an email within 5 minutes, check your spam folder or contact support.
-        </div>
+          If you don&apos;t receive an email within 5 minutes, check your spam folder or contact support.
+        </FormBanner>
         <button
           type="button"
           onClick={backToLogin}
@@ -54,9 +55,7 @@ export function AgentForgotPasswordForm() {
       </p>
 
       {error && (
-        <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">
-          {error}
-        </div>
+        <FormBanner variant="error">{error}</FormBanner>
       )}
 
       <div>

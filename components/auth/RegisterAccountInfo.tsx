@@ -4,6 +4,7 @@ import { ArrowLeft } from "@/components/ui/icons"
 import { PasswordStrength } from "./PasswordStrength"
 import { PasswordToggle } from "./PasswordToggle"
 import { GoogleSignInButton } from "./GoogleSignInButton"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 type ContactMethod = "email" | "phone"
 
@@ -51,7 +52,7 @@ export function RegisterAccountInfo({
 
       <div className="space-y-6">
         {error && (
-          <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{error}</div>
+          <FormBanner variant="error">{error}</FormBanner>
         )}
 
         <div className="grid grid-cols-2 gap-4">

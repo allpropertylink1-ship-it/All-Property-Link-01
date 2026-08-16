@@ -4,6 +4,7 @@
 import { useState, useCallback, useRef, useId } from "react";
 import { Upload, Loader2, X } from "@/components/ui/icons";
 import { api } from "@/lib/api-client";
+import { FormBanner } from "@/components/shared/FormFeedback";
 
 interface PropertyImageUploaderProps {
   onUploadComplete: (urls: string[]) => void;
@@ -116,8 +117,8 @@ export default function PropertyImageUploader({
         Upload up to {maxFiles} images (JPEG, PNG, WebP). Max size 10MB each.
       </p>
 
-      {error && (
-        <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{error}</div>
+{error && (
+        <FormBanner variant="error">{error}</FormBanner>
       )}
 
       {entries.length < maxFiles ? (

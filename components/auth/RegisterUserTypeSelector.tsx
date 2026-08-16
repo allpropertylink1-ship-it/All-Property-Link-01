@@ -1,6 +1,7 @@
 "use client"
 
 import { Home, Handshake, Wrench, Briefcase } from "@/components/ui/icons"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 const userTypeOptions = [
   { value: "PROPERTY_OWNER", label: "Property Owner", description: "I want to list properties for sale or rent", icon: Home },
@@ -23,7 +24,7 @@ export function RegisterUserTypeSelector({ userType, onChange, onNext, error }: 
       <p className="text-sm text-text-secondary">Select the type of account that best describes you.</p>
 
       {error && (
-        <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{error}</div>
+        <FormBanner variant="error">{error}</FormBanner>
       )}
 
       <div className="grid gap-3">

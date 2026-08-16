@@ -5,6 +5,7 @@ import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
 import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
 import { Loader2, AlertCircle, Building2, Plus, X, CheckCircle, XCircle, Clock } from "@/components/ui/icons"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 interface AvailableListing {
   id: string
@@ -63,6 +64,8 @@ export default function AgentClaimsPage() {
   const [formAmount, setFormAmount] = useState("")
   const [formNotes, setFormNotes] = useState("")
   const [submitting, setSubmitting] = useState(false)
+  const [claimSuccess, setClaimSuccess] = useState("")
+  const [claimError, setClaimError] = useState("")
 
   const fetchClaims = useCallback(async () => {
     setLoading(true)
@@ -95,14 +98,19 @@ export default function AgentClaimsPage() {
     const amount = parseFloat(formAmount)
     if (!amount || amount <= 0) return
     setSubmitting(true)
-    const { data } = await api.post("/api/claims", {
+    setClaimError("")
+    setClaimSuccess("")
+    const { data, error } = await api.post("/api/claims", {
       propertyId: selectedListing || undefined,
       amount,
       agentNotes: formNotes || null,
     })
     if (data) {
       setShowForm(false)
+      setClaimSuccess("Claim submitted! It will appear once an admin reviews it.")
       await fetchClaims()
+    } else {
+      setClaimError(error || "Failed to submit claim. Please try again.")
     }
     setSubmitting(false)
   }
@@ -148,6 +156,17 @@ export default function AgentClaimsPage() {
           >{statusLabels[s]}</button>
         ))}
       </div>
+
+      {claimSuccess && (
+        <div className="mb-4">
+          <FormBanner variant="success">{claimSuccess}</FormBanner>
+        </div>
+      )}
+      {claimError && (
+        <div className="mb-4">
+          <FormBanner variant="error">{claimError}</FormBanner>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex items-center justify-center py-20"><Loader2 size={24} className="animate-spin text-muted" /></div>
@@ -250,7 +269,7 @@ export default function AgentClaimsPage() {
                 <textarea value={formNotes} onChange={(e) => setFormNotes(e.target.value)} rows={3} placeholder="Reason for claim..."
                   className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm placeholder:text-muted/60 focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15 resize-none" />
               </div>
-              <button type="submit" disabled={submitting || !formAmount}
+              <button type="submit" disabled={submitting || !formAmount} aria-busy={submitting}
                 className="w-full touch-target rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-700 transition-all disabled:opacity-50 inline-flex items-center justify-center gap-2"
               >{submitting ? <Loader2 size={16} className="animate-spin" /> : null}{submitting ? "Submitting..." : "Submit Claim"}</button>
             </form>

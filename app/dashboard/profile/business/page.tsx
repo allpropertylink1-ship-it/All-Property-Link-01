@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { Check, Loader2, Save, Camera, User, Building2 } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 const categories = [
   { value: "AGENT", label: "Agent" },
@@ -276,14 +277,17 @@ export default function BusinessProfilePage() {
         </p>
       </div>
 
-      {error && (
-        <div className="mb-6 rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">{error}</div>
+{error && (
+        <div className="mb-6">
+          <FormBanner variant="error">{error}</FormBanner>
+        </div>
       )}
 
       {success && (
-        <div className="mb-6 rounded-lg bg-success-500/10 px-4 py-3 text-sm text-success-700">
-          <Check size={16} className="mr-2 inline" />
-          Business profile updated successfully
+        <div className="mb-6">
+          <FormBanner variant="success">
+            Business profile updated successfully
+          </FormBanner>
         </div>
       )}
 
@@ -468,8 +472,9 @@ export default function BusinessProfilePage() {
 
         <div className="flex justify-end border-t border-border pt-6">
           <button
-            type="submit"
+type="submit"
             disabled={loading}
+            aria-busy={loading}
             className="touch-target flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? (

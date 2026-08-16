@@ -4,7 +4,8 @@ import { useState } from "react"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
 import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
-import { Loader2, AlertCircle, Building2, CheckCircle, Link as LinkIcon, Copy, Check } from "@/components/ui/icons"
+import { Loader2, Building2, Link as LinkIcon, Copy, Check } from "@/components/ui/icons"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 export default function AgentSettingsPage() {
   const { user } = useAuth()
@@ -131,8 +132,8 @@ export default function AgentSettingsPage() {
       <form onSubmit={handleProfileUpdate} className="space-y-6 rounded-xl border border-border bg-surface p-6">
         <h2 className="font-heading text-lg font-semibold text-text-primary">Profile</h2>
 
-        {profileError && <div className="flex items-center gap-2 rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500"><AlertCircle size={16} /> {profileError}</div>}
-        {profileSuccess && <div className="flex items-center gap-2 rounded-lg bg-success/10 px-4 py-3 text-sm text-success-700"><CheckCircle size={16} /> Profile updated</div>}
+        {profileError && <FormBanner variant="error">{profileError}</FormBanner>}
+        {profileSuccess && <FormBanner variant="success">Profile updated</FormBanner>}
 
         <div>
           <label htmlFor="fullName" className="block text-sm font-medium text-text-primary">Full Name</label>
@@ -149,7 +150,7 @@ export default function AgentSettingsPage() {
         </div>
 
         <div className="flex justify-end">
-          <button type="submit" disabled={profileLoading}
+          <button type="submit" disabled={profileLoading} aria-busy={profileLoading}
             className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
           >
             {profileLoading && <Loader2 size={16} className="animate-spin" />}
@@ -161,8 +162,8 @@ export default function AgentSettingsPage() {
       <form onSubmit={handlePasswordChange} className="space-y-6 rounded-xl border border-border bg-surface p-6">
         <h2 className="font-heading text-lg font-semibold text-text-primary">Change Password</h2>
 
-        {pwError && <div className="flex items-center gap-2 rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500"><AlertCircle size={16} /> {pwError}</div>}
-        {pwSuccess && <div className="flex items-center gap-2 rounded-lg bg-success/10 px-4 py-3 text-sm text-success-700"><CheckCircle size={16} /> Password changed successfully</div>}
+        {pwError && <FormBanner variant="error">{pwError}</FormBanner>}
+        {pwSuccess && <FormBanner variant="success">Password changed successfully</FormBanner>}
 
         <div>
           <label htmlFor="currentPassword" className="block text-sm font-medium text-text-primary">Current Password</label>
@@ -186,7 +187,7 @@ export default function AgentSettingsPage() {
         </div>
 
         <div className="flex justify-end">
-          <button type="submit" disabled={pwLoading}
+          <button type="submit" disabled={pwLoading} aria-busy={pwLoading}
             className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
           >
             {pwLoading && <Loader2 size={16} className="animate-spin" />}

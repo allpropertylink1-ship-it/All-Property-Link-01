@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { PasswordToggle } from "@/components/auth/PasswordToggle"
 import { api } from "@/lib/api-client"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 function ActivateForm() {
   const router = useRouter()
@@ -57,9 +58,9 @@ function ActivateForm() {
   if (success) {
     return (
       <div className="space-y-6">
-        <div className="rounded-lg bg-success-500/10 px-4 py-3 text-sm text-success-700">
+        <FormBanner variant="success">
           Your account has been activated. Redirecting to login...
-        </div>
+        </FormBanner>
         <button
           type="button"
           onClick={() => router.push("/auth/login?tab=agent")}
@@ -78,15 +79,15 @@ function ActivateForm() {
       </p>
 
       {!token && (
-        <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">
+        <FormBanner variant="error">
           Invalid activation link. Please contact your administrator.
-        </div>
+        </FormBanner>
       )}
 
       {error && (
-        <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">
+        <FormBanner variant="error">
           {error}
-        </div>
+        </FormBanner>
       )}
 
       <div>

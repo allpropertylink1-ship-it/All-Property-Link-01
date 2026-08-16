@@ -3,6 +3,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { PasswordToggle } from "./PasswordToggle"
+import { FormBanner } from "@/components/shared/FormFeedback"
 
 interface Props {
   onForgotPassword?: () => void
@@ -43,9 +44,7 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="rounded-lg bg-error-500/10 px-4 py-3 text-sm text-error-500">
-          {error}
-        </div>
+        <FormBanner variant="error">{error}</FormBanner>
       )}
       <div>
         <label htmlFor="agentCode" className="block text-sm font-medium text-text-primary">
