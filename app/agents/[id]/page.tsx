@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Phone, Mail, UserCheck, ArrowRight } from "@/components/ui/icons";
-import { PropertyCard } from "@/components/property/PropertyCard";
+import { AgentListingsGrid } from "@/app/agents/AgentListingsGrid";
 import { getAgentById, getAgentListings } from "@/lib/services/agent";
 import { siteUrl } from "@/lib/seo";
 
@@ -138,26 +138,7 @@ export default async function AgentDetailPage({ params }: Props) {
               No listings from this representative&apos;s referrals yet.
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {listings.map((p) => (
-                <PropertyCard
-                  key={p.id}
-                  slug={p.slug}
-                  title={p.title}
-                  price={p.price}
-                  currency={p.currency}
-                  propertyType={p.propertyType}
-                  listingPurpose={p.listingPurpose}
-                  city={p.city}
-                  region={p.region}
-                  bedrooms={p.bedrooms}
-                  bathrooms={p.bathrooms}
-                  area={p.area}
-                  images={p.images}
-                  isFeatured={p.isFeatured}
-                />
-              ))}
-            </div>
+            <AgentListingsGrid listings={listings} />
           )}
         </div>
       </section>
