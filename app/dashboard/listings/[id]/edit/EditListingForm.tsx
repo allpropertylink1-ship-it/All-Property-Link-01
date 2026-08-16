@@ -50,7 +50,7 @@ const listingSchema = z.object({
   longitude: z.coerce.number().optional(),
 });
 
-export default function EditListingForm({ propertyId, property }: { propertyId: string; property: PropertyData }) {
+export default function EditListingForm({ propertyId, property, redirectTo }: { propertyId: string; property: PropertyData; redirectTo?: string }) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>(property.images || []);
@@ -97,7 +97,7 @@ export default function EditListingForm({ propertyId, property }: { propertyId: 
       setError(err instanceof Error ? err.message : "Failed to update listing");
       return;
     }
-    router.push("/dashboard/listings");
+    router.push(redirectTo || "/dashboard/listings");
   }
 
   const handleImageUploadComplete = (urls: string[]) => {

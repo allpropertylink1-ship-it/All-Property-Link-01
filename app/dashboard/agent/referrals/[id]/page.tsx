@@ -101,23 +101,30 @@ export default function AgentReferralDetailPage() {
           {referral.properties.map((p) => {
             const img = Array.isArray(p.images) ? p.images[0] : null
             return (
-              <Link key={p.id} href={`/properties/${p.city?.toLowerCase() || "unknown"}/${p.slug}`} className="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-sm">
-                {img ? (
-                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-surface-secondary">
-                    <img src={typeof img === "string" ? img : img.url} alt="" className="h-full w-full object-cover" />
+              <div key={p.id} className="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-sm">
+                <Link href={`/properties/${p.city?.toLowerCase() || "unknown"}/${p.slug}`} className="flex min-w-0 flex-1 items-center gap-4">
+                  {img ? (
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-surface-secondary">
+                      <img src={typeof img === "string" ? img : img.url} alt="" className="h-full w-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-surface-secondary">
+                      <Building2 size={20} className="text-muted" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-text-primary">{p.title}</p>
+                    <p className="text-xs text-text-secondary">{p.city} &middot; {p.propertyType}</p>
+                    <p className="text-sm font-semibold text-text-primary">{fmt(p.price)}</p>
                   </div>
-                ) : (
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-surface-secondary">
-                    <Building2 size={20} className="text-muted" />
-                  </div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-text-primary">{p.title}</p>
-                  <p className="text-xs text-text-secondary">{p.city} &middot; {p.propertyType}</p>
-                  <p className="text-sm font-semibold text-text-primary">{fmt(p.price)}</p>
+                </Link>
+                <div className="flex shrink-0 flex-col items-end gap-2">
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${p.moderationStatus === "APPROVED" ? "bg-success/10 text-success-700" : "bg-warning-50 text-warning-500"}`}>{p.status}</span>
+                  <Link href={`/dashboard/agent/referrals/${referral.id}/properties/${p.id}/edit`} className="rounded-lg border border-accent-200 bg-accent-50 px-3 py-1.5 text-xs font-medium text-accent-300 transition-colors hover:bg-accent-100">
+                    Edit
+                  </Link>
                 </div>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${p.moderationStatus === "APPROVED" ? "bg-success/10 text-success-700" : "bg-warning-50 text-warning-500"}`}>{p.status}</span>
-              </Link>
+              </div>
             )
           })}
         </div>
