@@ -89,12 +89,12 @@ export function PropertyGallery({ images, title }: Props) {
             </button>
           </div>
 
-          {/* Hover overlay with actions */}
-          <div className="absolute inset-0 opacity-0 transition-opacity hover:opacity-100">
+{/* Hover overlay with actions */}
+          <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity hover:opacity-100">
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); prev(); }}
-className="absolute left-2 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touch items-center justify-center rounded-full bg-black/45 text-white transition-colors hover:bg-black/65"
+className="pointer-events-auto absolute left-2 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touch items-center justify-center rounded-full bg-black/45 text-white transition-colors hover:bg-black/65"
               aria-label="Previous image"
             >
               <ChevronLeft size={22} />
@@ -102,7 +102,7 @@ className="absolute left-2 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touch
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); next(); }}
-className="absolute right-2 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touch items-center justify-center rounded-full bg-black/45 text-white transition-colors hover:bg-black/65"
+className="pointer-events-auto absolute right-2 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touch items-center justify-center rounded-full bg-black/45 text-white transition-colors hover:bg-black/65"
               aria-label="Next image"
             >
               <ChevronRight size={22} />
@@ -168,8 +168,8 @@ className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touc
 
       {/* Lightbox */}
       <Dialog open={showLightbox} onOpenChange={setShowLightbox}>
-        <DialogContent
-          className="fixed inset-0 z-50 flex h-full w-full max-w-none items-center justify-center bg-black/90 p-0 sm:max-w-none"
+<DialogContent
+          className="fixed inset-0 z-50 flex h-full w-full max-w-none translate-x-0 translate-y-0 items-center justify-center bg-black/90 p-0 text-white ring-0 sm:max-w-none"
           showCloseButton={false}
         >
           <DialogTitle className="sr-only">{title} — image {lightboxIndex + 1} of {images.length}</DialogTitle>
