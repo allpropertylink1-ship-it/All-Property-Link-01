@@ -24,7 +24,7 @@ const config: Config = {
         },
         error: {
           DEFAULT: "#EF4444",
-          50: "#FEF2F2", 500: "#EF4444", 700: "#B91C1C",
+          50: "#FEF2F2", 200: "#FECACA", 500: "#EF4444", 600: "#DC2626", 700: "#B91C1C",
         },
         accent: {
           50: "#F4ECDD",
@@ -41,11 +41,15 @@ const config: Config = {
         success: {
           50: "#F0FDF4",
           500: "#22C55E",
+          600: "#16A34A",
           700: "#15803D",
         },
         warning: {
           50: "#FFFBEB",
+          200: "#FDE68A",
           500: "#F59E0B",
+          600: "#D97706",
+          700: "#B45309",
         },
         surface: {
           DEFAULT: "var(--color-surface)",

@@ -18,11 +18,14 @@ export function ServiceCard({ item, icon }: { item: ServiceRow; icon: typeof Wre
   return (
     <Link href={`/services/${item.id}`} className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
-        {imageUrl ? (
+{imageUrl ? (
           <img src={imageUrl} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" decoding="async" onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_SERVICE }} />
         ) : (
-          <div className="flex h-full items-center justify-center">
-            <Icon className="h-12 w-12 text-text-secondary" />
+          <div className="relative flex h-full items-center justify-center overflow-hidden bg-surface-secondary">
+            <img src={PLACEHOLDER_SERVICE} alt={item.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }} />
+            <span className="relative z-10 flex h-10 w-10 items-center justify-center rounded-xl bg-white/85 text-primary-600 shadow-sm">
+              <Icon size={18} />
+            </span>
           </div>
         )}
         {item.category && (

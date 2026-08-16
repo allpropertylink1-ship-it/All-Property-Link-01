@@ -345,14 +345,14 @@ export default function PropertyDetailClient({ slug }: { slug: string }) {
                         href={`https://wa.me/${property.agent.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 rounded-lg bg-[#25D366] px-3 py-2 text-xs font-semibold text-white"
+                        className="flex items-center gap-1.5 rounded-lg bg-[#25D366] px-3 py-3 text-xs font-semibold text-white"
                       >
                         <MessageCircle size={14} />
                         WhatsApp
                       </a>
                       <a
                         href={`tel:${property.agent.phone}`}
-                        className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-primary"
+                        className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-3 text-xs font-semibold text-text-primary"
                       >
                         <Phone size={14} />
                         Call
@@ -362,7 +362,7 @@ export default function PropertyDetailClient({ slug }: { slug: string }) {
                   {property.agent.email && (
                     <a
                       href={`mailto:${property.agent.email}`}
-                      className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-primary"
+                      className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-3 text-xs font-semibold text-text-primary"
                     >
                       <Mail size={14} />
                       Email

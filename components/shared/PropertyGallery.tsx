@@ -82,7 +82,7 @@ export function PropertyGallery({ images, title }: Props) {
             <button type="button" onClick={() => openLightbox(current)} className="relative block h-full w-full" aria-label="View image full-screen">
               <img
                 src={images[current]}
-                alt={`${title} â€” image ${current + 1} of ${images.length}`}
+                alt={`${title} — image ${current + 1} of ${images.length}`}
                 className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
                 onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_GALLERY }}
               />
@@ -94,7 +94,7 @@ export function PropertyGallery({ images, title }: Props) {
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); prev(); }}
-              className="absolute left-2 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/45 text-white transition-colors hover:bg-black/65"
+className="absolute left-2 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touch items-center justify-center rounded-full bg-black/45 text-white transition-colors hover:bg-black/65"
               aria-label="Previous image"
             >
               <ChevronLeft size={22} />
@@ -102,7 +102,7 @@ export function PropertyGallery({ images, title }: Props) {
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); next(); }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/45 text-white transition-colors hover:bg-black/65"
+className="absolute right-2 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touch items-center justify-center rounded-full bg-black/45 text-white transition-colors hover:bg-black/65"
               aria-label="Next image"
             >
               <ChevronRight size={22} />
@@ -116,7 +116,7 @@ export function PropertyGallery({ images, title }: Props) {
           <button
             type="button"
             onClick={() => openLightbox(current)}
-            className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-md bg-black/55 text-white transition-colors hover:bg-black/75"
+className="absolute bottom-2 right-2 flex min-h-touch min-w-touch items-center justify-center rounded-md bg-black/55 text-white transition-colors hover:bg-black/75"
             aria-label="View full-screen"
           >
             <Expand size={14} />
@@ -127,7 +127,7 @@ export function PropertyGallery({ images, title }: Props) {
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); prev(); }}
-              className="absolute left-1 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-black/45 text-white"
+className="absolute left-1 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touch items-center justify-center rounded-full bg-black/45 text-white"
               aria-label="Previous image"
             >
               <ChevronLeft size={20} />
@@ -135,7 +135,7 @@ export function PropertyGallery({ images, title }: Props) {
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); next(); }}
-              className="absolute right-1 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-black/45 text-white"
+className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touch items-center justify-center rounded-full bg-black/45 text-white"
               aria-label="Next image"
             >
               <ChevronRight size={20} />
@@ -172,12 +172,12 @@ export function PropertyGallery({ images, title }: Props) {
           className="fixed inset-0 z-50 flex h-full w-full max-w-none items-center justify-center bg-black/90 p-0 sm:max-w-none"
           showCloseButton={false}
         >
-          <DialogTitle className="sr-only">{title} â€” image {lightboxIndex + 1} of {images.length}</DialogTitle>
+          <DialogTitle className="sr-only">{title} — image {lightboxIndex + 1} of {images.length}</DialogTitle>
 
           <button
             type="button"
             onClick={() => setShowLightbox(false)}
-            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
+className="absolute right-4 top-4 z-10 flex min-h-touch min-w-touch items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
             aria-label="Close"
           >
             <X size={22} />
@@ -207,7 +207,7 @@ export function PropertyGallery({ images, title }: Props) {
           <div className="flex h-full w-full items-center justify-center p-4">
             <img
               src={images[lightboxIndex]}
-              alt={`${title} â€” image ${lightboxIndex + 1}`}
+              alt={`${title} — image ${lightboxIndex + 1}`}
               className="max-h-full max-w-full rounded-lg object-contain"
               onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_GALLERY }}
             />
