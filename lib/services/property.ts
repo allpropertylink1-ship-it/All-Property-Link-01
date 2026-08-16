@@ -72,8 +72,8 @@ export const getProperties = cache(async (filters: PropertyFilters = {}): Promis
 });
 
 export const getPropertyBySlug = cache(async (slug: string): Promise<PropertyDetail | null> => {
-  const data = await fetchApi<PropertyDetail>(`/api/properties/${encodeURIComponent(slug)}`);
-  return data;
+  const data = await fetchApi<{ property: PropertyDetail | null }>(`/api/properties/${encodeURIComponent(slug)}`);
+  return data?.property ?? null;
 });
 
 export const getOtherPropertiesByAgent = cache(async (agentId: string, currentPropertyId: string): Promise<OtherProperty[]> => {

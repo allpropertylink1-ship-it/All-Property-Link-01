@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { siteUrl } from "@/lib/seo";
 import { getServiceById, getServiceReviews } from "@/lib/services/service";
 import type { ServiceReview } from "@/lib/services/service";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
@@ -24,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     alternates: { canonical: `/services/${service.id}` },
     openGraph: {
-      title: `${service.title} — All Property Link`,
+    title: service.title,
       description,
       type: "website",
       locale: "en_KE",
@@ -72,7 +73,7 @@ export default async function ServiceDetailPage({ params }: Props) {
     "@type": "Service",
     name: service.title,
     description: service.description,
-    url: `https://allpropertylink.co.ke/services/${service.id}`,
+    url: `${siteUrl()}/services/${service.id}`,
     ...(imageUrls[0] ? { image: imageUrls[0] } : {}),
     provider: {
       "@type": service.user?.companyName ? "Organization" : "Person",

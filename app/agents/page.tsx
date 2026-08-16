@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { AgentsDirectory } from "./AgentsDirectory"
 
 export const metadata: Metadata = {
-  title: "APL Representatives — All Property Link",
+  title: "APL Representatives",
   description: "Browse our verified APL Representatives across Kenya.",
   alternates: { canonical: "/agents" },
 }

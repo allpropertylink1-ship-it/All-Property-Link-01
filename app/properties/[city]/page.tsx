@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const count = match.count;
   const label = count === 1 ? "property" : "properties";
-  const title = `Properties in ${match.city} — All Property Link`;
+  const title = `Properties in ${match.city}`;
   const description = `${count} ${label} for sale, rent and short stays in ${match.city}, Kenya — browse verified listings from agents and owners on All Property Link.`;
 
   return {

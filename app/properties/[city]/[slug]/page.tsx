@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const image = firstImage(property.images);
 
   return {
-    title: `${property.title} — All Property Link`,
+    title: property.title,
     description,
     alternates: { canonical },
     openGraph: {
@@ -52,7 +52,7 @@ export default async function PropertyDetailPage({ params }: Props) {
   if (!property) notFound();
 
   const canonicalCity = slugifyCity(property.city);
-  if (slugifyCity(params.city) !== canonicalCity) {
+  if (params.city.toLowerCase() !== canonicalCity || slugifyCity(params.city) !== canonicalCity) {
     redirect(`/properties/${canonicalCity}/${property.slug}`);
   }
 

@@ -60,8 +60,8 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               name: "All Property Link",
-              url: "https://allpropertylink.co.ke",
-              logo: "https://allpropertylink.co.ke/favicon.ico",
+              url: siteUrl(),
+              logo: `${siteUrl()}/favicon.ico`,
               description: "Kenya's most reliable marketplace connecting you to properties, short-term stays, trusted fundis, and service providers across the country.",
               contactPoint: {
                 "@type": "ContactPoint",
@@ -83,12 +83,12 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebSite",
               name: "All Property Link",
-              url: "https://allpropertylink.co.ke",
+              url: siteUrl(),
               potentialAction: {
                 "@type": "SearchAction",
                 target: {
                   "@type": "EntryPoint",
-                  urlTemplate: "https://allpropertylink.co.ke/properties/search?query={search_term_string}",
+                  urlTemplate: `${siteUrl()}/properties/search?query={search_term_string}`,
                 },
                 "query-input": "required name=search_term_string",
               },
