@@ -1,7 +1,7 @@
 export function siteUrl(): string {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL;
+  const configured = process.env.SITE_URL;
   if (configured) return configured.replace(/\/+$/, "");
-  return "https://allpropertylink.co.ke";
+  return "https://www.allpropertylink.co.ke";
 }
 
 export function slugifyCity(city: string): string {

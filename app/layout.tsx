@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { CookieConsent } from "@/components/shared/CookieConsent";
 import { Footer } from "@/components/layout/Footer";
 import { AuthProvider } from "@/lib/auth-context";
+import { siteUrl } from "@/lib/seo";
 import "./globals.css";
 
 const sora = Sora({
@@ -27,7 +28,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: { default: "All Property Link — Kenya's Marketplace", template: "%s | All Property Link" },
   description: "Kenya's most reliable marketplace connecting you to properties, short-term stays, trusted fundis, and service providers across the country.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://allpropertylink.co.ke"),
+  metadataBase: new URL(siteUrl()),
   openGraph: {
     title: "All Property Link — Kenya's Marketplace",
     description: "Kenya's most reliable marketplace connecting you to properties, short-term stays, trusted fundis, and service providers across the country.",
