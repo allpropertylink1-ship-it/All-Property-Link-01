@@ -14,7 +14,7 @@ const tabs = [
   { id: "agent", label: "APL Representative" },
 ] as const
 
-const SWEEP_MS = 700
+const SWEEP_MS = 650
 
 interface Props {
   referralCode?: string
@@ -202,9 +202,8 @@ export function AuthCard({ referralCode }: Props) {
           ref={loginPaneRef}
           aria-hidden={settledView !== "login"}
           className={cn(
-            "p-6 transition-opacity duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] sm:p-8 lg:p-10",
-            view !== "login" && "hidden lg:block",
-            settledView !== "login" && "lg:opacity-0"
+            "p-6 sm:p-8 lg:p-10",
+            view !== "login" && "hidden lg:block"
           )}
         >
           <h2 className="font-heading text-2xl font-bold text-text-primary">
@@ -229,9 +228,8 @@ export function AuthCard({ referralCode }: Props) {
           ref={registerPaneRef}
           aria-hidden={settledView !== "register"}
           className={cn(
-            "p-6 transition-opacity duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] sm:p-8 lg:p-10",
-            view !== "register" && "hidden lg:block",
-            settledView !== "register" && "lg:opacity-0"
+            "p-6 sm:p-8 lg:p-10",
+            view !== "register" && "hidden lg:block"
           )}
         >
           <h2 className="font-heading text-2xl font-bold text-text-primary">
@@ -246,27 +244,25 @@ export function AuthCard({ referralCode }: Props) {
         </div>
       </div>
 
-      {/* Sliding blade (desktop) — VERSO wipe */}
+      {/* Sliding welcome panel (desktop) — curtain wipe */}
       <div
         className={cn(
-          "auth-band hidden lg:block",
-          view === "register" ? "auth-band--left" : "auth-band--right"
+          "auth-panel hidden lg:block",
+          view === "login" ? "auth-panel--right" : ""
         )}
       >
-        <span className="band-edge band-edge--lead" />
-        <span className="band-edge band-edge--trail" />
-        <div className="auth-band-inner">
+        <div className="auth-panel-inner">
           <div
             ref={loginPageRef}
             aria-hidden={settledView !== "login"}
-            className={cn("band-page band-page--login", settledView !== "login" && "is-covered")}
+            className={cn("auth-panel-page", settledView !== "login" && "is-covered")}
           >
             <WelcomeContent view="login" onToggle={() => toggleView("register")} />
           </div>
           <div
             ref={registerPageRef}
             aria-hidden={settledView !== "register"}
-            className={cn("band-page band-page--register", settledView !== "register" && "is-covered")}
+            className={cn("auth-panel-page", settledView !== "register" && "is-covered")}
           >
             <WelcomeContent view="register" onToggle={() => toggleView("login")} />
           </div>
