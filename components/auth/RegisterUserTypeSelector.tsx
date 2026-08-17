@@ -19,7 +19,7 @@ interface Props {
 
 export function RegisterUserTypeSelector({ userType, onChange, onNext, error }: Props) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <h2 className="font-heading text-xl font-bold text-text-primary">Choose your account type</h2>
       <p className="text-sm text-text-secondary">Select the type of account that best describes you.</p>
 
@@ -33,7 +33,7 @@ export function RegisterUserTypeSelector({ userType, onChange, onNext, error }: 
             key={opt.value}
             type="button"
             onClick={() => onChange(opt.value)}
-            className={`flex items-center gap-4 rounded-xl border-2 p-4 text-left transition-all ${
+            className={`flex items-center gap-4 rounded-xl border-2 p-3.5 text-left transition-all ${
               userType === opt.value
                 ? "border-accent-300 bg-accent-300/10"
                 : "border-border hover:border-accent-300"
@@ -51,7 +51,7 @@ export function RegisterUserTypeSelector({ userType, onChange, onNext, error }: 
       <button
         onClick={onNext}
         disabled={!userType}
-        className="touch-target w-full rounded-sm bg-accent-300 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-400 disabled:cursor-not-allowed disabled:opacity-50"
+        className="touch-target w-full rounded-sm bg-accent-300 px-4 py-2.5 font-medium text-white transition-colors hover:bg-accent-400 disabled:cursor-not-allowed disabled:opacity-50"
       >
         Continue
       </button>

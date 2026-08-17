@@ -180,7 +180,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
     return (
       <div>
         <h2 className="mb-2 font-heading text-xl font-bold text-text-primary">Verify your {otpType === "EMAIL_VERIFICATION" ? "email" : "phone"}</h2>
-        <p className="mb-6 text-sm text-text-secondary">
+        <p className="mb-3 text-sm text-text-secondary">
           We sent a code to <strong className="text-text-primary">{otpDestination}</strong>
           <button
             type="button"
@@ -197,14 +197,14 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
           </div>
         )}
 
-        <div className="mb-6">
+        <div className="mb-3">
           <OtpInput value={otpValues.join("")} onChange={(val) => { const arr = new Array(6).fill(""); val.split("").forEach((d, i) => { if (i < 6) arr[i] = d }); setOtpValues(arr) }} disabled={otpLoading} />
         </div>
 
         <button
           onClick={handleOtpVerify}
           disabled={otpLoading || otpValues.join("").length !== 6}
-          className="touch-target w-full rounded-sm bg-accent-300 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-300/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="touch-target w-full rounded-sm bg-accent-300 px-4 py-2.5 font-medium text-white transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-300/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {otpLoading ? "Verifying..." : "Verify code"}
         </button>

@@ -42,7 +42,7 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-3.5">
       {error && (
         <FormBanner variant="error">{error}</FormBanner>
       )}
@@ -56,7 +56,7 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
           type="text"
           required
           autoComplete="off"
-          className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+          className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2.5 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
           style={{ fontSize: "16px" }}
           placeholder="APL-XXX-000-00/00"
         />
@@ -91,7 +91,7 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
       <button
         type="submit"
         disabled={loading}
-        className="touch-target w-full rounded-sm bg-accent-300 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-300/20 disabled:cursor-not-allowed disabled:opacity-50"
+        className="touch-target w-full rounded-sm bg-accent-300 px-4 py-2.5 font-medium text-white transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-300/20 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? "Signing in..." : "Sign in"}
       </button>

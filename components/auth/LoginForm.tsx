@@ -112,7 +112,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
 
   return (
     <>
-      <div className="mb-6">
+      <div className="mb-3">
         <GoogleSignInButton
           mode="signin"
           onSuccess={async () => { await refreshUser(); router.push("/dashboard"); router.refresh() }}
@@ -120,7 +120,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
         />
       </div>
 
-      <div className="relative mb-6">
+      <div className="relative mb-3">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-border" />
         </div>
@@ -129,7 +129,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {error && (
           <FormBanner variant="error">{error}</FormBanner>
         )}
@@ -143,7 +143,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
             type="email"
             autoComplete="email"
             required
-            className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+            className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2.5 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
             style={{ fontSize: "16px" }}
             placeholder="you@example.com"
           />
@@ -191,7 +191,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
               <button
                 type="button"
                 onClick={() => { setMagicSent(false); setMagicEmail(""); setMagicError("") }}
-                className="touch-target w-full rounded-sm border border-accent-300 px-4 py-3 text-sm font-medium text-accent-300 transition-colors hover:bg-accent-300/10"
+                className="touch-target w-full rounded-sm border border-accent-300 px-4 py-2.5 text-sm font-medium text-accent-300 transition-colors hover:bg-accent-300/10"
               >
                 Send again
               </button>
@@ -204,13 +204,13 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
                   value={magicEmail}
                   onChange={(e) => setMagicEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="block flex-1 rounded-sm border border-border bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+                  className="block flex-1 rounded-sm border border-border bg-surface px-4 py-2.5 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
                 />
                 <button
                   type="button"
                   onClick={handleMagicLink}
                   disabled={!magicEmail}
-                  className="touch-target rounded-sm border border-accent-300 px-4 py-3 text-sm font-medium text-accent-300 transition-colors hover:bg-accent-300/10 disabled:opacity-50"
+                  className="touch-target rounded-sm border border-accent-300 px-4 py-2.5 text-sm font-medium text-accent-300 transition-colors hover:bg-accent-300/10 disabled:opacity-50"
                 >
                   Send
                 </button>
@@ -249,7 +249,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
                   value={phone}
                   onChange={(e) => { setPhone(e.target.value); setPhoneError("") }}
                   placeholder="712 345 678"
-                  className="block w-full rounded-sm rounded-l-none border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+                  className="block w-full rounded-sm rounded-l-none border border-border bg-surface px-4 py-2.5 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
                   style={{ fontSize: "16px" }}
                 />
               </div>
@@ -259,7 +259,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
               type="button"
               onClick={handlePhoneSendCode}
               disabled={phoneLoading}
-              className="touch-target w-full rounded-sm border border-accent-300 px-4 py-3 text-sm font-medium text-accent-300 transition-colors hover:bg-accent-300/10 disabled:opacity-50"
+                className="touch-target w-full rounded-sm border border-accent-300 px-4 py-2.5 text-sm font-medium text-accent-300 transition-colors hover:bg-accent-300/10 disabled:opacity-50"
             >
               {phoneLoading ? "Sending code..." : "Send login code"}
             </button>
@@ -285,7 +285,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
               type="button"
               onClick={handlePhoneVerify}
               disabled={otpLoading || otpValues.join("").length !== 6}
-              className="touch-target w-full rounded-sm bg-accent-300 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="touch-target w-full rounded-sm bg-accent-300 px-4 py-2.5 font-medium text-white transition-colors hover:bg-accent-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {otpLoading ? "Verifying..." : "Verify code"}
             </button>
@@ -308,7 +308,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
         <button
           type="submit"
           disabled={loading}
-          className="touch-target w-full rounded-sm bg-accent-300 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-300/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="touch-target w-full rounded-sm bg-accent-300 px-4 py-2.5 font-medium text-white transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-300/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? "Signing in..." : "Sign in"}
         </button>

@@ -30,7 +30,7 @@ export function RegisterAccountInfo({
 }: Props) {
   return (
     <>
-      <div className="mb-6">
+      <div className="mb-3">
         <GoogleSignInButton
           mode="signup"
           onSuccess={onGoogleSuccess}
@@ -38,7 +38,7 @@ export function RegisterAccountInfo({
         />
       </div>
 
-      <div className="relative mb-6">
+      <div className="relative mb-3">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-border" />
         </div>
@@ -51,7 +51,7 @@ export function RegisterAccountInfo({
         <ArrowLeft size={16} /> Back
       </button>
 
-      <div className="space-y-6">
+      <div className="space-y-3.5">
         {error && (
           <FormBanner variant="error">{error}</FormBanner>
         )}
@@ -60,13 +60,13 @@ export function RegisterAccountInfo({
           <div>
             <label htmlFor="firstName" className="block text-sm font-medium text-text-primary">First name</label>
             <input id="firstName" name="firstName" type="text" required
-              className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+              className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2.5 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
               style={{ fontSize: "16px" }} />
           </div>
           <div>
             <label htmlFor="lastName" className="block text-sm font-medium text-text-primary">Last name</label>
             <input id="lastName" name="lastName" type="text" required
-              className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+              className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2.5 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
               style={{ fontSize: "16px" }} />
           </div>
         </div>
@@ -75,13 +75,13 @@ export function RegisterAccountInfo({
           <label className="block text-sm font-medium text-text-primary mb-2">Contact method</label>
           <div className="flex gap-2">
             <button type="button" onClick={() => onContactMethodChange("email")}
-              className={`flex-1 rounded-sm border px-4 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-sm border px-4 py-2.5 text-sm font-medium transition-colors ${
                 contactMethod === "email"
                   ? "border-accent-300 bg-accent-300/10 text-accent-300"
                   : "border-border text-text-secondary hover:border-accent-300"
               }`}>Email</button>
             <button type="button" onClick={() => onContactMethodChange("phone")}
-              className={`flex-1 rounded-sm border px-4 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-sm border px-4 py-2.5 text-sm font-medium transition-colors ${
                 contactMethod === "phone"
                   ? "border-accent-300 bg-accent-300/10 text-accent-300"
                   : "border-border text-text-secondary hover:border-accent-300"
@@ -93,7 +93,7 @@ export function RegisterAccountInfo({
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-text-primary">Email</label>
             <input id="email" name="email" type="email" autoComplete="email" required
-              className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+              className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2.5 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
               style={{ fontSize: "16px" }} placeholder="you@example.com" />
           </div>
         ) : (
@@ -102,7 +102,7 @@ export function RegisterAccountInfo({
             <div className="mt-1 flex">
               <span className="inline-flex items-center rounded-sm rounded-r-none border border-r-0 border-border bg-surface-secondary px-3 text-sm text-text-secondary">+254</span>
               <input id="phone" name="phone" type="tel" inputMode="numeric" required maxLength={9}
-                className="block w-full rounded-sm rounded-l-none border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+                className="block w-full rounded-sm rounded-l-none border border-border bg-surface px-4 py-2.5 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
                 style={{ fontSize: "16px" }} placeholder="712 345 678" />
             </div>
             <p className="mt-1 text-xs text-text-secondary">Enter the last 9 digits of your Kenyan phone number</p>
@@ -134,7 +134,7 @@ export function RegisterAccountInfo({
         </div>
 
         <button type="submit" disabled={loading}
-          className="touch-target w-full rounded-sm bg-accent-300 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-300/20 disabled:cursor-not-allowed disabled:opacity-50">
+          className="touch-target w-full rounded-sm bg-accent-300 px-4 py-2.5 font-medium text-white transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-300/20 disabled:cursor-not-allowed disabled:opacity-50">
           {loading ? "Creating account..." : "Create account"}
         </button>
 
