@@ -13,8 +13,8 @@ export default async function AuthPage({ searchParams }: { searchParams: Promise
           Test accounts available &mdash; use password <strong>Test@123</strong>
         </div>
       )}
-      <div className="w-full max-w-5xl">
-        <div className="mb-4 text-center">
+      <div className="w-full max-w-4xl">
+        <div className="mb-3 text-center">
           <Link href="/" className="inline-flex items-center gap-2.5">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white">
               <LinkIcon size={18} />

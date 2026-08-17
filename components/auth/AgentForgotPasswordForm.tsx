@@ -49,7 +49,7 @@ export function AgentForgotPasswordForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3.5">
+    <form onSubmit={handleSubmit} className="space-y-2.5">
       <p className="text-sm text-text-secondary">
         Enter your APL Representative Code or registered email address and we'll send you a reset link.
       </p>
@@ -68,7 +68,7 @@ export function AgentForgotPasswordForm() {
           required
           value={identifier}
           onChange={(e) => setIdentifier(e.target.value)}
-          className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2.5 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+          className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
           placeholder="APL-XXX-000-00/00 or agent@example.com"
         />
       </div>

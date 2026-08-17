@@ -43,7 +43,7 @@ function LoginContent({
               type="button"
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                "flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all duration-150",
+                "flex-1 rounded-md px-4 py-1.5 text-sm font-medium transition-all duration-150",
                 activeTab === tab.id
                   ? "bg-surface text-text-primary shadow-sm"
                   : "text-text-secondary hover:text-text-primary"
@@ -80,18 +80,18 @@ function WelcomeContent({
       <span
         className={cn(
           "flex items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/15",
-          compact ? "h-10 w-10" : "h-9 w-9"
+          compact ? "h-10 w-10" : "h-8 w-8"
         )}
       >
-        <LinkIcon size={compact ? 18 : 18} className="text-accent-200" />
+        <LinkIcon size={compact ? 18 : 16} className="text-accent-200" />
       </span>
-      <p className="mt-3 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-accent-200">
+      <p className="mt-2 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-accent-200">
         All Property Link
       </p>
       <h1
         className={cn(
           "mt-1.5 font-heading font-bold leading-tight text-white",
-          compact ? "text-2xl" : "text-2xl lg:text-3xl"
+          compact ? "text-2xl" : "text-2xl lg:text-2xl"
         )}
       >
         {view === "login" ? (
@@ -104,7 +104,7 @@ function WelcomeContent({
       </h1>
       <p
         className={cn(
-          "mt-2.5 leading-relaxed text-white/80",
+          "mt-1.5 leading-relaxed text-white/80",
           compact ? "max-w-xs text-sm" : "max-w-sm text-[0.9375rem]"
         )}
       >
@@ -112,12 +112,12 @@ function WelcomeContent({
           ? "Your properties and services are exactly where you left them."
           : "Join thousands of property owners, agents, and service providers across Kenya."}
       </p>
-      <div className="mt-4 h-px w-16 bg-gradient-to-r from-accent-300 to-transparent" />
+      <div className="mt-3 h-px w-16 bg-gradient-to-r from-accent-300 to-transparent" />
       {!compact && (
         <button
           type="button"
           onClick={onToggle}
-          className="mt-5 inline-flex touch-target items-center justify-center gap-2 rounded-lg border border-white/25 bg-white/10 px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/20"
+          className="mt-4 inline-flex touch-target items-center justify-center gap-2 rounded-lg border border-white/25 bg-white/10 px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/20"
         >
           {view === "login" ? "Create an account" : "Sign in"}
           <ArrowRight size={16} className="text-accent-200" />
@@ -202,11 +202,11 @@ export function AuthCard({ referralCode }: Props) {
           ref={loginPaneRef}
           aria-hidden={settledView !== "login"}
           className={cn(
-            "p-6 sm:p-8 lg:p-5",
+            "p-6 sm:p-8 lg:p-4",
             view !== "login" && "hidden lg:block"
           )}
         >
-          <h2 className="font-heading text-xl font-bold text-text-primary">
+          <h2 className="font-heading text-lg font-bold text-text-primary">
             Sign in to your account
           </h2>
           <p className="mt-1.5 text-sm text-text-secondary">
@@ -228,11 +228,11 @@ export function AuthCard({ referralCode }: Props) {
           ref={registerPaneRef}
           aria-hidden={settledView !== "register"}
           className={cn(
-            "p-6 sm:p-8 lg:p-5",
+            "p-6 sm:p-8 lg:p-4",
             view !== "register" && "hidden lg:block"
           )}
         >
-          <h2 className="font-heading text-xl font-bold text-text-primary">
+          <h2 className="font-heading text-lg font-bold text-text-primary">
             Create your account
           </h2>
           <p className="mt-1.5 text-sm text-text-secondary">

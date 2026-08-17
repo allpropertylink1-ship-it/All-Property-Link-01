@@ -30,7 +30,7 @@ export function RegisterAccountInfo({
 }: Props) {
   return (
     <>
-      <div className="mb-3">
+      <div className="mb-2">
         <GoogleSignInButton
           mode="signup"
           onSuccess={onGoogleSuccess}
@@ -38,7 +38,7 @@ export function RegisterAccountInfo({
         />
       </div>
 
-      <div className="relative mb-3">
+      <div className="relative mb-2">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-border" />
         </div>
@@ -51,7 +51,7 @@ export function RegisterAccountInfo({
         <ArrowLeft size={16} /> Back
       </button>
 
-      <div className="space-y-3.5">
+      <div className="space-y-3">
         {error && (
           <FormBanner variant="error">{error}</FormBanner>
         )}
@@ -60,13 +60,13 @@ export function RegisterAccountInfo({
           <div>
             <label htmlFor="firstName" className="block text-sm font-medium text-text-primary">First name</label>
             <input id="firstName" name="firstName" type="text" required
-              className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2.5 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+              className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
               style={{ fontSize: "16px" }} />
           </div>
           <div>
             <label htmlFor="lastName" className="block text-sm font-medium text-text-primary">Last name</label>
             <input id="lastName" name="lastName" type="text" required
-              className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2.5 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+              className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
               style={{ fontSize: "16px" }} />
           </div>
         </div>
@@ -75,13 +75,13 @@ export function RegisterAccountInfo({
           <label className="block text-sm font-medium text-text-primary mb-2">Contact method</label>
           <div className="flex gap-2">
             <button type="button" onClick={() => onContactMethodChange("email")}
-              className={`flex-1 rounded-sm border px-4 py-2.5 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-sm border px-4 py-2 text-sm font-medium transition-colors ${
                 contactMethod === "email"
                   ? "border-accent-300 bg-accent-300/10 text-accent-300"
                   : "border-border text-text-secondary hover:border-accent-300"
               }`}>Email</button>
             <button type="button" onClick={() => onContactMethodChange("phone")}
-              className={`flex-1 rounded-sm border px-4 py-2.5 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-sm border px-4 py-2 text-sm font-medium transition-colors ${
                 contactMethod === "phone"
                   ? "border-accent-300 bg-accent-300/10 text-accent-300"
                   : "border-border text-text-secondary hover:border-accent-300"
@@ -93,7 +93,7 @@ export function RegisterAccountInfo({
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-text-primary">Email</label>
             <input id="email" name="email" type="email" autoComplete="email" required
-              className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2.5 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+              className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
               style={{ fontSize: "16px" }} placeholder="you@example.com" />
           </div>
         ) : (
