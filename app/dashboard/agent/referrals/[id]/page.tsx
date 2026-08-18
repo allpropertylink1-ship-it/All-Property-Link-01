@@ -4,10 +4,11 @@
 import { useState, useEffect, useCallback } from "react"
 import { useParams } from "next/navigation"
 import { api } from "@/lib/api-client"
-import { useAuth } from "@/lib/auth-context"
-import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
 import { Loader2, AlertCircle, Building2, ArrowLeft } from "@/components/ui/icons"
 import Link from "next/link"
+import { AgentGuard } from "@/components/dashboard/AgentGuard"
+import { StatusPill } from "@/components/shared/StatusPill"
+import { fmtKES } from "@/lib/utils"
 
 interface Property {
   id: string
@@ -36,11 +37,7 @@ interface ReferralDetail {
   properties: Property[]
 }
 
-const fmt = (n: number) => new Intl.NumberFormat("en-KE", { style: "currency", currency: "KES", minimumFractionDigits: 0 }).format(n)
-
 export default function AgentReferralDetailPage() {
-  const { user } = useAuth()
-  useAgentPasswordGuard()
   const params = useParams()
   const [referral, setReferral] = useState<ReferralDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -48,6 +45,7 @@ export default function AgentReferralDetailPage() {
 
   const fetchReferral = useCallback(async () => {
     setLoading(true)
+    setError("")
     const { data, error } = await api.get<{ referral: ReferralDetail }>(`/api/referral-partner/referrals/${params.id}`)
     if (data) setReferral(data.referral)
     else setError(error || "Failed to load")
@@ -55,17 +53,6 @@ export default function AgentReferralDetailPage() {
   }, [params.id])
 
   useEffect(() => { fetchReferral() }, [fetchReferral])
-
-  if (user?.authMethod !== "agent") {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="max-w-md text-center">
-          <Building2 size={48} className="mx-auto mb-4 text-muted" />
-          <h2 className="mb-2 font-heading text-xl font-bold text-text-primary">Access Restricted</h2>
-        </div>
-      </div>
-    )
-  }
 
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={24} className="animate-spin text-muted" /></div>
   if (error) return (
@@ -77,7 +64,7 @@ export default function AgentReferralDetailPage() {
   if (!referral) return null
 
   return (
-    <div>
+    <AgentGuard>
       <Link href="/dashboard/agent/referrals" className="mb-6 inline-flex items-center gap-1 text-sm text-accent-300 hover:text-accent-400">
         <ArrowLeft size={16} /> Back to referrals
       </Link>
@@ -88,7 +75,7 @@ export default function AgentReferralDetailPage() {
         {referral.phone && <p className="text-sm text-text-secondary">{referral.phone}</p>}
         <div className="mt-4 flex flex-wrap gap-2">
           {referral.category && <span className="rounded-full bg-surface-secondary px-3 py-1 text-xs text-text-secondary">{referral.category}</span>}
-          <span className={`rounded-full px-3 py-1 text-xs font-medium ${referral.kycStatus === "VERIFIED" ? "bg-success/10 text-success-700" : "bg-warning-50 text-warning-500"}`}>KYC: {referral.kycStatus}</span>
+          <StatusPill status={referral.kycStatus} label={`KYC: ${referral.kycStatus}`} />
         </div>
       </div>
 
@@ -115,12 +102,12 @@ export default function AgentReferralDetailPage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-text-primary">{p.title}</p>
                     <p className="text-xs text-text-secondary">{p.city} &middot; {p.propertyType}</p>
-                    <p className="text-sm font-semibold text-text-primary">{fmt(p.price)}</p>
+                    <p className="text-sm font-semibold text-text-primary">{fmtKES(p.price)}</p>
                   </div>
                 </Link>
                 <div className="flex shrink-0 flex-col items-end gap-2">
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${p.moderationStatus === "APPROVED" ? "bg-success/10 text-success-700" : "bg-warning-50 text-warning-500"}`}>{p.status}</span>
-                  <Link href={`/dashboard/agent/referrals/${referral.id}/properties/${p.id}/edit`} className="rounded-lg border border-accent-200 bg-accent-50 px-3 py-1.5 text-xs font-medium text-accent-300 transition-colors hover:bg-accent-100">
+                  <StatusPill status={p.moderationStatus} label={p.status} />
+                  <Link href={`/dashboard/agent/referrals/${referral.id}/properties/${p.id}/edit`} className="rounded-lg border border-accent-200 bg-accent-50 px-3 py-1.5 text-xs font-medium text-accent-700 transition-colors hover:bg-accent-100">
                     Edit
                   </Link>
                 </div>
@@ -129,6 +116,6 @@ export default function AgentReferralDetailPage() {
           })}
         </div>
       )}
-    </div>
+    </AgentGuard>
   )
 }

@@ -3,9 +3,9 @@
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { api } from "@/lib/api-client"
-import { useAuth } from "@/lib/auth-context"
-import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
-import { Loader2, AlertCircle, Building2, Search, ChevronRight, Users, Archive } from "@/components/ui/icons"
+import { Loader2, AlertCircle, Search, ChevronRight, Users, Archive } from "@/components/ui/icons"
+import { AgentGuard } from "@/components/dashboard/AgentGuard"
+import { Pagination } from "@/components/shared/Pagination"
 
 interface Referral {
   id: string
@@ -23,8 +23,6 @@ interface Referral {
 type Tab = "ACTIVE" | "DELETED"
 
 export default function AgentReferralsPage() {
-  const { user } = useAuth()
-  useAgentPasswordGuard()
   const [tab, setTab] = useState<Tab>("ACTIVE")
   const [referrals, setReferrals] = useState<Referral[]>([])
   const [total, setTotal] = useState(0)
@@ -42,6 +40,7 @@ export default function AgentReferralsPage() {
 
   const fetchReferrals = useCallback(async () => {
     setLoading(true)
+    setError("")
     const status = tab === "DELETED" ? "DELETED" : "ACTIVE"
     const params = new URLSearchParams({ page: String(page), limit: "20", status })
     if (debouncedSearch) params.set("search", debouncedSearch)
@@ -60,20 +59,8 @@ export default function AgentReferralsPage() {
 
   useEffect(() => { setSearch(""); setPage(1) }, [tab])
 
-  if (user?.authMethod !== "agent") {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="max-w-md text-center">
-          <Building2 size={48} className="mx-auto mb-4 text-muted" />
-          <h2 className="mb-2 font-heading text-xl font-bold text-text-primary">Access Restricted</h2>
-          <p className="text-sm text-text-secondary">Only APL Representatives can view this page.</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div>
+    <AgentGuard>
       <div className="mb-6">
         <h1 className="font-heading text-2xl font-bold text-text-primary">Referrals</h1>
         <p className="mt-1 text-sm text-text-secondary">{total} {tab === "DELETED" ? "deleted" : "active"} referral{total !== 1 ? "s" : ""}</p>
@@ -93,7 +80,7 @@ export default function AgentReferralsPage() {
       <div className="relative mb-4">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
         <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or email..."
-          className="w-full rounded-lg border border-border bg-surface py-2.5 pl-9 pr-4 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none"
+          className="w-full rounded-lg border border-border bg-surface py-2.5 pl-9 pr-4 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15"
         />
       </div>
 
@@ -144,13 +131,7 @@ export default function AgentReferralsPage() {
         </div>
       )}
 
-      {totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-center gap-2">
-          <button type="button" disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="touch-target rounded-lg border border-border px-4 py-2 text-sm text-text-primary disabled:opacity-40">Previous</button>
-          <span className="text-sm text-text-secondary">Page {page} of {totalPages}</span>
-          <button type="button" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="touch-target rounded-lg border border-border px-4 py-2 text-sm text-text-primary disabled:opacity-40">Next</button>
-        </div>
-      )}
-    </div>
+      <Pagination currentPage={page} totalPages={totalPages} onChange={setPage} />
+    </AgentGuard>
   )
 }

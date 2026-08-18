@@ -4,9 +4,11 @@
 import { useState, useEffect, useCallback } from "react"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
-import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
 import Link from "next/link"
-import { Building2, Users, DollarSign, Clock, ArrowRight, Eye, Receipt } from "@/components/ui/icons"
+import { Users, DollarSign, Clock, ArrowRight, Eye, Receipt } from "@/components/ui/icons"
+import { AgentGuard } from "@/components/dashboard/AgentGuard"
+import { StatusPill } from "@/components/shared/StatusPill"
+import { fmtKES } from "@/lib/utils"
 
 interface AgentData {
   agent: {
@@ -44,7 +46,6 @@ interface AgentData {
 
 export default function AgentDashboardPage() {
   const { user } = useAuth()
-  useAgentPasswordGuard()
   const [data, setData] = useState<AgentData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -69,18 +70,6 @@ export default function AgentDashboardPage() {
     fetchDashboard()
   }, [user, fetchDashboard])
 
-  if (!user || user.authMethod !== "agent") {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="max-w-md text-center">
-          <Building2 size={48} className="mx-auto mb-4 text-muted" />
-          <h2 className="mb-2 font-heading text-xl font-bold text-text-primary">Access Restricted</h2>
-          <p className="text-sm text-text-secondary">You don&apos;t have access to the APL Representative Dashboard. Only registered representatives can view this page.</p>
-        </div>
-      </div>
-    )
-  }
-
   if (loading) {
     return (
       <div>
@@ -97,8 +86,8 @@ export default function AgentDashboardPage() {
             </div>
           ))}
         </div>
-        <div className="grid gap-6 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
+        <div className="grid gap-6 lg:grid-cols-2">
+          {Array.from({ length: 2 }).map((_, i) => (
             <div key={i} className="rounded-xl border border-border bg-surface p-6">
               <div className="mb-4 h-5 w-32 animate-pulse rounded-md bg-border" />
               <div className="space-y-3">
@@ -134,21 +123,21 @@ export default function AgentDashboardPage() {
   if (!data) return null
 
   const statCards = [
-    { label: "Total Referrals", value: data.stats.totalReferrals, icon: Users, color: "bg-primary-50 text-primary-600", href: "/dashboard/agent/referrals" },
-    { label: "Total Paid", value: `KES ${data.stats.totalPaid.toLocaleString()}`, icon: DollarSign, color: "bg-success-50 text-success-700", href: "/dashboard/agent/claims" },
-    { label: "Pending Claims", value: data.stats.pendingClaims, icon: Clock, color: "bg-warning-50 text-warning-500", href: "/dashboard/agent/claims" },
-    { label: "Paid Claims", value: data.stats.paidClaims, icon: Receipt, color: "bg-accent-50 text-accent-500", href: "/dashboard/agent/claims" },
+    { label: "Total Referrals", value: data.stats.totalReferrals, icon: Users, color: "bg-primary-50 text-primary-700", href: "/dashboard/agent/referrals" },
+    { label: "Total Paid", value: fmtKES(data.stats.totalPaid), icon: DollarSign, color: "bg-success-50 text-success-700", href: "/dashboard/agent/claims" },
+    { label: "Pending Claims", value: data.stats.pendingClaims, icon: Clock, color: "bg-warning-50 text-warning-700", href: "/dashboard/agent/claims" },
+    { label: "Paid Claims", value: data.stats.paidClaims, icon: Receipt, color: "bg-accent-50 text-accent-700", href: "/dashboard/agent/claims" },
   ]
 
   const quickActions = [
-    { label: "Submit a Claim", href: "/dashboard/agent/claims", icon: Receipt, color: "bg-primary-50 text-primary-600" },
+    { label: "Submit a Claim", href: "/dashboard/agent/claims", icon: Receipt, color: "bg-primary-50 text-primary-700" },
     { label: "View Referrals", href: "/dashboard/agent/referrals", icon: Users, color: "bg-success-50 text-success-700" },
-    { label: "View Claims", href: "/dashboard/agent/claims", icon: DollarSign, color: "bg-warning-50 text-warning-500" },
-    { label: "View Disputes", href: "/dashboard/agent/disputes", icon: Eye, color: "bg-accent-50 text-accent-500" },
+    { label: "View Claims", href: "/dashboard/agent/claims", icon: DollarSign, color: "bg-warning-50 text-warning-700" },
+    { label: "View Disputes", href: "/dashboard/agent/disputes", icon: Eye, color: "bg-accent-50 text-accent-700" },
   ]
 
   return (
-    <div>
+    <AgentGuard message="You don&apos;t have access to the APL Representative Dashboard. Only registered representatives can view this page.">
       <div className="mb-8">
         <h1 className="mb-1 font-heading text-2xl font-bold text-text-primary">APL Representative Dashboard</h1>
         <p className="text-sm text-text-secondary">
@@ -188,7 +177,7 @@ export default function AgentDashboardPage() {
         })}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-border bg-surface p-6">
           <h3 className="mb-4 font-heading text-base font-semibold text-text-primary">Recent Referrals</h3>
           {data.recentReferrals.length === 0 ? (
@@ -222,12 +211,10 @@ export default function AgentDashboardPage() {
                 <div key={c.id} className="rounded-lg bg-surface-secondary p-3">
                   <p className="truncate text-sm font-medium text-text-primary">{c.property?.title || "No property"}</p>
                   <div className="mt-1 flex items-center justify-between">
-                    <span className="text-sm font-semibold text-text-primary">KES {c.amount.toLocaleString()}</span>
-                    <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                      c.status === "PAID" ? "bg-success-500/10 text-success-700" : "bg-warning-50 text-warning-500"
-                    }`}>{c.status === "AWAITING_AGENT_ACCEPTANCE" ? "AWAITING YOU" : c.status}</span>
+                    <span className="text-sm font-semibold text-text-primary">{fmtKES(c.adminModifiedAmount ?? c.amount)}</span>
+                    <StatusPill status={c.status} label={c.status === "AWAITING_AGENT_ACCEPTANCE" ? "AWAITING YOU" : c.status} />
                   </div>
-                  {c.paidAt && <p className="mt-0.5 text-[10px] text-text-secondary">{new Date(c.paidAt).toLocaleDateString()}</p>}
+                  {c.paidAt && <p className="mt-0.5 text-xs text-text-secondary">{new Date(c.paidAt).toLocaleDateString()}</p>}
                 </div>
               ))}
             </div>
@@ -236,21 +223,7 @@ export default function AgentDashboardPage() {
             View all <ArrowRight size={12} />
           </Link>
         </div>
-
-        <div className="rounded-xl border border-border bg-surface p-6">
-          <h3 className="mb-4 font-heading text-base font-semibold text-text-primary">Quick Links</h3>
-          <div className="space-y-2">
-            <Link href="/dashboard/agent/settings" className="flex items-center justify-between rounded-lg bg-surface-secondary p-3 transition-colors hover:bg-surface">
-              <span className="text-sm font-medium text-text-primary">Share Referral Link</span>
-              <ArrowRight size={16} className="shrink-0 text-muted" />
-            </Link>
-            <Link href="/dashboard/agent/disputes" className="flex items-center justify-between rounded-lg bg-surface-secondary p-3 transition-colors hover:bg-surface">
-              <span className="text-sm font-medium text-text-primary">Open a Dispute</span>
-              <ArrowRight size={16} className="shrink-0 text-muted" />
-            </Link>
-          </div>
-        </div>
       </div>
-    </div>
+    </AgentGuard>
   )
 }

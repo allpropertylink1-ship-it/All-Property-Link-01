@@ -14,3 +14,8 @@ export function formatPrice(price: number | string | null | undefined | { toStri
   if (listingPurpose === "FOR_RENT_LONG_TERM") return `${formatted}/month`
   return formatted
 }
+
+export function fmtKES(value: number | string | null | undefined) {
+  const num = Number(value ?? 0)
+  return new Intl.NumberFormat("en-KE", { style: "currency", currency: "KES", minimumFractionDigits: 0 }).format(Number.isFinite(num) ? num : 0)
+}

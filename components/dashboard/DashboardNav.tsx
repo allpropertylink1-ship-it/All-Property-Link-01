@@ -45,7 +45,6 @@ const tertiary: NavLink[] = [
 const agentPrimary: NavLink[] = [
   { href: "/dashboard/agent", label: "Overview", icon: Briefcase },
   { href: "/dashboard/agent/claims", label: "Claims", icon: Shield },
-  { href: "/dashboard/agent/payouts", label: "Payouts", icon: Shield },
   { href: "/dashboard/agent/referrals", label: "Referrals", icon: User },
   { href: "/dashboard/agent/disputes", label: "Disputes", icon: Shield },
   { href: "/dashboard/agent/settings", label: "Settings", icon: User },

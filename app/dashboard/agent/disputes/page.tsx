@@ -3,9 +3,11 @@
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { api } from "@/lib/api-client"
-import { useAuth } from "@/lib/auth-context"
-import { useAgentPasswordGuard } from "@/lib/use-agent-password-guard"
-import { Loader2, AlertCircle, Building2, Plus, ChevronRight } from "@/components/ui/icons"
+import { Loader2, AlertCircle, Plus, ChevronRight } from "@/components/ui/icons"
+import { AgentGuard } from "@/components/dashboard/AgentGuard"
+import { StatusPill } from "@/components/shared/StatusPill"
+import { Pagination } from "@/components/shared/Pagination"
+import { fmtKES } from "@/lib/utils"
 
 interface Dispute {
   id: string
@@ -19,20 +21,10 @@ interface Dispute {
   updatedAt: string
 }
 
-const fmt = (n: number) => new Intl.NumberFormat("en-KE", { style: "currency", currency: "KES", minimumFractionDigits: 0 }).format(n)
-
 const statuses = ["", "PENDING", "UNDER_REVIEW", "RESOLVED", "REJECTED"] as const
 const statusLabels: Record<string, string> = { "": "All", PENDING: "Pending", UNDER_REVIEW: "Under Review", RESOLVED: "Resolved", REJECTED: "Rejected" }
-const statusColors: Record<string, string> = {
-  PENDING: "bg-warning-50 text-warning-500",
-  UNDER_REVIEW: "bg-blue-50 text-blue-600",
-  RESOLVED: "bg-success/10 text-success-700",
-  REJECTED: "bg-error/10 text-error-500",
-}
 
 export default function AgentDisputesPage() {
-  const { user } = useAuth()
-  useAgentPasswordGuard()
   const [disputes, setDisputes] = useState<Dispute[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -43,6 +35,7 @@ export default function AgentDisputesPage() {
 
   const fetchDisputes = useCallback(async () => {
     setLoading(true)
+    setError("")
     const params = new URLSearchParams({ page: String(page), limit: "20" })
     if (statusFilter) params.set("status", statusFilter)
     const { data, error } = await api.get<{ disputes: Dispute[]; total: number; totalPages: number }>(`/api/referral-partner/disputes?${params}`)
@@ -58,20 +51,8 @@ export default function AgentDisputesPage() {
 
   useEffect(() => { fetchDisputes() }, [fetchDisputes])
 
-  if (user?.authMethod !== "agent") {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="max-w-md text-center">
-          <Building2 size={48} className="mx-auto mb-4 text-muted" />
-          <h2 className="mb-2 font-heading text-xl font-bold text-text-primary">Access Restricted</h2>
-          <p className="text-sm text-text-secondary">Only APL Representatives can view this page.</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div>
+    <AgentGuard>
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="font-heading text-2xl font-bold text-text-primary">Disputes</h1>
@@ -106,10 +87,10 @@ export default function AgentDisputesPage() {
             <Link key={d.id} href={`/dashboard/agent/disputes/${d.id}`} className="flex items-center justify-between rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-sm">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-text-primary">{d.title}</p>
-                <p className="mt-0.5 text-xs text-text-secondary line-clamp-1">{d.description}</p>
+                <p className="mt-0.5 line-clamp-1 text-xs text-text-secondary">{d.description}</p>
                 <div className="mt-1 flex items-center gap-3">
-                  <span className="text-xs font-semibold text-text-primary">{fmt(d.amount)}</span>
-                  <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${statusColors[d.status] || ""}`}>{statusLabels[d.status] || d.status}</span>
+                  <span className="text-xs font-semibold text-text-primary">{fmtKES(d.amount)}</span>
+                  <StatusPill status={d.status} />
                   <span className="text-[10px] text-text-secondary">{new Date(d.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
@@ -119,13 +100,7 @@ export default function AgentDisputesPage() {
         </div>
       )}
 
-      {totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-center gap-2">
-          <button type="button" disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="touch-target rounded-lg border border-border px-4 py-2 text-sm text-text-primary disabled:opacity-40">Previous</button>
-          <span className="text-sm text-text-secondary">Page {page} of {totalPages}</span>
-          <button type="button" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="touch-target rounded-lg border border-border px-4 py-2 text-sm text-text-primary disabled:opacity-40">Next</button>
-        </div>
-      )}
-    </div>
+      <Pagination currentPage={page} totalPages={totalPages} onChange={setPage} />
+    </AgentGuard>
   )
 }

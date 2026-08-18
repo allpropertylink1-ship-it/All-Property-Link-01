@@ -3,11 +3,12 @@ import Link from "next/link";
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  basePath: string;
+  basePath?: string;
   searchParams?: Record<string, string | undefined>;
+  onChange?: (page: number) => void;
 }
 
-export function Pagination({ currentPage, totalPages, basePath, searchParams = {} }: PaginationProps) {
+export function Pagination({ currentPage, totalPages, basePath = "", searchParams = {}, onChange }: PaginationProps) {
   if (totalPages <= 1) return null;
 
   function href(page: number) {
@@ -29,41 +30,54 @@ export function Pagination({ currentPage, totalPages, basePath, searchParams = {
     }
   }
 
+  const edgeClass =
+    "touch-target inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary disabled:opacity-40";
+  const pageClass = (active: boolean) =>
+    `touch-target inline-flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition-colors ${
+      active ? "bg-primary-500 text-white" : "border border-border bg-surface text-text-primary hover:bg-surface-secondary"
+    }`;
+
   return (
     <nav className="mt-10 flex items-center justify-center gap-2" aria-label="Pagination">
-      {currentPage > 1 && (
-        <Link
-          href={href(currentPage - 1)}
-          className="touch-target inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary"
-        >
-          Previous
-        </Link>
-      )}
+      {currentPage > 1 &&
+        (onChange ? (
+          <button type="button" onClick={() => onChange(currentPage - 1)} className={edgeClass}>
+            Previous
+          </button>
+        ) : (
+          <Link href={href(currentPage - 1)} className={edgeClass}>
+            Previous
+          </Link>
+        ))}
       {pages.map((p, i) =>
         p === "..." ? (
           <span key={`ellipsis-${i}`} className="px-2 text-text-secondary">...</span>
-        ) : (
-          <Link
+        ) : onChange ? (
+          <button
+            type="button"
             key={p}
-            href={href(p)}
-            className={`touch-target inline-flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition-colors ${
-              p === currentPage
-                ? "bg-primary-500 text-white"
-                : "border border-border bg-surface text-text-primary hover:bg-surface-secondary"
-            }`}
+            aria-current={p === currentPage ? "page" : undefined}
+            onClick={() => onChange(p)}
+            className={pageClass(p === currentPage)}
           >
+            {p}
+          </button>
+        ) : (
+          <Link key={p} href={href(p)} aria-current={p === currentPage ? "page" : undefined} className={pageClass(p === currentPage)}>
             {p}
           </Link>
         ),
       )}
-      {currentPage < totalPages && (
-        <Link
-          href={href(currentPage + 1)}
-          className="touch-target inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary"
-        >
-          Next
-        </Link>
-      )}
+      {currentPage < totalPages &&
+        (onChange ? (
+          <button type="button" onClick={() => onChange(currentPage + 1)} className={edgeClass}>
+            Next
+          </button>
+        ) : (
+          <Link href={href(currentPage + 1)} className={edgeClass}>
+            Next
+          </Link>
+        ))}
     </nav>
   );
 }
