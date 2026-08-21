@@ -1,5 +1,13 @@
 export function optimizeImageUrl(url: string, width: number): string {
   if (!url) return url
+  // Local uploads: make absolute if relative
+  if (url.startsWith("/uploads/")) {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.allpropertylink.co.ke"
+    return `${apiUrl}${url}`
+  }
+  if (url.includes("/uploads/") && url.includes("api.allpropertylink.co.ke")) {
+    return url
+  }
   if (url.includes("res.cloudinary.com/")) {
     const parts = url.split("/image/upload/")
     if (parts.length === 2) {
@@ -17,6 +25,15 @@ export function optimizeImageUrl(url: string, width: number): string {
     } catch {
       /* fall through */
     }
+  }
+  return url
+}
+
+export function resolveImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  if (url.startsWith("/uploads/")) {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.allpropertylink.co.ke"
+    return `${apiUrl}${url}`
   }
   return url
 }
