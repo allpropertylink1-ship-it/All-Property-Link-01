@@ -24,6 +24,10 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "api.allpropertylink.co.ke",
+      },
+      {
+        protocol: "https",
         hostname: "allpropertylink.co.ke",
       },
       {
