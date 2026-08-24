@@ -15,6 +15,7 @@ interface User {
   accountStatus?: string
   isAgent?: boolean
   aplAgentId?: string
+  primaryUserType?: string | null
   companyName?: string
   agentCode?: string
   fullName?: string

@@ -112,7 +112,52 @@ async function agentPages(base: string): Promise<MetadataRoute.Sitemap> {
   }
 }
 
+interface ProfileIndexEntry {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+/** Seller profile pages (/profiles/{name-slug}-{uuid}) for sitemap. */
+function profileUrl(id: string, firstName: string, lastName: string, base: string): string {
+  const name = (firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName || "member").trim();
+  const slug = slugifyCity(name) || "member";
+  return `${base}/profiles/${slug}-${id}`;
+}
+
+async function profilePages(base: string): Promise<MetadataRoute.Sitemap> {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://api.allpropertylink.co.ke"}/api/profiles`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return [];
+    const data: { profiles: ProfileIndexEntry[] } = await res.json();
+    const seen = new Set<string>();
+    const entries: MetadataRoute.Sitemap = [];
+    for (const p of data.profiles || []) {
+      const url = profileUrl(p.id, p.firstName, p.lastName, base);
+      if (seen.has(url)) continue;
+      seen.add(url);
+      entries.push({
+        url,
+        lastModified: new Date(),
+        changeFrequency: "weekly",
+        priority: 0.5,
+      });
+    }
+    return entries;
+  } catch {
+    return [];
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
-  return [...staticPages(base), ...(await propertyPages(base)), ...(await servicePages(base)), ...(await agentPages(base))];
+  return [
+    ...staticPages(base),
+    ...(await propertyPages(base)),
+    ...(await servicePages(base)),
+    ...(await agentPages(base)),
+    ...(await profilePages(base)),
+  ];
 }

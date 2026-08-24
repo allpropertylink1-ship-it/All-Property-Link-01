@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Handshake, Wrench, Briefcase } from "@/components/ui/icons"
+import { Home, Handshake, Wrench, Briefcase, User } from "@/components/ui/icons"
 import { FormBanner } from "@/components/shared/FormFeedback"
 
 const userTypeOptions = [
@@ -10,25 +10,40 @@ const userTypeOptions = [
   { value: "SERVICE_PROVIDER", label: "Service Provider", description: "I offer services like cleaning, security, property management", icon: Briefcase },
 ]
 
+const customerOption = {
+  value: "CUSTOMER",
+  label: "Customer",
+  description: "I want to find properties, rentals & services — and leave reviews",
+  icon: User,
+}
+
 interface Props {
   userType: string
   onChange: (v: string) => void
   onNext: () => void
   error: string
+  /** When set, only this type is shown (e.g. customer-only signup from "Leave a Review"). */
+  lockValue?: string
 }
 
-export function RegisterUserTypeSelector({ userType, onChange, onNext, error }: Props) {
+export function RegisterUserTypeSelector({ userType, onChange, onNext, error, lockValue }: Props) {
+  const options = lockValue
+    ? [...userTypeOptions, customerOption].filter((o) => o.value === lockValue)
+    : [...userTypeOptions, customerOption]
+
   return (
     <div className="space-y-3">
       <h2 className="font-heading text-xl font-bold text-text-primary">Choose your account type</h2>
-      <p className="text-sm text-text-secondary">Select the type of account that best describes you.</p>
+      <p className="text-sm text-text-secondary">
+        {lockValue ? "Confirm the account type to continue." : "Select the type of account that best describes you."}
+      </p>
 
       {error && (
         <FormBanner variant="error">{error}</FormBanner>
       )}
 
       <div className="grid gap-3">
-        {userTypeOptions.map((opt) => (
+        {options.map((opt) => (
           <button
             key={opt.value}
             type="button"

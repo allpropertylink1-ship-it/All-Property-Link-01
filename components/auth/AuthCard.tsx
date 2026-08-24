@@ -129,9 +129,15 @@ function WelcomeContent({
 
 export function AuthCard({ referralCode }: Props) {
   const searchParams = useSearchParams()
-  const [view, setView] = useState<"login" | "register">(referralCode ? "register" : "login")
+  // "Leave a Review" deep-link: /auth?type=customer&return=<path>
+  const customerReturnParam = searchParams.get("return")
+  const customerMode = searchParams.get("type") === "customer" && !!customerReturnParam
+  const returnUrl = customerMode && customerReturnParam.startsWith("/") ? customerReturnParam : undefined
+  const [view, setView] = useState<"login" | "register">(
+    referralCode || customerMode ? "register" : "login"
+  )
   const [settledView, setSettledView] = useState<"login" | "register">(
-    referralCode ? "register" : "login"
+    referralCode || customerMode ? "register" : "login"
   )
   const sweepTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const loginPaneRef = useRef<HTMLDivElement>(null)
@@ -239,7 +245,12 @@ export function AuthCard({ referralCode }: Props) {
             Join the All Property Link community.
           </p>
           <div className="mt-4">
-            <RegisterForm referralCode={referralCode} onSwitchToLogin={() => toggleView("login")} />
+            <RegisterForm
+              referralCode={referralCode}
+              onSwitchToLogin={() => toggleView("login")}
+              lockUserType={customerMode ? "CUSTOMER" : undefined}
+              returnUrl={returnUrl}
+            />
           </div>
         </div>
       </div>

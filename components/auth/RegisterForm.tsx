@@ -12,11 +12,11 @@ import { FormBanner } from "@/components/shared/FormFeedback"
 type ContactMethod = "email" | "phone"
 type Step = "userType" | "form" | "otp"
 
-export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogin }: { referralCode?: string; onSwitchToLogin?: () => void }) {
+export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogin, lockUserType, returnUrl }: { referralCode?: string; onSwitchToLogin?: () => void; lockUserType?: string; returnUrl?: string }) {
   const router = useRouter()
   const { signup, sendOtp, verifyOtp, refreshUser, updateRegistration } = useAuth()
-  const [step, setStep] = useState<Step>("userType")
-  const [userType, setUserType] = useState("")
+  const [step, setStep] = useState<Step>(lockUserType ? "form" : "userType")
+  const [userType, setUserType] = useState(lockUserType || "")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [contactMethod, setContactMethod] = useState<ContactMethod>("email")
@@ -152,7 +152,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
     }
 
     setOtpLoading(false)
-    router.push("/dashboard")
+    router.push(returnUrl || "/dashboard")
   }
 
   async function handleResendOtp() {
@@ -169,7 +169,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
 
   async function handleGoogleSuccess() {
     await refreshUser()
-    router.push("/dashboard")
+    router.push(returnUrl || "/dashboard")
   }
 
   function handleGoogleError(msg: string) {

@@ -12,6 +12,7 @@ export interface PropertyFilters {
   query?: string;
   page?: number;
   pageSize?: number;
+  agentId?: string;
 }
 
 export interface PropertyCard {
@@ -65,6 +66,7 @@ export const getProperties = cache(async (filters: PropertyFilters = {}): Promis
   if (filters.query) params.set("search", filters.query);
   if (filters.page) params.set("page", String(filters.page));
   if (filters.pageSize) params.set("limit", String(filters.pageSize));
+  if (filters.agentId) params.set("agentId", filters.agentId);
   params.set("limit", String(filters.pageSize || 20));
 
   const data = await fetchApi<{ properties: PropertyCard[]; total: number; page: number; pageSize: number; totalPages: number; cities?: { city: string; count: number }[] }>(`/api/properties?${params}`);

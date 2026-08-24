@@ -3,8 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { siteUrl } from "@/lib/seo";
-import { getServiceById, getServiceReviews } from "@/lib/services/service";
-import type { ServiceReview } from "@/lib/services/service";
+import { getServiceById } from "@/lib/services/service";
+import { getUserReviews } from "@/lib/services/review";
+import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
 import { Phone, Mail, Globe, Sparkles, MessageCircle, Star, MapPin, Briefcase } from "@/components/ui/icons";
@@ -66,7 +67,8 @@ export default async function ServiceDetailPage({ params }: Props) {
   const rawImages = Array.isArray(service.images) ? service.images : [];
   const imageUrls = rawImages.filter((u: unknown): u is string => typeof u === "string");
 
-  const reviewData = await getServiceReviews(service.id);
+  const providerId = service.user?.id ?? null;
+  const reviewData = providerId ? await getUserReviews(providerId) : null;
 
   const serviceJsonLd = {
     "@context": "https://schema.org",
@@ -268,46 +270,25 @@ export default async function ServiceDetailPage({ params }: Props) {
             </div>
           )}
 
-          {/* ─── Reviews Section ─── */}
-          <div>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-text-primary">
+          {/* ─── Reviews Section (customer reviews of the provider) ─── */}
+          {reviewData && providerId && (
+            <div>
+              <h2 className="mb-4 text-sm font-semibold text-text-primary">
                 Reviews {reviewData.total > 0 && `(${reviewData.total})`}
               </h2>
+              <ReviewSection
+                targetId={providerId}
+                initialSummary={{
+                  avgRating: reviewData.avgRating,
+                  total: reviewData.total,
+                  distribution: [...reviewData.distribution] as [number, number, number, number, number],
+                }}
+                initialReviews={reviewData.reviews}
+                initialTotalPages={reviewData.totalPages}
+                emptyMessage="No customer reviews for this provider yet."
+              />
             </div>
-
-            {reviewData.reviews.length === 0 ? (
-              <p className="text-sm text-text-secondary">No reviews yet.</p>
-            ) : (
-              <div className="space-y-4">
-                {reviewData.reviews.map((review: ServiceReview) => (
-                  <div
-                    key={review.id}
-                    className="rounded-lg border border-border bg-surface p-4"
-                  >
-                    <div className="mb-1.5 flex items-center justify-between">
-                      <p className="text-sm font-medium text-text-primary">
-                        {review.user?.firstName} {review.user?.lastName}
-                      </p>
-                      <span className="text-xs text-text-secondary">
-                        {new Date(review.createdAt).toLocaleDateString("en-KE", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </span>
-                    </div>
-                    <div className="mb-1.5">
-                      <StarRating rating={review.rating} />
-                    </div>
-                    {review.comment && (
-                      <p className="text-sm leading-relaxed text-text-secondary">{review.comment}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
         {/* ─── RIGHT SIDEBAR: Contact + Share ─── */}

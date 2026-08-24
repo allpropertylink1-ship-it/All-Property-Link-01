@@ -6,9 +6,17 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
-import { Building2, Bed, Bath, Maximize2, Phone, Mail, Globe, Sparkles, MessageCircle, Loader2 } from "@/components/ui/icons";
+import { Building2, Bed, Bath, Maximize2, Phone, Mail, Globe, Sparkles, MessageCircle, Loader2, Star } from "@/components/ui/icons";
 import { optimizeImageUrl } from "@/lib/images";
 import { slugifyCity } from "@/lib/seo";
+import { formatReviewerName } from "@/lib/utils";
+import type { ReviewItem } from "@/lib/services/review";
+
+export interface SellerReviewsSummary {
+  avgRating: number | null;
+  total: number;
+  topReviews: ReviewItem[];
+}
 
 const PropertyMap = dynamic(() => import("@/components/shared/PropertyMap").then(m => ({ default: m.PropertyMap })), {
   ssr: false,
@@ -62,7 +70,7 @@ interface OtherProperty {
   listingPurpose?: string | null;
 }
 
-export default function PropertyDetailClient({ slug, initial }: { slug: string; initial?: PropertyData }) {
+export default function PropertyDetailClient({ slug, initial, sellerReviews }: { slug: string; initial?: PropertyData; sellerReviews?: SellerReviewsSummary }) {
   const [property, setProperty] = useState<PropertyData | null>(initial ?? null);
   const [otherProperties, setOtherProperties] = useState<OtherProperty[]>([]);
   const [loading, setLoading] = useState(!initial);
@@ -172,6 +180,29 @@ export default function PropertyDetailClient({ slug, initial }: { slug: string; 
                     </span>
                   )}
 
+                  {sellerReviews && sellerReviews.total > 0 && (
+                    <Link
+                      href={`/profiles/${property.agent.id}`}
+                      className="mb-2.5 flex items-center gap-1.5 rounded-lg bg-surface-secondary px-2.5 py-1.5 text-xs transition-colors hover:bg-surface"
+                    >
+                      <Star className="h-3.5 w-3.5 fill-accent-300 text-accent-300" />
+                      <span className="font-semibold text-text-primary">
+                        {sellerReviews.avgRating != null ? sellerReviews.avgRating.toFixed(1) : "--"}
+                      </span>
+                      <span className="text-text-secondary">
+                        ({sellerReviews.total} {sellerReviews.total === 1 ? "review" : "reviews"})
+                      </span>
+                    </Link>
+                  )}
+                  {sellerReviews && sellerReviews.total === 0 && property.agent.id && (
+                    <Link
+                      href={`/profiles/${property.agent.id}`}
+                      className="mb-2.5 block text-xs font-medium text-primary-600 hover:text-primary-700 transition-colors"
+                    >
+                      View profile
+                    </Link>
+                  )}
+
                   {property.agent.specialties && property.agent.specialties.length > 0 && (
                     <div className="mb-2.5">
                       <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Specialties</p>
@@ -272,6 +303,52 @@ export default function PropertyDetailClient({ slug, initial }: { slug: string; 
                 <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
                   {property.description}
                 </p>
+              </div>
+            )}
+
+            {/* Customer reviews of the seller (top 3, server-fetched) */}
+            {sellerReviews && sellerReviews.total > 0 && property.agent && (
+              <div className="rounded-xl border border-border bg-surface p-5">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h2 className="text-sm font-semibold text-text-primary">Customer reviews</h2>
+                  <Link
+                    href={`/profiles/${property.agent.id}`}
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-700"
+                  >
+                    See all {sellerReviews.total} <Star className="h-3 w-3 fill-accent-300 text-accent-300" />
+                  </Link>
+                </div>
+                <div className="mb-3 flex items-center gap-2">
+                  <Star className="h-5 w-5 fill-accent-300 text-accent-300" />
+                  <span className="font-heading text-lg font-bold text-text-primary">
+                    {sellerReviews.avgRating != null ? sellerReviews.avgRating.toFixed(1) : "--"}
+                  </span>
+                  <span className="text-xs text-text-secondary">
+                    {sellerReviews.total} {sellerReviews.total === 1 ? "review" : "reviews"} of the seller
+                  </span>
+                </div>
+                <ul className="space-y-3">
+                  {sellerReviews.topReviews.map((r) => (
+                    <li key={r.id} className="rounded-lg bg-surface-secondary p-3">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                        <span className="text-xs font-semibold text-text-primary">
+                          {formatReviewerName(r.user.firstName, r.user.lastName)}
+                        </span>
+                        <span className="flex items-center gap-0.5" aria-hidden>
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star
+                              key={s}
+                              className={`h-3 w-3 ${s <= r.rating ? "fill-accent-300 text-accent-300" : "fill-none text-text-secondary"}`}
+                            />
+                          ))}
+                        </span>
+                      </div>
+                      {r.comment && (
+                        <p className="mt-1 line-clamp-3 text-xs leading-relaxed text-text-secondary">{r.comment}</p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 

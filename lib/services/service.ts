@@ -61,13 +61,17 @@ export interface ServiceListingsResponse {
   totalPages: number;
 }
 
-export interface ServiceDetailUser extends ServiceListingUser {
+export interface ServiceDetailUser {
+  id: string;
+  firstName: string;
+  lastName: string;
+  companyName: string | null;
+  businessLogo: string | null;
   phone: string | null;
   email: string | null;
   specialties: string[];
   website: string | null;
 }
-
 export interface ServiceDetail {
   id: string;
   title: string;

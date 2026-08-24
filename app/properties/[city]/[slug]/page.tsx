@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import PropertyDetailClient from "@/components/property/PropertyDetailClient";
 import PropertyBreadcrumbs from "@/components/property/PropertyBreadcrumbs";
 import { getPropertyBySlug } from "@/lib/services/property";
+import { getUserReviewSummary } from "@/lib/services/review";
 import { siteUrl, slugifyCity } from "@/lib/seo";
 
 interface Props {
@@ -61,6 +62,9 @@ export default async function PropertyDetailPage({ params }: Props) {
     ? property.images.filter((u): u is string => typeof u === "string")
     : [];
 
+  // Seller review summary (ISR-cached) for sidebar badge + top-3 block
+  const sellerReviews = property.agent?.id ? await getUserReviewSummary(property.agent.id) : undefined;
+
   const listingJsonLd = {
     "@context": "https://schema.org",
     "@type": "RealEstateListing",
@@ -102,7 +106,7 @@ export default async function PropertyDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(listingJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <PropertyBreadcrumbs city={property.city} title={property.title} />
-      <PropertyDetailClient slug={params.slug} initial={property} />
+      <PropertyDetailClient slug={params.slug} initial={property} sellerReviews={sellerReviews} />
     </>
   );
 }
