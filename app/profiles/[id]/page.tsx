@@ -127,7 +127,7 @@ export default async function ProfilePage({ params }: Props) {
                 <div className="absolute -inset-1.5 rounded-full bg-accent-300/25 blur-md" aria-hidden />
                 <div className="relative h-full w-full overflow-hidden rounded-full ring-2 ring-accent-200/80">
                   {avatarUrl ? (
-                    <Image src={avatarUrl} alt={name} fill className="object-cover" sizes="88px" />
+                    <Image src={avatarUrl} alt={name} fill className="object-cover" sizes="88px" unoptimized />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-white/10 font-heading text-2xl font-bold">
                       {name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}

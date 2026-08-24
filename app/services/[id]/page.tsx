@@ -99,7 +99,7 @@ export default async function ServiceDetailPage({ params }: Props) {
               <div className="mb-4 flex items-center gap-3.5">
                 {service.user.businessLogo ? (
                   <Image
-                    src={resolveImageUrl(service.user.businessLogo) as string}
+                    src={resolveImageUrl(service.user.businessLogo) as string} unoptimized
                     alt={service.user.companyName || "Business logo"}
                     width={48}
                     height={48}

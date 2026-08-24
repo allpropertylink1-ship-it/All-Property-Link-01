@@ -112,7 +112,7 @@ export default function AdminListingsPage() {
                       <div className="flex items-center space-x-3">
                         {prop.agent?.avatar ? (
                           <Image
-                            src={resolveImageUrl(prop.agent.avatar)}
+                            src={resolveImageUrl(prop.agent.avatar) as string} unoptimized
                             alt={`${prop.agent.firstName}'s avatar`}
                             width={32}
                             height={32}
@@ -141,7 +141,7 @@ export default function AdminListingsPage() {
                         <div className="flex items-center space-x-2">
                           {prop.agent?.avatar ? (
                             <Image
-                              src={resolveImageUrl(prop.agent.avatar)}
+                              src={resolveImageUrl(prop.agent.avatar) as string} unoptimized
                               alt={`${prop.agent.firstName}'s avatar`}
                               width={24}
                               height={24}

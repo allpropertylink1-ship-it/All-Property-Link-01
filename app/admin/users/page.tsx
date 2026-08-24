@@ -130,7 +130,7 @@ export default function AdminUsersPage() {
                       <div className="flex items-center gap-2">
                         {user.avatar ? (
                           <Image
-                            src={resolveImageUrl(user.avatar) ?? undefined}
+                            src={resolveImageUrl(user.avatar) as string} unoptimized
                             alt={`${user.firstName} ${user.lastName}'s avatar`}
                             width={32}
                             height={32}

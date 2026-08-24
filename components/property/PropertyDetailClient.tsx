@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element -- DB thumbs are served direct (unoptimized) from the API host */
+
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -145,7 +147,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                   <div className="flex items-center gap-3.5 mb-4">
                     {property.agent.avatar ? (
                       <Image
-                        src={agentAvatarUrl as string}
+                        src={agentAvatarUrl as string} unoptimized
                         alt={`${property.agent.firstName} ${property.agent.lastName}`}
                         width={48}
                         height={48}
@@ -159,7 +161,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                     {property.agent.businessLogo && (
                       <div className="relative shrink-0 h-10 w-auto max-w-[110px]">
                         <Image
-                          src={agentLogoUrl as string}
+                          src={agentLogoUrl as string} unoptimized
                           alt="Business logo"
                           width={110}
                           height={40}
@@ -494,12 +496,12 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                           >
                             <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-md bg-surface-secondary">
                               {thumbUrl && (
-                                <Image
+                                <img
                                   src={thumbUrl}
                                   alt={op.title}
-                                  fill
-                                  className="object-cover"
-                                  sizes="80px"
+                                  className="absolute inset-0 h-full w-full object-cover"
+                                  loading="lazy"
+                                  decoding="async"
                                 />
                               )}
                             </div>

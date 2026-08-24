@@ -135,6 +135,7 @@ export default async function ServicesPage({ searchParams }: Props) {
                 <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
                   {imageUrl ? (
                     <Image
+                  unoptimized
                       src={imageUrl}
                       alt={service.title}
                       fill
