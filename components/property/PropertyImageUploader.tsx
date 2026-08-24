@@ -2,8 +2,8 @@
 'use client';
 
 import { useState, useCallback, useRef, useId } from "react";
+import { uploadImage } from "@/lib/image-client";
 import { Upload, Loader2, X } from "@/components/ui/icons";
-import { api } from "@/lib/api-client";
 import { FormBanner } from "@/components/shared/FormFeedback";
 
 interface PropertyImageUploaderProps {
@@ -55,33 +55,9 @@ export default function PropertyImageUploader({
         try {
           const preview = URL.createObjectURL(file);
 
-          const signRes = await api.post<{ signature: string; timestamp: number; apiKey: string; cloudName: string }>(
-            "/api/uploadthing/sign",
-            { folder: "allpropertylink/property-listings" }
-          );
-          if (signRes.error || !signRes.data) throw new Error(signRes.error || "Failed to get upload signature");
-
-          const { signature, timestamp, apiKey, cloudName } = signRes.data;
-          const fd = new FormData();
-          fd.append("file", file);
-          fd.append("api_key", apiKey);
-          fd.append("timestamp", String(timestamp));
-          fd.append("signature", signature);
-          fd.append("folder", "allpropertylink/property-listings");
-
-          const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-            method: "POST",
-            body: fd,
-          });
-          if (!uploadRes.ok) {
-            const text = await uploadRes.text().catch(() => "");
-            throw new Error(`Cloudinary ${uploadRes.status}: ${text.slice(0, 200)}`);
-          }
-          const result = await uploadRes.json();
-          if (!result.secure_url) throw new Error("No URL returned from Cloudinary");
-
-          urls.push(result.secure_url);
-          setEntries((prev) => [...prev, { preview, url: result.secure_url }]);
+          const url = await uploadImage(file, "allpropertylink/property-listings");
+          urls.push(url);
+          setEntries((prev) => [...prev, { preview, url }]);
         } catch (err) {
           const msg = err instanceof Error ? err.message : "Upload failed";
           setError(`${file.name}: ${msg}`);

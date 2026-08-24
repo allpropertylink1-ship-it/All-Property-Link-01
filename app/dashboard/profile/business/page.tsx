@@ -2,6 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { uploadImage } from "@/lib/image-client";
 import { Check, Loader2, Save, Camera, User, Building2 } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
@@ -164,19 +165,7 @@ export default function BusinessProfilePage() {
   }, [])
 
   async function uploadFile(file: File, folder: string): Promise<string> {
-    const signRes = await api.post<{ signature: string; timestamp: number; apiKey: string; cloudName: string }>("/api/uploadthing/sign", { folder })
-    if (signRes.error || !signRes.data) throw new Error(signRes.error || "Failed to get upload signature")
-    const { signature, timestamp, apiKey, cloudName } = signRes.data
-    const fd = new FormData()
-    fd.append("file", file)
-    fd.append("api_key", apiKey)
-    fd.append("timestamp", String(timestamp))
-    fd.append("signature", signature)
-    fd.append("folder", folder)
-    const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: fd })
-    if (!uploadRes.ok) throw new Error("Upload failed")
-    const result = await uploadRes.json()
-    return result.secure_url
+    return uploadImage(file, folder)
   }
 
   async function handleBusinessProfilePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {

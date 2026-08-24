@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { uploadImage } from "@/lib/image-client";
 import { Shield, CheckCircle, Clock, XCircle, Loader2 } from "@/components/ui/icons"
 import { api } from "@/lib/api-client"
 import { cn } from "@/lib/utils"
@@ -121,19 +122,8 @@ export default function KycPage() {
         const result = await res.json()
         return { url: result.url }
       }
-      const signRes = await api.post<{ signature: string; timestamp: number; apiKey: string; cloudName: string }>("/api/uploadthing/sign", { folder: "allpropertylink/kyc" })
-      if (!signRes.data) throw new Error(signRes.error || "Failed to get upload signature")
-      const { signature, timestamp, apiKey, cloudName } = signRes.data
-      const fd = new FormData()
-      fd.append("file", file)
-      fd.append("api_key", apiKey)
-      fd.append("timestamp", String(timestamp))
-      fd.append("signature", signature)
-      fd.append("folder", "allpropertylink/kyc")
-      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: fd })
-      if (!uploadRes.ok) throw new Error("Cloudinary upload failed")
-      const result = await uploadRes.json()
-      return { url: result.secure_url, publicId: result.public_id }
+            const url = await uploadImage(file, "allpropertylink/kyc")
+      return { url }
     }))
   }
 

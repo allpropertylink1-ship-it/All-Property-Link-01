@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { uploadImage } from "@/lib/image-client";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Camera, Save, Key, Trash2, Shield, CheckCircle, Clock, XCircle, Loader2 } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
-import { api } from "@/lib/api-client";
 import { resolveImageUrl } from "@/lib/images";
 import ImageCropper from "@/components/kyc/ImageCropper";
 import { FormBanner } from "@/components/shared/FormFeedback";
@@ -64,20 +64,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
     setCropping(false);
     setPassportUploading(true);
     try {
-      const file = new File([blob], "passport.jpg", { type: "image/jpeg" });
-      const signRes = await api.post<{ signature: string; timestamp: number; apiKey: string; cloudName: string }>("/api/uploadthing/sign", { folder: "allpropertylink/profiles" });
-      if (signRes.error || !signRes.data) throw new Error(signRes.error || "Failed to get upload signature");
-      const { signature, timestamp, apiKey, cloudName } = signRes.data;
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("api_key", apiKey);
-      fd.append("timestamp", String(timestamp));
-      fd.append("signature", signature);
-      fd.append("folder", "allpropertylink/profiles");
-      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: fd });
-      if (!uploadRes.ok) throw new Error("Upload failed");
-      const result = await uploadRes.json();
-      const url = result.secure_url;
+      const url = await uploadImage(new File([blob], "passport.jpg", { type: "image/jpeg" }), "allpropertylink/profiles");
       setPassportPhotoUrl(url);
       setPassportFile(null);
       const patchRes = await fetch("/api/user/profile", {
