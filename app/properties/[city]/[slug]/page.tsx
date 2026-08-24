@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import PropertyDetailClient from "@/components/property/PropertyDetailClient";
 import PropertyBreadcrumbs from "@/components/property/PropertyBreadcrumbs";
 import { getPropertyBySlug } from "@/lib/services/property";
-import { getUserReviewSummary } from "@/lib/services/review";
+import { getUserReviews } from "@/lib/services/review";
 import { siteUrl, slugifyCity } from "@/lib/seo";
 
 interface Props {
@@ -63,7 +63,7 @@ export default async function PropertyDetailPage({ params }: Props) {
     : [];
 
   // Seller review summary (ISR-cached) for sidebar badge + top-3 block
-  const sellerReviews = property.agent?.id ? await getUserReviewSummary(property.agent.id) : undefined;
+  const sellerReviews = property.agent?.id ? await getUserReviews(property.agent.id) : undefined;
 
   const listingJsonLd = {
     "@context": "https://schema.org",

@@ -9,13 +9,15 @@ import { ShareButtons } from "@/components/shared/ShareButtons";
 import { Building2, Bed, Bath, Maximize2, Phone, Mail, Globe, Sparkles, MessageCircle, Loader2, Star, ArrowRight } from "@/components/ui/icons";
 import { optimizeImageUrl } from "@/lib/images";
 import { slugifyCity } from "@/lib/seo";
-import { formatReviewerName } from "@/lib/utils";
+import { ReviewSection } from "@/components/reviews/ReviewSection";
 import type { ReviewItem } from "@/lib/services/review";
 
-export interface SellerReviewsSummary {
-  avgRating: number | null;
+interface SellerReviewsData {
+  reviews: ReviewItem[];
   total: number;
-  topReviews: ReviewItem[];
+  totalPages: number;
+  avgRating: number | null;
+  distribution: number[];
 }
 
 const PropertyMap = dynamic(() => import("@/components/shared/PropertyMap").then(m => ({ default: m.PropertyMap })), {
@@ -70,7 +72,7 @@ interface OtherProperty {
   listingPurpose?: string | null;
 }
 
-export default function PropertyDetailClient({ slug, initial, sellerReviews }: { slug: string; initial?: PropertyData; sellerReviews?: SellerReviewsSummary }) {
+export default function PropertyDetailClient({ slug, initial, sellerReviews }: { slug: string; initial?: PropertyData; sellerReviews?: SellerReviewsData }) {
   const [property, setProperty] = useState<PropertyData | null>(initial ?? null);
   const [otherProperties, setOtherProperties] = useState<OtherProperty[]>([]);
   const [loading, setLoading] = useState(!initial);
@@ -306,10 +308,10 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
               </div>
             )}
 
-            {/* Customer reviews of the seller (top 3, server-fetched) */}
-            {sellerReviews && sellerReviews.total > 0 && property.agent && (
-              <div className="rounded-xl border border-border bg-surface p-5 sm:p-6">
-                <div className="mb-4 flex items-start justify-between gap-3">
+            {/* ─── Customer reviews of the seller (always shown) ─── */}
+            {sellerReviews && property.agent && (
+              <section id="reviews" aria-label="Customer reviews of the seller" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+                <div className="mb-5 flex items-start justify-between gap-3">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary-600">
                       Customer feedback
@@ -320,45 +322,35 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                         {sellerReviews.avgRating != null ? sellerReviews.avgRating.toFixed(1) : "--"}
                       </span>
                       <span className="text-xs text-text-secondary">
-                        {sellerReviews.total} {sellerReviews.total === 1 ? "review" : "reviews"} of the seller
+                        {sellerReviews.total > 0
+                          ? `${sellerReviews.total} ${sellerReviews.total === 1 ? "review" : "reviews"} of the seller`
+                          : "No customer reviews yet"}
                       </span>
                     </div>
                   </div>
-                  <Link
-                    href={`/profiles/${property.agent.id}`}
-                    className="mt-0.5 inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary-600 hover:text-primary-700"
-                  >
-                    See all
-                    <ArrowRight className="h-3 w-3" />
-                  </Link>
+                  {sellerReviews.total > 0 && (
+                    <Link
+                      href={`/profiles/${property.agent.id}`}
+                      className="mt-0.5 inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary-600 hover:text-primary-700"
+                    >
+                      View profile
+                      <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  )}
                 </div>
-                <ul className="space-y-4">
-                  {sellerReviews.topReviews.map((r) => (
-                    <li key={r.id} className="border-l-2 border-accent-300/70 pl-4">
-                      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
-                        <span className="text-xs font-semibold text-text-primary">
-                          {formatReviewerName(r.user.firstName, r.user.lastName)}
-                        </span>
-                        <span className="text-[11px] text-text-secondary">
-                          {new Date(r.createdAt).toLocaleDateString("en-KE", { month: "short", year: "numeric" })}
-                        </span>
-                        <span className="flex items-center gap-0.5" aria-hidden>
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <Star
-                              key={s}
-                              size={10}
-                              className={s <= r.rating ? "fill-accent-300 text-accent-300" : "fill-none text-text-secondary/40"}
-                            />
-                          ))}
-                        </span>
-                      </div>
-                      {r.comment && (
-                        <p className="mt-1 line-clamp-3 text-sm leading-relaxed text-text-secondary">{r.comment}</p>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+
+                <ReviewSection
+                  targetId={property.agent.id}
+                  initialSummary={{
+                    avgRating: sellerReviews.avgRating,
+                    total: sellerReviews.total,
+                    distribution: (sellerReviews.distribution as [number, number, number, number, number]) || [0, 0, 0, 0, 0],
+                  }}
+                  initialReviews={sellerReviews.reviews}
+                  initialTotalPages={sellerReviews.totalPages}
+                  emptyMessage={`Be the first customer to review ${property.agent.companyName || `${property.agent.firstName} ${property.agent.lastName}`}.`}
+                />
+              </section>
             )}
 
             {property.features.length > 0 && (
