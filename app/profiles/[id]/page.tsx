@@ -8,6 +8,7 @@ import { getProfile, getUserReviews } from "@/lib/services/review"
 import { getProperties } from "@/lib/services/property"
 import { siteUrl, slugifyCity } from "@/lib/seo"
 import { formatReviewerName } from "@/lib/utils"
+import { resolveImageUrl } from "@/lib/images";
 
 interface Props {
   params: { id: string }
@@ -110,7 +111,7 @@ export default async function ProfilePage({ params }: Props) {
     ],
   }
 
-  const avatarUrl = profile.businessLogo || profile.avatar
+  const avatarUrl = resolveImageUrl(profile.businessLogo || profile.avatar)
 
   return (
     <div className="min-h-screen bg-surface">

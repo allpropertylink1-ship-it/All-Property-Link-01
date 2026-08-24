@@ -11,6 +11,7 @@ import { optimizeImageUrl } from "@/lib/images";
 import { slugifyCity } from "@/lib/seo";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import type { ReviewItem } from "@/lib/services/review";
+import { resolveImageUrl } from "@/lib/images";
 
 interface SellerReviewsData {
   reviews: ReviewItem[];
@@ -129,6 +130,9 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
 
   const otherFiltered = otherProperties.filter((op) => op.id !== property.id);
 
+  const agentAvatarUrl = property.agent ? resolveImageUrl(property.agent.avatar) ?? undefined : undefined;
+  const agentLogoUrl = property.agent ? resolveImageUrl(property.agent.businessLogo) ?? undefined : undefined;
+
   return (
       <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
         <div className="grid gap-6 lg:gap-8 lg:grid-cols-[240px_1fr_280px] xl:grid-cols-[260px_1fr_300px]">
@@ -141,7 +145,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                   <div className="flex items-center gap-3.5 mb-4">
                     {property.agent.avatar ? (
                       <Image
-                        src={property.agent.avatar}
+                        src={agentAvatarUrl as string}
                         alt={`${property.agent.firstName} ${property.agent.lastName}`}
                         width={48}
                         height={48}
@@ -155,7 +159,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                     {property.agent.businessLogo && (
                       <div className="relative shrink-0 h-10 w-auto max-w-[110px]">
                         <Image
-                          src={property.agent.businessLogo}
+                          src={agentLogoUrl as string}
                           alt="Business logo"
                           width={110}
                           height={40}
@@ -480,7 +484,8 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                     <div className="space-y-3">
                       {otherFiltered.map((op) => {
                         const opImages = Array.isArray(op.images) ? op.images : [];
-                        const thumbUrl = opImages.find((u): u is string => typeof u === "string");
+                        const thumbUrlRaw = opImages.find((u): u is string => typeof u === "string");
+                        const thumbUrl = thumbUrlRaw ? optimizeImageUrl(thumbUrlRaw, 400) : null;
                         return (
                           <Link
                             key={op.id}

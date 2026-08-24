@@ -7,6 +7,7 @@ import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getProperties } from "@/lib/admin-actions";
+import { resolveImageUrl } from "@/lib/images";
 
 interface PropertyRow {
   id: string;
@@ -111,7 +112,7 @@ export default function AdminListingsPage() {
                       <div className="flex items-center space-x-3">
                         {prop.agent?.avatar ? (
                           <Image
-                            src={prop.agent.avatar}
+                            src={resolveImageUrl(prop.agent.avatar)}
                             alt={`${prop.agent.firstName}'s avatar`}
                             width={32}
                             height={32}
@@ -140,7 +141,7 @@ export default function AdminListingsPage() {
                         <div className="flex items-center space-x-2">
                           {prop.agent?.avatar ? (
                             <Image
-                              src={prop.agent.avatar}
+                              src={resolveImageUrl(prop.agent.avatar)}
                               alt={`${prop.agent.firstName}'s avatar`}
                               width={24}
                               height={24}

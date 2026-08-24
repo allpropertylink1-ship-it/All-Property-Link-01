@@ -11,6 +11,7 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Camera, Save, Key, Trash2, Shield, CheckCircle, Clock, XCircle, Loader2 } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api-client";
+import { resolveImageUrl } from "@/lib/images";
 import ImageCropper from "@/components/kyc/ImageCropper";
 import { FormBanner } from "@/components/shared/FormFeedback";
 
@@ -219,7 +220,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         <div className="relative">
           <label className="block cursor-pointer">
             {passportPhotoUrl ? (
-              <img src={passportPhotoUrl} alt="" className="h-20 w-20 rounded-full object-cover ring-2 ring-primary/20" />
+              <img src={resolveImageUrl(passportPhotoUrl) ?? undefined} alt="" className="h-20 w-20 rounded-full object-cover ring-2 ring-primary/20" />
             ) : (
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-50 text-2xl font-bold text-primary-600">
                 {user.firstName[0]}

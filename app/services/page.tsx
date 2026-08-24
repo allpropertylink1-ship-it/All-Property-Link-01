@@ -4,6 +4,7 @@ import { getServiceListings, getServiceCategories } from "@/lib/services/service
 import type { ServiceCategory, ServiceListingCard } from "@/lib/services/service";
 import { Search, MapPin, Briefcase } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
+import { resolveImageUrl } from "@/lib/images";
 
 export const revalidate = 60;
 
@@ -122,7 +123,8 @@ export default async function ServicesPage({ searchParams }: Props) {
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {data.services.map((service: ServiceListingCard) => {
             const rawImages = Array.isArray(service.images) ? service.images : [];
-            const imageUrl = rawImages.length > 0 ? rawImages[0] : null;
+            const imageUrlRaw = rawImages.length > 0 ? rawImages[0] : null;
+            const imageUrl = imageUrlRaw ? resolveImageUrl(imageUrlRaw) : null;
 
             return (
               <Link

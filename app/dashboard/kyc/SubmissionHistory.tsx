@@ -4,6 +4,7 @@
 import { Shield, XCircle, Trash2 } from "@/components/ui/icons"
 import PdfViewer from "@/components/kyc/PdfViewer"
 import { cn } from "@/lib/utils"
+import { resolveImageUrl } from "@/lib/images";
 
 interface KycDocument {
   id: string
@@ -78,8 +79,8 @@ export function SubmissionHistory({ documents, onDelete, deleteConfirm, setDelet
                   )}
                   {(doc.frontImage || doc.backImage || doc.businessPermit) && (
                     <div className="mt-3 flex flex-wrap gap-3">
-                      {doc.frontImage && (isPdf(doc.frontImage) ? <PdfViewer url={doc.frontImage} compact /> : <img src={doc.frontImage} alt="" className="h-14 w-20 rounded object-cover" />)}
-                      {doc.backImage && (isPdf(doc.backImage) ? <PdfViewer url={doc.backImage} compact /> : <img src={doc.backImage} alt="" className="h-14 w-20 rounded object-cover" />)}
+                      {doc.frontImage && (isPdf(doc.frontImage) ? <PdfViewer url={resolveImageUrl(doc.frontImage) ?? doc.frontImage} compact /> : <img src={resolveImageUrl(doc.frontImage) ?? doc.frontImage} alt="" className="h-14 w-20 rounded object-cover" />)}
+                      {doc.backImage && (isPdf(doc.backImage) ? <PdfViewer url={resolveImageUrl(doc.backImage) ?? doc.backImage} compact /> : <img src={resolveImageUrl(doc.backImage) ?? doc.backImage} alt="" className="h-14 w-20 rounded object-cover" />)}
                       {doc.businessPermit && <PdfViewer url={doc.businessPermit} compact />}
                     </div>
                   )}

@@ -2,6 +2,7 @@
 "use client"
 
 import UploadZone from "./UploadZone"
+import { resolveImageUrl } from "@/lib/images";
 import ImageCropper from "./ImageCropper"
 import PdfViewer from "./PdfViewer"
 
@@ -161,7 +162,7 @@ export default function CoreDocumentForm({
                     <PdfViewer url={frontImageUrl} label="Front" compact />
                   ) : (
                     <div className="space-y-2">
-                      <img src={frontImageUrl} alt="Front ID" className="h-32 w-full rounded object-cover" />
+                      <img src={resolveImageUrl(frontImageUrl) ?? undefined} alt="Front ID" className="h-32 w-full rounded object-cover" />
                       <button onClick={handleRemoveFront} className="text-xs text-red-500 hover:text-red-600">
                         Remove Front Image
                       </button>
@@ -176,7 +177,7 @@ export default function CoreDocumentForm({
                     <PdfViewer url={backImageUrl} label="Back" compact />
                   ) : (
                     <div className="space-y-2">
-                      <img src={backImageUrl} alt="Back ID" className="h-32 w-full rounded object-cover" />
+                      <img src={resolveImageUrl(backImageUrl) ?? undefined} alt="Back ID" className="h-32 w-full rounded object-cover" />
                       <button onClick={handleRemoveBack} className="text-xs text-red-500 hover:text-red-600">
                         Remove Back Image
                       </button>

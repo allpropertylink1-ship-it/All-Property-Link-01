@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { resolveImageUrl } from "@/lib/images";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import Image from "next/image";
@@ -129,7 +130,7 @@ export default function AdminUsersPage() {
                       <div className="flex items-center gap-2">
                         {user.avatar ? (
                           <Image
-                            src={user.avatar}
+                            src={resolveImageUrl(user.avatar) ?? undefined}
                             alt={`${user.firstName} ${user.lastName}'s avatar`}
                             width={32}
                             height={32}

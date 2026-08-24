@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { siteUrl } from "@/lib/seo";
 import { getServiceById } from "@/lib/services/service";
 import { getUserReviews } from "@/lib/services/review";
+import { resolveImageUrl } from "@/lib/images";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
@@ -98,7 +99,7 @@ export default async function ServiceDetailPage({ params }: Props) {
               <div className="mb-4 flex items-center gap-3.5">
                 {service.user.businessLogo ? (
                   <Image
-                    src={service.user.businessLogo}
+                    src={resolveImageUrl(service.user.businessLogo) as string}
                     alt={service.user.companyName || "Business logo"}
                     width={48}
                     height={48}

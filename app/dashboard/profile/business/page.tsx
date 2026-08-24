@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { Check, Loader2, Save, Camera, User, Building2 } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
+import { resolveImageUrl } from "@/lib/images";
 import { FormBanner } from "@/components/shared/FormFeedback"
 
 const categories = [
@@ -322,7 +323,7 @@ export default function BusinessProfilePage() {
             </div>
             <div className="shrink-0">
               {businessLogoUrl ? (
-                <img src={businessLogoUrl} alt="Logo" className="h-28 w-28 rounded-xl object-cover ring-2 ring-primary/20" />
+                <img src={resolveImageUrl(businessLogoUrl) ?? undefined} alt="Logo" className="h-28 w-28 rounded-xl object-cover ring-2 ring-primary/20" />
               ) : (
                 <div className="flex h-28 w-28 items-center justify-center rounded-xl bg-primary-50 ring-2 ring-primary/10">
                   <Building2 size={40} className="text-primary-400" />
@@ -361,7 +362,7 @@ export default function BusinessProfilePage() {
             </div>
             <div className="shrink-0">
               {businessProfilePhotoUrl ? (
-                <img src={businessProfilePhotoUrl} alt="" className="h-20 w-20 rounded-full object-cover ring-2 ring-primary/20" />
+                <img src={resolveImageUrl(businessProfilePhotoUrl) ?? undefined} alt="" className="h-20 w-20 rounded-full object-cover ring-2 ring-primary/20" />
               ) : (
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-50 text-2xl font-bold text-primary-600">
                   <User size={28} />

@@ -9,6 +9,7 @@ import Link from "next/link"
 import { AgentGuard } from "@/components/dashboard/AgentGuard"
 import { StatusPill } from "@/components/shared/StatusPill"
 import { fmtKES } from "@/lib/utils"
+import { resolveImageUrl } from "@/lib/images";
 
 interface Property {
   id: string
@@ -92,7 +93,7 @@ export default function AgentReferralDetailPage() {
                 <Link href={`/properties/${p.city?.toLowerCase() || "unknown"}/${p.slug}`} className="flex min-w-0 flex-1 items-center gap-4">
                   {img ? (
                     <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-surface-secondary">
-                      <img src={typeof img === "string" ? img : img.url} alt="" className="h-full w-full object-cover" />
+                      <img src={resolveImageUrl(typeof img === "string" ? img : img.url) ?? undefined} alt="" className="h-full w-full object-cover" />
                     </div>
                   ) : (
                     <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-surface-secondary">

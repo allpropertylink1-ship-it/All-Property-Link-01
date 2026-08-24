@@ -4,6 +4,7 @@
 import { Trash2, Loader2, FileText, ImageIcon, CheckCircle, XCircle } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
 import { resolvePdfUrl } from "@/lib/pdf-utils"
+import { resolveImageUrl } from "@/lib/images";
 
 interface DocumentCardProps {
   doc: {
@@ -43,21 +44,23 @@ function StatusBadge({ status }: { status: string }) {
   )
 }
 
-function DocThumbnail({ src, label }: { src: string; label: string }) {
+function DocThumbnail({ src, label }: { src: string | null; label: string }) {
+  if (!src) return null;
   const isPdf = src.match(/\.pdf/i)
-  const url = isPdf ? resolvePdfUrl(src) : src
+  const abs = resolveImageUrl(src) ?? src
+  const url = isPdf ? resolvePdfUrl(abs) : abs
   
   if (isPdf) {
     return (
-      <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg border border-border bg-gray-50 p-2 text-sm text-muted hover:bg-gray-100">
+      <a href={url ?? "#"} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg border border-border bg-gray-50 p-2 text-sm text-muted hover:bg-gray-100">
         <FileText size={20} className="shrink-0 text-red-400" />
         <span>View PDF</span>
       </a>
     )
   }
   return (
-    <a href={src} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-lg border border-border hover:ring-2 hover:ring-primary/50">
-      <img src={src} alt={label} className="h-16 w-20 object-cover" />
+    <a href={url ?? "#"} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-lg border border-border hover:ring-2 hover:ring-primary/50">
+      <img src={url ?? undefined} alt={label} className="h-16 w-20 object-cover" />
     </a>
   )
 }

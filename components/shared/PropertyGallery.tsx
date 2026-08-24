@@ -9,13 +9,16 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { resolveImageUrl } from "@/lib/images";
 
 interface Props {
   images: string[];
   title: string;
 }
 
-export function PropertyGallery({ images, title }: Props) {
+export function PropertyGallery({ images: rawImages, title }: Props) {
+  // Absolutize DB-relative /uploads/* paths (cPanel migration safety)
+  const images = (rawImages || []).map((u) => resolveImageUrl(u)).filter((u): u is string => !!u);
   const [current, setCurrent] = useState(0);
   const [showLightbox, setShowLightbox] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);

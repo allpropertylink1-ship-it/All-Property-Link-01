@@ -2,6 +2,7 @@
 "use client"
 
 import { useState } from "react"
+import { resolveImageUrl } from "@/lib/images";
 import { Upload, XCircle, FileText, Trash2 } from "@/components/ui/icons"
 import PdfViewer from "@/components/kyc/PdfViewer"
 import ImageCropper from "@/components/kyc/ImageCropper"
@@ -142,7 +143,7 @@ export function DocumentUpload(props: Props) {
               </div>
             ) : props.frontUrl ? (
               <div className="space-y-2">
-                {isPdf(props.frontUrl) ? <PdfViewer url={props.frontUrl} compact /> : <img src={props.frontUrl} alt="" className="h-44 w-full rounded-lg object-cover" />}
+                {isPdf(props.frontUrl) ? <PdfViewer url={resolveImageUrl(props.frontUrl) ?? props.frontUrl} compact /> : <img src={resolveImageUrl(props.frontUrl) ?? undefined} alt="" className="h-44 w-full rounded-lg object-cover" />}
               </div>
             ) : (
               <label className="flex h-44 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background hover:border-primary/50 hover:bg-primary/5 transition-colors">
@@ -168,7 +169,7 @@ export function DocumentUpload(props: Props) {
               </div>
             ) : props.backUrl ? (
               <div className="space-y-2">
-                {isPdf(props.backUrl) ? <PdfViewer url={props.backUrl} compact /> : <img src={props.backUrl} alt="" className="h-44 w-full rounded-lg object-cover" />}
+                {isPdf(props.backUrl) ? <PdfViewer url={resolveImageUrl(props.backUrl) ?? props.backUrl} compact /> : <img src={resolveImageUrl(props.backUrl) ?? undefined} alt="" className="h-44 w-full rounded-lg object-cover" />}
               </div>
             ) : (
               <label className="flex h-44 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background hover:border-primary/50 hover:bg-primary/5 transition-colors">
