@@ -6,7 +6,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
-import { Building2, Bed, Bath, Maximize2, Phone, Mail, Globe, Sparkles, MessageCircle, Loader2, Star } from "@/components/ui/icons";
+import { Building2, Bed, Bath, Maximize2, Phone, Mail, Globe, Sparkles, MessageCircle, Loader2, Star, ArrowRight } from "@/components/ui/icons";
 import { optimizeImageUrl } from "@/lib/images";
 import { slugifyCity } from "@/lib/seo";
 import { formatReviewerName } from "@/lib/utils";
@@ -183,23 +183,23 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                   {sellerReviews && sellerReviews.total > 0 && (
                     <Link
                       href={`/profiles/${property.agent.id}`}
-                      className="mb-2.5 flex items-center gap-1.5 rounded-lg bg-surface-secondary px-2.5 py-1.5 text-xs transition-colors hover:bg-surface"
+                      className="group/badge mb-1 block rounded-xl border border-border bg-surface-secondary/60 px-3.5 py-3 transition-all hover:border-accent-300 hover:bg-surface"
                     >
-                      <Star className="h-3.5 w-3.5 fill-accent-300 text-accent-300" />
-                      <span className="font-semibold text-text-primary">
-                        {sellerReviews.avgRating != null ? sellerReviews.avgRating.toFixed(1) : "--"}
-                      </span>
-                      <span className="text-text-secondary">
-                        ({sellerReviews.total} {sellerReviews.total === 1 ? "review" : "reviews"})
-                      </span>
-                    </Link>
-                  )}
-                  {sellerReviews && sellerReviews.total === 0 && property.agent.id && (
-                    <Link
-                      href={`/profiles/${property.agent.id}`}
-                      className="mb-2.5 block text-xs font-medium text-primary-600 hover:text-primary-700 transition-colors"
-                    >
-                      View profile
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Star className="h-4 w-4 fill-accent-300 text-accent-300" />
+                          <span className="font-heading text-sm font-bold tabular-nums text-text-primary">
+                            {sellerReviews.avgRating != null ? sellerReviews.avgRating.toFixed(1) : "--"}
+                          </span>
+                        </span>
+                        <span className="text-[11px] font-medium text-text-secondary">
+                          {sellerReviews.total} {sellerReviews.total === 1 ? "review" : "reviews"}
+                        </span>
+                      </div>
+                      <p className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-primary-600 transition-colors group-hover/badge:text-primary-700">
+                        Read customer reviews
+                        <ArrowRight className="h-3 w-3 transition-transform group-hover/badge:translate-x-0.5" />
+                      </p>
                     </Link>
                   )}
 
@@ -308,43 +308,52 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
 
             {/* Customer reviews of the seller (top 3, server-fetched) */}
             {sellerReviews && sellerReviews.total > 0 && property.agent && (
-              <div className="rounded-xl border border-border bg-surface p-5">
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <h2 className="text-sm font-semibold text-text-primary">Customer reviews</h2>
+              <div className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary-600">
+                      Customer feedback
+                    </p>
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <Star className="h-5 w-5 fill-accent-300 text-accent-300" />
+                      <span className="font-heading text-xl font-bold tabular-nums text-text-primary">
+                        {sellerReviews.avgRating != null ? sellerReviews.avgRating.toFixed(1) : "--"}
+                      </span>
+                      <span className="text-xs text-text-secondary">
+                        {sellerReviews.total} {sellerReviews.total === 1 ? "review" : "reviews"} of the seller
+                      </span>
+                    </div>
+                  </div>
                   <Link
                     href={`/profiles/${property.agent.id}`}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-700"
+                    className="mt-0.5 inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary-600 hover:text-primary-700"
                   >
-                    See all {sellerReviews.total} <Star className="h-3 w-3 fill-accent-300 text-accent-300" />
+                    See all
+                    <ArrowRight className="h-3 w-3" />
                   </Link>
                 </div>
-                <div className="mb-3 flex items-center gap-2">
-                  <Star className="h-5 w-5 fill-accent-300 text-accent-300" />
-                  <span className="font-heading text-lg font-bold text-text-primary">
-                    {sellerReviews.avgRating != null ? sellerReviews.avgRating.toFixed(1) : "--"}
-                  </span>
-                  <span className="text-xs text-text-secondary">
-                    {sellerReviews.total} {sellerReviews.total === 1 ? "review" : "reviews"} of the seller
-                  </span>
-                </div>
-                <ul className="space-y-3">
+                <ul className="space-y-4">
                   {sellerReviews.topReviews.map((r) => (
-                    <li key={r.id} className="rounded-lg bg-surface-secondary p-3">
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                    <li key={r.id} className="border-l-2 border-accent-300/70 pl-4">
+                      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
                         <span className="text-xs font-semibold text-text-primary">
                           {formatReviewerName(r.user.firstName, r.user.lastName)}
+                        </span>
+                        <span className="text-[11px] text-text-secondary">
+                          {new Date(r.createdAt).toLocaleDateString("en-KE", { month: "short", year: "numeric" })}
                         </span>
                         <span className="flex items-center gap-0.5" aria-hidden>
                           {[1, 2, 3, 4, 5].map((s) => (
                             <Star
                               key={s}
-                              className={`h-3 w-3 ${s <= r.rating ? "fill-accent-300 text-accent-300" : "fill-none text-text-secondary"}`}
+                              size={10}
+                              className={s <= r.rating ? "fill-accent-300 text-accent-300" : "fill-none text-text-secondary/40"}
                             />
                           ))}
                         </span>
                       </div>
                       {r.comment && (
-                        <p className="mt-1 line-clamp-3 text-xs leading-relaxed text-text-secondary">{r.comment}</p>
+                        <p className="mt-1 line-clamp-3 text-sm leading-relaxed text-text-secondary">{r.comment}</p>
                       )}
                     </li>
                   ))}

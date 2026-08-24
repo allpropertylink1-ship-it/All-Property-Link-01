@@ -117,47 +117,53 @@ export default async function ProfilePage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
-      {/* Identity band */}
-      <section className="bg-primary-600 py-12 text-text-on-primary sm:py-16">
+      {/* Identity band — deep-teal brand treatment */}
+      <section className="profile-hero py-14 sm:py-20">
         <div className="mx-auto max-w-7xl px-4">
-          <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:items-center sm:text-left">
-            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-white/15">
-              {avatarUrl ? (
-                <Image src={avatarUrl} alt={name} fill className="object-cover" sizes="80px" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-2xl font-bold">
-                  {name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+          <div className="flex flex-col items-center gap-7 text-center lg:flex-row lg:items-end lg:justify-between lg:text-left">
+            <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:gap-6">
+              <div className="relative h-24 w-24 shrink-0">
+                <div className="absolute -inset-1.5 rounded-full bg-accent-300/25 blur-md" aria-hidden />
+                <div className="relative h-full w-full overflow-hidden rounded-full ring-2 ring-accent-200/80">
+                  {avatarUrl ? (
+                    <Image src={avatarUrl} alt={name} fill className="object-cover" sizes="88px" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-white/10 font-heading text-2xl font-bold">
+                      {name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <h1 className="font-heading text-3xl font-bold tracking-tight">{name}</h1>
-              <p className="mt-1 text-sm text-white/85">
-                {[
-                  profile.primaryUserType ? TYPE_LABEL[profile.primaryUserType] : null,
-                  profile.category,
-                  profile.city,
-                ]
-                  .filter(Boolean)
-                  .join(" · ") || "All Property Link member"}
-              </p>
-              {profile.specialties && profile.specialties.length > 0 && (
-                <p className="mt-1 text-sm text-white/70">{profile.specialties.join(", ")}</p>
-              )}
-            </div>
-            <dl className="flex shrink-0 gap-6 text-center">
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-white/70">Listings</dt>
-                <dd className="font-heading text-xl font-bold">{listingData.total}</dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wide text-white/70">Reviews</dt>
-                <dd className="font-heading text-xl font-bold">{reviews.total}</dd>
+                <p className="mb-2 flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-accent-200 lg:justify-start">
+                  {profile.primaryUserType ? TYPE_LABEL[profile.primaryUserType] : "Member"}
+                </p>
+                <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">{name}</h1>
+                <p className="mt-2 text-sm text-white/75">
+                  {[
+                    profile.category,
+                    profile.city,
+                    profile.specialties && profile.specialties.length > 0 ? profile.specialties.slice(0, 3).join(" · ") : null,
+                  ]
+                    .filter(Boolean)
+                    .join("  ·  ") || `Member since ${new Date(profile.createdAt).toLocaleDateString("en-KE", { month: "long", year: "numeric" })}`}
+                </p>
               </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-white/70">Avg</dt>
-                <dd className="inline-flex items-center gap-1 font-heading text-xl font-bold">
-                  <Star className="h-4 w-4 fill-accent-300 text-accent-300" />
+            </div>
+
+            <dl className="flex gap-3.5">
+              <div className="stat-glass rounded-xl px-5 py-4 text-center min-w-[96px]">
+                <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/65">Listings</dt>
+                <dd className="mt-1 font-heading text-2xl font-bold tabular-nums">{listingData.total}</dd>
+              </div>
+              <div className="stat-glass rounded-xl px-5 py-4 text-center min-w-[96px]">
+                <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/65">Reviews</dt>
+                <dd className="mt-1 font-heading text-2xl font-bold tabular-nums">{reviews.total}</dd>
+              </div>
+              <div className="stat-glass rounded-xl px-5 py-4 text-center min-w-[110px]">
+                <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/65">Avg rating</dt>
+                <dd className="mt-1 inline-flex items-center gap-1.5 font-heading text-2xl font-bold tabular-nums text-accent-200">
+                  <Star className="h-4 w-4 fill-accent-200 text-accent-200" />
                   {reviews.avgRating != null ? reviews.avgRating.toFixed(1) : "--"}
                 </dd>
               </div>
@@ -167,10 +173,11 @@ export default async function ProfilePage({ params }: Props) {
       </section>
 
       {/* Reviews + Listings */}
-      <section className="py-10 sm:py-14">
-        <div className="mx-auto max-w-5xl space-y-14 px-4">
+      <section className="bg-surface-secondary/50 py-12 sm:py-16">
+        <div className="mx-auto max-w-5xl space-y-16 px-4">
           <div>
-            <h2 className="mb-6 font-heading text-2xl font-bold text-text-primary">Reviews</h2>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary-600">Customer feedback</p>
+            <h2 className="mb-7 font-heading text-2xl font-bold text-text-primary">Reviews</h2>
             <ReviewSectionMount
               targetId={uuid}
               summary={{ avgRating: reviews.avgRating, total: reviews.total, distribution: reviews.distribution }}
@@ -180,7 +187,8 @@ export default async function ProfilePage({ params }: Props) {
           </div>
 
           <div>
-            <h2 className="mb-6 font-heading text-2xl font-bold text-text-primary">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary-600">Browse their posts</p>
+            <h2 className="mb-7 font-heading text-2xl font-bold text-text-primary">
               Listings by {profile.firstName}
             </h2>
             {listingData.properties.length === 0 ? (

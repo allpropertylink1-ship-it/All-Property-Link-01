@@ -222,3 +222,36 @@
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; }
 }
+
+/* --- Profile hero - deep-teal brand treatment (matches auth panel) --- */
+.profile-hero {
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(120% 90% at 85% -10%, rgba(212, 154, 68, 0.28), transparent 55%),
+    linear-gradient(165deg, #152F29 0%, #1A3D35 45%, #286255 100%);
+}
+
+.profile-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.022) 0 2px,
+    transparent 2px 16px
+  );
+}
+
+.profile-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.stat-glass {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(6px);
+}
