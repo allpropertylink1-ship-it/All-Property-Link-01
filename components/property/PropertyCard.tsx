@@ -64,9 +64,13 @@ export function PropertyCard({
   listingPurpose,
   urgencyText,
   isVerified = true,
+  priority = false,
 }: PropertyCardProps) {
   const imageUrls = Array.isArray(images) ? images : [];
   const imageUrl = imageUrls.length > 0 ? optimizeImageUrl(String(imageUrls[0]), 800) : PLACEHOLDER_PROPERTY;
+  // LCP hint for above-the-fold cards: eager load + high priority via
+  // fetchpriority passthrough (React 18 does not support the camelCase prop).
+  const lcpAttrs = priority ? ({ fetchpriority: "high" } as Record<string, string>) : {};
 
   return (
     <Link
@@ -79,8 +83,11 @@ export function PropertyCard({
             src={imageUrl}
             alt={title}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            loading="lazy"
-            decoding="async"
+            width={800}
+            height={600}
+            loading={priority ? "eager" : "lazy"}
+            decoding={priority ? "sync" : "async"}
+            {...lcpAttrs}
             onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_PROPERTY }}
           />
           <span

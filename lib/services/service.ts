@@ -37,6 +37,8 @@ export interface ServiceListingUser {
 
 export interface ServiceListingCard {
   id: string;
+  userId: string;
+  categoryId: string;
   title: string;
   description: string;
   price: string | null;

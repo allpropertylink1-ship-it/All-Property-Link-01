@@ -4,12 +4,13 @@ import { useEffect, useState } from "react"
 import { FeaturedSection } from "./FeaturedSection"
 import { ProfileCard, type ProfileRow } from "./ProfileCard"
 
-export function FeaturedFundis() {
-  const [services, setServices] = useState<ProfileRow[]>([])
-  const [loading, setLoading] = useState(true)
+export function FeaturedFundis({ initialData }: { initialData?: ProfileRow[] }) {
+  const [services, setServices] = useState<ProfileRow[]>(initialData || [])
+  const [loading, setLoading] = useState(!initialData)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (initialData) return
     fetch("/api/services?type=FUNDI&limit=6")
       .then((r) => {
         if (!r.ok) throw new Error(`Status ${r.status}`)
@@ -23,7 +24,7 @@ export function FeaturedFundis() {
         setError(e.message)
         setLoading(false)
       })
-  }, [])
+  }, [initialData])
 
   return (
     <FeaturedSection
