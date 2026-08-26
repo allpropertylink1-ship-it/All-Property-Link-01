@@ -429,7 +429,7 @@ export function HeroSection() {
               Create a listing
             </Link>
             <Link
-              href="/agents"
+              href="/aplreps"
               className="rounded-xl border border-white/30 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
             >
               Talk to an APL rep

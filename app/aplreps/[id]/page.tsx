@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Phone, Mail, MapPin, ArrowRight } from "@/components/ui/icons";
-import { AgentListingsGrid } from "@/app/agents/AgentListingsGrid";
+import { AgentListingsGrid } from "@/app/aplreps/AgentListingsGrid";
 import { getAgentById, getAgentListings } from "@/lib/services/agent";
 import { siteUrl } from "@/lib/seo";
 import { resolveImageUrl } from "@/lib/images";
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${agent.fullName} — APL Representative`,
     description,
-    alternates: { canonical: `/agents/${agent.id}` },
+    alternates: { canonical: `/aplreps/${agent.id}` },
     openGraph: {
       title: `${agent.fullName} — APL Representative`,
       description,
@@ -47,7 +47,7 @@ export default async function AgentDetailPage({ params }: Props) {
   if (!agent) notFound();
 
   const listings = await getAgentListings(agent.id);
-  const canonical = `${siteUrl()}/agents/${agent.id}`;
+  const canonical = `${siteUrl()}/aplreps/${agent.id}`;
 
   const avatarUrl = resolveImageUrl(agent.avatar);
 
@@ -68,7 +68,7 @@ export default async function AgentDetailPage({ params }: Props) {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: `${siteUrl()}/` },
-      { "@type": "ListItem", position: 2, name: "APL Representatives", item: `${siteUrl()}/agents` },
+      { "@type": "ListItem", position: 2, name: "APL Representatives", item: `${siteUrl()}/aplreps` },
       { "@type": "ListItem", position: 3, name: agent.fullName, item: canonical },
     ],
   };
@@ -155,7 +155,7 @@ export default async function AgentDetailPage({ params }: Props) {
           </div>
 
           <Link
-            href="/agents"
+            href="/aplreps"
             className="mb-8 inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700"
           >
             <ArrowRight size={15} className="rotate-180" /> All representatives

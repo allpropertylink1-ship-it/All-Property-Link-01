@@ -50,6 +50,12 @@ const nextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      { source: "/agents", destination: "/aplreps", permanent: true },
+      { source: "/agents/:id", destination: "/aplreps/:id", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

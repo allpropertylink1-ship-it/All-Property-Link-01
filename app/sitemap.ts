@@ -13,7 +13,7 @@ const staticPages = (base: string): MetadataRoute.Sitemap => [
   { url: `${base}/privacy`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
   { url: `${base}/terms`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
   { url: `${base}/services`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-  { url: `${base}/agents`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+  { url: `${base}/aplreps`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
 ];
 
 function isTestListing(title: string): boolean {
@@ -102,7 +102,7 @@ async function agentPages(base: string): Promise<MetadataRoute.Sitemap> {
     if (!res.ok) return [];
     const data: { agents: { id: string; _count: { users: number } }[] } = await res.json();
     return (data.agents || []).map((agent) => ({
-      url: `${base}/agents/${agent.id}`,
+      url: `${base}/aplreps/${agent.id}`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.4,
