@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Phone, Mail, UserCheck, ArrowRight } from "@/components/ui/icons";
+import Image from "next/image";
+import { Phone, Mail, MapPin, ArrowRight } from "@/components/ui/icons";
 import { AgentListingsGrid } from "@/app/agents/AgentListingsGrid";
 import { getAgentById, getAgentListings } from "@/lib/services/agent";
 import { siteUrl } from "@/lib/seo";
+import { resolveImageUrl } from "@/lib/images";
 
 interface Props {
   params: { id: string };
@@ -14,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const agent = await getAgentById(params.id);
   if (!agent) return {};
 
-  const description = `${agent.fullName} is a verified APL Representative at All Property Link. Code: ${agent.agentCode}. Browse their recommended property listings across Kenya.`;
+  const description = `${agent.fullName} is an APL Representative at All Property Link. Code: ${agent.agentCode}. Browse their recommended property listings across Kenya.`;
 
   return {
     title: `${agent.fullName} — APL Representative`,
@@ -47,6 +49,8 @@ export default async function AgentDetailPage({ params }: Props) {
   const listings = await getAgentListings(agent.id);
   const canonical = `${siteUrl()}/agents/${agent.id}`;
 
+  const avatarUrl = resolveImageUrl(agent.avatar);
+
   const agentJsonLd = {
     "@context": "https://schema.org",
     "@type": "RealEstateAgent",
@@ -54,7 +58,8 @@ export default async function AgentDetailPage({ params }: Props) {
     url: canonical,
     telephone: agent.phone || undefined,
     email: agent.email || undefined,
-    description: `${agent.fullName} is a verified APL Representative at All Property Link with ${agent._count.users} referrals and ${listings.length} property listings.`,
+    image: avatarUrl || undefined,
+    description: `${agent.fullName} is an APL Representative at All Property Link with ${agent._count.users} referrals and ${listings.length} property listings.`,
     areaServed: "Kenya",
   };
 
@@ -73,15 +78,38 @@ export default async function AgentDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(agentJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
-      <section className="bg-primary-600 py-14 text-center text-text-on-primary sm:py-20">
+      <section className="profile-hero py-14 text-center sm:py-20">
         <div className="mx-auto max-w-7xl px-4">
-          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white/15 text-2xl font-bold">
-            {initials(agent.fullName)}
+          <div className="relative mx-auto mb-4 h-22 w-22">
+            <div className="absolute -inset-1.5 rounded-full bg-accent-300/25 blur-md" aria-hidden />
+            <div className="relative h-full w-full overflow-hidden rounded-full ring-2 ring-accent-200/80">
+              {avatarUrl ? (
+                <Image src={avatarUrl} alt={agent.fullName} fill className="object-cover" sizes="88px" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-white/10 text-2xl font-bold">
+                  {initials(agent.fullName)}
+                </div>
+              )}
+            </div>
           </div>
           <h1 className="mb-2 font-heading text-3xl font-bold tracking-tight sm:text-4xl">{agent.fullName}</h1>
-          <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-sm font-medium">
-            <UserCheck size={15} /> Verified APL Representative · {agent.agentCode}
-          </p>
+          <p className="text-sm text-white/75">APL Representative · {agent.agentCode}</p>
+          {agent.regions.length > 0 && (
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              {agent.regions.map((r) => (
+                <span key={r} className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-sm font-medium text-white/85 backdrop-blur-sm">
+                  <MapPin size={13} className="text-accent-200" />
+                  {r}
+                </span>
+              ))}
+              {agent.specificArea && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-sm font-medium text-white/85 backdrop-blur-sm">
+                  <MapPin size={13} className="text-accent-200" />
+                  {agent.specificArea}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </section>
 

@@ -8,6 +8,9 @@ export interface AgentSummary {
   phone: string | null;
   email: string | null;
   agentCode: string;
+  avatar: string | null;
+  regions: string[];
+  specificArea: string | null;
   status: string;
   createdAt: Date;
   _count: { users: number };

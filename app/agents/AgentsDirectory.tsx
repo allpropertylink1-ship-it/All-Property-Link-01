@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { api } from "@/lib/api-client"
-import { Loader2, AlertCircle, Phone, UserCheck, ArrowRight } from "@/components/ui/icons"
+import { resolveImageUrl } from "@/lib/images"
+import { Loader2, AlertCircle, Phone, ArrowRight, MapPin } from "@/components/ui/icons"
 
 interface Agent {
   id: string
@@ -11,6 +13,9 @@ interface Agent {
   phone: string | null
   email: string | null
   agentCode: string
+  avatar: string | null
+  regions: string[]
+  specificArea: string | null
   _count: { users: number }
   propertyCount: number
 }
@@ -62,43 +67,68 @@ export function AgentsDirectory() {
         <div className="py-20 text-center text-sm text-text-secondary">No representatives found.</div>
       ) : (
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((agent) => (
-            <div key={agent.id} className="flex flex-col rounded-xl border border-border bg-surface p-6 transition-shadow hover:shadow-md">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 text-sm font-bold text-primary-600">
-                  {agent.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+          {filtered.map((agent) => {
+            const photoUrl = resolveImageUrl(agent.avatar)
+            return (
+              <div key={agent.id} className="flex flex-col rounded-xl border border-border bg-surface p-6 transition-shadow hover:shadow-md">
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full ring-2 ring-accent-200/60">
+                    {photoUrl ? (
+                      <Image src={photoUrl} alt={agent.fullName} fill className="object-cover" sizes="48px" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-primary-100 text-sm font-bold text-primary-600">
+                        {agent.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <Link href={`/agents/${agent.id}`} className="font-heading font-semibold text-text-primary hover:text-primary-600">
+                      {agent.fullName}
+                    </Link>
+                    <p className="text-xs text-muted">{agent.agentCode}</p>
+                  </div>
                 </div>
-                <div>
-                  <Link href={`/agents/${agent.id}`} className="font-heading font-semibold text-text-primary hover:text-primary-600">
-                    {agent.fullName}
-                  </Link>
-                  <p className="flex items-center gap-1 text-xs text-muted">
-                    <UserCheck size={12} className="text-primary-600" /> {agent.agentCode}
-                  </p>
+
+                <div className="space-y-1.5 text-sm text-text-secondary">
+                  <p>{agent._count.users} referral{agent._count.users !== 1 ? "s" : ""} · {agent.propertyCount} listing{agent.propertyCount !== 1 ? "s" : ""}</p>
                 </div>
-              </div>
 
-              <div className="space-y-1.5 text-sm text-text-secondary">
-                <p className="flex items-center gap-2"><UserCheck size={14} />{agent._count.users} referral{agent._count.users !== 1 ? "s" : ""} · {agent.propertyCount} listing{agent.propertyCount !== 1 ? "s" : ""}</p>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                {agent.phone && (
-                  <>
-                    <a href={`tel:${agent.phone}`}
-                      className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 transition-colors touch-target"
-                    ><Phone size={14} />Call</a>
-                    <a href={`https://wa.me/${agent.phone.replace(/\D/g, "").replace(/^0/, "254")}`} target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors touch-target"
-                    ><WhatsAppIcon />WhatsApp</a>
-                  </>
+                {/* Region chips */}
+                {(agent.regions.length > 0 || agent.specificArea) && (
+                  <div className="mt-auto flex flex-wrap gap-1.5 pt-4">
+                    {agent.regions.map((r) => (
+                      <span key={r} className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-2.5 py-1 text-[11px] font-medium text-primary-700">
+                        <MapPin size={11} className="shrink-0 text-primary-500" />
+                        {r}
+                      </span>
+                    ))}
+                    {agent.specificArea && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-accent-300/15 px-2.5 py-1 text-[11px] font-medium text-accent-600">
+                        <MapPin size={11} className="shrink-0" />
+                        {agent.specificArea}
+                      </span>
+                    )}
+                  </div>
                 )}
-                <Link href={`/agents/${agent.id}`}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary hover:bg-surface-secondary transition-colors touch-target"
-                >View profile <ArrowRight size={14} /></Link>
+
+                <div className={`flex flex-wrap gap-2 ${agent.regions.length > 0 || agent.specificArea ? "mt-4" : "mt-4"}`}>
+                  {agent.phone && (
+                    <>
+                      <a href={`tel:${agent.phone}`}
+                        className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 transition-colors touch-target"
+                      ><Phone size={14} />Call</a>
+                      <a href={`https://wa.me/${agent.phone.replace(/\D/g, "").replace(/^0/, "254")}`} target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors touch-target"
+                      ><WhatsAppIcon />WhatsApp</a>
+                    </>
+                  )}
+                  <Link href={`/agents/${agent.id}`}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary hover:bg-surface-secondary transition-colors touch-target"
+                  >View profile <ArrowRight size={14} /></Link>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

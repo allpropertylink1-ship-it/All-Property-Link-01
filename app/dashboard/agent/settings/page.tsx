@@ -1,11 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
+import Image from "next/image"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
-import { Loader2, Link as LinkIcon, Copy, Check } from "@/components/ui/icons"
+import { uploadImage } from "@/lib/image-client"
+import { Loader2, Link as LinkIcon, Copy, Check, MapPin } from "@/components/ui/icons"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { AgentGuard } from "@/components/dashboard/AgentGuard"
+import { resolveImageUrl } from "@/lib/images"
+
+const KENYA_REGIONS = [
+  "Nairobi", "Central", "Coast", "Eastern",
+  "North-Eastern", "Nyanza", "Rift Valley", "Western",
+] as const
 
 const inputClass = "mt-1 block w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-text-primary placeholder:text-text-secondary focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15"
 
@@ -25,6 +33,17 @@ export default function AgentSettingsPage() {
   const [pwSuccess, setPwSuccess] = useState(false)
 
   const [copied, setCopied] = useState(false)
+
+  // ── Photo & region state ──
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [selectedRegions, setSelectedRegions] = useState<string[]>([])
+  const [specificArea, setSpecificAreaState] = useState("")
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const [profileDataLoading, setProfileDataLoading] = useState(true)
+  const [prLoading, setPrLoading] = useState(false)
+  const [prError, setPrError] = useState("")
+  const [prSuccess, setPrSuccess] = useState(false)
+  const avatarInputRef = useRef<HTMLInputElement>(null)
 
   async function handleProfileUpdate(e: React.FormEvent) {
     e.preventDefault()
@@ -82,6 +101,65 @@ export default function AgentSettingsPage() {
 
   const referralLink = user?.agentCode ? `https://allpropertylink.co.ke/auth/register?ref=${user.agentCode}` : ""
 
+  // Fetch current avatar/regions on mount
+  useEffect(() => {
+    if (!user?.aplAgentId) return
+    api.get<{ agent: { avatar: string | null; regions: string[]; specificArea: string | null } }>(
+      `/api/apl-agents/${user.aplAgentId}`
+    ).then(({ data }) => {
+      if (data?.agent) {
+        setAvatarUrl(data.agent.avatar)
+        setSelectedRegions(data.agent.regions || [])
+        setSpecificAreaState(data.agent.specificArea || "")
+      }
+      setProfileDataLoading(false)
+    })
+  }, [user?.aplAgentId])
+
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ""
+    setAvatarUploading(true)
+    setPrError("")
+    try {
+      const url = await uploadImage(file, "allpropertylink/avatars", { maxDimension: 400, quality: 0.85 })
+      const { error } = await api.patch("/api/apl-agents/profile", { avatar: url })
+      if (error) throw new Error(error)
+      setAvatarUrl(url)
+    } catch (err) {
+      setPrError(err instanceof Error ? err.message : "Photo upload failed")
+    } finally {
+      setAvatarUploading(false)
+    }
+  }
+
+  async function handleAvatarRemove() {
+    setPrError("")
+    const { error } = await api.patch("/api/apl-agents/profile", { avatar: null })
+    if (error) { setPrError(error); return }
+    setAvatarUrl(null)
+  }
+
+  function toggleRegion(region: string) {
+    setSelectedRegions((prev) =>
+      prev.includes(region) ? prev.filter((r) => r !== region) : [...prev, region]
+    )
+  }
+
+  async function handleProfileRegionSave() {
+    setPrLoading(true)
+    setPrError("")
+    setPrSuccess(false)
+    const { error } = await api.patch("/api/apl-agents/profile", {
+      regions: selectedRegions,
+      specificArea: specificArea.trim() || null,
+    })
+    if (error) setPrError(error)
+    else setPrSuccess(true)
+    setPrLoading(false)
+  }
+
   async function copyReferralLink() {
     if (!referralLink) return
     try {
@@ -120,6 +198,113 @@ export default function AgentSettingsPage() {
             {copied && <p className="mt-2 text-xs text-success-700">Copied to clipboard!</p>}
           </div>
         )}
+
+        {/* ─── Photo & Region section ─── */}
+        <div className="space-y-6 rounded-xl border border-border bg-surface p-6">
+          <h2 className="font-heading text-lg font-semibold text-text-primary">Profile Picture &amp; Coverage</h2>
+
+          {prError && <FormBanner variant="error">{prError}</FormBanner>}
+          {prSuccess && <FormBanner variant="success">Profile picture &amp; coverage updated</FormBanner>}
+
+          {/* Photo */}
+          <div className="flex items-center gap-5">
+            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-2 ring-accent-200/60">
+              {avatarUploading ? (
+                <div className="flex h-full w-full items-center justify-center bg-surface-secondary">
+                  <Loader2 size={20} className="animate-spin text-text-secondary" />
+                </div>
+              ) : resolveImageUrl(avatarUrl) ? (
+                <Image src={resolveImageUrl(avatarUrl) as string} alt="Profile" fill className="object-cover" sizes="80px" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-primary-100 font-heading text-xl font-bold text-primary-600">
+                  {(user?.fullName || user?.agentCode || "?").split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                </div>
+              )}
+            </div>
+            <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
+              onChange={handleAvatarUpload} />
+            <div className="flex gap-2.5">
+              <button
+                type="button"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={avatarUploading}
+                aria-busy={avatarUploading}
+                className="touch-target rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary disabled:opacity-50"
+              >
+                {avatarUrl ? "Change photo" : "Upload photo"}
+              </button>
+              {avatarUrl && (
+                <button
+                  type="button"
+                  onClick={handleAvatarRemove}
+                  className="touch-target rounded-lg border border-border px-4 py-2 text-sm font-medium text-error-600 transition-colors hover:bg-surface-secondary"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Regions */}
+          <div>
+            <label className="mb-1.5 block text-sm font-semibold text-text-primary">
+              Regions covered
+            </label>
+            <p className="mb-3 text-xs text-text-secondary">
+              Select all areas where you onboard clients.
+            </p>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {KENYA_REGIONS.map((region) => {
+                const active = selectedRegions.includes(region)
+                return (
+                  <button
+                    key={region}
+                    type="button"
+                    onClick={() => toggleRegion(region)}
+                    aria-pressed={active}
+                    className={`flex min-h-[44px] items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
+                      active
+                        ? "border-accent-300 bg-accent-300/10 text-accent-600"
+                        : "border-border text-text-secondary hover:border-accent-300/50"
+                    }`}
+                  >
+                    <MapPin size={12} className={active ? "text-accent-500" : "text-text-secondary"} />
+                    {region}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Specific area */}
+          <div>
+            <label htmlFor="specificArea" className="block text-sm font-medium text-text-primary">
+              Specific area <span className="font-normal text-text-secondary">(optional)</span>
+            </label>
+            <input
+              id="specificArea"
+              type="text"
+              value={specificArea}
+              onChange={(e) => setSpecificAreaState(e.target.value)}
+              placeholder="e.g. Mombasa / Diani"
+              maxLength={80}
+              className={inputClass}
+            />
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={handleProfileRegionSave}
+              disabled={prLoading || profileDataLoading}
+              aria-busy={prLoading}
+              className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-700 hover:shadow-md disabled:opacity-50"
+            >
+              {prLoading && <Loader2 size={16} className="animate-spin" />}
+              Save changes
+            </button>
+          </div>
+        </div>
 
         <form onSubmit={handleProfileUpdate} className="space-y-6 rounded-xl border border-border bg-surface p-6">
           <h2 className="font-heading text-lg font-semibold text-text-primary">Profile</h2>
