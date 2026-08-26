@@ -16,29 +16,56 @@ export default function AplRepsLoading() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="flex flex-col rounded-3xl border-2 border-accent-300/60 bg-surface p-5 sm:p-6">
-                <div className="flex gap-5 sm:gap-6">
-                  <div className="h-28 w-28 shrink-0 self-center rounded-full bg-surface-secondary animate-pulse sm:h-[150px] sm:w-[150px]" />
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
-                      <div className="h-6 w-44 rounded bg-surface-secondary animate-pulse" />
-                      <div className="h-4 w-28 rounded bg-surface-secondary animate-pulse" />
+                {/* Mobile skeleton */}
+                <div className="lg:hidden">
+                  <div className="mx-auto h-[130px] w-[130px] rounded-full border-2 border-accent-300/70 p-[3px]">
+                    <div className="h-full w-full rounded-full bg-surface-secondary animate-pulse" />
+                  </div>
+                  <div className="mt-4 h-6 w-56 rounded bg-surface-secondary animate-pulse" />
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className="h-5 w-40 rounded bg-surface-secondary animate-pulse" />
+                    <div className="h-8 w-28 rounded-full bg-surface-secondary animate-pulse" />
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <div className="h-8 w-20 rounded-full bg-surface-secondary animate-pulse" />
+                    <div className="h-8 w-28 rounded-full bg-surface-secondary animate-pulse" />
+                    <div className="h-8 w-24 rounded-full bg-surface-secondary animate-pulse" />
+                  </div>
+                  <div className="mt-4 border-t border-accent-300/60" />
+                  <div className="mt-4 flex items-center gap-4">
+                    <div className="h-14 w-14 shrink-0 rounded bg-surface-secondary animate-pulse" />
+                    <div className="grid flex-1 grid-cols-2 gap-x-3 gap-y-2.5">
+                      <div className="h-8 rounded-full bg-surface-secondary animate-pulse" />
+                      <div className="h-8 rounded-full bg-surface-secondary animate-pulse" />
+                      <div className="h-8 rounded-full bg-surface-secondary animate-pulse" />
+                      <div className="h-8 rounded-full bg-surface-secondary animate-pulse" />
                     </div>
-                    <div className="mt-2 h-4 w-40 rounded bg-surface-secondary animate-pulse" />
-                    <div className="mt-4 grid w-fit grid-cols-1 gap-2.5 sm:grid-cols-[auto_auto] sm:gap-x-5 sm:gap-y-3">
-                      <div className="h-9 w-32 rounded-full bg-surface-secondary animate-pulse" />
-                      <div className="h-9 w-32 rounded-full bg-surface-secondary animate-pulse" />
-                      <div className="h-9 w-24 rounded-full bg-surface-secondary animate-pulse" />
-                      <div className="h-9 w-28 rounded-full bg-surface-secondary animate-pulse" />
-                    </div>
-                    <div className="mt-5 border-t border-accent-300/50" />
                   </div>
                 </div>
-                <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
-                  <div className="h-10 w-44 shrink-0 rounded bg-surface-secondary animate-pulse" />
-                  <div className="flex flex-wrap gap-3">
-                    <div className="h-9 w-24 rounded-full bg-surface-secondary animate-pulse" />
-                    <div className="h-9 w-20 rounded-full bg-surface-secondary animate-pulse" />
-                    <div className="h-9 w-20 rounded-full bg-surface-secondary animate-pulse" />
+                {/* Desktop skeleton */}
+                <div className="hidden lg:flex gap-7">
+                  <div className="h-[150px] w-[150px] shrink-0 self-center rounded-full border-2 border-accent-300/70 p-[3px]">
+                    <div className="h-full w-full rounded-full bg-surface-secondary animate-pulse" />
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <div className="h-7 w-56 rounded bg-surface-secondary animate-pulse" />
+                    <div className="mt-2 h-5 w-44 rounded bg-surface-secondary animate-pulse" />
+                    <div className="mt-4 grid max-w-[320px] grid-cols-2 gap-x-4 gap-y-3">
+                      <div className="h-9 rounded-full bg-surface-secondary animate-pulse" />
+                      <div className="h-9 rounded-full bg-surface-secondary animate-pulse" />
+                      <div className="h-9 rounded-full bg-surface-secondary animate-pulse" />
+                      <div className="h-9 rounded-full bg-surface-secondary animate-pulse" />
+                    </div>
+                    <div className="mt-auto pt-5"><div className="border-t border-accent-300/60" /></div>
+                  </div>
+                </div>
+                <div className="mt-5 hidden lg:flex items-center gap-6">
+                  <div className="h-14 w-32 shrink-0 rounded bg-surface-secondary animate-pulse" />
+                  <div className="flex flex-1 flex-wrap gap-x-10 gap-y-3">
+                    <div className="h-8 w-24 rounded-full bg-surface-secondary animate-pulse" />
+                    <div className="h-8 w-20 rounded-full bg-surface-secondary animate-pulse" />
+                    <div className="h-8 w-20 rounded-full bg-surface-secondary animate-pulse" />
+                    <div className="h-8 w-24 rounded-full bg-surface-secondary animate-pulse" />
                   </div>
                 </div>
               </div>
