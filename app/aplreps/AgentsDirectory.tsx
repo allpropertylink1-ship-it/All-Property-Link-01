@@ -20,7 +20,7 @@ interface Agent {
   propertyCount: number
 }
 
-function WhatsAppIcon({ size = 15 }: { size?: number }) {
+function WhatsAppIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
       <path d="M12 2C6.48 2 2 6.14 2 11.27c0 2.92 1.45 5.55 3.72 7.25L5 22.1l3.85-1.74c.99.27 2.05.41 3.15.41 5.52 0 10-4.14 10-9.5S17.52 2 12 2z" />
@@ -38,6 +38,8 @@ function formatPhoneForWhatsApp(phone: string): string {
   if (digits.startsWith("+")) return digits.slice(1)
   return digits
 }
+
+const pillBase = "touch-target inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-colors"
 
 export function AgentsDirectory() {
   const [agents, setAgents] = useState<Agent[]>([])
@@ -73,7 +75,7 @@ export function AgentsDirectory() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div>
       <div className="mb-8">
         <input
           type="text" value={search} onChange={(e) => setSearch(e.target.value)}
@@ -85,78 +87,71 @@ export function AgentsDirectory() {
       {filtered.length === 0 ? (
         <div className="py-20 text-center text-sm text-text-secondary">No representatives found.</div>
       ) : (
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {filtered.map((agent) => {
             const photoUrl = resolveImageUrl(agent.avatar)
             const cities = agent.specificArea ? [...agent.regions, agent.specificArea] : agent.regions
             return (
-              <div key={agent.id} className="flex flex-col rounded-3xl border-2 border-accent-300/60 bg-surface p-6 transition-shadow hover:shadow-md sm:p-7">
-                <div className="flex gap-5 sm:gap-7">
-                  <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full ring-2 ring-accent-200/50 sm:h-[120px] sm:w-[120px]">
+              <div key={agent.id} className="flex flex-col rounded-3xl border-2 border-accent-300/60 bg-surface p-5 sm:p-6">
+                <div className="flex gap-5 sm:gap-6">
+                  <div className="relative h-28 w-28 shrink-0 self-center overflow-hidden rounded-full sm:h-[150px] sm:w-[150px]">
                     {photoUrl ? (
-                      <Image src={photoUrl} alt={agent.fullName} fill className="object-cover" sizes="120px" />
+                      <Image src={photoUrl} alt={agent.fullName} fill className="object-cover" sizes="150px" />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-primary-100 text-2xl font-bold text-primary-600">
+                      <div className="flex h-full w-full items-center justify-center bg-primary-100 text-3xl font-bold text-primary-600">
                         {initials(agent.fullName)}
                       </div>
                     )}
                   </div>
-                  <div className="flex min-w-0 flex-1 flex-col justify-center">
-                    <div className="flex items-baseline justify-between gap-4">
-                      <Link href={`/aplreps/${agent.id}`} className="truncate font-heading text-xl font-bold text-text-primary hover:text-primary-600 sm:text-2xl">
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+                      <Link href={`/aplreps/${agent.id}`} className="font-heading text-xl font-bold text-text-primary hover:text-primary-600 sm:text-2xl">
                         {agent.fullName}
                       </Link>
-                      <span className="shrink-0 text-xs text-text-secondary sm:text-sm">{agent.agentCode}</span>
+                      <span className="text-sm text-text-primary sm:text-base">{agent.agentCode}</span>
                     </div>
-                    <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-                      <p className="text-sm text-text-secondary">
-                        {agent._count.users} referral{agent._count.users !== 1 ? "s" : ""} | {agent.propertyCount} listing{agent.propertyCount !== 1 ? "s" : ""}
-                      </p>
-                      <Link
-                        href={`/aplreps/${agent.id}`}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-accent-300/60 px-4 py-1.5 text-sm font-medium text-text-primary transition-colors hover:bg-accent-300/10"
-                      >
-                        View profile <ExternalLink size={13} className="text-muted" />
-                      </Link>
-                    </div>
-                    <div className="mt-4 flex flex-wrap gap-2.5">
-                      {agent.phone && (
-                        <a href={`tel:${agent.phone}`}
-                          className="touch-target inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-5 py-2 text-sm font-medium text-primary-800 transition-colors hover:bg-primary-100"
-                        ><Phone size={15} />Call</a>
-                      )}
+                    <p className="mt-2 text-sm text-text-primary sm:text-base">
+                      {agent._count.users} referral{agent._count.users !== 1 ? "s" : ""} | {agent.propertyCount} listing{agent.propertyCount !== 1 ? "s" : ""}
+                    </p>
+                    <div className="mt-4 grid w-fit grid-cols-1 gap-2.5 sm:grid-cols-[auto_auto] sm:gap-x-5 sm:gap-y-3">
+                      <Link href={`/aplreps/${agent.id}`}
+                        className={`${pillBase} bg-rose-200 text-rose-950 hover:bg-rose-300`}
+                      >View profile <ExternalLink size={14} className="text-rose-900" /></Link>
                       {agent.phone && (
                         <a href={`https://wa.me/${formatPhoneForWhatsApp(agent.phone)}`} target="_blank" rel="noopener noreferrer"
-                          className="touch-target inline-flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-600"
+                          className={`${pillBase} bg-emerald-500 text-white hover:bg-emerald-600`}
                         ><WhatsAppIcon />WhatsApp</a>
+                      )}
+                      {agent.phone && (
+                        <a href={`tel:${agent.phone}`}
+                          className={`${pillBase} bg-primary-700 text-white hover:bg-primary-800`}
+                        ><Phone size={15} />Call</a>
                       )}
                       {agent.email && (
                         <a href={`mailto:${agent.email}`}
-                          className="touch-target inline-flex items-center gap-2 rounded-full bg-pink-100 px-5 py-2 text-sm font-medium text-pink-800 transition-colors hover:bg-pink-200"
-                        ><Mail size={15} className="text-pink-600" />E-Mail</a>
+                          className={`${pillBase} bg-rose-200 text-rose-950 hover:bg-rose-300`}
+                        ><Mail size={15} className="text-red-600" />E-Mail</a>
                       )}
                     </div>
+                    <div className="mt-5 border-t border-accent-300/50" />
                   </div>
                 </div>
                 {cities.length > 0 && (
-                  <>
-                    <div className="my-5 border-t border-border sm:my-6" />
-                    <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-                      <span className="inline-flex shrink-0 items-center gap-2.5 text-base font-medium text-text-primary">
-                        <Building2 size={22} className="text-primary-700" />
-                        Cities Covered
-                      </span>
-                      <div className="flex flex-wrap gap-2.5">
-                        {cities.map((c) => (
-                          <Link key={c} href={`/browse?region=${encodeURIComponent(c)}`}
-                            className="inline-flex items-center gap-1.5 rounded-full bg-pink-100 px-4 py-1.5 text-sm font-medium text-pink-800 transition-colors hover:bg-pink-200"
-                          >
-                            {c} <ExternalLink size={11} className="text-pink-500" />
-                          </Link>
-                        ))}
-                      </div>
+                  <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
+                    <span className="flex shrink-0 items-center gap-3">
+                      <Building2 size={44} className="text-primary-700" />
+                      <span className="text-base font-medium text-text-primary sm:text-lg">Cities Covered</span>
+                    </span>
+                    <div className="flex flex-wrap gap-3">
+                      {cities.map((c) => (
+                        <Link key={c} href={`/browse?region=${encodeURIComponent(c)}`}
+                          className="inline-flex items-center gap-2 rounded-full bg-rose-200/80 px-4 py-2 text-sm font-medium text-rose-950 transition-colors hover:bg-rose-200"
+                        >
+                          {c} <ExternalLink size={12} className="text-rose-700" />
+                        </Link>
+                      ))}
                     </div>
-                  </>
+                  </div>
                 )}
               </div>
             )
