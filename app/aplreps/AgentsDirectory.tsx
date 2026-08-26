@@ -20,9 +20,9 @@ interface Agent {
   propertyCount: number
 }
 
-function WhatsAppIcon() {
+function WhatsAppIcon({ size = 15 }: { size?: number }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
       <path d="M12 2C6.48 2 2 6.14 2 11.27c0 2.92 1.45 5.55 3.72 7.25L5 22.1l3.85-1.74c.99.27 2.05.41 3.15.41 5.52 0 10-4.14 10-9.5S17.52 2 12 2z" />
     </svg>
   )
@@ -72,10 +72,8 @@ export function AgentsDirectory() {
     )
   }
 
-  const hasCities = (agent: Agent) => agent.regions.length > 0 || !!agent.specificArea
-
   return (
-    <div>
+    <div className="mx-auto max-w-5xl">
       <div className="mb-8">
         <input
           type="text" value={search} onChange={(e) => setSearch(e.target.value)}
@@ -87,75 +85,75 @@ export function AgentsDirectory() {
       {filtered.length === 0 ? (
         <div className="py-20 text-center text-sm text-text-secondary">No representatives found.</div>
       ) : (
-        <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6">
           {filtered.map((agent) => {
             const photoUrl = resolveImageUrl(agent.avatar)
+            const cities = agent.specificArea ? [...agent.regions, agent.specificArea] : agent.regions
             return (
-              <div key={agent.id} className="flex flex-col rounded-2xl border-2 border-accent-200/60 bg-surface p-5 transition-shadow hover:shadow-md">
-                <div className="flex gap-5">
-                  <div className="relative h-[100px] w-[100px] shrink-0 overflow-hidden rounded-full ring-2 ring-accent-200/60">
+              <div key={agent.id} className="flex flex-col rounded-3xl border-2 border-accent-300/60 bg-surface p-6 transition-shadow hover:shadow-md sm:p-7">
+                <div className="flex gap-5 sm:gap-7">
+                  <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full ring-2 ring-accent-200/50 sm:h-[120px] sm:w-[120px]">
                     {photoUrl ? (
-                      <Image src={photoUrl} alt={agent.fullName} fill className="object-cover" sizes="100px" />
+                      <Image src={photoUrl} alt={agent.fullName} fill className="object-cover" sizes="120px" />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-primary-100 text-xl font-bold text-primary-600">
+                      <div className="flex h-full w-full items-center justify-center bg-primary-100 text-2xl font-bold text-primary-600">
                         {initials(agent.fullName)}
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 min-w-0 flex flex-col">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <Link href={`/aplreps/${agent.id}`} className="font-heading font-bold text-lg text-text-primary hover:text-primary-600 truncate">
+                  <div className="flex min-w-0 flex-1 flex-col justify-center">
+                    <div className="flex items-baseline justify-between gap-4">
+                      <Link href={`/aplreps/${agent.id}`} className="truncate font-heading text-xl font-bold text-text-primary hover:text-primary-600 sm:text-2xl">
                         {agent.fullName}
                       </Link>
-                      <span className="text-xs text-muted shrink-0">{agent.agentCode}</span>
+                      <span className="shrink-0 text-xs text-text-secondary sm:text-sm">{agent.agentCode}</span>
                     </div>
-                    <p className="mt-1 text-sm text-text-secondary">
-                      {agent._count.users} referral{agent._count.users !== 1 ? "s" : ""} · {agent.propertyCount} listing{agent.propertyCount !== 1 ? "s" : ""}
-                    </p>
-                    <Link
-                      href={`/aplreps/${agent.id}`}
-                      className="mt-2 self-end text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
-                    >
-                      View profile <ExternalLink size={13} className="ml-1" />
-                    </Link>
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                      <p className="text-sm text-text-secondary">
+                        {agent._count.users} referral{agent._count.users !== 1 ? "s" : ""} | {agent.propertyCount} listing{agent.propertyCount !== 1 ? "s" : ""}
+                      </p>
+                      <Link
+                        href={`/aplreps/${agent.id}`}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-accent-300/60 px-4 py-1.5 text-sm font-medium text-text-primary transition-colors hover:bg-accent-300/10"
+                      >
+                        View profile <ExternalLink size={13} className="text-muted" />
+                      </Link>
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-2.5">
                       {agent.phone && (
-                        <>
-                          <a href={`tel:${agent.phone}`}
-                            className="inline-flex items-center gap-2 rounded-full bg-primary-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-700 transition-colors touch-target"
-                          ><Phone size={13} />Call</a>
-                          <a href={`https://wa.me/${formatPhoneForWhatsApp(agent.phone)}`} target="_blank" rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-600 transition-colors touch-target"
-                          ><WhatsAppIcon />WhatsApp</a>
-                        </>
+                        <a href={`tel:${agent.phone}`}
+                          className="touch-target inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-5 py-2 text-sm font-medium text-primary-800 transition-colors hover:bg-primary-100"
+                        ><Phone size={15} />Call</a>
+                      )}
+                      {agent.phone && (
+                        <a href={`https://wa.me/${formatPhoneForWhatsApp(agent.phone)}`} target="_blank" rel="noopener noreferrer"
+                          className="touch-target inline-flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-600"
+                        ><WhatsAppIcon />WhatsApp</a>
                       )}
                       {agent.email && (
                         <a href={`mailto:${agent.email}`}
-                          className="inline-flex items-center gap-2 rounded-full bg-pink-100 px-4 py-1.5 text-sm font-medium text-pink-700 hover:bg-pink-200 transition-colors touch-target"
-                        ><Mail size={13} />E-Mail</a>
+                          className="touch-target inline-flex items-center gap-2 rounded-full bg-pink-100 px-5 py-2 text-sm font-medium text-pink-800 transition-colors hover:bg-pink-200"
+                        ><Mail size={15} className="text-pink-600" />E-Mail</a>
                       )}
                     </div>
                   </div>
                 </div>
-                {hasCities(agent) && (
+                {cities.length > 0 && (
                   <>
-                    <hr className="border-t border-border my-4" />
-                    <div className="flex items-start gap-3">
-                      <div className="inline-flex items-center gap-1.5 shrink-0 text-sm font-medium text-text-secondary whitespace-nowrap">
-                        <Building2 size={14} className="text-primary-600" />
+                    <div className="my-5 border-t border-border sm:my-6" />
+                    <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+                      <span className="inline-flex shrink-0 items-center gap-2.5 text-base font-medium text-text-primary">
+                        <Building2 size={22} className="text-primary-700" />
                         Cities Covered
-                      </div>
-                      <div className="flex-1 flex flex-wrap gap-2">
-                        {agent.regions.map((r) => (
-                          <Link key={r} href={`/browse?region=${encodeURIComponent(r)}`} className="inline-flex items-center gap-1 rounded-full bg-pink-100 px-3 py-1 text-xs font-medium text-pink-700 hover:bg-pink-200 transition-colors">
-                            {r} <ExternalLink size={10} />
+                      </span>
+                      <div className="flex flex-wrap gap-2.5">
+                        {cities.map((c) => (
+                          <Link key={c} href={`/browse?region=${encodeURIComponent(c)}`}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-pink-100 px-4 py-1.5 text-sm font-medium text-pink-800 transition-colors hover:bg-pink-200"
+                          >
+                            {c} <ExternalLink size={11} className="text-pink-500" />
                           </Link>
                         ))}
-                        {agent.specificArea && (
-                          <Link href={`/browse?region=${encodeURIComponent(agent.specificArea)}`} className="inline-flex items-center gap-1 rounded-full bg-pink-100 px-3 py-1 text-xs font-medium text-pink-700 hover:bg-pink-200 transition-colors">
-                            {agent.specificArea} <ExternalLink size={10} />
-                          </Link>
-                        )}
                       </div>
                     </div>
                   </>

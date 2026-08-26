@@ -12,36 +12,42 @@ export default function AplRepsLoading() {
 
       <section className="py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-4">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="flex flex-col rounded-2xl border-2 border-accent-200/60 bg-surface p-5">
-                <div className="flex gap-5">
-                  <div className="h-[100px] w-[100px] shrink-0 rounded-full bg-surface-secondary animate-pulse" />
-                  <div className="flex-1 min-w-0 flex flex-col">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <div className="h-5 w-3/4 rounded bg-surface-secondary animate-pulse" />
-                      <div className="h-4 w-24 rounded bg-surface-secondary animate-pulse shrink-0" />
+          <div className="mx-auto max-w-5xl">
+            <div className="mb-8 h-11 w-full max-w-md rounded-xl bg-surface-secondary animate-pulse" />
+            <div className="grid grid-cols-1 gap-6">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex flex-col rounded-3xl border-2 border-accent-300/60 bg-surface p-6 sm:p-7">
+                  <div className="flex gap-5 sm:gap-7">
+                    <div className="h-24 w-24 shrink-0 rounded-full bg-surface-secondary animate-pulse sm:h-[120px] sm:w-[120px]" />
+                    <div className="flex min-w-0 flex-1 flex-col justify-center">
+                      <div className="flex items-baseline justify-between gap-4">
+                        <div className="h-6 w-56 rounded bg-surface-secondary animate-pulse" />
+                        <div className="h-4 w-32 shrink-0 rounded bg-surface-secondary animate-pulse" />
+                      </div>
+                      <div className="mt-2 flex items-center justify-between gap-4">
+                        <div className="h-4 w-44 rounded bg-surface-secondary animate-pulse" />
+                        <div className="h-8 w-32 rounded-full bg-surface-secondary animate-pulse" />
+                      </div>
+                      <div className="mt-4 flex gap-2.5">
+                        <div className="h-9 w-24 rounded-full bg-surface-secondary animate-pulse" />
+                        <div className="h-9 w-32 rounded-full bg-surface-secondary animate-pulse" />
+                        <div className="h-9 w-28 rounded-full bg-surface-secondary animate-pulse" />
+                      </div>
                     </div>
-                    <div className="mt-1 h-3 w-1/2 rounded bg-surface-secondary animate-pulse" />
-                    <div className="mt-2 self-end h-4 w-32 rounded bg-surface-secondary animate-pulse" />
-                    <div className="mt-3 flex flex-wrap gap-2">
+                  </div>
+                  <div className="my-5 border-t border-border sm:my-6" />
+                  <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+                    <div className="h-5 w-36 shrink-0 rounded bg-surface-secondary animate-pulse" />
+                    <div className="flex flex-wrap gap-2.5">
+                      <div className="h-8 w-24 rounded-full bg-surface-secondary animate-pulse" />
+                      <div className="h-8 w-20 rounded-full bg-surface-secondary animate-pulse" />
                       <div className="h-8 w-20 rounded-full bg-surface-secondary animate-pulse" />
                       <div className="h-8 w-28 rounded-full bg-surface-secondary animate-pulse" />
-                      <div className="h-8 w-24 rounded-full bg-surface-secondary animate-pulse" />
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 flex items-start gap-3 animate-pulse">
-                  <div className="h-5 w-28 rounded bg-surface-secondary shrink-0" />
-                  <div className="flex-1 flex flex-wrap gap-2">
-                    <div className="h-6 w-24 rounded-full bg-surface-secondary" />
-                    <div className="h-6 w-20 rounded-full bg-surface-secondary" />
-                    <div className="h-6 w-28 rounded-full bg-surface-secondary" />
-                    <div className="h-6 w-22 rounded-full bg-surface-secondary" />
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
