@@ -5,7 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { api } from "@/lib/api-client"
 import { resolveImageUrl } from "@/lib/images"
-import { Loader2, AlertCircle, Phone, Mail, Building2, ExternalLink } from "@/components/ui/icons"
+import { Loader2, AlertCircle, Phone, Mail, CitiesCovered, ExternalLink } from "@/components/ui/icons"
 
 interface Agent {
   id: string
@@ -160,7 +160,7 @@ export function AgentsDirectory() {
                       <div className="mt-4 border-t border-accent-300/60" />
                       <div className="mt-4 flex items-center gap-4">
                         <div className="flex shrink-0 flex-col items-center gap-1">
-                          <Building2 size={40} className="text-text-primary" />
+                          <CitiesCovered size={40} className="text-text-primary" />
                           <span className="text-xs font-medium leading-tight text-text-primary">Cities Covered</span>
                         </div>
                         <div className="grid flex-1 grid-cols-2 gap-x-3 gap-y-2.5">
@@ -215,7 +215,7 @@ export function AgentsDirectory() {
                 {cities.length > 0 && (
                   <div className="mt-5 hidden lg:flex items-center gap-6">
                     <div className="flex shrink-0 items-center gap-3">
-                      <Building2 size={52} className="text-text-primary" />
+                      <CitiesCovered size={52} className="text-text-primary" />
                       <span className="max-w-[72px] text-[17px] leading-snug text-text-primary">Cities Covered</span>
                     </div>
                     <div className="flex flex-1 flex-wrap gap-x-10 gap-y-3">
