@@ -10,8 +10,8 @@ import { RegisterForm } from "./RegisterForm"
 import { cn } from "@/lib/utils"
 
 const tabs = [
-  { id: "user", label: "User Login" },
-  { id: "agent", label: "APL Representative" },
+  { id: "user", label: "User Login", description: "For property owners, buyers, renters" },
+  { id: "agent", label: "APL Representative", description: "For APL reps to manage referrals & claims" },
 ] as const
 
 const SWEEP_MS = 650
@@ -43,13 +43,14 @@ function LoginContent({
               type="button"
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                "flex-1 rounded-md px-4 py-1.5 text-sm font-medium transition-all duration-150",
+                "flex-1 rounded-md px-4 py-3 text-sm font-medium transition-all duration-150 text-left",
                 activeTab === tab.id
                   ? "bg-surface text-text-primary shadow-sm"
                   : "text-text-secondary hover:text-text-primary"
               )}
             >
-              {tab.label}
+              <span className="block font-medium">{tab.label}</span>
+              <span className="block mt-0.5 text-[11px] text-muted">{tab.description}</span>
             </button>
           ))}
         </div>
