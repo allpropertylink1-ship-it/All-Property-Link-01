@@ -6,6 +6,7 @@ import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
 import { uploadImage } from "@/lib/image-client"
 import { Loader2, Link as LinkIcon, Copy, Check, MapPin } from "@/components/ui/icons"
+import ImageCropper from "@/components/kyc/ImageCropper"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { AgentGuard } from "@/components/dashboard/AgentGuard"
 import { resolveImageUrl } from "@/lib/images"
@@ -43,6 +44,8 @@ export default function AgentSettingsPage() {
   const [prLoading, setPrLoading] = useState(false)
   const [prError, setPrError] = useState("")
   const [prSuccess, setPrSuccess] = useState(false)
+  const [cropping, setCropping] = useState(false)
+  const [cropImageUrl, setCropImageUrl] = useState<string | null>(null)
   const avatarInputRef = useRef<HTMLInputElement>(null)
 
   async function handleProfileUpdate(e: React.FormEvent) {
@@ -120,10 +123,18 @@ export default function AgentSettingsPage() {
     const file = e.target.files?.[0]
     if (!file) return
     e.target.value = ""
+    setPrError("")
+    const url = URL.createObjectURL(file)
+    setCropImageUrl(url)
+    setCropping(true)
+  }
+
+  async function handleCropComplete(croppedBlob: Blob) {
+    setCropping(false)
     setAvatarUploading(true)
     setPrError("")
     try {
-      const url = await uploadImage(file, "avatars", { maxDimension: 400, quality: 0.85 })
+      const url = await uploadImage(new File([croppedBlob], "avatar.jpg", { type: "image/jpeg" }), "avatars", { maxDimension: 400, quality: 0.85 })
       const { error } = await api.patch("/api/apl-agents/profile", { avatar: url })
       if (error) throw new Error(error)
       setAvatarUrl(url)
@@ -132,6 +143,12 @@ export default function AgentSettingsPage() {
     } finally {
       setAvatarUploading(false)
     }
+  }
+
+  function handleCropCancel() {
+    setCropping(false)
+    if (cropImageUrl) URL.revokeObjectURL(cropImageUrl)
+    setCropImageUrl(null)
   }
 
   async function handleAvatarRemove() {
@@ -372,6 +389,15 @@ export default function AgentSettingsPage() {
             </button>
           </div>
         </form>
+
+      {cropping && cropImageUrl && (
+        <ImageCropper
+          imageUrl={cropImageUrl}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+          sideLabel="Profile Picture"
+        />
+      )}
       </div>
     </AgentGuard>
   )
