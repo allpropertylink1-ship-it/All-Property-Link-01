@@ -1,12 +1,13 @@
 "use client"
 
-import Link from "next/link";
-import Image from "next/image";
-import { useAuth } from "@/lib/auth-context";
-import { Briefcase } from "@/components/ui/icons";
-import dynamic from "next/dynamic";
+import { useState } from "react"
+import Link from "next/link"
+import Image from "next/image"
+import { useAuth } from "@/lib/auth-context"
+import { Briefcase, Menu, X } from "@/components/ui/icons"
+import dynamic from "next/dynamic"
 
-const ClientProfileButton = dynamic(() => import("./ProfileButton").then(mod => mod.ProfileButton), { ssr: false });
+const ClientProfileButton = dynamic(() => import("./ProfileButton").then(mod => mod.ProfileButton), { ssr: false })
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -16,11 +17,12 @@ const navLinks = [
   { href: "/properties?type=LAND", label: "Plots & Land" },
   { href: "/aplreps", label: "Reps" },
   { href: "/about", label: "About" },
-];
+]
 
 export function Navbar() {
   const { user } = useAuth()
   const isAgent = user?.authMethod === "agent"
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-surface backdrop-blur">
@@ -36,6 +38,18 @@ export function Navbar() {
           />
         </Link>
 
+        {/* Mobile hamburger button */}
+        <button
+          type="button"
+          className="touch-target lg:hidden flex items-center justify-center p-2"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileOpen}
+        >
+          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
+        {/* Desktop navigation */}
         <div className="hidden items-center gap-6 md:flex">
           {navLinks.map((link) => (
             <Link
@@ -57,10 +71,53 @@ export function Navbar() {
           )}
         </div>
 
+        {/* Mobile navigation drawer */}
+        {mobileOpen && (
+          <>
+            <div className="fixed inset-0 z-40 lg:hidden">
+              <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
+              <div className="absolute right-0 top-0 h-full w-72 max-w-full bg-surface border-l border-border shadow-xl overflow-y-auto">
+                <div className="flex h-16 items-center justify-between border-b border-border px-4">
+                  <span className="font-semibold text-text-primary">Navigation</span>
+                  <button
+                    type="button"
+                    className="touch-target p-2"
+                    onClick={() => setMobileOpen(false)}
+                    aria-label="Close menu"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+                <nav className="p-4 space-y-2">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.label}
+                      href={link.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="touch-target flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium text-text-primary transition-colors hover:bg-surface-secondary"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                  {isAgent && (
+                    <Link
+                      href="/dashboard/agent"
+                      onClick={() => setMobileOpen(false)}
+                      className="touch-target flex items-center gap-3 rounded-lg bg-primary-600 px-4 py-3 text-base font-medium text-white"
+                    >
+                      <Briefcase size={20} />
+                      Agent Dashboard
+                    </Link>
+                  )}
+                </nav>
+              </div>
+            </div>
+          </>
+        )}
+
         <div className="flex items-center gap-1">
           <ClientProfileButton />
         </div>
-
       </div>
     </nav>
   );

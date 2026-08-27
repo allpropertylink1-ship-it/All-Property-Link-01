@@ -136,15 +136,15 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
   const agentLogoUrl = property.agent ? resolveImageUrl(property.agent.businessLogo) ?? undefined : undefined;
 
   return (
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
-        <div className="grid gap-6 lg:gap-8 lg:grid-cols-[240px_1fr_280px] xl:grid-cols-[260px_1fr_300px]">
+      <div className="mx-auto max-w-7xl px-4 py-4 sm:py-6">
+        <div className="grid gap-4 sm:gap-6 lg:gap-6 lg:grid-cols-[280px_1fr] xl:grid-cols-[300px_1fr_320px]">
 
           {/* ─── LEFT SIDEBAR ─── */}
-          <aside className="hidden lg:block space-y-5">
+          <aside className="lg:order-1 order-2 lg:col-span-1 space-y-5">
             {property.agent && (
               <>
-                <div className="rounded-xl border border-border bg-surface p-5">
-                  <div className="flex items-center gap-3.5 mb-4">
+                <div className="rounded-xl border border-border bg-surface p-4 lg:p-5">
+                  <div className="flex items-center gap-3 mb-4">
                     {property.agent.avatar ? (
                       <Image
                         src={agentAvatarUrl as string} unoptimized
@@ -191,7 +191,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                   {sellerReviews && sellerReviews.total > 0 && (
                     <Link
                       href={`/profiles/${property.agent.id}`}
-                      className="group/badge mb-1 block rounded-xl border border-border bg-surface-secondary/60 px-3.5 py-3 transition-all hover:border-accent-300 hover:bg-surface"
+                      className="group/badge mb-1 block rounded-xl border border-border bg-surface-secondary/60 px-3 py-2.5 transition-all hover:border-accent-300 hover:bg-surface"
                     >
                       <div className="flex items-center justify-between">
                         <span className="inline-flex items-center gap-1.5">
@@ -248,7 +248,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
           </aside>
 
           {/* ─── CENTER ─── */}
-          <div className="min-w-0 space-y-5">
+          <div className="lg:order-2 order-1 lg:col-span-2 xl:col-span-1 min-w-0 space-y-5">
             <PropertyGallery images={imageUrls} title={property.title} />
 
             <div>
@@ -398,42 +398,42 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {property.agent.phone && (
-                    <>
+{property.agent.phone && (
+                      <>
+                        <a
+                          href={`https://wa.me/${property.agent.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="touch-target flex items-center gap-1.5 rounded-lg bg-[#25D366] px-3 py-3 text-xs font-semibold text-white"
+                        >
+                          <MessageCircle size={14} />
+                          WhatsApp
+                        </a>
+                        <a
+                          href={`tel:${property.agent.phone}`}
+                          className="touch-target flex items-center gap-1.5 rounded-lg border border-border px-3 py-3 text-xs font-semibold text-text-primary"
+                        >
+                          <Phone size={14} />
+                          Call
+                        </a>
+                      </>
+                    )}
+                    {property.agent.email && (
                       <a
-                        href={`https://wa.me/${property.agent.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 rounded-lg bg-[#25D366] px-3 py-3 text-xs font-semibold text-white"
+                        href={`mailto:${property.agent.email}`}
+                        className="touch-target flex items-center gap-1.5 rounded-lg border border-border px-3 py-3 text-xs font-semibold text-text-primary"
                       >
-                        <MessageCircle size={14} />
-                        WhatsApp
+                        <Mail size={14} />
+                        Email
                       </a>
-                      <a
-                        href={`tel:${property.agent.phone}`}
-                        className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-3 text-xs font-semibold text-text-primary"
-                      >
-                        <Phone size={14} />
-                        Call
-                      </a>
-                    </>
-                  )}
-                  {property.agent.email && (
-                    <a
-                      href={`mailto:${property.agent.email}`}
-                      className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-3 text-xs font-semibold text-text-primary"
-                    >
-                      <Mail size={14} />
-                      Email
-                    </a>
-                  )}
+                    )}
                 </div>
               </div>
             )}
           </div>
 
           {/* ─── RIGHT SIDEBAR ─── */}
-          <aside className="hidden lg:block space-y-5">
+          <aside className="hidden lg:block lg:order-3 xl:order-2 xl:col-span-1 space-y-5">
             {property.agent && (
               <>
                 <div className="rounded-xl border border-border bg-surface p-5">
@@ -445,14 +445,14 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                           href={`https://wa.me/${property.agent.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1ebe5c]"
+                          className="touch-target flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1ebe5c]"
                         >
                           <MessageCircle size={16} />
                           WhatsApp
                         </a>
                         <a
                           href={`tel:${property.agent.phone}`}
-                          className="flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
+                          className="touch-target flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
                         >
                           <Phone size={16} />
                           {property.agent.phone}
@@ -462,7 +462,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                     {property.agent.email && (
                       <a
                         href={`mailto:${property.agent.email}`}
-                        className="flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
+                        className="touch-target flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
                       >
                         <Mail size={16} />
                         {property.agent.email}

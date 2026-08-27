@@ -104,13 +104,14 @@ export function BottomNav() {
 
   return (
     <>
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] md:hidden" role="navigation" aria-label="Bottom navigation">
         <div className="flex items-center justify-around">
           <Link
             href="/"
-            className="flex flex-col items-center gap-0.5 py-2 flex-1"
+            className="touch-target flex flex-col items-center gap-0.5 py-3 flex-1"
+            aria-current={homeActive ? "page" : undefined}
           >
-            <div className={`flex h-6 w-6 items-center justify-center ${homeActive ? "text-accent-300" : "text-text-secondary"}`}>
+            <div className={`flex h-7 w-7 items-center justify-center ${homeActive ? "text-accent-300" : "text-text-secondary"}`}>
               <HomeIcon />
             </div>
             <span className={`text-[10px] font-medium ${homeActive ? "text-accent-300" : "text-text-secondary"}`}>
@@ -121,9 +122,12 @@ export function BottomNav() {
           <button
             type="button"
             onClick={() => setBrowseOpen(true)}
-            className="flex flex-col items-center gap-0.5 py-2 flex-1"
+            className="touch-target flex flex-col items-center gap-0.5 py-3 flex-1"
+            aria-label="Browse categories"
+            aria-expanded={browseOpen}
+            aria-controls="browse-modal"
           >
-            <div className="flex h-6 w-6 items-center justify-center text-text-secondary">
+            <div className="flex h-7 w-7 items-center justify-center text-text-secondary">
               <BrowseIcon />
             </div>
             <span className="text-[10px] font-medium text-text-secondary">
@@ -133,9 +137,9 @@ export function BottomNav() {
 
           <Link
             href={user ? "/dashboard" : "/auth/login"}
-            className="flex flex-col items-center gap-0.5 py-2 flex-1"
+            className="touch-target flex flex-col items-center gap-0.5 py-3 flex-1"
           >
-            <div className={`flex h-6 w-6 items-center justify-center ${user && pathname.startsWith("/dashboard") ? "text-accent-300" : "text-text-secondary"}`}>
+            <div className={`flex h-7 w-7 items-center justify-center ${user && pathname.startsWith("/dashboard") ? "text-accent-300" : "text-text-secondary"}`}>
               <UserIcon />
             </div>
             <span className={`text-[10px] font-medium ${user && pathname.startsWith("/dashboard") ? "text-accent-300" : "text-text-secondary"}`}>
@@ -146,15 +150,16 @@ export function BottomNav() {
       </nav>
 
       {browseOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center md:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setBrowseOpen(false)} />
+        <div className="fixed inset-0 z-50 flex items-end justify-center md:hidden" role="dialog" aria-modal="true" aria-labelledby="browse-modal-title" id="browse-modal">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setBrowseOpen(false)} aria-hidden="true" />
           <div className="relative w-full max-w-sm rounded-t-2xl bg-surface px-6 pb-8 pt-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-base font-semibold text-text-primary">Browse Categories</h2>
+              <h2 id="browse-modal-title" className="text-base font-semibold text-text-primary">Browse Categories</h2>
               <button
                 type="button"
                 onClick={() => setBrowseOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary hover:bg-surface-secondary"
+                className="touch-target flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary hover:bg-surface-secondary"
+                aria-label="Close browse categories"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
                   <line x1="18" y1="6" x2="6" y2="18" />
@@ -168,7 +173,7 @@ export function BottomNav() {
                   key={cat.href}
                   href={cat.href}
                   onClick={() => setBrowseOpen(false)}
-                  className="flex flex-col items-center gap-2 rounded-xl border border-border bg-surface-secondary p-4 text-sm font-medium text-text-primary transition-colors hover:border-accent-300 hover:bg-accent-50"
+                  className="touch-target flex flex-col items-center gap-2 rounded-xl border border-border bg-surface-secondary p-4 text-sm font-medium text-text-primary transition-colors hover:border-accent-300 hover:bg-accent-50"
                 >
                   <cat.icon />
                   <span className="text-center text-xs">{cat.label}</span>

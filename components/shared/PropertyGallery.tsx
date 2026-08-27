@@ -24,6 +24,7 @@ export function PropertyGallery({ images: rawImages, title }: Props) {
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [paused, setPaused] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
 
   const goTo = useCallback((i: number) => {
     setCurrent(i);
@@ -50,6 +51,21 @@ export function PropertyGallery({ images: rawImages, title }: Props) {
   const lbPrev = useCallback(() => {
     setLightboxIndex((p) => (p - 1 + images.length) % images.length);
   }, [images.length]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientX);
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStart === null) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) next();
+      else prev();
+    }
+    setTouchStart(null);
+  }, [touchStart, next, prev]);
 
   useEffect(() => {
     if (images.length <= 1 || paused) return;
@@ -78,6 +94,8 @@ export function PropertyGallery({ images: rawImages, title }: Props) {
         onMouseLeave={() => setPaused(false)}
         onFocus={() => setPaused(true)}
         onBlur={() => setPaused(false)}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
         {/* Main image */}
         <div className="relative overflow-hidden rounded-lg" style={{ aspectRatio: "4 / 3" }}>
@@ -97,7 +115,7 @@ export function PropertyGallery({ images: rawImages, title }: Props) {
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); prev(); }}
-className="pointer-events-auto absolute left-2 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touch items-center justify-center rounded-full bg-black/45 text-white transition-colors hover:bg-black/65"
+              className="pointer-events-auto absolute left-2 top-1/2 -translate-y-1/2 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-black/45 text-white transition-colors hover:bg-black/65"
               aria-label="Previous image"
             >
               <ChevronLeft size={22} />
@@ -105,7 +123,7 @@ className="pointer-events-auto absolute left-2 top-1/2 -translate-y-1/2 flex min
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); next(); }}
-className="pointer-events-auto absolute right-2 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touch items-center justify-center rounded-full bg-black/45 text-white transition-colors hover:bg-black/65"
+              className="pointer-events-auto absolute right-2 top-1/2 -translate-y-1/2 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-black/45 text-white transition-colors hover:bg-black/65"
               aria-label="Next image"
             >
               <ChevronRight size={22} />
@@ -119,7 +137,7 @@ className="pointer-events-auto absolute right-2 top-1/2 -translate-y-1/2 flex mi
           <button
             type="button"
             onClick={() => openLightbox(current)}
-className="absolute bottom-2 right-2 flex min-h-touch min-w-touch items-center justify-center rounded-md bg-black/55 text-white transition-colors hover:bg-black/75"
+            className="absolute bottom-2 right-2 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md bg-black/55 text-white transition-colors hover:bg-black/75"
             aria-label="View full-screen"
           >
             <Expand size={14} />
@@ -130,7 +148,7 @@ className="absolute bottom-2 right-2 flex min-h-touch min-w-touch items-center j
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); prev(); }}
-className="absolute left-1 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touch items-center justify-center rounded-full bg-black/45 text-white"
+              className="absolute left-1 top-1/2 -translate-y-1/2 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-black/45 text-white"
               aria-label="Previous image"
             >
               <ChevronLeft size={20} />
@@ -138,7 +156,7 @@ className="absolute left-1 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touch
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); next(); }}
-className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touch items-center justify-center rounded-full bg-black/45 text-white"
+              className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-black/45 text-white"
               aria-label="Next image"
             >
               <ChevronRight size={20} />
@@ -154,12 +172,11 @@ className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touc
                 key={i}
                 type="button"
                 onClick={() => goTo(i)}
-                className={`relative shrink-0 overflow-hidden rounded-md border-2 transition-all ${
+                className={`relative shrink-0 overflow-hidden rounded-md border-2 transition-all min-h-[56px] min-w-[72px] ${
                   i === current
                     ? "border-primary-500 ring-1 ring-primary-500"
                     : "border-transparent opacity-55 hover:opacity-100"
                 }`}
-                style={{ width: 72, height: 54 }}
                 aria-label={`View image ${i + 1}`}
               >
                 <img src={url} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }} />
@@ -171,52 +188,52 @@ className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-touch min-w-touc
 
       {/* Lightbox */}
       <Dialog open={showLightbox} onOpenChange={setShowLightbox}>
-<DialogContent
-          className="fixed inset-0 z-50 flex h-full w-full max-w-none translate-x-0 translate-y-0 items-center justify-center bg-black/90 p-0 text-white ring-0 sm:max-w-none"
-          showCloseButton={false}
-        >
-          <DialogTitle className="sr-only">{title} — image {lightboxIndex + 1} of {images.length}</DialogTitle>
-
-          <button
-            type="button"
-            onClick={() => setShowLightbox(false)}
-className="absolute right-4 top-4 z-10 flex min-h-touch min-w-touch items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
-            aria-label="Close"
+      <DialogContent
+            className="fixed inset-0 z-50 flex h-full w-full max-w-none translate-x-0 translate-y-0 items-center justify-center bg-black/90 p-0 text-white ring-0 sm:max-w-none"
+            showCloseButton={false}
           >
-            <X size={22} />
-          </button>
+            <DialogTitle className="sr-only">{title} — image {lightboxIndex + 1} of {images.length}</DialogTitle>
 
-          <span className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 rounded-md bg-black/50 px-3 py-1.5 text-sm font-medium text-white">
-            {lightboxIndex + 1} / {images.length}
-          </span>
+            <button
+              type="button"
+              onClick={() => setShowLightbox(false)}
+              className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
+              aria-label="Close"
+            >
+              <X size={22} />
+            </button>
 
-          <button
-            type="button"
-            onClick={lbPrev}
-            className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/60"
-            aria-label="Previous image"
-          >
-            <ChevronLeft size={28} />
-          </button>
-          <button
-            type="button"
-            onClick={lbNext}
-            className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/60"
-            aria-label="Next image"
-          >
-            <ChevronRight size={28} />
-          </button>
+            <span className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 rounded-md bg-black/50 px-3 py-1.5 text-sm font-medium text-white">
+              {lightboxIndex + 1} / {images.length}
+            </span>
 
-          <div className="flex h-full w-full items-center justify-center p-4">
-            <img
-              src={images[lightboxIndex]}
-              alt={`${title} — image ${lightboxIndex + 1}`}
-              className="max-h-full max-w-full rounded-lg object-contain"
-              onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_GALLERY }}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
+            <button
+              type="button"
+              onClick={lbPrev}
+              className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/60"
+              aria-label="Previous image"
+            >
+              <ChevronLeft size={28} />
+            </button>
+            <button
+              type="button"
+              onClick={lbNext}
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/60"
+              aria-label="Next image"
+            >
+              <ChevronRight size={28} />
+            </button>
+
+            <div className="flex h-full w-full items-center justify-center p-4">
+              <img
+                src={images[lightboxIndex]}
+                alt={`${title} — image ${lightboxIndex + 1}`}
+                className="max-h-full max-w-full rounded-lg object-contain"
+                onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_GALLERY }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
     </>
   );
 }

@@ -3,11 +3,11 @@ import Link from "next/link";
 export function Footer() {
   return (
     <footer className="border-t border-border bg-surface">
-      <div className="mx-auto max-w-content px-4 py-12 md:py-16">
-        <div className="mb-8 md:mb-12">
+      <div className="mx-auto max-w-content px-4 py-10 sm:py-12 md:py-16">
+        <div className="mb-6 md:mb-10">
           <Link
             href="/"
-            className="font-heading text-lg font-bold tracking-tight text-primary md:text-xl"
+            className="font-heading text-lg font-bold tracking-tight text-primary sm:text-xl"
           >
             All Property{" "}
             <span className="text-accent-300">Link</span>
@@ -23,11 +23,11 @@ export function Footer() {
             <h3 className="mb-4 font-heading text-sm font-semibold text-primary">
               Browse
             </h3>
-            <ul className="space-y-2 text-sm text-secondary">
+            <ul className="space-y-3 text-sm text-secondary">
               <li>
                 <Link
                   href="/properties"
-                  className="transition-colors hover:text-primary"
+                  className="touch-target inline-block py-1.5 transition-colors hover:text-primary"
                 >
                   Properties
                 </Link>
@@ -35,7 +35,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/properties?purpose=FOR_RENT_SHORT_TERM"
-                  className="transition-colors hover:text-primary"
+                  className="touch-target inline-block py-1.5 transition-colors hover:text-primary"
                 >
                   Airbnbs
                 </Link>
@@ -43,7 +43,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/services?type=FUNDI"
-                  className="transition-colors hover:text-primary"
+                  className="touch-target inline-block py-1.5 transition-colors hover:text-primary"
                 >
                   Fundis
                 </Link>
@@ -51,7 +51,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/services?type=SERVICE_PROVIDER"
-                  className="transition-colors hover:text-primary"
+                  className="touch-target inline-block py-1.5 transition-colors hover:text-primary"
                 >
                   Services
                 </Link>
@@ -59,7 +59,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/properties?type=LAND"
-                  className="transition-colors hover:text-primary"
+                  className="touch-target inline-block py-1.5 transition-colors hover:text-primary"
                 >
                   Plots & Land
                 </Link>
@@ -71,11 +71,11 @@ export function Footer() {
             <h3 className="mb-4 font-heading text-sm font-semibold text-primary">
               Company
             </h3>
-            <ul className="space-y-2 text-sm text-secondary">
+            <ul className="space-y-3 text-sm text-secondary">
               <li>
                 <Link
                   href="/about"
-                  className="transition-colors hover:text-primary"
+                  className="touch-target inline-block py-1.5 transition-colors hover:text-primary"
                 >
                   About
                 </Link>
@@ -83,7 +83,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/contact"
-                  className="transition-colors hover:text-primary"
+                  className="touch-target inline-block py-1.5 transition-colors hover:text-primary"
                 >
                   Contact
                 </Link>
@@ -91,7 +91,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/privacy"
-                  className="transition-colors hover:text-primary"
+                  className="touch-target inline-block py-1.5 transition-colors hover:text-primary"
                 >
                   Privacy policy
                 </Link>
@@ -103,11 +103,11 @@ export function Footer() {
             <h3 className="mb-4 font-heading text-sm font-semibold text-primary">
               For owners
             </h3>
-            <ul className="space-y-2 text-sm text-secondary">
+            <ul className="space-y-3 text-sm text-secondary">
               <li>
                 <Link
                   href="/auth/register"
-                  className="transition-colors hover:text-primary"
+                  className="touch-target inline-block py-1.5 transition-colors hover:text-primary"
                 >
                   List a property
                 </Link>
@@ -115,7 +115,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/auth/register"
-                  className="transition-colors hover:text-primary"
+                  className="touch-target inline-block py-1.5 transition-colors hover:text-primary"
                 >
                   Register as fundi
                 </Link>
@@ -123,7 +123,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/auth/register"
-                  className="transition-colors hover:text-primary"
+                  className="touch-target inline-block py-1.5 transition-colors hover:text-primary"
                 >
                   Register as provider
                 </Link>
@@ -142,7 +142,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col items-center justify-between gap-2 border-t border-border pt-6 sm:flex-row sm:mt-12">
+        <div className="mt-6 flex flex-col items-center justify-between gap-2 border-t border-border pt-5 sm:flex-row sm:mt-10">
           <p className="text-xs text-secondary">
             &copy; {new Date().getFullYear()} All Property Link. All rights
             reserved.
