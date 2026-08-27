@@ -123,7 +123,7 @@ export default function AgentSettingsPage() {
     setAvatarUploading(true)
     setPrError("")
     try {
-      const url = await uploadImage(file, "allpropertylink/avatars", { maxDimension: 400, quality: 0.85 })
+      const url = await uploadImage(file, "avatars", { maxDimension: 400, quality: 0.85 })
       const { error } = await api.patch("/api/apl-agents/profile", { avatar: url })
       if (error) throw new Error(error)
       setAvatarUrl(url)

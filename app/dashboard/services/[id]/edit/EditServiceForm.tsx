@@ -84,7 +84,7 @@ export function EditServiceForm({
         try {
           const preview = URL.createObjectURL(file);
 
-                    const url = await uploadImage(file, "allpropertylink/services");
+                    const url = await uploadImage(file, "services");
           urls.push(url);
           setImagePreviews((prev) => [...prev, preview]);
           setImageUrls((prev) => [...prev, url]);

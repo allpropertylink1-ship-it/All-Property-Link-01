@@ -122,7 +122,7 @@ export default function KycPage() {
         const result = await res.json()
         return { url: result.url }
       }
-            const url = await uploadImage(file, "allpropertylink/kyc")
+            const url = await uploadImage(file, "kyc")
       return { url }
     }))
   }

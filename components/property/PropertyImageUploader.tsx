@@ -55,7 +55,7 @@ export default function PropertyImageUploader({
         try {
           const preview = URL.createObjectURL(file);
 
-          const url = await uploadImage(file, "allpropertylink/property-listings");
+          const url = await uploadImage(file, "properties");
           urls.push(url);
           setEntries((prev) => [...prev, { preview, url }]);
         } catch (err) {

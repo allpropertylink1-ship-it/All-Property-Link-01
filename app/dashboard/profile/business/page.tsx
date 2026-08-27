@@ -176,7 +176,7 @@ export default function BusinessProfilePage() {
     setAvatarUploading(true)
     setError("")
     try {
-      const url = await uploadFile(file, "allpropertylink/business-profiles")
+      const url = await uploadFile(file, "business-profiles")
       setBusinessProfilePhotoUrl(url)
       const res = await api.patch("/api/user/profile", { businessProfilePhoto: url })
       if (res.error) throw new Error(res.error)

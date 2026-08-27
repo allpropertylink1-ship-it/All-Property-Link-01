@@ -64,7 +64,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
     setCropping(false);
     setPassportUploading(true);
     try {
-      const url = await uploadImage(new File([blob], "passport.jpg", { type: "image/jpeg" }), "allpropertylink/profiles");
+      const url = await uploadImage(new File([blob], "passport.jpg", { type: "image/jpeg" }), "profiles");
       setPassportPhotoUrl(url);
       setPassportFile(null);
       const patchRes = await fetch("/api/user/profile", {
