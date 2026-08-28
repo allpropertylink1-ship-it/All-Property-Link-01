@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
-import { Menu, X, LogOut, User, Briefcase, Settings } from "@/components/ui/icons"
 
 export function ProfileButton() {
   const { user, logout } = useAuth()
@@ -24,7 +23,7 @@ export function ProfileButton() {
 
   if (!user) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="hidden items-center gap-2 md:flex">
         <Link
           href="/auth/login"
           className="touch-target inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-secondary transition-colors hover:text-primary"
@@ -44,12 +43,6 @@ export function ProfileButton() {
   const isAgent = user.authMethod === "agent"
   const displayName = isAgent ? (user.fullName || [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email) : ([user.firstName, user.lastName].filter(Boolean).join(" ") || user.email)
   const initial = (isAgent ? (user.fullName || user.email) : (user.firstName || user.email)).charAt(0).toUpperCase()
-
-  async function handleLogout() {
-    setOpen(false)
-    await logout()
-    router.refresh()
-  }
 
   return (
     <div className="relative" ref={menuRef}>

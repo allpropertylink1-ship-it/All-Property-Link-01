@@ -166,13 +166,14 @@ export function PropertyGallery({ images: rawImages, title }: Props) {
 
         {/* Thumbnails */}
         {images.length > 1 && (
-          <div className="mt-3 flex gap-1.5 overflow-x-auto pb-0.5">
+          <div className="mt-3 flex gap-1.5 overflow-x-auto pb-0.5 [-webkit-overflow-scrolling:touch]">
             {images.map((url, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => goTo(i)}
-                className={`relative shrink-0 overflow-hidden rounded-md border-2 transition-all min-h-[56px] min-w-[72px] ${
+                style={{ width: 72, height: 54 }}
+                className={`relative shrink-0 overflow-hidden rounded-md border-2 transition-all ${
                   i === current
                     ? "border-primary-500 ring-1 ring-primary-500"
                     : "border-transparent opacity-55 hover:opacity-100"

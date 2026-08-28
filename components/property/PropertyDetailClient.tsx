@@ -136,11 +136,11 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
   const agentLogoUrl = property.agent ? resolveImageUrl(property.agent.businessLogo) ?? undefined : undefined;
 
   return (
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:py-6">
-        <div className="grid gap-4 sm:gap-6 lg:gap-6 lg:grid-cols-[280px_1fr] xl:grid-cols-[300px_1fr_320px]">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
+        <div className="grid gap-6 lg:gap-8 lg:grid-cols-[240px_1fr_280px] xl:grid-cols-[260px_1fr_300px]">
 
           {/* ─── LEFT SIDEBAR ─── */}
-          <aside className="lg:order-1 order-2 lg:col-span-1 space-y-5">
+          <aside className="hidden lg:block space-y-5">
             {property.agent && (
               <>
                 <div className="rounded-xl border border-border bg-surface p-4 lg:p-5">
@@ -248,7 +248,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
           </aside>
 
           {/* ─── CENTER ─── */}
-          <div className="lg:order-2 order-1 lg:col-span-2 xl:col-span-1 min-w-0 space-y-5">
+          <div className="min-w-0 space-y-5">
             <PropertyGallery images={imageUrls} title={property.title} />
 
             <div>
@@ -433,7 +433,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
           </div>
 
           {/* ─── RIGHT SIDEBAR ─── */}
-          <aside className="hidden lg:block lg:order-3 xl:order-2 xl:col-span-1 space-y-5">
+          <aside className="hidden lg:block space-y-5">
             {property.agent && (
               <>
                 <div className="rounded-xl border border-border bg-surface p-5">
