@@ -24,17 +24,10 @@ export async function downscaleImage(
   }
 
   try {
-    const bitmap = await createImageBitmap(input);
+    const bitmap = await createImageBitmap(input, { imageOrientation: "from-image" } as ImageBitmapOptions);
     const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
     const w = Math.max(1, Math.round(bitmap.width * scale));
     const h = Math.max(1, Math.round(bitmap.height * scale));
-
-    // Small enough already and not a huge PNG — skip re-encode
-    const needsWork = scale < 1 || input.size > 200 * 1024;
-    if (!needsWork) {
-      bitmap.close?.();
-      return input instanceof File ? input : new File([input], sourceName, { type });
-    }
 
     const canvas = document.createElement("canvas");
     canvas.width = w;
