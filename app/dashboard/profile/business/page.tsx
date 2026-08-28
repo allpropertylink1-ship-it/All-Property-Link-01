@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react"
 import { uploadImage } from "@/lib/image-client";
-import { Check, Loader2, Save, Camera, User, Building2 } from "@/components/ui/icons"
+import { Check, Loader2, Save, Camera, User, Building2, RotateCw } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
 import { resolveImageUrl } from "@/lib/images";
@@ -187,6 +187,39 @@ export default function BusinessProfilePage() {
     }
   }
 
+  async function handleRotatePhoto() {
+    if (!businessProfilePhotoUrl) return
+    const src = resolveImageUrl(businessProfilePhotoUrl)
+    if (!src) return
+    setAvatarUploading(true)
+    setError("")
+    try {
+      const res = await fetch(src)
+      if (!res.ok) throw new Error("Failed to fetch image")
+      const blob = await res.blob()
+      const bitmap = await createImageBitmap(blob)
+      const canvas = document.createElement("canvas")
+      canvas.width = bitmap.height
+      canvas.height = bitmap.width
+      const ctx = canvas.getContext("2d")
+      if (!ctx) throw new Error("Canvas unavailable")
+      ctx.translate(canvas.width / 2, canvas.height / 2)
+      ctx.rotate((90 * Math.PI) / 180)
+      ctx.drawImage(bitmap, -bitmap.width / 2, -bitmap.height / 2)
+      const outBlob = await new Promise<Blob | null>((r) => canvas.toBlob((b) => r(b), "image/jpeg", 0.92))
+      if (!outBlob) throw new Error("Rotate failed")
+      const file = new File([outBlob], "rotated.jpg", { type: "image/jpeg" })
+      const url = await uploadFile(file, "business-profiles")
+      setBusinessProfilePhotoUrl(url)
+      const patch = await api.patch("/api/user/profile", { businessProfilePhoto: url })
+      if (patch.error) throw new Error(patch.error)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Rotate failed")
+    } finally {
+      setAvatarUploading(false)
+    }
+  }
+
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -340,14 +373,27 @@ export default function BusinessProfilePage() {
             <div className="text-right flex-1">
               <h3 className="font-heading text-sm font-semibold text-text-primary">Profile Photo</h3>
               <p className="text-xs text-text-secondary">This photo appears on your public profile</p>
-              <label className="mt-2 touch-target inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700">
-                {avatarUploading ? (
-                  <><Loader2 size={14} className="animate-spin" /> Uploading...</>
-                ) : (
-                  <><Camera size={14} /> {businessProfilePhotoUrl ? "Change" : "Upload"}</>
+              <div className="mt-2 flex flex-wrap justify-end gap-2">
+                <label className="touch-target inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700">
+                  {avatarUploading ? (
+                    <><Loader2 size={14} className="animate-spin" /> Uploading...</>
+                  ) : (
+                    <><Camera size={14} /> {businessProfilePhotoUrl ? "Change" : "Upload"}</>
+                  )}
+                  <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handleBusinessProfilePhotoUpload} className="hidden" disabled={avatarUploading} />
+                </label>
+                {businessProfilePhotoUrl && (
+                  <button
+                    type="button"
+                    onClick={handleRotatePhoto}
+                    disabled={avatarUploading}
+                    className="touch-target inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary disabled:opacity-50"
+                    title="Rotate 90° clockwise"
+                  >
+                    <RotateCw size={14} /> Rotate
+                  </button>
                 )}
-                <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handleBusinessProfilePhotoUpload} className="hidden" disabled={avatarUploading} />
-              </label>
+              </div>
             </div>
             <div className="shrink-0">
               {businessProfilePhotoUrl ? (
