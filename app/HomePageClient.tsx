@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { HeroSection } from "@/components/home/HeroSection"
 import { CategoryGrid } from "@/components/home/CategoryGrid"
@@ -24,14 +24,21 @@ export function HomePageClient({
   providers: ProfileRow[];
 }) {
   const router = useRouter()
+  const [checkedSplash, setCheckedSplash] = useState(false)
 
   useEffect(() => {
     const seen = localStorage.getItem("splash_seen_v1")
     const now = Date.now()
     if (!seen || now - parseInt(seen) > 24 * 60 * 60 * 1000) {
       router.push("/splash")
+    } else {
+      setCheckedSplash(true)
     }
   }, [router])
+
+  if (!checkedSplash) {
+    return null
+  }
 
   return (
     <>
