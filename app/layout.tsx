@@ -45,6 +45,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="overflow-x-hidden">
+      <head>
+        <link rel="preload" href="/splash/all-property-link.mp4" as="video" type="video/mp4" />
+        <link rel="preload" href="/splash/all-property-link.gif" as="image" type="image/gif" />
+      </head>
       <body className={`${sora.variable} ${dmSans.variable} flex min-h-screen flex-col antialiased`}>
         <AuthProvider>
           <Navbar />
