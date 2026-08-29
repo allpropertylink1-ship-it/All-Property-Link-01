@@ -6,7 +6,8 @@ import Image from "next/image";
 import { X } from "@/components/ui/icons";
 
 const STORAGE_KEY = "splash_seen_v1";
-const AUTO_DISMISS_MS = 6000;
+// Auto-dismiss after video duration + buffer, or 20s max
+const AUTO_DISMISS_MS = 20000;
 
 export function SplashPageClient() {
   const router = useRouter();
@@ -42,6 +43,10 @@ export function SplashPageClient() {
       videoRef.current.currentTime = 0;
       videoRef.current.play().catch(() => {});
     }
+  }, []);
+
+  const handleVideoPlay = useCallback(() => {
+    // Video started playing successfully
   }, []);
 
   if (!mounted) return null;
@@ -107,6 +112,7 @@ export function SplashPageClient() {
             className="absolute inset-0 h-full w-full object-cover"
             poster="/splash/all-property-link-poster.jpg"
             onEnded={handleVideoEnd}
+            onPlay={handleVideoPlay}
           >
             <source src="/splash/all-property-link.mp4" type="video/mp4" />
             <Image
