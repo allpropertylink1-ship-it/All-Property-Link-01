@@ -49,7 +49,7 @@ export function SplashPageClient() {
   if (prefersReducedMotion) {
     return (
       <div
-        className="fixed inset-0 z-[60] bg-cover bg-center"
+        className="fixed inset-0 z-[60] overflow-hidden bg-cover bg-center"
         style={{ backgroundImage: "url(/splash/all-property-link-poster.jpg)" }}
         onClick={dismiss}
         onKeyDown={(e) => e.key === "Enter" && dismiss()}
@@ -74,33 +74,37 @@ export function SplashPageClient() {
 
   return (
     <div
-      className="fixed inset-0 z-[60]"
+      className="fixed inset-0 z-[60] overflow-hidden"
       onClick={dismiss}
       role="dialog"
       aria-modal="true"
       aria-label="Welcome to All Property Link"
+      style={{ height: "100dvh" }}
     >
-      <video
-        ref={videoRef}
-        autoPlay
-        muted
-        playsInline
-        loop
-        preload="auto"
-        className="absolute inset-0 h-full w-full object-cover"
-        poster="/splash/all-property-link-poster.jpg"
-        onEnded={handleVideoEnd}
-      >
-        <source src="/splash/all-property-link.mp4" type="video/mp4" />
-        <Image
-          src="/splash/all-property-link.gif"
-          alt=""
-          fill
-          className="absolute inset-0 object-cover"
-          priority
-          sizes="100vw"
-        />
-      </video>
+      <div className="absolute inset-0 overflow-hidden" style={{ height: "100dvh" }}>
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          playsInline
+          loop
+          preload="auto"
+          className="h-full w-full object-cover"
+          poster="/splash/all-property-link-poster.jpg"
+          onEnded={handleVideoEnd}
+        >
+          <source src="/splash/all-property-link.mp4" type="video/mp4" />
+          <Image
+            src="/splash/all-property-link.gif"
+            alt=""
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+            style={{ objectFit: "cover" }}
+          />
+        </video>
+      </div>
 
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
 
