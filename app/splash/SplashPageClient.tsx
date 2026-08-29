@@ -1,17 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { X } from "@/components/ui/icons";
 
 const STORAGE_KEY = "splash_seen_v1";
-// Auto-dismiss after video duration + buffer, or 20s max
 const AUTO_DISMISS_MS = 20000;
 
 export function SplashPageClient() {
   const router = useRouter();
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -37,17 +35,6 @@ export function SplashPageClient() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [dismiss]);
-
-  const handleVideoEnd = useCallback(() => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play().catch(() => {});
-    }
-  }, []);
-
-  const handleVideoPlay = useCallback(() => {
-    // Video started playing successfully
-  }, []);
 
   if (!mounted) return null;
 
@@ -102,29 +89,16 @@ export function SplashPageClient() {
       {/* Centered video container - landscape aspect ratio */}
       <div className="absolute inset-0 flex items-center justify-center p-4">
         <div className="relative w-full max-w-[500px] aspect-video max-h-[70vh] overflow-hidden rounded-2xl shadow-2xl">
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            playsInline
-            loop
-            preload="auto"
-            className="absolute inset-0 h-full w-full object-cover"
-            poster="/splash/all-property-link-poster.jpg"
-            onEnded={handleVideoEnd}
-            onPlay={handleVideoPlay}
-          >
-            <source src="/splash/all-property-link.mp4" type="video/mp4" />
-            <Image
-              src="/splash/all-property-link.gif"
-              alt=""
-              fill
-              className="object-cover"
-              priority
-              sizes="100vw"
-              style={{ objectFit: "cover" }}
-            />
-          </video>
+          {/* GIF as primary - works reliably everywhere, no moov atom issues */}
+          <Image
+            src="/splash/all-property-link.gif"
+            alt=""
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+            style={{ objectFit: "cover" }}
+          />
         </div>
       </div>
 
