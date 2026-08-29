@@ -110,9 +110,13 @@ export function BottomNav() {
             </span>
           </Link>
 
-          <Link
-            href="/browse"
+          <button
+            type="button"
+            onClick={() => setBrowseOpen(true)}
             className="touch-target flex flex-col items-center gap-0.5 py-3 flex-1"
+            aria-label="Browse categories"
+            aria-expanded={browseOpen}
+            aria-controls="browse-modal"
           >
             <div className="flex h-7 w-7 items-center justify-center text-text-secondary">
               <Image
@@ -126,7 +130,7 @@ export function BottomNav() {
             <span className="text-[10px] font-medium text-text-secondary">
               Browse
             </span>
-          </Link>
+          </button>
 
           <Link
             href={user ? "/dashboard" : "/auth/login"}
