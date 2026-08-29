@@ -50,7 +50,7 @@ export function SplashPageClient() {
     return (
       <div
         className="fixed inset-0 z-[60] overflow-hidden bg-cover bg-center max-h-screen"
-        style={{ backgroundImage: "url(/splash/all-property-link-poster.jpg)", height: "100vh" }}
+        style={{ backgroundImage: "url(/splash/all-property-link-poster.jpg)", height: "100vh", filter: "blur(20px)" }}
         onClick={dismiss}
         onKeyDown={(e) => e.key === "Enter" && dismiss()}
         role="button"
@@ -81,32 +81,46 @@ export function SplashPageClient() {
       aria-label="Welcome to All Property Link"
       style={{ height: "100vh" }}
     >
-      <div className="absolute inset-0 overflow-hidden" style={{ height: "100vh" }}>
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          loop
-          preload="auto"
-          className="h-full w-full object-cover"
-          poster="/splash/all-property-link-poster.jpg"
-          onEnded={handleVideoEnd}
-        >
-          <source src="/splash/all-property-link.mp4" type="video/mp4" />
-          <Image
-            src="/splash/all-property-link.gif"
-            alt=""
-            fill
-            className="object-cover"
-            priority
-            sizes="100vw"
-            style={{ objectFit: "cover" }}
-          />
-        </video>
-      </div>
+      {/* Blurred background using poster image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: "url(/splash/all-property-link-poster.jpg)",
+          filter: "blur(40px) brightness(0.4)",
+          transform: "scale(1.1)",
+        }}
+      />
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+      {/* Dark gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/70" />
+
+      {/* Centered video container - landscape aspect ratio */}
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <div className="relative w-full max-w-[500px] aspect-video max-h-[70vh] overflow-hidden rounded-2xl shadow-2xl">
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            loop
+            preload="auto"
+            className="absolute inset-0 h-full w-full object-cover"
+            poster="/splash/all-property-link-poster.jpg"
+            onEnded={handleVideoEnd}
+          >
+            <source src="/splash/all-property-link.mp4" type="video/mp4" />
+            <Image
+              src="/splash/all-property-link.gif"
+              alt=""
+              fill
+              className="object-cover"
+              priority
+              sizes="100vw"
+              style={{ objectFit: "cover" }}
+            />
+          </video>
+        </div>
+      </div>
 
       <button
         onClick={dismiss}
