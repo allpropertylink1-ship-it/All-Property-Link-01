@@ -6,6 +6,7 @@ import { CookieConsent } from "@/components/shared/CookieConsent";
 import { Footer } from "@/components/layout/Footer";
 import { AuthProvider } from "@/lib/auth-context";
 import { siteUrl } from "@/lib/seo";
+import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 import "./globals.css";
 
 const sora = Sora({
@@ -48,6 +49,12 @@ export default function RootLayout({
       <head>
         <link rel="preload" href="/splash/all-property-link.mp4" as="video" type="video/mp4" />
         <link rel="preload" href="/splash/all-property-link.gif" as="image" type="image/gif" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#286255" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="All Property Link" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body className={`${sora.variable} ${dmSans.variable} flex min-h-screen flex-col antialiased`}>
         <AuthProvider>
@@ -57,6 +64,7 @@ export default function RootLayout({
           <BottomNav />
           <Footer />
         </AuthProvider>
+        <PWAInstallPrompt />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
