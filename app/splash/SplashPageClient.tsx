@@ -49,8 +49,8 @@ export function SplashPageClient() {
   if (prefersReducedMotion) {
     return (
       <div
-        className="fixed inset-0 z-[60] overflow-hidden bg-cover bg-center"
-        style={{ backgroundImage: "url(/splash/all-property-link-poster.jpg)" }}
+        className="fixed inset-0 z-[60] overflow-hidden bg-cover bg-center max-h-screen"
+        style={{ backgroundImage: "url(/splash/all-property-link-poster.jpg)", height: "100vh" }}
         onClick={dismiss}
         onKeyDown={(e) => e.key === "Enter" && dismiss()}
         role="button"
@@ -60,7 +60,7 @@ export function SplashPageClient() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
         <button
           onClick={dismiss}
-          className="absolute top-4 right-4 z-[70] touch-target flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white transition-colors hover:bg-white/20"
+          className="absolute top-[calc(56px+16px)] right-4 z-[70] touch-target flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white transition-colors hover:bg-white/20"
           aria-label="Close splash screen"
         >
           <X size={24} />
@@ -74,14 +74,14 @@ export function SplashPageClient() {
 
   return (
     <div
-      className="fixed inset-0 z-[60] overflow-hidden"
+      className="fixed inset-0 z-[60] overflow-hidden max-h-screen"
       onClick={dismiss}
       role="dialog"
       aria-modal="true"
       aria-label="Welcome to All Property Link"
-      style={{ height: "100dvh" }}
+      style={{ height: "100vh" }}
     >
-      <div className="absolute inset-0 overflow-hidden" style={{ height: "100dvh" }}>
+      <div className="absolute inset-0 overflow-hidden" style={{ height: "100vh" }}>
         <video
           ref={videoRef}
           autoPlay
@@ -110,7 +110,7 @@ export function SplashPageClient() {
 
       <button
         onClick={dismiss}
-        className="absolute top-4 right-4 z-[70] touch-target flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white transition-colors hover:bg-white/20"
+        className="absolute top-[calc(56px+16px)] right-4 z-[70] touch-target flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white transition-colors hover:bg-white/20"
         aria-label="Close splash screen"
       >
         <X size={24} />
