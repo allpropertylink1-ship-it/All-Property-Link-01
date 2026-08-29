@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 
@@ -77,16 +78,6 @@ const HomeIcon = () => (
   </svg>
 );
 
-const BrowseIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
-    <rect x="3" y="3" width="7" height="7" rx="1" />
-    <rect x="14" y="3" width="7" height="7" rx="1" />
-    <rect x="3" y="14" width="7" height="7" rx="1" />
-    <rect x="14" y="14" width="7" height="7" rx="1" />
-    <rect x="5" y="5" width="3" height="3" fill={GOLD} stroke="none" rx="0.5" />
-  </svg>
-);
-
 const UserIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
     <circle cx="12" cy="8" r="5" />
@@ -119,21 +110,23 @@ export function BottomNav() {
             </span>
           </Link>
 
-          <button
-            type="button"
-            onClick={() => setBrowseOpen(true)}
+          <Link
+            href="/browse"
             className="touch-target flex flex-col items-center gap-0.5 py-3 flex-1"
-            aria-label="Browse categories"
-            aria-expanded={browseOpen}
-            aria-controls="browse-modal"
           >
             <div className="flex h-7 w-7 items-center justify-center text-text-secondary">
-              <BrowseIcon />
+              <Image
+                src="/logos/logo-icon.png"
+                alt="All Property Link"
+                width={28}
+                height={28}
+                className="h-7 w-7 object-contain"
+              />
             </div>
             <span className="text-[10px] font-medium text-text-secondary">
               Browse
             </span>
-          </button>
+          </Link>
 
           <Link
             href={user ? "/dashboard" : "/auth/login"}
