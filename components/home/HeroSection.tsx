@@ -12,6 +12,17 @@ import { slugifyCity } from "@/lib/seo"
 const DAY_MS = 24 * 60 * 60 * 1000
 const AUTO_INTERVAL_MS = 6000
 
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(false)
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 1024)
+    check()
+    window.addEventListener("resize", check)
+    return () => window.removeEventListener("resize", check)
+  }, [])
+  return isDesktop
+}
+
 type PersonaId = "buy" | "rent" | "stay" | "list"
 
 interface Persona {
@@ -156,6 +167,7 @@ export function HeroSection() {
   const [ticker, setTicker] = useState<TickerItem[]>([])
   const [tickerOffset, setTickerOffset] = useState(0)
   const [gliding, setGliding] = useState(false)
+  const isDesktop = useIsDesktop()
   const [query, setQuery] = useState("")
   const cacheRef = useRef<Map<string, Slide[]>>(new Map())
   const tickerTrackRef = useRef<HTMLDivElement>(null)
@@ -515,19 +527,12 @@ export function HeroSection() {
       </div>
 
       {/* Fresh on the market ticker */}
-      {ticker.length > 0 && (
+      {ticker.length > 0 && isDesktop && (
         <div
           className="relative z-10 mt-12 border-t border-white/10 bg-black/30 backdrop-blur-md"
-          style={{ display: 'none' }}
           onMouseEnter={handleTickerEnter}
           onMouseLeave={handleTickerLeave}
         >
-          <style jsx>{`
-            @media (min-width: 1024px) {
-              .ticker-container { display: block; }
-            }
-          `}</style>
-          <div className="ticker-container">
           <div className="container mx-auto flex max-w-7xl items-center gap-6 overflow-hidden px-4">
             <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wider text-accent-300">
               Fresh on the market
@@ -559,7 +564,6 @@ export function HeroSection() {
             </div>
           </div>
         </div>
-      </div>
       )}
     </section>
   )
