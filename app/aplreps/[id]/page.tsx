@@ -146,7 +146,7 @@ export default async function AgentDetailPage({ params }: Props) {
               {agent.email && (
                 <a
                   href={`mailto:${agent.email}`}
-                  className="touch-target inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary"
+                  className="touch-target inline-flex items-center gap-2 rounded-lg border-primary text-primary px-5 py-2.5 text-sm font-medium transition-colors hover:bg-primary-50"
                 >
                   <Mail size={15} /> Email
                 </a>

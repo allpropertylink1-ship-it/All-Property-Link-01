@@ -60,9 +60,9 @@ function CityPill({ city }: { city: string }) {
   return (
     <Link
       href={`/browse?region=${encodeURIComponent(city)}`}
-      className="inline-flex items-center gap-1.5 rounded-full bg-rose-200 px-4 py-1.5 text-sm font-medium text-rose-950 transition-colors hover:bg-rose-300"
+      className="inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-4 py-1.5 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-100"
     >
-      {city} <ExternalLink size={11} className="text-rose-800/70" />
+      {city} <ExternalLink size={11} className="text-primary-500/70" />
     </Link>
   )
 }
@@ -131,12 +131,12 @@ export function AgentsDirectory() {
                     <p className="text-base text-text-primary">
                       {agent._count.users} referral{agent._count.users !== 1 ? "s" : ""} | {agent.propertyCount} listing{agent.propertyCount !== 1 ? "s" : ""}
                     </p>
-                    <Link
+<Link
                       href={`/aplreps/${agent.id}`}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-rose-200 px-4 py-1.5 text-sm font-medium text-rose-950 transition-colors hover:bg-rose-300"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-4 py-1.5 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-100"
                     >
-                      View profile <ExternalLink size={12} className="text-rose-800/70" />
-                    </Link>
+                        View profile <ExternalLink size={12} className="text-primary-500/70" />
+                      </Link>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {agent.phone && (
@@ -149,11 +149,13 @@ export function AgentsDirectory() {
                         className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-600"
                       ><WhatsAppIcon size={14} />WhatsApp</a>
                     )}
-                    {agent.email && (
-                      <a href={`mailto:${agent.email}`}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-rose-200 px-3.5 py-1.5 text-sm font-medium text-rose-950 transition-colors hover:bg-rose-300"
-                      ><Mail size={14} className="text-red-600" />E-Mail</a>
-                    )}
+{agent.email && (
+                        <a href={`mailto:${agent.email}`}
+                          className="inline-flex items-center justify-center gap-2 rounded-full bg-primary-50 px-4 py-2 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-100"
+                        >
+                          <Mail size={15} className="text-primary-600" />E-Mail
+                        </a>
+                      )}
                   </div>
                   {cities.length > 0 && (
                     <>
@@ -189,9 +191,9 @@ export function AgentsDirectory() {
                     <div className="mt-4 grid max-w-[320px] grid-cols-2 gap-x-4 gap-y-3">
                       <Link
                         href={`/aplreps/${agent.id}`}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-full bg-rose-200 px-4 py-2 text-sm font-medium text-rose-950 transition-colors hover:bg-rose-300"
+                        className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary-50 px-4 py-2 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-100"
                       >
-                        View profile <ExternalLink size={12} className="text-rose-800/70" />
+                        View profile <ExternalLink size={12} className="text-primary-500/70" />
                       </Link>
                       {agent.phone && (
                         <a href={`https://wa.me/${formatPhoneForWhatsApp(agent.phone)}`} target="_blank" rel="noopener noreferrer"
