@@ -133,7 +133,8 @@ export default function ContactForm() {
         type="submit"
         disabled={isSubmitting}
         aria-busy={isSubmitting}
-        className="w-full bg-accent-300 text-white hover:bg-accent-400 min-h-11 py-2.5"
+        variant="accent"
+        className="w-full min-h-11 py-2.5"
       >
         {isSubmitting ? "Sending..." : "Send Message"}
       </Button>

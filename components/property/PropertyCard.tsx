@@ -73,12 +73,12 @@ export function PropertyCard({
   const lcpAttrs = priority ? ({ fetchpriority: "high" } as Record<string, string>) : {};
 
   return (
-    <Link
+<Link
       href={`/properties/${slugifyCity(city)}/${slug}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-all duration-300 md:flex-row md:hover:-translate-y-[3px] md:hover:shadow-lg"
+      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-all duration-300 hover:-translate-y-[3px] hover:shadow-lg"
     >
-      <div className="relative w-full overflow-hidden md:w-[28%] md:shrink-0">
-        <div className="relative aspect-[4/3] w-full overflow-hidden md:h-full">
+      <div className="relative w-full overflow-hidden">
+        <div className="relative aspect-[4/3] w-full overflow-hidden">
           <img
             src={imageUrl}
             alt={title}
@@ -110,7 +110,7 @@ export function PropertyCard({
           )}
         </div>
       </div>
-      <div className="flex flex-1 flex-col justify-center gap-1.5 p-4 md:p-5">
+      <div className="flex flex-1 flex-col justify-center gap-1.5 p-5">
         <h3 className="font-heading text-base font-semibold leading-tight text-text-primary md:text-lg">
           {title}
         </h3>

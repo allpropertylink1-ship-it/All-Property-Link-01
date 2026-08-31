@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, type ReactElement } from "react";
 import {
   AlertDialog,
@@ -81,7 +79,7 @@ export function ConfirmDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            variant={confirmVariant === "destructive" ? "destructive" : "default"}
+            variant={confirmVariant === "destructive" ? "destructive" : "primary"}
             onClick={handleConfirm}
             disabled={requiresInput && (requiredInputValue ? inputValue !== requiredInputValue : !inputValue.trim())}
           >

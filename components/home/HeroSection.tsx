@@ -517,7 +517,7 @@ export function HeroSection() {
       {/* Fresh on the market ticker */}
       {ticker.length > 0 && (
         <div
-          className="relative z-10 mt-12 border-t border-white/10 bg-black/30 backdrop-blur-md"
+          className="hidden md:block relative z-10 mt-12 border-t border-white/10 bg-black/30 backdrop-blur-md"
           onMouseEnter={handleTickerEnter}
           onMouseLeave={handleTickerLeave}
         >

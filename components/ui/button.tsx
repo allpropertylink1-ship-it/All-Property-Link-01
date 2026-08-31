@@ -8,16 +8,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/80",
-        outline:
-          "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
-        ghost:
-          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
-        destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20",
-        link: "text-primary underline-offset-4 hover:underline",
+        primary: "bg-primary text-white hover:bg-primary-600",
+        accent: "border border-accent-300/30 text-accent-600 bg-transparent hover:bg-accent-50/50",
+        outline: "border-primary text-primary hover:bg-primary-50",
+        ghost: "text-primary hover:bg-primary-50",
+        destructive: "border-error text-error hover:bg-error-50",
       },
       size: {
         default:
@@ -34,7 +29,7 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "primary",
       size: "default",
     },
   }
@@ -42,7 +37,7 @@ const buttonVariants = cva(
 
 function Button({
   className,
-  variant = "default",
+  variant = "primary",
   size = "default",
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
