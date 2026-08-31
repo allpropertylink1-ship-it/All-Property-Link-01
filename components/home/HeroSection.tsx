@@ -527,14 +527,14 @@ export function HeroSection() {
       </div>
 
       {/* Fresh on the market ticker */}
-      {ticker.length > 0 && isDesktop && (
+      {ticker.length > 0 && (
         <div
           className="relative z-10 mt-12 border-t border-white/10 bg-black/30 backdrop-blur-md"
           onMouseEnter={handleTickerEnter}
           onMouseLeave={handleTickerLeave}
         >
           <div className="container mx-auto flex max-w-7xl items-center gap-6 overflow-hidden px-4">
-            <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wider text-accent-300">
+            <span className="hidden lg:inline-block shrink-0 text-[11px] font-semibold uppercase tracking-wider text-accent-300">
               Fresh on the market
             </span>
             <div ref={tickerRegionRef} className="overflow-hidden py-3">
