@@ -517,10 +517,17 @@ export function HeroSection() {
       {/* Fresh on the market ticker */}
       {ticker.length > 0 && (
         <div
-          className="hidden lg:block relative z-10 mt-12 border-t border-white/10 bg-black/30 backdrop-blur-md"
+          className="relative z-10 mt-12 border-t border-white/10 bg-black/30 backdrop-blur-md"
+          style={{ display: 'none' }}
           onMouseEnter={handleTickerEnter}
           onMouseLeave={handleTickerLeave}
         >
+          <style jsx>{`
+            @media (min-width: 1024px) {
+              .ticker-container { display: block; }
+            }
+          `}</style>
+          <div className="ticker-container">
           <div className="container mx-auto flex max-w-7xl items-center gap-6 overflow-hidden px-4">
             <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wider text-accent-300">
               Fresh on the market
@@ -552,6 +559,7 @@ export function HeroSection() {
             </div>
           </div>
         </div>
+      </div>
       )}
     </section>
   )
