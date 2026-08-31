@@ -48,7 +48,7 @@ export default function RootLayout({
     <html lang="en" className="overflow-x-hidden">
       <head>
         <link rel="preload" href="/splash/all-property-link.mp4" as="video" type="video/mp4" />
-        <link rel="preload" href="/splash/all-property-link.gif" as="image" type="image/gif" />
+        <link rel="preload" href="/splash/all-property-link-poster.jpg" as="image" type="image/jpeg" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#286255" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

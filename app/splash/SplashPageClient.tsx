@@ -1,20 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { X } from "@/components/ui/icons";
 
-const STORAGE_KEY = "splash_seen_v1";
 const AUTO_DISMISS_MS = 20000;
 
 export function SplashPageClient() {
   const router = useRouter();
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   const dismiss = useCallback(() => {
-    localStorage.setItem(STORAGE_KEY, Date.now().toString());
     router.push("/");
     router.refresh();
   }, [router]);
@@ -35,6 +33,13 @@ export function SplashPageClient() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [dismiss]);
+
+  const handleVideoEnd = useCallback(() => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(() => {});
+    }
+  }, []);
 
   if (!mounted) return null;
 
@@ -73,34 +78,21 @@ export function SplashPageClient() {
       aria-label="Welcome to All Property Link"
       style={{ height: "100vh" }}
     >
-      {/* Blurred background using poster image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: "url(/splash/all-property-link-poster.jpg)",
-          filter: "blur(40px) brightness(0.4)",
-          transform: "scale(1.1)",
-        }}
-      />
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        playsInline
+        loop
+        preload="auto"
+        className="absolute inset-0 h-full w-full object-cover"
+        poster="/splash/all-property-link-poster.jpg"
+        onEnded={handleVideoEnd}
+      >
+        <source src="/splash/all-property-link.mp4" type="video/mp4" />
+      </video>
 
-      {/* Dark gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/70" />
-
-      {/* Centered video container - landscape aspect ratio */}
-      <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="relative w-full max-w-[500px] aspect-video max-h-[70vh] overflow-hidden rounded-2xl shadow-2xl">
-          {/* GIF as primary - works reliably everywhere, no moov atom issues */}
-          <Image
-            src="/splash/all-property-link.gif"
-            alt=""
-            fill
-            className="object-cover"
-            priority
-            sizes="100vw"
-            style={{ objectFit: "cover" }}
-          />
-        </div>
-      </div>
 
       <button
         onClick={dismiss}
