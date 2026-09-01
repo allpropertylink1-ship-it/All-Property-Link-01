@@ -20,7 +20,7 @@ const navLinks = [
 ]
 
 export function Navbar() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const isAgent = user?.authMethod === "agent"
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -110,6 +110,48 @@ export function Navbar() {
                     <Briefcase size={20} />
                     Agent Dashboard
                   </Link>
+                )}
+                {!user ? (
+                  <div className="border-t border-border pt-4 mt-4 space-y-2">
+                    <Link
+                      href="/auth/login"
+                      onClick={() => setMobileOpen(false)}
+                      className="touch-target flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-white"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/auth/register"
+                      onClick={() => setMobileOpen(false)}
+                      className="touch-target flex items-center justify-center gap-2 rounded-lg border border-primary px-4 py-3 text-sm font-medium text-primary"
+                    >
+                      Create Account
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="border-t border-border pt-4 mt-4">
+                    <div className="flex items-center gap-3 px-4 py-2">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-300 text-xs font-bold text-white">
+                        {(user.fullName || user.email)?.charAt(0).toUpperCase()}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-text-primary truncate">
+                          {(user.fullName || [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email) as string}
+                        </p>
+                        <p className="text-xs text-text-secondary truncate">{user.email as string}</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileOpen(false)
+                        logout()
+                      }}
+                      className="touch-target mt-2 flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm text-error-500 hover:bg-surface-secondary"
+                    >
+                      Log out
+                    </button>
+                  </div>
                 )}
               </nav>
             </div>

@@ -12,17 +12,6 @@ import { slugifyCity } from "@/lib/seo"
 const DAY_MS = 24 * 60 * 60 * 1000
 const AUTO_INTERVAL_MS = 6000
 
-function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = useState(false)
-  useEffect(() => {
-    const check = () => setIsDesktop(window.innerWidth >= 1024)
-    check()
-    window.addEventListener("resize", check)
-    return () => window.removeEventListener("resize", check)
-  }, [])
-  return isDesktop
-}
-
 type PersonaId = "buy" | "rent" | "stay" | "list"
 
 interface Persona {
@@ -167,7 +156,6 @@ export function HeroSection() {
   const [ticker, setTicker] = useState<TickerItem[]>([])
   const [tickerOffset, setTickerOffset] = useState(0)
   const [gliding, setGliding] = useState(false)
-  const isDesktop = useIsDesktop()
   const [query, setQuery] = useState("")
   const cacheRef = useRef<Map<string, Slide[]>>(new Map())
   const tickerTrackRef = useRef<HTMLDivElement>(null)
