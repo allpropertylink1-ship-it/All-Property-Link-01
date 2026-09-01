@@ -36,16 +36,17 @@ export function ListingForm() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<ListingFormData>({
+  const [imagesDirty, setImagesDirty] = useState(false);
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting, isDirty } } = useForm<ListingFormData>({
     resolver: zodResolver(listingSchema),
   });
 
   const handleLocationChange = useCallback((loc: { lat: number; lng: number; address: string; city: string; region: string }) => {
-    setValue("address", loc.address)
-    setValue("city", loc.city)
-    setValue("region", loc.region)
-    setValue("latitude", loc.lat)
-    setValue("longitude", loc.lng)
+    setValue("address", loc.address, { shouldDirty: true })
+    setValue("city", loc.city, { shouldDirty: true })
+    setValue("region", loc.region, { shouldDirty: true })
+    setValue("latitude", loc.lat, { shouldDirty: true })
+    setValue("longitude", loc.lng, { shouldDirty: true })
   }, [setValue])
 
   async function onSubmit(data: ListingFormData) {
@@ -71,6 +72,7 @@ export function ListingForm() {
 
   const handleImageUploadComplete = (urls: string[]) => {
     setImageUrls((prev) => [...prev, ...urls]);
+    setImagesDirty(true);
   };
 
   const handleImageUploadError = (error: string) => {
@@ -79,6 +81,7 @@ export function ListingForm() {
 
   const handleRemoveImage = (url: string) => {
     setImageUrls((prev) => prev.filter((u) => u !== url));
+    setImagesDirty(true);
   };
 
   return (
@@ -155,8 +158,8 @@ export function ListingForm() {
           maxFiles={10}
         />
       </div>
-      <div className="flex items-center gap-4 pt-2">
-        <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
+      <div className="flex flex-wrap items-center gap-4 pt-2">
+        <Button type="submit" disabled={isSubmitting || (!isDirty && !imagesDirty) || imageUrls.length === 0} aria-busy={isSubmitting} title={!isDirty && !imagesDirty ? "Make changes to create listing" : imageUrls.length === 0 ? "Upload at least one image" : undefined}>
           {isSubmitting ? "Creating..." : "Create listing"}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>

@@ -17,7 +17,7 @@ export default async function DashboardLayout({
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)]">
+    <div className="flex min-h-[calc(100dvh-4rem)]">
       <DashboardNav />
       <div className="flex-1 bg-surface-secondary">
         <DashboardBanner
@@ -27,8 +27,8 @@ export default async function DashboardLayout({
           isAgent={user.isAgent}
         />
         <KycGate kycStatus={user.kycStatus} isAgent={user.isAgent}>
-          <div className="p-6 lg:p-8">
-            <div className="mx-auto max-w-7xl">{children}</div>
+          <div className="p-4 sm:p-6 lg:p-8">
+            <div className="mx-auto max-w-7xl min-w-0">{children}</div>
           </div>
         </KycGate>
       </div>

@@ -181,7 +181,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
       <div>
         <h2 className="mb-2 font-heading text-xl font-bold text-text-primary">Verify your {otpType === "EMAIL_VERIFICATION" ? "email" : "phone"}</h2>
         <p className="mb-3 text-sm text-text-secondary">
-          We sent a code to <strong className="text-text-primary">{otpDestination}</strong>
+          We sent a code to <strong className="break-all text-text-primary">{otpDestination}</strong>
           <button
             type="button"
             onClick={() => { setStep("form"); setOtpValues(["", "", "", "", "", ""]) }}

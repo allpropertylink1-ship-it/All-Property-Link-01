@@ -38,7 +38,7 @@ export default async function MyServicesPage() {
   if (services.length === 0) {
     return (
       <div>
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h1 className="font-heading text-2xl font-bold text-text-primary">
             My Services
           </h1>
@@ -54,7 +54,7 @@ export default async function MyServicesPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-heading text-2xl font-bold text-text-primary">
           My Services
         </h1>
@@ -68,7 +68,7 @@ export default async function MyServicesPage() {
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-border">
-        <table className="w-full text-left text-sm">
+        <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="bg-surface-secondary text-text-secondary">
             <tr>
               <th className="px-4 py-3 font-medium">Title</th>

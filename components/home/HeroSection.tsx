@@ -337,7 +337,7 @@ export function HeroSection() {
 
   return (
     <section
-      className="relative flex min-h-[560px] flex-col overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-accent pb-16 pt-16 sm:min-h-[620px] sm:pb-20 sm:pt-20"
+      className="relative flex min-h-[clamp(520px,100svh,620px)] flex-col overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-accent pb-16 pt-16 sm:pb-20 sm:pt-20"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -388,7 +388,7 @@ export function HeroSection() {
 
         <h1
           key={`${persona.id}-headline`}
-          className="mx-auto mt-6 max-w-4xl animate-[fadeUp_0.5s_ease-out] text-4xl font-bold leading-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-5xl lg:text-6xl"
+          className="mx-auto mt-6 max-w-4xl animate-[fadeUp_0.5s_ease-out] text-[clamp(1.75rem,8vw,2.25rem)] font-bold leading-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-5xl lg:text-6xl"
         >
           {persona.headlineTop}
           <span className={`block ${persona.accentClass}`}>{persona.headlineAccent}</span>

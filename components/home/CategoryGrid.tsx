@@ -67,7 +67,7 @@ export function CategoryGrid() {
         <p className="mb-8 text-sm text-muted">
           Find exactly what you&apos;re looking for
         </p>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
+        <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
           {categories.map((cat) => {
             const Icon = cat.icon
             return (

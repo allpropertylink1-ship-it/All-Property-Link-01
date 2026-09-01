@@ -207,7 +207,7 @@ export default function ImageCropper({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-      <div className="mx-4 w-full max-w-2xl rounded-xl bg-white shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="mx-4 w-full max-w-2xl rounded-xl bg-white shadow-2xl max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between border-b px-6 py-4">
           <div>
             <h3 className="text-lg font-semibold text-gray-900">
@@ -270,36 +270,37 @@ export default function ImageCropper({
           )}
         </div>
 
-        <div className="flex items-center gap-4 border-t px-6 py-4">
-          <span className="text-xs font-medium text-gray-500 min-w-20">
-            {Math.round(rect.width)} &times; {Math.round(rect.height)} px
-          </span>
-
-          <div className="flex items-center gap-2">
-            <ZoomOut size={18} className="text-gray-500" />
-            <input
-              type="range"
-              min={0.5}
-              max={3}
-              step={0.01}
-              value={zoom}
-              onChange={(e) => setZoom(Number(e.target.value))}
-              className="h-2 w-32 cursor-pointer appearance-none rounded-full bg-gray-200 accent-teal-600"
-            />
-            <ZoomIn size={18} className="text-gray-500" />
+        <div className="flex flex-col gap-4 border-t px-4 py-4 sm:flex-row sm:items-center sm:px-6">
+          <div className="flex items-center justify-between gap-4 sm:contents">
+            <span className="shrink-0 text-xs font-medium text-gray-500">
+              {Math.round(rect.width)} &times; {Math.round(rect.height)} px
+            </span>
+            <div className="flex items-center gap-2">
+              <ZoomOut size={18} className="shrink-0 text-gray-500" />
+              <input
+                type="range"
+                min={0.5}
+                max={3}
+                step={0.01}
+                value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+                className="h-2 w-28 sm:w-32 cursor-pointer appearance-none rounded-full bg-gray-200 accent-teal-600"
+              />
+              <ZoomIn size={18} className="shrink-0 text-gray-500" />
+            </div>
           </div>
 
-          <div className="ml-auto flex gap-3">
+          <div className="flex gap-3 sm:ml-auto">
             <button
               onClick={onCancel}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 sm:flex-initial touch-target"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving || !hasRect}
-              className="flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-50"
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-50 sm:flex-initial touch-target"
             >
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
               {saving ? "Saving..." : "Apply Crop"}

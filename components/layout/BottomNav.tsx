@@ -149,7 +149,7 @@ export function BottomNav() {
       {browseOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center md:hidden" role="dialog" aria-modal="true" aria-labelledby="browse-modal-title" id="browse-modal">
           <div className="absolute inset-0 bg-black/50" onClick={() => setBrowseOpen(false)} aria-hidden="true" />
-          <div className="relative w-full max-w-sm rounded-t-2xl bg-surface px-6 pb-8 pt-6 shadow-xl">
+          <div className="relative max-h-[90dvh] w-full max-w-sm overflow-y-auto rounded-t-2xl bg-surface px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 id="browse-modal-title" className="text-base font-semibold text-text-primary">Browse Categories</h2>
               <button
@@ -164,7 +164,7 @@ export function BottomNav() {
                 </svg>
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2">
               {categories.map((cat) => (
                 <Link
                   key={cat.href}

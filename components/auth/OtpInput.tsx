@@ -35,14 +35,14 @@ export function OtpInput({ value, onChange, length = 6, disabled = false }: OtpI
   }
 
   return (
-    <div className="flex gap-2 justify-center" onPaste={handlePaste}>
+    <div className="flex gap-1.5 sm:gap-2 justify-center" onPaste={handlePaste}>
       {Array.from({ length }).map((_, i) => (
         <input key={i} ref={(el) => { inputs.current[i] = el }}
           type="text" inputMode="numeric" maxLength={1}
           value={value[i] || ""} onChange={(e) => handleChange(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)} disabled={disabled}
           autoFocus={i === 0}
-          className="h-12 w-12 rounded-xl border border-border text-center text-lg font-bold focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15 disabled:opacity-50" />
+          className="h-10 w-10 max-w-10 flex-1 min-w-0 rounded-xl border sm:h-12 sm:w-12 border-border text-center text-lg font-bold focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15 disabled:opacity-50" />
       ))}
     </div>
   )

@@ -271,7 +271,7 @@ export default function OnboardingPage() {
           <label className="block text-sm font-medium text-text-primary">
             Category <span className="text-error-500">*</span>
           </label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2">
             {categories.map((cat) => (
               <button
                 key={cat.value}
@@ -296,7 +296,7 @@ export default function OnboardingPage() {
               Select your specialties <span className="text-error-500">*</span>
               <span className="ml-2 text-xs font-normal text-text-secondary">(tap to select multiple)</span>
             </label>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:grid-cols-3">
               {selectedSpecialties.map((spec) => {
                 const isSelected = form.specialties.includes(spec.value);
                 return (

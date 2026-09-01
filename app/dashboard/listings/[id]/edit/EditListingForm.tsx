@@ -56,7 +56,8 @@ export default function EditListingForm({ propertyId, property, redirectTo }: { 
   const [error, setError] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>(property.images || []);
 
-  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<z.infer<typeof listingSchema>>({
+  const [imagesDirty, setImagesDirty] = useState(false)
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting, isDirty } } = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
     defaultValues: {
       title: property.title,
@@ -77,11 +78,11 @@ export default function EditListingForm({ propertyId, property, redirectTo }: { 
   });
 
   const handleLocationChange = useCallback((loc: { lat: number; lng: number; address: string; city: string; region: string }) => {
-    setValue("address", loc.address)
-    setValue("city", loc.city)
-    setValue("region", loc.region)
-    setValue("latitude", loc.lat)
-    setValue("longitude", loc.lng)
+    setValue("address", loc.address, { shouldDirty: true })
+    setValue("city", loc.city, { shouldDirty: true })
+    setValue("region", loc.region, { shouldDirty: true })
+    setValue("latitude", loc.lat, { shouldDirty: true })
+    setValue("longitude", loc.lng, { shouldDirty: true })
   }, [setValue])
 
   async function onSubmit(data: z.infer<typeof listingSchema>) {
@@ -103,6 +104,7 @@ export default function EditListingForm({ propertyId, property, redirectTo }: { 
 
   const handleImageUploadComplete = (urls: string[]) => {
     setImageUrls((prev) => [...prev, ...urls]);
+    setImagesDirty(true);
   };
 
   const handleImageUploadError = (error: string) => {
@@ -111,6 +113,7 @@ export default function EditListingForm({ propertyId, property, redirectTo }: { 
 
   const handleRemoveImage = (url: string) => {
     setImageUrls((prev) => prev.filter((u) => u !== url));
+    setImagesDirty(true);
   };
 
   return (
@@ -194,8 +197,8 @@ export default function EditListingForm({ propertyId, property, redirectTo }: { 
           initialUrls={property.images}
         />
       </div>
-      <div className="flex items-center gap-4 pt-2">
-        <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
+      <div className="flex flex-wrap items-center gap-4 pt-2">
+        <Button type="submit" disabled={isSubmitting || (!isDirty && !imagesDirty)} aria-busy={isSubmitting} title={!isDirty && !imagesDirty ? "No changes to save" : undefined}>
           {isSubmitting ? "Updating..." : "Update listing"}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>

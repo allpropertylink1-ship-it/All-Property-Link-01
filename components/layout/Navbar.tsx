@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useAuth } from "@/lib/auth-context"
@@ -23,6 +23,10 @@ export function Navbar() {
   const { user } = useAuth()
   const isAgent = user?.authMethod === "agent"
   const [mobileOpen, setMobileOpen] = useState(false)
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : ""
+    return () => { document.body.style.overflow = "" }
+  }, [mobileOpen])
 
   return (
     <>
@@ -80,12 +84,12 @@ export function Navbar() {
       {mobileOpen && (
         <div className="fixed inset-0 z-[60] lg:hidden">
           <button type="button" aria-label="Close menu" className="absolute inset-0 bg-black/20" onClick={() => setMobileOpen(false)} />
-          <div className="absolute right-4 top-20 w-64 max-w-[85vw] rounded-2xl bg-white border border-border shadow-2xl overflow-hidden">
+          <div className="absolute right-4 top-[calc(4rem+env(safe-area-inset-top))] max-h-[calc(100dvh-5rem)] w-full max-w-[85vw] sm:w-64 overflow-y-auto rounded-2xl bg-white border border-border shadow-2xl">
             <div className="flex h-12 items-center justify-between px-4 border-b border-border">
               <span className="text-[15px] font-bold tracking-tight text-text-primary">Navigation</span>
               <button
                 type="button"
-                className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-surface-secondary"
+                className="flex h-11 w-11 touch-target items-center justify-center rounded-full hover:bg-surface-secondary"
                 onClick={() => setMobileOpen(false)}
                 aria-label="Close menu"
               >

@@ -9,7 +9,7 @@ export default async function AdminLayout({
   await requireRole(["ADMIN"]);
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-[100dvh] bg-surface">
       <AdminNav />
       <div className="lg:pl-64">
         <div className="p-6 lg:p-8">{children}</div>

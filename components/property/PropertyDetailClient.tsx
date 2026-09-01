@@ -252,13 +252,13 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
             <PropertyGallery images={imageUrls} title={property.title} />
 
             <div>
-              <h1 className="font-heading text-2xl sm:text-3xl font-bold text-text-primary leading-tight">
+              <h1 className="font-heading break-words text-2xl sm:text-3xl font-bold [overflow-wrap:anywhere] text-text-primary leading-tight">
                 {property.title}
               </h1>
               <p className="mt-1.5 text-sm text-text-secondary">
                 {property.region && `${property.region}, `}{property.city}, {property.country}
               </p>
-              <p className="mt-2.5 font-heading text-2xl sm:text-3xl font-bold text-primary-600">
+              <p className="mt-2.5 font-heading break-words text-2xl sm:text-3xl font-bold [overflow-wrap:anywhere] text-primary-600">
                 {property.price == null ? "Price on request" : `${property.currency} ${Number(property.price).toLocaleString()}${property.listingPurpose === "FOR_RENT_SHORT_TERM" ? "/night" : property.listingPurpose === "FOR_RENT_LONG_TERM" ? "/month" : ""}`}
               </p>
               <div className="mt-2 flex flex-wrap gap-2">

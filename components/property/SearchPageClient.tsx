@@ -100,13 +100,13 @@ export default function SearchPageClient({
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <form method="GET" action="/properties/search" className="mb-8">
-        <div className="flex gap-3">
+        <div className="flex min-w-0 gap-3">
           <input
             type="text"
             name="q"
             defaultValue={q}
             placeholder="Search properties, cities, areas..."
-            className="flex-1 rounded-lg border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            className="min-w-0 flex-1 rounded-lg border border-border px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
           />
           <button
             type="submit"
@@ -130,7 +130,7 @@ export default function SearchPageClient({
           <h2 className="mb-4 font-heading text-xl font-semibold text-text-primary">
             Browse by city
           </h2>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {cities.map((c) => (
               <a
                 key={c.city}

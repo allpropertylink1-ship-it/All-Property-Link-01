@@ -61,7 +61,7 @@ export function KycGate({ children, kycStatus, isAgent }: KycGateProps) {
       <div className="flex flex-col">
         <div className="mx-6 mt-4 flex items-center gap-3 rounded-xl border border-warning-200 bg-warning-50 px-4 py-3 text-sm lg:mx-8">
           <Clock size={18} className="shrink-0 text-warning-500" />
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <p className="font-medium text-warning-700">KYC under review</p>
             <p className="text-warning-600">Your identity documents are being verified. Some features are limited until verification is complete.</p>
           </div>

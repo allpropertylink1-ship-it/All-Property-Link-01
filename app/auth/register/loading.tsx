@@ -2,7 +2,7 @@ import { FormSkeleton } from "@/components/shared/LoadingSkeleton"
 
 export default function RegisterLoading() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface px-4">
+    <div className="flex min-h-[100dvh] items-center justify-center bg-surface px-4">
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
           <div className="mx-auto h-6 w-56 animate-pulse rounded bg-surface-secondary" />

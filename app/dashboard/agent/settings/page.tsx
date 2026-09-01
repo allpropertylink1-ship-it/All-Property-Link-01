@@ -44,9 +44,15 @@ export default function AgentSettingsPage() {
   const [prLoading, setPrLoading] = useState(false)
   const [prError, setPrError] = useState("")
   const [prSuccess, setPrSuccess] = useState(false)
+  const [initialRegions, setInitialRegions] = useState<string[]>([])
+  const [initialArea, setInitialArea] = useState("")
   const [cropping, setCropping] = useState(false)
   const [cropImageUrl, setCropImageUrl] = useState<string | null>(null)
   const avatarInputRef = useRef<HTMLInputElement>(null)
+
+  const isRegionDirty = JSON.stringify([...selectedRegions].sort()) !== JSON.stringify([...initialRegions].sort()) || specificArea.trim() !== initialArea.trim()
+  const isAgentProfileDirty = fullName.trim().length > 0 || phone.trim().length > 0
+  const isAgentPasswordDirty = currentPassword.length > 0 && newPassword.length > 0 && confirmPassword.length > 0
 
   async function handleProfileUpdate(e: React.FormEvent) {
     e.preventDefault()
@@ -66,7 +72,11 @@ export default function AgentSettingsPage() {
 
     const { error } = await api.patch("/api/referral-partner/profile", body)
     if (error) setProfileError(error)
-    else setProfileSuccess(true)
+    else {
+      setProfileSuccess(true)
+      setFullName("")
+      setPhone("")
+    }
     setProfileLoading(false)
   }
 
@@ -114,6 +124,8 @@ export default function AgentSettingsPage() {
         setAvatarUrl(data.agent.avatar)
         setSelectedRegions(data.agent.regions || [])
         setSpecificAreaState(data.agent.specificArea || "")
+        setInitialRegions(data.agent.regions || [])
+        setInitialArea(data.agent.specificArea || "")
       }
       setProfileDataLoading(false)
     })
@@ -173,7 +185,11 @@ export default function AgentSettingsPage() {
       specificArea: specificArea.trim() || null,
     })
     if (error) setPrError(error)
-    else setPrSuccess(true)
+    else {
+      setPrSuccess(true)
+      setInitialRegions([...selectedRegions])
+      setInitialArea(specificArea.trim())
+    }
     setPrLoading(false)
   }
 
@@ -188,7 +204,7 @@ export default function AgentSettingsPage() {
 
   return (
     <AgentGuard>
-      <div className="max-w-2xl space-y-10">
+      <div className="w-full max-w-2xl space-y-6 sm:space-y-10">
         <div>
           <h1 className="font-heading text-2xl font-bold text-text-primary">Settings</h1>
           <p className="mt-1 text-sm text-text-secondary">
@@ -197,12 +213,12 @@ export default function AgentSettingsPage() {
         </div>
 
         {referralLink && (
-          <div className="rounded-xl border border-border bg-surface p-6">
+          <div className="rounded-xl border border-border bg-surface p-4 sm:p-6">
             <h2 className="mb-1 font-heading text-lg font-semibold text-text-primary">Your Referral Link</h2>
             <p className="mb-4 text-sm text-text-secondary">Share this link to earn commissions on referred clients</p>
-            <div className="flex items-center gap-2 rounded-lg border border-border bg-surface-secondary px-4 py-2.5">
+            <div className="flex min-w-0 items-center gap-2 rounded-lg border border-border bg-surface-secondary px-3 py-2.5 sm:px-4">
               <LinkIcon size={16} className="shrink-0 text-accent-300" />
-              <code className="flex-1 truncate text-sm text-text-primary">{referralLink}</code>
+              <code className="min-w-0 flex-1 break-all text-xs sm:text-sm text-text-primary">{referralLink}</code>
               <button
                 onClick={copyReferralLink}
                 className="touch-target shrink-0 rounded-lg bg-primary-600 p-2 text-white transition-colors hover:bg-primary-700"
@@ -217,14 +233,14 @@ export default function AgentSettingsPage() {
         )}
 
         {/* ─── Photo & Region section ─── */}
-        <div className="space-y-6 rounded-xl border border-border bg-surface p-6">
+        <div className="space-y-6 rounded-xl border border-border bg-surface p-4 sm:p-6">
           <h2 className="font-heading text-lg font-semibold text-text-primary">Profile Picture &amp; Coverage</h2>
 
           {prError && <FormBanner variant="error">{prError}</FormBanner>}
           {prSuccess && <FormBanner variant="success">Profile picture &amp; coverage updated</FormBanner>}
 
           {/* Photo */}
-          <div className="flex items-center gap-5">
+          <div className="flex flex-col gap-4 min-[380px]:flex-row min-[380px]:items-center">
             <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-2 ring-accent-200/60">
               {avatarUploading ? (
                 <div className="flex h-full w-full items-center justify-center bg-surface-secondary">
@@ -240,7 +256,7 @@ export default function AgentSettingsPage() {
             </div>
             <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
               onChange={handleAvatarUpload} />
-            <div className="flex gap-2.5">
+            <div className="flex flex-wrap gap-2.5">
               <button
                 type="button"
                 onClick={() => avatarInputRef.current?.click()}
@@ -270,7 +286,7 @@ export default function AgentSettingsPage() {
             <p className="mb-3 text-xs text-text-secondary">
               Select all areas where you onboard clients.
             </p>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
               {KENYA_REGIONS.map((region) => {
                 const active = selectedRegions.includes(region)
                 return (
@@ -313,9 +329,10 @@ export default function AgentSettingsPage() {
             <button
               type="button"
               onClick={handleProfileRegionSave}
-              disabled={prLoading || profileDataLoading}
+              disabled={prLoading || profileDataLoading || !isRegionDirty}
               aria-busy={prLoading}
-              className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-700 hover:shadow-md disabled:opacity-50"
+              title={!isRegionDirty ? "No changes to save" : undefined}
+              className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-700 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {prLoading && <Loader2 size={16} className="animate-spin" />}
               Save changes
@@ -323,7 +340,7 @@ export default function AgentSettingsPage() {
           </div>
         </div>
 
-        <form onSubmit={handleProfileUpdate} className="space-y-6 rounded-xl border border-border bg-surface p-6">
+        <form onSubmit={handleProfileUpdate} className="space-y-6 rounded-xl border border-border bg-surface p-4 sm:p-6">
           <h2 className="font-heading text-lg font-semibold text-text-primary">Profile</h2>
 
           {profileError && <FormBanner variant="error">{profileError}</FormBanner>}
@@ -344,8 +361,9 @@ export default function AgentSettingsPage() {
           </div>
 
           <div className="flex justify-end">
-            <button type="submit" disabled={profileLoading} aria-busy={profileLoading}
-              className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
+            <button type="submit" disabled={profileLoading || !isAgentProfileDirty} aria-busy={profileLoading}
+              title={!isAgentProfileDirty ? "Fill in name or phone to save" : undefined}
+              className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {profileLoading && <Loader2 size={16} className="animate-spin" />}
               Save Changes
@@ -353,7 +371,7 @@ export default function AgentSettingsPage() {
           </div>
         </form>
 
-        <form onSubmit={handlePasswordChange} className="space-y-6 rounded-xl border border-border bg-surface p-6">
+        <form onSubmit={handlePasswordChange} className="space-y-6 rounded-xl border border-border bg-surface p-4 sm:p-6">
           <h2 className="font-heading text-lg font-semibold text-text-primary">Change Password</h2>
 
           {pwError && <FormBanner variant="error">{pwError}</FormBanner>}
@@ -381,8 +399,9 @@ export default function AgentSettingsPage() {
           </div>
 
           <div className="flex justify-end">
-            <button type="submit" disabled={pwLoading} aria-busy={pwLoading}
-              className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
+            <button type="submit" disabled={pwLoading || !isAgentPasswordDirty} aria-busy={pwLoading}
+              title={!isAgentPasswordDirty ? "Fill all password fields" : undefined}
+              className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {pwLoading && <Loader2 size={16} className="animate-spin" />}
               Change Password

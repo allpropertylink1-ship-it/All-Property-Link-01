@@ -204,7 +204,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
                   value={magicEmail}
                   onChange={(e) => setMagicEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="block flex-1 rounded-sm border border-border bg-surface px-4 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+                  className="block min-w-0 flex-1 rounded-sm border border-border bg-surface px-4 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
                 />
                 <button
                   type="button"

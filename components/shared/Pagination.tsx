@@ -38,7 +38,7 @@ export function Pagination({ currentPage, totalPages, basePath = "", searchParam
     }`;
 
   return (
-    <nav className="mt-10 flex items-center justify-center gap-2" aria-label="Pagination">
+    <nav className="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label="Pagination">
       {currentPage > 1 &&
         (onChange ? (
           <button type="button" onClick={() => onChange(currentPage - 1)} className={edgeClass}>

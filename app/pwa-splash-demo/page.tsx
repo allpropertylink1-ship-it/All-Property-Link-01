@@ -11,7 +11,7 @@ export default function PWASplashDemo() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-[100dvh] bg-gray-100 p-8">
       <h1 className="text-3xl font-bold mb-8 text-center">PWA Splash Screen Fit Comparison</h1>
       <p className="text-center text-gray-600 mb-8 max-w-3xl mx-auto">
         Source: 9:16 image (720x1280). Device screens have different aspect ratios.

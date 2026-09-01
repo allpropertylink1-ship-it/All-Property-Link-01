@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
@@ -101,6 +101,11 @@ export function DashboardNav() {
   const { user, logout } = useAuth()
   const [open, setOpen] = useState(false)
 
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : ""
+    return () => { document.body.style.overflow = "" }
+  }, [open])
+
   const userTypes = user?.userTypes ?? []
   const hasServiceAccess = userTypes.includes("FUNDI") || userTypes.includes("SERVICE_PROVIDER")
 
@@ -124,7 +129,7 @@ export function DashboardNav() {
       <aside
         id="dashboard-nav"
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-border bg-surface transition-transform duration-300 ease-out lg:static lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 flex w-64 max-w-[85vw] flex-col border-r border-border bg-surface transition-transform duration-300 ease-out lg:static lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full"
         )}
         aria-label="Dashboard navigation"

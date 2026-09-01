@@ -1,11 +1,11 @@
 export default function AgentDetailLoading() {
   return (
-    <div className="min-h-screen bg-surface" aria-busy="true" aria-label="Loading representative profile">
+    <div className="min-h-[100dvh] bg-surface" aria-busy="true" aria-label="Loading representative profile">
       {/* Hero band */}
       <section className="bg-primary-600 py-14 text-center sm:py-20">
         <div className="mx-auto max-w-7xl px-4">
           <div className="mx-auto mb-4 h-20 w-20 rounded-full bg-white/15" />
-          <div className="mx-auto h-9 w-72 rounded-lg bg-white/25" />
+          <div className="mx-auto h-9 w-full max-w-72 rounded-lg bg-white/25" />
           <div className="mx-auto mt-3 h-6 w-56 rounded-full bg-white/15" />
         </div>
       </section>

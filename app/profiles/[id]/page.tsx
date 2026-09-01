@@ -114,7 +114,7 @@ export default async function ProfilePage({ params }: Props) {
   const avatarUrl = resolveImageUrl(profile.businessLogo || profile.avatar)
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-[100dvh] bg-surface">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
@@ -153,15 +153,15 @@ export default async function ProfilePage({ params }: Props) {
             </div>
 
             <dl className="flex gap-3.5">
-              <div className="stat-glass rounded-xl px-5 py-4 text-center min-w-[96px]">
+              <div className="stat-glass rounded-xl px-4 py-4 text-center min-w-0 flex-1 sm:min-w-[96px]">
                 <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/65">Listings</dt>
                 <dd className="mt-1 font-heading text-2xl font-bold tabular-nums">{listingData.total}</dd>
               </div>
-              <div className="stat-glass rounded-xl px-5 py-4 text-center min-w-[96px]">
+              <div className="stat-glass rounded-xl px-4 py-4 text-center min-w-0 flex-1 sm:min-w-[96px]">
                 <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/65">Reviews</dt>
                 <dd className="mt-1 font-heading text-2xl font-bold tabular-nums">{reviews.total}</dd>
               </div>
-              <div className="stat-glass rounded-xl px-5 py-4 text-center min-w-[110px]">
+              <div className="stat-glass rounded-xl px-4 py-4 text-center min-w-0 flex-1 sm:min-w-[110px]">
                 <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/65">Avg rating</dt>
                 <dd className="mt-1 inline-flex items-center gap-1.5 font-heading text-2xl font-bold tabular-nums text-accent-200">
                   <Star className="h-4 w-4 fill-accent-200 text-accent-200" />

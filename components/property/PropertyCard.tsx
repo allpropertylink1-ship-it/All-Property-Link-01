@@ -110,13 +110,13 @@ export function PropertyCard({
           )}
         </div>
       </div>
-      <div className="flex flex-1 flex-col justify-center gap-1.5 p-5">
-        <h3 className="font-heading text-base font-semibold leading-tight text-text-primary md:text-lg">
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-4 min-[375px]:p-5">
+        <h3 className="line-clamp-2 min-w-0 break-words font-heading text-base font-semibold leading-tight text-text-primary md:text-lg">
           {title}
         </h3>
-        <div className="flex items-center gap-1 text-xs text-text-secondary md:text-sm">
+        <div className="flex min-w-0 items-center gap-1 text-xs text-text-secondary md:text-sm">
           <MapPinIcon />
-          <span>
+          <span className="min-w-0 truncate">
             {region}, {city}
           </span>
         </div>
@@ -126,7 +126,7 @@ export function PropertyCard({
           {area != null && area > 0 && <span>{area} sqft</span>}
           <span className="capitalize">{propertyType.toLowerCase()}</span>
         </div>
-        <p className="mt-1.5 font-heading text-xl font-semibold text-accent-400">
+        <p className="mt-1.5 break-words font-heading text-lg font-semibold text-accent-400 min-[375px]:text-xl">
           {formatPrice(price, listingPurpose ?? undefined)}
         </p>
       </div>

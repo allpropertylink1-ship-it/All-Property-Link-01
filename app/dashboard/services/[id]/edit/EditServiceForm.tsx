@@ -44,6 +44,7 @@ export function EditServiceForm({
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   const initialImages: string[] = Array.isArray(service.images)
     ? service.images
@@ -77,6 +78,7 @@ export function EditServiceForm({
 
       setError("");
       setUploading(true);
+      setIsDirty(true);
 
       const urls: string[] = [];
 
@@ -110,6 +112,7 @@ export function EditServiceForm({
       if (entry?.startsWith("blob:")) URL.revokeObjectURL(entry);
       return prev.filter((_, i) => i !== index);
     });
+    setIsDirty(true);
   }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -156,7 +159,7 @@ export function EditServiceForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} onChange={() => setIsDirty(true)} className="space-y-6">
 {error && (
         <FormBanner variant="error">{error}</FormBanner>
       )}
@@ -396,11 +399,12 @@ export function EditServiceForm({
         )}
       </div>
 
-      <div className="flex items-center gap-4 pt-2">
+      <div className="flex flex-wrap items-center gap-4 pt-2">
         <button
-type="submit"
-          disabled={submitting}
+ type="submit"
+          disabled={submitting || !isDirty}
           aria-busy={submitting}
+          title={!isDirty ? "No changes to save" : undefined}
           className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-3 text-sm font-medium text-text-on-primary transition-colors hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting && <Loader2 size={16} className="animate-spin" />}

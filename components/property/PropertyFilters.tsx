@@ -73,7 +73,7 @@ export function PropertyFilters({
         </select>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2">
         <div>
           <label htmlFor="minPrice" className="mb-1 block text-sm font-medium text-text-primary">
             Min price

@@ -73,7 +73,7 @@ export default async function ServicesPage({ searchParams }: Props) {
 
       <div className="mb-8">
         <form method="GET" className="flex flex-wrap gap-3">
-          <div className="relative min-w-[200px] flex-1">
+          <div className="relative min-w-0 flex-1 min-[360px]:min-w-[200px]">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
             <input
               type="text"
@@ -83,7 +83,7 @@ export default async function ServicesPage({ searchParams }: Props) {
               className="w-full rounded-lg border border-border bg-surface py-3 pl-9 pr-4 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
           </div>
-          <div className="relative w-48">
+          <div className="relative w-full sm:w-48">
             <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
             <input
               type="text"
@@ -120,7 +120,7 @@ export default async function ServicesPage({ searchParams }: Props) {
           <p className="text-text-secondary">No services found. Try adjusting your filters.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 min-[360px]:grid-cols-2 lg:grid-cols-3">
           {data.services.map((service: ServiceListingCard) => {
             const rawImages = Array.isArray(service.images) ? service.images : [];
             const imageUrlRaw = rawImages.length > 0 ? rawImages[0] : null;
@@ -184,7 +184,7 @@ export default async function ServicesPage({ searchParams }: Props) {
       )}
 
       {data.totalPages > 1 && (
-        <div className="mt-8 flex justify-center gap-2">
+        <div className="mt-8 flex flex-wrap justify-center gap-2">
           {Array.from({ length: data.totalPages }, (_, i) => i + 1).map((p) => {
             const params = new URLSearchParams();
             if (category) params.set("category", category);

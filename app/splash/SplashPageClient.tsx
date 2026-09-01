@@ -46,8 +46,8 @@ export function SplashPageClient() {
   if (prefersReducedMotion) {
     return (
       <div
-        className="fixed inset-0 z-[60] overflow-hidden bg-cover bg-center max-h-screen"
-        style={{ backgroundImage: "url(/splash/all-property-link-poster.jpg)", height: "100vh", filter: "blur(20px)" }}
+        className="fixed inset-0 z-[60] overflow-hidden bg-cover bg-center max-h-[100dvh]"
+        style={{ backgroundImage: "url(/splash/all-property-link-poster.jpg)", height: "100dvh", filter: "blur(20px)" }}
         onClick={dismiss}
         onKeyDown={(e) => e.key === "Enter" && dismiss()}
         role="button"
@@ -71,12 +71,12 @@ export function SplashPageClient() {
 
   return (
     <div
-      className="fixed inset-0 z-[60] overflow-hidden max-h-screen"
+      className="fixed inset-0 z-[60] overflow-hidden max-h-[100dvh]"
       onClick={dismiss}
       role="dialog"
       aria-modal="true"
       aria-label="Welcome to All Property Link"
-      style={{ height: "100vh" }}
+      style={{ height: "100dvh" }}
     >
       <video
         ref={videoRef}

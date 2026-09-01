@@ -2,7 +2,7 @@ import { FormSkeleton } from "@/components/shared/LoadingSkeleton"
 
 export default function ContactLoading() {
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-surface">
+    <div className="min-h-[calc(100dvh-80px)] bg-surface">
       <section className="mx-auto max-w-7xl px-4 py-12">
         <div className="mb-12 text-center">
           <div className="mx-auto mb-2 h-9 w-48 animate-pulse rounded bg-surface-secondary" />

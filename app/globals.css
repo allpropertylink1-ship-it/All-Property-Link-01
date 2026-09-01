@@ -10,6 +10,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-tap-highlight-color: transparent;
+    max-width: 100%;
+    overflow-x: clip;
   }
 
   body {
@@ -18,7 +20,8 @@
     line-height: 1.5;
     color: var(--color-text);
     background: var(--color-bg);
-    overflow-x: hidden;
+    max-width: 100%;
+    overflow-x: clip;
   }
 
   :root {
@@ -47,7 +50,7 @@
     --shadow-lg: 0 6px 24px rgba(0,0,0,.08);
 
     --ease: cubic-bezier(.25,.1,.25,1);
-    --nav-h: 56px;
+    --nav-h: 64px;
   }
 
   a { color: inherit; text-decoration: none; }

@@ -76,7 +76,7 @@ export default function AgentDisputeDetailPage() {
 
       <div className="rounded-xl border border-border bg-surface p-6">
         <div className="mb-4 flex items-start justify-between">
-          <div>
+          <div className="min-w-0 flex-1">
             <h1 className="font-heading text-2xl font-bold text-text-primary">{dispute.title}</h1>
             <p className="mt-1 text-sm text-text-secondary">Submitted {new Date(dispute.createdAt).toLocaleDateString()}</p>
           </div>

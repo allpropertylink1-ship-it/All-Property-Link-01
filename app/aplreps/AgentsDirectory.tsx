@@ -165,7 +165,7 @@ export function AgentsDirectory() {
                           <CitiesCovered size={40} className="text-text-primary" />
                           <span className="text-xs font-medium leading-tight text-text-primary">Cities Covered</span>
                         </div>
-                        <div className="grid flex-1 grid-cols-2 gap-x-3 gap-y-2.5">
+                        <div className="grid flex-1 grid-cols-1 gap-x-3 gap-y-2.5 min-[360px]:grid-cols-2">
                           {cities.map((c) => <CityPill key={c} city={c} />)}
                         </div>
                       </div>
@@ -188,7 +188,7 @@ export function AgentsDirectory() {
                     <p className="mt-2 text-[17px] text-text-primary">
                       {agent._count.users} referral{agent._count.users !== 1 ? "s" : ""} | {agent.propertyCount} listing{agent.propertyCount !== 1 ? "s" : ""}
                     </p>
-                    <div className="mt-4 grid max-w-[320px] grid-cols-2 gap-x-4 gap-y-3">
+                    <div className="mt-4 grid max-w-full grid-cols-1 gap-x-4 gap-y-3 min-[360px]:grid-cols-2 sm:max-w-[320px]">
                       <Link
                         href={`/aplreps/${agent.id}`}
                         className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary-50 px-4 py-2 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-100"

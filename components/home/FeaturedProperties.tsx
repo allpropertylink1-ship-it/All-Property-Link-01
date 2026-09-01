@@ -32,7 +32,7 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
   return (
     <FeaturedSection title="Properties for Sale & Rent" viewAllHref="/properties" loading={loading} error={error ?? undefined} emptyMessage={!loading && !error && properties.length === 0 ? "No properties listed yet." : undefined}>
       {properties.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 md:grid-cols-3">
           {properties.map((p, i) => (
             <PropertyCard key={p.slug} slug={p.slug} title={p.title} price={p.price == null ? null : Number(p.price)} currency={p.currency}
               propertyType={p.propertyType} listingPurpose={p.listingPurpose} city={p.city} region={p.region}

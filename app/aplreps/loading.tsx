@@ -1,6 +1,6 @@
 export default function AplRepsLoading() {
   return (
-    <div className="min-h-screen bg-surface" aria-busy="true" aria-label="Loading representatives">
+    <div className="min-h-[100dvh] bg-surface" aria-busy="true" aria-label="Loading representatives">
       {/* Page header */}
       <section className="bg-primary-600 py-14 text-center sm:py-20">
         <div className="mx-auto max-w-7xl px-4">
@@ -34,7 +34,7 @@ export default function AplRepsLoading() {
                   <div className="mt-4 border-t border-accent-300/60" />
                   <div className="mt-4 flex items-center gap-4">
                     <div className="h-14 w-14 shrink-0 rounded bg-surface-secondary animate-pulse" />
-                    <div className="grid flex-1 grid-cols-2 gap-x-3 gap-y-2.5">
+                    <div className="grid flex-1 grid-cols-1 gap-x-3 gap-y-2.5 min-[360px]:grid-cols-2">
                       <div className="h-8 rounded-full bg-surface-secondary animate-pulse" />
                       <div className="h-8 rounded-full bg-surface-secondary animate-pulse" />
                       <div className="h-8 rounded-full bg-surface-secondary animate-pulse" />
@@ -50,7 +50,7 @@ export default function AplRepsLoading() {
                   <div className="flex min-w-0 flex-1 flex-col">
                     <div className="h-7 w-56 rounded bg-surface-secondary animate-pulse" />
                     <div className="mt-2 h-5 w-44 rounded bg-surface-secondary animate-pulse" />
-                    <div className="mt-4 grid max-w-[320px] grid-cols-2 gap-x-4 gap-y-3">
+                    <div className="mt-4 grid max-w-full grid-cols-1 gap-x-4 gap-y-3 min-[360px]:grid-cols-2 sm:max-w-[320px]">
                       <div className="h-9 rounded-full bg-surface-secondary animate-pulse" />
                       <div className="h-9 rounded-full bg-surface-secondary animate-pulse" />
                       <div className="h-9 rounded-full bg-surface-secondary animate-pulse" />

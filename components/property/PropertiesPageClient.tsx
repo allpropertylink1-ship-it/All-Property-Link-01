@@ -72,7 +72,7 @@ export function PropertiesPageClient({ searchParams }: Props) {
           </p>
           <PropertyGrid properties={data.properties} />
           {data.totalPages > 1 && (
-            <div className="mt-8 flex justify-center gap-2">
+            <div className="mt-8 flex flex-wrap justify-center gap-2">
               {Array.from({ length: data.totalPages }, (_, i) => i + 1).map((p) => (
                 <a key={p}
                   href={`/properties?page=${p}${city ? `&city=${city}` : ""}${propertyType ? `&propertyType=${propertyType}` : ""}${purpose ? `&purpose=${purpose}` : ""}${minPrice ? `&minPrice=${minPrice}` : ""}${maxPrice ? `&maxPrice=${maxPrice}` : ""}${bedrooms ? `&bedrooms=${bedrooms}` : ""}`}

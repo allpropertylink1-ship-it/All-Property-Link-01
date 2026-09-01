@@ -47,7 +47,7 @@ export function RegisterAccountInfo({
         </div>
       </div>
 
-      <button type="button" onClick={onBack} className="mb-4 flex items-center gap-1 text-sm text-accent-300 hover:text-accent-400">
+      <button type="button" onClick={onBack} className="mb-4 flex touch-target items-center gap-1 text-sm text-accent-300 hover:text-accent-400">
         <ArrowLeft size={16} /> Back
       </button>
 
@@ -56,7 +56,7 @@ export function RegisterAccountInfo({
           <FormBanner variant="error">{error}</FormBanner>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
           <div>
             <label htmlFor="firstName" className="block text-sm font-medium text-text-primary">First name</label>
             <input id="firstName" name="firstName" type="text" required

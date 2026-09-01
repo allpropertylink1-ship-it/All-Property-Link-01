@@ -131,7 +131,7 @@ export default function AgentClaimsPage() {
 
   return (
     <AgentGuard>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-heading text-2xl font-bold text-text-primary">Payment Claims</h1>
           <p className="mt-1 text-sm text-text-secondary">{total} total claim{total !== 1 ? "s" : ""}</p>
@@ -172,7 +172,7 @@ export default function AgentClaimsPage() {
         <div className="py-20 text-center text-sm text-text-secondary">No claims found. Submit your first payment claim above.</div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full text-left text-sm">
+          <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="bg-surface-secondary text-text-secondary">
               <tr>
                 <th className="px-4 py-3 font-medium">Property</th>

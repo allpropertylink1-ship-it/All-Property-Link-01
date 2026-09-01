@@ -1,6 +1,6 @@
 export default function ProfileLoading() {
   return (
-    <div className="min-h-screen bg-surface" aria-busy="true" aria-label="Loading profile">
+    <div className="min-h-[100dvh] bg-surface" aria-busy="true" aria-label="Loading profile">
       {/* Identity band */}
       <section className="profile-hero py-14 sm:py-20">
         <div className="mx-auto max-w-7xl px-4">
@@ -77,7 +77,7 @@ export default function ProfileLoading() {
           <div>
             <div className="mb-1 h-3 w-36 animate-pulse rounded bg-surface-secondary" />
             <div className="mb-7 h-7 w-56 animate-pulse rounded bg-surface-secondary" />
-            <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 min-[360px]:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="overflow-hidden rounded-xl border border-border bg-surface">
                   <div className="aspect-[4/3] w-full animate-pulse bg-surface-secondary" />

@@ -215,7 +215,7 @@ export default async function ServiceDetailPage({ params }: Props) {
           {service.description && (
             <div>
               <h2 className="mb-2 text-sm font-semibold text-text-primary">Description</h2>
-              <p className="whitespace-pre-line text-sm leading-relaxed text-text-secondary">
+              <p className="whitespace-pre-line break-words text-sm leading-relaxed text-text-secondary [overflow-wrap:anywhere]">
                 {service.description}
               </p>
             </div>

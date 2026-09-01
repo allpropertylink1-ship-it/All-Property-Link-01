@@ -190,7 +190,7 @@ export function PropertyGallery({ images: rawImages, title }: Props) {
       {/* Lightbox */}
       <Dialog open={showLightbox} onOpenChange={setShowLightbox}>
       <DialogContent
-            className="fixed inset-0 z-50 flex h-full w-full max-w-none translate-x-0 translate-y-0 items-center justify-center bg-black/90 p-0 text-white ring-0 sm:max-w-none"
+            className="fixed inset-0 z-50 flex h-[100dvh] max-h-[100dvh] w-full max-w-none translate-x-0 translate-y-0 items-center justify-center bg-black/90 p-0 pt-[env(safe-area-inset-top)] text-white ring-0 sm:max-w-none"
             showCloseButton={false}
           >
             <DialogTitle className="sr-only">{title} — image {lightboxIndex + 1} of {images.length}</DialogTitle>

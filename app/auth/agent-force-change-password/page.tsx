@@ -16,7 +16,7 @@ export default function AgentForceChangePasswordPage() {
 
   if (!user || user.authMethod !== "agent") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface px-4">
+      <div className="flex min-h-[100dvh] items-center justify-center bg-surface px-4">
         <div className="w-full max-w-md text-center">
           <p className="text-text-secondary">You must log in as an APL Representative to access this page.</p>
           <a href="/auth/login" className="mt-4 inline-block text-accent-300 hover:text-accent-400">Go to login</a>
@@ -54,14 +54,14 @@ export default function AgentForceChangePasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface px-4">
+    <div className="flex min-h-[100dvh] items-center justify-center bg-surface px-4">
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
           <h2 className="font-heading text-xl font-bold text-text-primary">
             All Property <span className="text-accent-300">Link</span>
           </h2>
         </div>
-        <div className="rounded-xl border border-border bg-surface p-8">
+        <div className="rounded-xl border border-border bg-surface p-6 sm:p-8">
           <div className="mb-6 text-center">
             <h1 className="font-heading text-3xl font-bold text-text-primary">
               Change your password

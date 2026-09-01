@@ -39,7 +39,7 @@ export function FeaturedFundis({ initialData }: { initialData?: ProfileRow[] }) 
       }
     >
       {services.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {services.map((s) => (
             <ProfileCard key={s.id} item={s} variant="fundi" />
           ))}

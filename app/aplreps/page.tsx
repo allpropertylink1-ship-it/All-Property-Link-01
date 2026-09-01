@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AgentsPage() {
   return (
-    <main className="min-h-screen bg-surface">
+    <main className="min-h-[100dvh] bg-surface">
       <section className="bg-primary-600 py-16 text-center text-text-on-primary sm:py-24">
         <div className="mx-auto max-w-7xl px-4">
           <h1 className="mb-4 font-heading text-4xl font-bold tracking-tight sm:text-5xl">Our APL Representatives</h1>

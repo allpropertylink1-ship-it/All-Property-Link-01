@@ -176,7 +176,7 @@ export default function BrowsePageClient() {
           const Icon = section.icon;
           return (
             <section key={section.id}>
-              <div className="mb-5 flex items-end justify-between">
+              <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-50">
                     <Icon className="h-4 w-4 text-primary-500" />
@@ -193,7 +193,7 @@ export default function BrowsePageClient() {
               </div>
 
               {section.items.length > 0 ? (
-                <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 md:grid-cols-3">
                   {section.items.map(section.renderItem)}
                 </div>
               ) : (

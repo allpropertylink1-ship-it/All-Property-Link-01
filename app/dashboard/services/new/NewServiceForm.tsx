@@ -25,6 +25,7 @@ export function NewServiceForm({ categories }: { categories: Category[] }) {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
 
@@ -50,6 +51,7 @@ export function NewServiceForm({ categories }: { categories: Category[] }) {
 
       setError("");
       setUploading(true);
+      setIsDirty(true);
 
       const urls: string[] = [];
 
@@ -83,6 +85,7 @@ export function NewServiceForm({ categories }: { categories: Category[] }) {
       if (entry?.startsWith("blob:")) URL.revokeObjectURL(entry);
       return prev.filter((_, i) => i !== index);
     });
+    setIsDirty(true);
   }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -119,7 +122,7 @@ export function NewServiceForm({ categories }: { categories: Category[] }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} onChange={() => setIsDirty(true)} className="space-y-6">
 {error && (
         <FormBanner variant="error">{error}</FormBanner>
       )}
@@ -321,9 +324,10 @@ export function NewServiceForm({ categories }: { categories: Category[] }) {
 
       <div className="flex items-center gap-4 pt-2">
         <button
-type="submit"
-          disabled={submitting}
+ type="submit"
+          disabled={submitting || !isDirty}
           aria-busy={submitting}
+          title={!isDirty ? "Make changes before saving" : undefined}
           className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-3 text-sm font-medium text-text-on-primary transition-colors hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting && <Loader2 size={16} className="animate-spin" />}

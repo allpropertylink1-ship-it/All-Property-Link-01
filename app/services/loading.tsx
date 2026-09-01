@@ -3,7 +3,7 @@ import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 export default function ServicesLoading() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="mb-8 h-9 w-72 rounded bg-surface-secondary" />
+      <div className="mb-8 h-9 w-full max-w-72 rounded bg-surface-secondary" />
       <div className="mb-8">
         <div className="flex gap-3 overflow-x-auto pb-2">
           {Array.from({ length: 5 }).map((_, i) => (

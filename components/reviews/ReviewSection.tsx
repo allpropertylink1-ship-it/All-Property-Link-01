@@ -415,7 +415,7 @@ export function ReviewSection({
                 </div>
 
                 {review.comment && (
-                  <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-text-secondary">
+                  <p className="mt-4 whitespace-pre-line break-words text-sm leading-relaxed text-text-secondary [overflow-wrap:anywhere]">
                     {review.comment}
                   </p>
                 )}

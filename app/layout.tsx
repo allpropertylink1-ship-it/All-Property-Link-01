@@ -24,6 +24,10 @@ const dmSans = DM_Sans({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  minimumScale: 0.5,
+  maximumScale: 5,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-visual",
 };
 
 export const metadata: Metadata = {
@@ -45,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="overflow-x-hidden">
+    <html lang="en">
       <head>
         <link rel="preload" href="/splash/all-property-link.mp4" as="video" type="video/mp4" />
         <link rel="preload" href="/splash/all-property-link-poster.jpg" as="image" type="image/jpeg" />
@@ -56,10 +60,10 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="All Property Link" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
-      <body className={`${sora.variable} ${dmSans.variable} flex min-h-screen flex-col antialiased`}>
+      <body className={`${sora.variable} ${dmSans.variable} flex min-h-[100dvh] flex-col antialiased`}>
         <AuthProvider>
           <Navbar />
-          <main className="flex-1 pb-20 md:pb-0">{children}</main>
+          <main className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6">{children}</main>
           <CookieConsent />
           <BottomNav />
           <Footer />

@@ -44,7 +44,7 @@ function WrenchIcon() {
 export default function AboutPage() {
   return (
     <>
-      <div className="min-h-[calc(100vh-80px)] bg-surface">
+      <div className="min-h-[calc(100dvh-80px)] bg-surface">
         <section className="bg-gradient-to-br from-primary-800 via-primary-700 to-primary-600 px-4 py-20 text-center text-text-on-primary">
           <h1 className="mx-auto max-w-4xl font-heading text-4xl font-bold leading-tight sm:text-5xl">
             Kenya&apos;s Property &amp; Services Marketplace

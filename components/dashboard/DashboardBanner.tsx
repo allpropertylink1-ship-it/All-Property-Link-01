@@ -15,9 +15,9 @@ export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, 
   if (kycStatus === "NONE" || kycStatus === "REJECTED") {
     return (
       <div className="px-6 pt-4 lg:px-8">
-        <div className="flex items-center gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-sm">
+        <div className="flex min-w-0 items-center gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-sm">
           <ShieldAlert size={18} className="shrink-0 text-error-500" />
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <p className="font-medium text-error-700">
               {kycStatus === "NONE" ? "Identity verification required" : "Identity verification rejected"}
             </p>
@@ -41,9 +41,9 @@ export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, 
   return (
     <div className="px-6 pt-4 lg:px-8">
       {accountStatus === "PENDING_APPROVAL" && (
-        <div className="flex items-center gap-3 rounded-xl border border-warning-200 bg-warning-50 px-4 py-3 text-sm">
+        <div className="flex min-w-0 items-center gap-3 rounded-xl border border-warning-200 bg-warning-50 px-4 py-3 text-sm">
           <Clock size={18} className="shrink-0 text-warning-500" />
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <p className="font-medium text-warning-700">Account pending approval</p>
             <p className="text-warning-600">
               {onboardingComplete
@@ -63,9 +63,9 @@ export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, 
       )}
 
       {accountStatus === "REJECTED" && (
-        <div className="flex items-center gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-sm">
+        <div className="flex min-w-0 items-center gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-sm">
           <XCircle size={18} className="shrink-0 text-error-500" />
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <p className="font-medium text-error-700">Account not approved</p>
             <p className="text-error-600">
               Your registration was not approved. Please contact support or update your information.

@@ -45,6 +45,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const [passportPhotoUrl, setPassportPhotoUrl] = useState(user.passportPhoto || "");
   const [passportFile, setPassportFile] = useState<File | null>(null);
   const [cropping, setCropping] = useState(false);
+  const [isProfileDirty, setIsProfileDirty] = useState(false);
+  const [isPasswordDirty, setIsPasswordDirty] = useState(false);
 
   function handlePassportSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -112,6 +114,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
       }
 
       setMessage({ type: "success", text: "Profile updated successfully" });
+      setIsProfileDirty(false);
       router.refresh();
     } catch (err) {
       setMessage({
@@ -153,6 +156,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
       setMessage({ type: "success", text: "Password changed successfully" });
       setShowPasswordForm(false);
+      setIsPasswordDirty(false);
       (e.target as HTMLFormElement).reset();
     } catch (err) {
       setMessage({
@@ -203,8 +207,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
         </FormBanner>
       )}
 
-      <div className="flex items-center gap-6">
-        <div className="relative">
+      <div className="flex min-w-0 items-center gap-4 min-[375px]:gap-6">
+        <div className="relative shrink-0">
           <label className="block cursor-pointer">
             {passportPhotoUrl ? (
               <img src={resolveImageUrl(passportPhotoUrl) ?? undefined} alt="" className="h-20 w-20 rounded-full object-cover ring-2 ring-primary/20" />
@@ -220,8 +224,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
             <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handlePassportSelect} className="hidden" disabled={passportUploading} />
           </label>
         </div>
-        <div>
-          <h2 className="font-heading text-xl font-semibold text-text-primary">
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate font-heading text-lg font-semibold text-text-primary min-[375px]:text-xl">
             {user.firstName} {user.lastName}
           </h2>
           <p className="text-sm text-text-secondary">{user.email}</p>
@@ -242,7 +246,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         />
       )}
 
-      <form onSubmit={handleProfileSubmit} className="space-y-6">
+      <form onSubmit={handleProfileSubmit} onChange={() => setIsProfileDirty(true)} className="space-y-6">
         <h3 className="font-heading text-lg font-semibold text-text-primary">
           Personal Information
         </h3>
@@ -322,7 +326,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         </div>
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={profileLoading}>
+          <Button type="submit" disabled={profileLoading || !isProfileDirty} title={!isProfileDirty ? "No changes to save" : undefined}>
             <Save size={16} className="mr-2" />
             {profileLoading ? "Saving..." : "Save changes"}
           </Button>
@@ -335,7 +339,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         </h3>
 
         {showPasswordForm ? (
-          <form onSubmit={handlePasswordChange} className="space-y-4 rounded-lg border border-border bg-surface-secondary p-4">
+          <form onSubmit={handlePasswordChange} onChange={() => setIsPasswordDirty(true)} className="space-y-4 rounded-lg border border-border bg-surface-secondary p-4">
             <div className="space-y-2">
               <Label htmlFor="currentPassword">Current password</Label>
               <Input
@@ -366,7 +370,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
               />
             </div>
             <div className="flex gap-2">
-              <Button type="submit" disabled={passwordLoading}>
+              <Button type="submit" disabled={passwordLoading || !isPasswordDirty} title={!isPasswordDirty ? "Fill in all password fields" : undefined}>
                 {passwordLoading ? "Changing..." : "Change password"}
               </Button>
               <Button

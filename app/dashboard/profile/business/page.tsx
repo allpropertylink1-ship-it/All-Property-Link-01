@@ -124,6 +124,7 @@ export default function BusinessProfilePage() {
     location: "",
     estateSubLocation: "",
   })
+  const [initialForm, setInitialForm] = useState<typeof form | null>(null)
 
   const [businessProfilePhotoUrl, setBusinessProfilePhotoUrl] = useState("")
   const [businessLogoUrl, setBusinessLogoUrl] = useState("")
@@ -148,7 +149,7 @@ export default function BusinessProfilePage() {
       }>("/api/user/profile")
       if (res.data?.user) {
         const u = res.data.user
-        setForm({
+        const next = {
           companyName: u.companyName || "",
           contactPerson: u.contactPerson || "",
           category: u.category || "",
@@ -156,7 +157,9 @@ export default function BusinessProfilePage() {
           website: u.website || "",
           location: u.location || "",
           estateSubLocation: u.estateSubLocation || "",
-        })
+        }
+        setForm(next)
+        setInitialForm(next)
         setBusinessProfilePhotoUrl(u.businessProfilePhoto || "")
         setBusinessLogoUrl(u.businessLogo || "")
       }
@@ -255,6 +258,8 @@ export default function BusinessProfilePage() {
         ? specialtiesService
         : []
 
+  const isDirty = initialForm ? JSON.stringify(form) !== JSON.stringify(initialForm) : false
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true)
@@ -263,6 +268,7 @@ export default function BusinessProfilePage() {
     try {
       const res = await api.patch("/api/user/profile", form)
       if (res.error) throw new Error(res.error)
+      setInitialForm({ ...form })
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
@@ -331,7 +337,7 @@ export default function BusinessProfilePage() {
           </div>
 
           <div className="flex items-center gap-4 justify-self-end">
-            <div className="text-right flex-1">
+            <div className="min-w-0 text-right flex-1">
               <h3 className="font-heading text-sm font-semibold text-text-primary">Business Logo</h3>
               <p className="text-xs text-text-secondary">Appears on your listings & services</p>
               <label className="mt-2 touch-target inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700">
@@ -370,7 +376,7 @@ export default function BusinessProfilePage() {
           </div>
 
           <div className="flex items-center gap-4 justify-self-end">
-            <div className="text-right flex-1">
+            <div className="min-w-0 text-right flex-1">
               <h3 className="font-heading text-sm font-semibold text-text-primary">Profile Photo</h3>
               <p className="text-xs text-text-secondary">This photo appears on your public profile</p>
               <div className="mt-2 flex flex-wrap justify-end gap-2">
@@ -413,7 +419,7 @@ export default function BusinessProfilePage() {
           <label className="block text-sm font-medium text-text-primary">
             Category <span className="text-error-500">*</span>
           </label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2">
             {categories.map((cat) => (
               <button
                 key={cat.value}
@@ -441,7 +447,7 @@ export default function BusinessProfilePage() {
               Select your specialties <span className="text-error-500">*</span>
               <span className="ml-2 text-xs font-normal text-text-secondary">(tap to select multiple)</span>
             </label>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:grid-cols-3">
               {selectedSpecialties.map((spec) => {
                 const isSelected = form.specialties.includes(spec.value);
                 return (
@@ -508,9 +514,10 @@ export default function BusinessProfilePage() {
 
         <div className="flex justify-end border-t border-border pt-6">
           <button
-type="submit"
-            disabled={loading}
+ type="submit"
+            disabled={loading || !isDirty}
             aria-busy={loading}
+            title={!isDirty ? "No changes to save" : undefined}
             className="touch-target flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? (
