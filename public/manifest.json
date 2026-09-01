@@ -57,38 +57,6 @@
       "purpose": "any maskable"
     }
   ],
-  "splash_screens": [
-    {
-      "src": "/icons/splash-640x1136.png",
-      "sizes": "640x1136",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/icons/splash-750x1334.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/icons/splash-828x1792.png",
-      "sizes": "828x1792",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/icons/splash-1125x2436.png",
-      "sizes": "1125x2436",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/icons/splash-1242x2688.png",
-      "sizes": "1242x2688",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ],
   "categories": ["business", "lifestyle", "shopping"],
   "shortcuts": [
     {
