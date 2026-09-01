@@ -79,8 +79,8 @@ export function Navbar() {
       {/* Mobile navigation - compact dropdown up to About, translucent */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[60] lg:hidden">
-          <button type="button" aria-label="Close menu" className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={() => setMobileOpen(false)} />
-          <div className="absolute right-4 top-20 w-64 max-w-[85vw] rounded-2xl bg-surface/85 backdrop-blur-xl border border-border/50 shadow-2xl overflow-hidden">
+          <button type="button" aria-label="Close menu" className="absolute inset-0 bg-black/20" onClick={() => setMobileOpen(false)} />
+          <div className="absolute right-4 top-20 w-64 max-w-[85vw] rounded-2xl bg-surface/90 backdrop-blur-xl border border-border/50 shadow-2xl overflow-hidden supports-backdrop-filter:backdrop-blur-xl">
             <div className="flex h-12 items-center justify-between px-4 border-b border-border/50">
               <span className="text-sm font-semibold text-text-primary">Navigation</span>
               <button
