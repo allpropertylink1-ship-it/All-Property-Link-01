@@ -76,29 +76,29 @@ export function Navbar() {
           </div>
         </div>
       </nav>
-      {/* Mobile navigation drawer - outside nav to avoid sticky clipping */}
+      {/* Mobile navigation - compact dropdown up to About, translucent */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[60] lg:hidden">
-          <button type="button" aria-label="Close menu" className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <div className="absolute right-0 inset-y-0 flex w-72 max-w-[85vw] flex-col bg-surface border-l border-border shadow-xl">
-            <div className="flex h-16 shrink-0 items-center justify-between border-b border-border px-4">
-              <span className="font-semibold text-text-primary">Navigation</span>
+          <button type="button" aria-label="Close menu" className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={() => setMobileOpen(false)} />
+          <div className="absolute right-4 top-20 w-64 max-w-[85vw] rounded-2xl bg-surface/85 backdrop-blur-xl border border-border/50 shadow-2xl overflow-hidden">
+            <div className="flex h-12 items-center justify-between px-4 border-b border-border/50">
+              <span className="text-sm font-semibold text-text-primary">Navigation</span>
               <button
                 type="button"
-                className="touch-target flex h-11 w-11 items-center justify-center rounded-lg hover:bg-surface-secondary"
+                className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-surface-secondary"
                 onClick={() => setMobileOpen(false)}
                 aria-label="Close menu"
               >
-                <X size={22} />
+                <X size={16} />
               </button>
             </div>
-            <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+            <nav className="p-2 space-y-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="touch-target flex items-center gap-3 rounded-lg px-4 py-3 text-[15px] font-medium text-text-primary transition-colors hover:bg-surface-secondary"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium text-text-primary transition-colors hover:bg-surface-secondary"
                 >
                   {link.label}
                 </Link>
@@ -107,9 +107,9 @@ export function Navbar() {
                 <Link
                   href="/dashboard/agent"
                   onClick={() => setMobileOpen(false)}
-                  className="touch-target mt-2 flex items-center gap-3 rounded-lg bg-primary-600 px-4 py-3 text-[15px] font-medium text-white"
+                  className="mt-1 flex items-center gap-2 rounded-xl bg-primary-600 px-3 py-2.5 text-[14px] font-medium text-white"
                 >
-                  <Briefcase size={20} />
+                  <Briefcase size={16} />
                   Agent Dashboard
                 </Link>
               )}
