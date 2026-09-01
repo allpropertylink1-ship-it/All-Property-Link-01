@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useAuth } from "@/lib/auth-context"
+import { usePathname } from "next/navigation"
 import { Briefcase, Menu, X } from "@/components/ui/icons"
 import dynamic from "next/dynamic"
 
@@ -21,6 +22,8 @@ const navLinks = [
 
 export function Navbar() {
   const { user } = useAuth()
+  const pathname = usePathname()
+  const isHome = pathname === "/"
   const isAgent = user?.authMethod === "agent"
   const [mobileOpen, setMobileOpen] = useState(false)
   useEffect(() => {
@@ -67,16 +70,18 @@ export function Navbar() {
 
           <div className="flex items-center gap-1">
             <ClientProfileButton />
-            {/* Mobile hamburger - last so it sits at far right on mobile when profile auth is hidden */}
-            <button
-              type="button"
-              className="touch-target flex h-11 w-11 items-center justify-center rounded-lg border border-transparent hover:bg-surface-secondary lg:hidden"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label={mobileOpen ? "Close menu" : "Open menu"}
-              aria-expanded={mobileOpen}
-            >
-              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
+            {/* Mobile hamburger - only on home page, far right */}
+            {isHome && (
+              <button
+                type="button"
+                className="touch-target flex h-11 w-11 items-center justify-center rounded-lg border border-transparent hover:bg-surface-secondary lg:hidden"
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label={mobileOpen ? "Close menu" : "Open menu"}
+                aria-expanded={mobileOpen}
+              >
+                {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+              </button>
+            )}
           </div>
         </div>
       </nav>
