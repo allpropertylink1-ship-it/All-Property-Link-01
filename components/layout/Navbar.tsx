@@ -80,9 +80,9 @@ export function Navbar() {
       {mobileOpen && (
         <div className="fixed inset-0 z-[60] lg:hidden">
           <button type="button" aria-label="Close menu" className="absolute inset-0 bg-black/20" onClick={() => setMobileOpen(false)} />
-          <div className="absolute right-4 top-20 w-64 max-w-[85vw] rounded-2xl bg-surface/90 backdrop-blur-xl border border-border/50 shadow-2xl overflow-hidden supports-backdrop-filter:backdrop-blur-xl">
-            <div className="flex h-12 items-center justify-between px-4 border-b border-border/50">
-              <span className="text-sm font-semibold text-text-primary">Navigation</span>
+          <div className="absolute right-4 top-20 w-64 max-w-[85vw] rounded-2xl bg-white border border-border shadow-2xl overflow-hidden">
+            <div className="flex h-12 items-center justify-between px-4 border-b border-border">
+              <span className="text-[15px] font-bold tracking-tight text-text-primary">Navigation</span>
               <button
                 type="button"
                 className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-surface-secondary"
@@ -92,13 +92,13 @@ export function Navbar() {
                 <X size={16} />
               </button>
             </div>
-            <nav className="p-2 space-y-1">
+            <nav className="p-3 space-y-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium text-text-primary transition-colors hover:bg-surface-secondary"
+                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-semibold text-foreground transition-colors hover:bg-surface-secondary active:bg-primary-50"
                 >
                   {link.label}
                 </Link>
@@ -107,9 +107,9 @@ export function Navbar() {
                 <Link
                   href="/dashboard/agent"
                   onClick={() => setMobileOpen(false)}
-                  className="mt-1 flex items-center gap-2 rounded-xl bg-primary-600 px-3 py-2.5 text-[14px] font-medium text-white"
+                  className="mt-2 flex items-center gap-2 rounded-xl bg-primary-600 px-3 py-3 text-[15px] font-semibold text-white shadow-sm"
                 >
-                  <Briefcase size={16} />
+                  <Briefcase size={18} />
                   Agent Dashboard
                 </Link>
               )}
