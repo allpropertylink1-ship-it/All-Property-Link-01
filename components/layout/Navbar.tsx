@@ -78,7 +78,7 @@ export function Navbar() {
         {mobileOpen && (
           <div className="fixed inset-0 z-[60] lg:hidden">
             <button type="button" aria-label="Close menu" className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-            <div className="absolute right-0 top-0 flex h-full w-72 max-w-[85vw] flex-col bg-surface border-l border-border shadow-xl">
+            <div className="absolute right-0 inset-y-0 flex w-72 max-w-[85vw] flex-col bg-surface border-l border-border shadow-xl">
               <div className="flex h-16 shrink-0 items-center justify-between border-b border-border px-4">
                 <span className="font-semibold text-text-primary">Navigation</span>
                 <button
