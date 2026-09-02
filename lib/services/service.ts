@@ -114,7 +114,7 @@ export const getServiceListings = cache(async (filters: ServiceFilters = {}): Pr
   if (filters.type) params.set("type", filters.type);
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 4000);
+  const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const res = await fetch(`${API_BASE}/api/services?${params}`, {
       next: { revalidate: 60 },
@@ -131,7 +131,7 @@ export const getServiceListings = cache(async (filters: ServiceFilters = {}): Pr
 
 export const getServiceCategories = cache(async (): Promise<ServiceCategory[]> => {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 4000);
+  const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const res = await fetch(`${API_BASE}/api/services/categories`, {
       next: { revalidate: 300 },
@@ -149,7 +149,7 @@ export const getServiceCategories = cache(async (): Promise<ServiceCategory[]> =
 
 export const getServiceById = cache(async (id: string): Promise<ServiceDetail | null> => {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 4000);
+  const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const res = await fetch(
       `${API_BASE}/api/services/${encodeURIComponent(id)}`,
@@ -167,7 +167,7 @@ export const getServiceById = cache(async (id: string): Promise<ServiceDetail | 
 
 export const getServiceReviews = cache(async (targetId: string): Promise<ServiceReviewsResponse> => {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 4000);
+  const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const res = await fetch(
       `${API_BASE}/api/reviews/SERVICE_LISTING/${encodeURIComponent(targetId)}`,

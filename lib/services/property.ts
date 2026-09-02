@@ -46,7 +46,7 @@ interface OtherProperty {
 const fetchApi = cache(async <T>(path: string): Promise<T | null> => {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const timeout = setTimeout(() => controller.abort(), 15000);
     const res = await fetch(`${API_BASE}${path}`, {
       next: { revalidate: 60 },
       signal: controller.signal,
