@@ -96,6 +96,7 @@ export function ReviewSection({
     !!user &&
     (user.primaryUserType === "CUSTOMER" || (user.userTypes ?? []).includes("CUSTOMER"));
   const isSeller = !!user && !isCustomer;
+  const isAgent = !!user && user.authMethod === "agent";
   const signupUrl = `/auth?type=customer&return=${encodeURIComponent(pathname)}`;
 
   function startCreate() {
@@ -273,8 +274,11 @@ export function ReviewSection({
               Leave a Review
             </Link>
           )}
-          {isSeller && (
+          {isSeller && !isAgent && (
             <p className="text-sm text-text-secondary">Reviews are left by customers.</p>
+          )}
+          {isAgent && (
+            <p className="text-sm text-text-secondary">APL Representatives cannot leave reviews.</p>
           )}
         </>
       )}

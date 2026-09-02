@@ -37,6 +37,7 @@ export function RegisterUserTypeSelector({ userType, onChange, onNext, error, lo
       <p className="text-sm text-text-secondary">
         {lockValue ? "Confirm the account type to continue." : "Select the type of account that best describes you."}
       </p>
+      <p className="mt-2 text-xs text-error-600">⚠ This choice is permanent and cannot be changed.</p>
 
       {error && (
         <FormBanner variant="error">{error}</FormBanner>
