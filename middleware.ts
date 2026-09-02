@@ -18,6 +18,13 @@ export default async function middleware(request: NextRequest) {
     url.protocol = "https"
     url.port = ""
     const res = NextResponse.rewrite(url.toString())
+    
+    // Forward cookies from the original request to the backend API
+    const cookieHeader = request.headers.get("cookie")
+    if (cookieHeader) {
+      res.headers.set("cookie", cookieHeader)
+    }
+    
     if (isPublicGet(request.method, pathname)) {
       // Cache public listings data at the Vercel CDN edge so users never
       // wait on the shared-hosting origin for the same public payload.
