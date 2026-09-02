@@ -113,37 +113,71 @@ export const getServiceListings = cache(async (filters: ServiceFilters = {}): Pr
   if (filters.limit) params.set("limit", filters.limit);
   if (filters.type) params.set("type", filters.type);
 
-  const res = await fetch(`${API_BASE}/api/services?${params}`, {
-    next: { revalidate: 60 },
-  });
-  if (!res.ok) return { services: [], total: 0, page: 1, totalPages: 0 };
-  return res.json();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 4000);
+  try {
+    const res = await fetch(`${API_BASE}/api/services?${params}`, {
+      next: { revalidate: 60 },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!res.ok) return { services: [], total: 0, page: 1, totalPages: 0 };
+    return res.json();
+  } catch {
+    clearTimeout(timeout);
+    return { services: [], total: 0, page: 1, totalPages: 0 };
+  }
 })
 
 export const getServiceCategories = cache(async (): Promise<ServiceCategory[]> => {
-  const res = await fetch(`${API_BASE}/api/services/categories`, {
-    next: { revalidate: 300 },
-  });
-  if (!res.ok) return [];
-  const data = await res.json();
-  return (data.categories || []) as ServiceCategory[];
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 4000);
+  try {
+    const res = await fetch(`${API_BASE}/api/services/categories`, {
+      next: { revalidate: 300 },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.categories || []) as ServiceCategory[];
+  } catch {
+    clearTimeout(timeout);
+    return [];
+  }
 })
 
 export const getServiceById = cache(async (id: string): Promise<ServiceDetail | null> => {
-  const res = await fetch(
-    `${API_BASE}/api/services/${encodeURIComponent(id)}`,
-    { next: { revalidate: 60 } },
-  );
-  if (!res.ok) return null;
-  const data = await res.json();
-  return (data.service || null) as ServiceDetail | null;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 4000);
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/services/${encodeURIComponent(id)}`,
+      { next: { revalidate: 60 }, signal: controller.signal },
+    );
+    clearTimeout(timeout);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return (data.service || null) as ServiceDetail | null;
+  } catch {
+    clearTimeout(timeout);
+    return null;
+  }
 })
 
 export const getServiceReviews = cache(async (targetId: string): Promise<ServiceReviewsResponse> => {
-  const res = await fetch(
-    `${API_BASE}/api/reviews/SERVICE_LISTING/${encodeURIComponent(targetId)}`,
-    { next: { revalidate: 30 } },
-  );
-  if (!res.ok) return { reviews: [], total: 0 };
-  return res.json();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 4000);
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/reviews/SERVICE_LISTING/${encodeURIComponent(targetId)}`,
+      { next: { revalidate: 30 }, signal: controller.signal },
+    );
+    clearTimeout(timeout);
+    if (!res.ok) return { reviews: [], total: 0 };
+    return res.json();
+  } catch {
+    clearTimeout(timeout);
+    return { reviews: [], total: 0 };
+  }
 })
