@@ -35,26 +35,15 @@ export function Navbar() {
     <>
       <nav className="sticky top-0 z-50 border-b border-border bg-surface backdrop-blur">
         <div className="mx-auto flex h-16 max-w-content items-center justify-between gap-4 px-4">
-          <Link href="/" className="flex shrink-0 flex-col items-center justify-center leading-none">
+          <Link href="/" className="flex shrink-0 items-center">
             <Image
-              src="/logos/logo-icon.png"
+              src="/logos/logo.png"
               alt="All Property Link"
-              width={468}
-              height={343}
-              className="h-9 w-auto"
+              width={1061}
+              height={151}
+              className="h-10 w-auto"
               priority
             />
-            <span
-              className="mt-0.5 text-xl text-primary"
-              style={{
-                fontFamily: "'Brush Script MT', 'Brush Script Std', cursive",
-                fontWeight: 700,
-                textShadow: "0 1px 0 rgba(0,0,0,0.12)",
-                WebkitTextStroke: "0.5px rgba(40,98,85,0.4)",
-              }}
-            >
-              All Property <span style={{ color: "#ddba83" }}>Link</span>
-            </span>
           </Link>
 
           {/* Desktop navigation */}
