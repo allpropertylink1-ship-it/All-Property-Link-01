@@ -39,9 +39,9 @@ export function Navbar() {
             <Image
               src="/logos/logo.png"
               alt="All Property Link"
-              width={756}
-              height={319}
-              className="h-9 w-auto"
+              width={1366}
+              height={768}
+              className="h-12 w-auto"
               priority
             />
           </Link>
