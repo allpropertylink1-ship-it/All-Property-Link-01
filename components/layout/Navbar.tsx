@@ -35,17 +35,20 @@ export function Navbar() {
     <>
       <nav className="sticky top-0 z-50 border-b border-border bg-surface backdrop-blur">
         <div className="mx-auto flex h-16 max-w-content items-center justify-between gap-4 px-4">
-          <Link href="/" className="flex shrink-0 items-center gap-2.5">
+          <Link href="/" className="flex shrink-0 flex-col items-center justify-center leading-none">
             <Image
               src="/logos/logo-icon.png"
               alt="All Property Link"
               width={468}
               height={343}
-              className="h-11 w-auto"
+              className="h-9 w-auto"
               priority
             />
-            <span className="font-heading text-lg font-bold tracking-tight text-primary sm:text-xl">
-              All Property <span className="text-accent-300">Link</span>
+            <span
+              className="mt-0.5 text-lg text-primary"
+              style={{ fontFamily: "'Brush Script MT', 'Brush Script Std', cursive" }}
+            >
+              All Property <span style={{ color: "#ddba83" }}>Link</span>
             </span>
           </Link>
 
