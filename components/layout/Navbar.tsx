@@ -37,11 +37,11 @@ export function Navbar() {
         <div className="mx-auto flex h-16 max-w-content items-center justify-between gap-4 px-4">
           <Link href="/" className="flex shrink-0 items-center">
             <Image
-              src="/logos/logo.png"
+              src="/logos/logo-icon.png"
               alt="All Property Link"
-              width={1366}
-              height={768}
-              className="h-12 w-auto"
+              width={468}
+              height={343}
+              className="h-11 w-auto"
               priority
             />
           </Link>
