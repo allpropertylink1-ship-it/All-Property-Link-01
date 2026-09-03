@@ -35,7 +35,7 @@ export function Navbar() {
     <>
       <nav className="sticky top-0 z-50 border-b border-border bg-surface backdrop-blur">
         <div className="mx-auto flex h-16 max-w-content items-center justify-between gap-4 px-4">
-          <Link href="/" className="flex shrink-0 items-center">
+          <Link href="/" className="flex shrink-0 items-center gap-2.5">
             <Image
               src="/logos/logo-icon.png"
               alt="All Property Link"
@@ -44,6 +44,9 @@ export function Navbar() {
               className="h-11 w-auto"
               priority
             />
+            <span className="font-heading text-lg font-bold tracking-tight text-primary sm:text-xl">
+              All Property <span className="text-accent-300">Link</span>
+            </span>
           </Link>
 
           {/* Desktop navigation */}
