@@ -30,7 +30,7 @@ const PERSONAS: Persona[] = [
   {
     id: "buy",
     label: "Buy",
-    headlineTop: "Find Your Perfect",
+    headlineTop: "Find Your Ideal",
     headlineAccent: "Property in Kenya",
     accentClass: "text-teal-200",
     subtitle:
