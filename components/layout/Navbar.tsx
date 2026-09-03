@@ -45,8 +45,13 @@ export function Navbar() {
               priority
             />
             <span
-              className="mt-0.5 text-lg text-primary"
-              style={{ fontFamily: "'Brush Script MT', 'Brush Script Std', cursive" }}
+              className="mt-0.5 text-xl text-primary"
+              style={{
+                fontFamily: "'Brush Script MT', 'Brush Script Std', cursive",
+                fontWeight: 700,
+                textShadow: "0 1px 0 rgba(0,0,0,0.12)",
+                WebkitTextStroke: "0.5px rgba(40,98,85,0.4)",
+              }}
             >
               All Property <span style={{ color: "#ddba83" }}>Link</span>
             </span>
