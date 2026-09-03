@@ -35,13 +35,21 @@ export function Navbar() {
     <>
       <nav className="sticky top-0 z-50 border-b border-border bg-surface backdrop-blur">
         <div className="mx-auto flex h-16 max-w-content items-center justify-between gap-4 px-4">
-          <Link href="/" className="flex shrink-0 items-center">
+          <Link href="/" className="flex shrink-0 flex-col items-center justify-center leading-none">
+            <Image
+              src="/logos/logo-icon.png"
+              alt="All Property Link"
+              width={468}
+              height={343}
+              className="h-8 w-auto"
+              priority
+            />
             <Image
               src="/logos/logo.png"
               alt="All Property Link"
               width={1061}
               height={151}
-              className="h-10 w-auto"
+              className="mt-0.5 h-4 w-auto"
               priority
             />
           </Link>
