@@ -142,6 +142,11 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
       setError("Please enter the complete 6-digit code")
       return
     }
+    if (!otpIdentifier || !otpType) {
+      setError("Verification session expired. Please request a new code.")
+      setOtpLoading(false)
+      return
+    }
     setOtpLoading(true)
     setError("")
 
@@ -158,6 +163,10 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
 
   async function handleResendOtp() {
     if (cooldown > 0) return
+    if (!otpIdentifier || !otpType) {
+      setError("Verification session expired. Please request a new code.")
+      return
+    }
     setError("")
     const { error: sendError } = await sendOtp(otpIdentifier, otpType)
     if (sendError) {
