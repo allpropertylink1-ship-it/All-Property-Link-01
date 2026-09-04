@@ -109,7 +109,13 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
         ...(phone ? { phone } : {}),
         firstName, lastName,
       })
-      if (!result.otp) {
+      if (result.otp) {
+        setOtpIdentifier(result.otp.identifier)
+        setOtpType(result.otp.type)
+        setOtpDestination(result.otp.otpDestination)
+        startCooldown(result.otp.retryAfter)
+        startExpiryTimer(result.otp.expiresIn)
+      } else {
         setOtpIdentifier("")
         setOtpType("EMAIL_VERIFICATION")
         setOtpDestination("")
@@ -125,12 +131,9 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
     }
 
     if (result.otp) {
-      setOtpIdentifier(result.otp.identifier)
-      setOtpType(result.otp.type)
-      setOtpDestination(result.otp.otpDestination)
-      startCooldown(result.otp.retryAfter)
-      startExpiryTimer(result.otp.expiresIn)
-      setStep("otp")
+      if (!otpIdentifier) {
+        setStep("otp")
+      }
     }
     setLoading(false)
   }

@@ -101,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       : { email: emailOrPhone, password }
     const { data, error } = await api.post<{ user: User }>("/api/auth/login", payload)
     if (data?.user) {
-      setUser(data.user)
+      setUser({ ...data.user, authMethod: "user" })
       return {}
     }
     return { error: error || "Login failed" }
@@ -127,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const verifyOtp = useCallback(async (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => {
     const { data, error } = await api.post<{ user: User }>("/api/auth/verify-otp", { identifier, token, type })
     if (error) return { error }
-    if (data?.user) setUser(data.user)
+    if (data?.user) setUser({ ...data.user, authMethod: "user" })
     return {}
   }, [])
 
@@ -146,7 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const agentLogin = useCallback(async (agentCode: string, password: string) => {
     const { data, error } = await api.post<{ user: User; requiresPasswordChange?: boolean }>("/api/auth/agent-login", { agentCode, password })
     if (data?.user) {
-      setUser(data.user)
+      setUser({ ...data.user, authMethod: "agent" })
       return { requiresPasswordChange: data.requiresPasswordChange }
     }
     return { error: error || "Login failed" }
