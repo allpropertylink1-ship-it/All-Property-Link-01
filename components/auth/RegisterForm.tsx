@@ -131,9 +131,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
     }
 
     if (result.otp) {
-      if (!otpIdentifier) {
-        setStep("otp")
-      }
+      setStep("otp")
     }
     setLoading(false)
   }
