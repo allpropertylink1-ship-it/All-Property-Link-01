@@ -48,7 +48,7 @@ export default function AgentEditReferralServicePage() {
       api.get<{ service: AgentService }>(
         `/api/agent/referrals/${referralId}/services/${serviceId}`
       ),
-      api.get<{ categories: Category[] }>("/api/services/categories"),
+      api.get<{ categories: Category[] }>("/api/agent/services/categories"),
     ])
     if (svcRes.data) setService(svcRes.data.service)
     else setError(svcRes.error || "Failed to load service")
