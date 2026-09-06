@@ -36,9 +36,14 @@ const PRICE_PERIODS = ["TOTAL", "PER_MONTH", "PER_NIGHT", "PER_WEEK", "PER_SQM"]
 export function EditServiceForm({
   service,
   categories,
+  endpoint,
+  redirectTo,
 }: {
   service: ServiceData;
   categories: Category[];
+  /** Override for non-owner submits (e.g. APL reps editing for a referral). */
+  endpoint?: string;
+  redirectTo?: string;
 }) {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -143,7 +148,7 @@ export function EditServiceForm({
 
     try {
       const res = await api.patch<{ service: unknown }>(
-        `/api/services/${service.id}`,
+        endpoint ?? `/api/services/${service.id}`,
         data
       );
       if (res.error) {
@@ -151,7 +156,7 @@ export function EditServiceForm({
         setSubmitting(false);
         return;
       }
-      router.push("/dashboard/services");
+      router.push(redirectTo || "/dashboard/services");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update service");
       setSubmitting(false);

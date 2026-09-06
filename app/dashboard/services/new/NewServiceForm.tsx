@@ -18,7 +18,12 @@ interface Category {
 const CURRENCIES = ["KES", "USD"] as const;
 const PRICE_PERIODS = ["TOTAL", "PER_MONTH", "PER_NIGHT", "PER_WEEK", "PER_SQM"] as const;
 
-export function NewServiceForm({ categories }: { categories: Category[] }) {
+export function NewServiceForm({ categories, endpoint, redirectTo }: {
+  categories: Category[]
+  /** Override for non-owner submits (e.g. APL reps posting for a referral). */
+  endpoint?: string
+  redirectTo?: string
+}) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -108,13 +113,13 @@ export function NewServiceForm({ categories }: { categories: Category[] }) {
     };
 
     try {
-      const res = await api.post<{ service: unknown }>("/api/services/create", data);
+      const res = await api.post<{ service: unknown }>(endpoint ?? "/api/services/create", data);
       if (res.error) {
         setError(res.error);
         setSubmitting(false);
         return;
       }
-      router.push("/dashboard/services");
+      router.push(redirectTo || "/dashboard/services");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create service");
       setSubmitting(false);
