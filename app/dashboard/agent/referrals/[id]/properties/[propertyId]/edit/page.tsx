@@ -81,6 +81,14 @@ export default function AgentEditReferralPropertyPage() {
         <EditListingForm
           propertyId={property.id}
           redirectTo={`/dashboard/agent/referrals/${referralId}`}
+          submitOverride={async (payload) => {
+            const { error } = await api.patch(
+              `/api/agent/referrals/${referralId}/properties/${property.id}`,
+              payload
+            )
+            if (error) return { success: false, error }
+            return { success: true }
+          }}
           property={{
             title: property.title,
             description: property.description,

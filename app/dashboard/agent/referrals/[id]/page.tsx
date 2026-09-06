@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { useParams } from "next/navigation"
 import { api } from "@/lib/api-client"
-import { Loader2, AlertCircle, Building2, ArrowLeft } from "@/components/ui/icons"
+import { Loader2, AlertCircle, Building2, ArrowLeft, Plus, Trash2 } from "@/components/ui/icons"
 import Link from "next/link"
 import { AgentGuard } from "@/components/dashboard/AgentGuard"
 import { StatusPill } from "@/components/shared/StatusPill"
@@ -43,6 +43,9 @@ export default function AgentReferralDetailPage() {
   const [referral, setReferral] = useState<ReferralDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [actionError, setActionError] = useState("")
 
   const fetchReferral = useCallback(async () => {
     setLoading(true)
@@ -54,6 +57,26 @@ export default function AgentReferralDetailPage() {
   }, [params.id])
 
   useEffect(() => { fetchReferral() }, [fetchReferral])
+
+  async function handleDelete(propertyId: string) {
+    if (confirmDeleteId !== propertyId) {
+      setConfirmDeleteId(propertyId)
+      return
+    }
+    setDeleting(true)
+    setActionError("")
+    const { error } = await api.delete(
+      `/api/agent/referrals/${params.id}/properties/${propertyId}`
+    )
+    setDeleting(false)
+    if (error) {
+      setActionError(error)
+      setConfirmDeleteId(null)
+      return
+    }
+    setConfirmDeleteId(null)
+    fetchReferral()
+  }
 
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={24} className="animate-spin text-muted" /></div>
   if (error) return (
@@ -80,7 +103,22 @@ export default function AgentReferralDetailPage() {
         </div>
       </div>
 
-      <h2 className="mb-4 font-heading text-lg font-semibold text-text-primary">Properties ({referral.properties.length})</h2>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-heading text-lg font-semibold text-text-primary">Properties ({referral.properties.length})</h2>
+        <Link
+          href={`/dashboard/agent/referrals/${referral.id}/properties/new`}
+          className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
+        >
+          <Plus size={16} />
+          Post listing
+        </Link>
+      </div>
+
+      {actionError && (
+        <p role="alert" className="mb-4 rounded-lg border border-error-500/20 bg-error-50 px-4 py-3 text-sm text-error-700">
+          {actionError}
+        </p>
+      )}
 
       {referral.properties.length === 0 ? (
         <p className="text-sm text-text-secondary">No properties listed yet</p>
@@ -108,9 +146,24 @@ export default function AgentReferralDetailPage() {
                 </Link>
                 <div className="flex shrink-0 flex-col items-end gap-2">
                   <StatusPill status={p.moderationStatus} label={p.status} />
-                  <Link href={`/dashboard/agent/referrals/${referral.id}/properties/${p.id}/edit`} className="rounded-lg border border-accent-200 bg-accent-50 px-3 py-1.5 text-xs font-medium text-accent-700 transition-colors hover:bg-accent-100">
-                    Edit
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <Link href={`/dashboard/agent/referrals/${referral.id}/properties/${p.id}/edit`} className="rounded-lg border border-accent-200 bg-accent-50 px-3 py-1.5 text-xs font-medium text-accent-700 transition-colors hover:bg-accent-100">
+                      Edit
+                    </Link>
+                    <button
+                      type="button"
+                      disabled={deleting}
+                      onClick={() => handleDelete(p.id)}
+                      className={`inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
+                        confirmDeleteId === p.id
+                          ? "border-error-500 bg-error-500 text-white hover:bg-error-700"
+                          : "border-border text-text-secondary hover:bg-surface-secondary hover:text-error-600"
+                      }`}
+                    >
+                      <Trash2 size={14} />
+                      {confirmDeleteId === p.id ? (deleting ? "Deleting..." : "Confirm delete") : "Delete"}
+                    </button>
+                  </div>
                 </div>
               </div>
             )
