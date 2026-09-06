@@ -32,7 +32,19 @@ const listingSchema = z.object({
 
 type ListingFormData = z.infer<typeof listingSchema>;
 
-export function ListingForm() {
+/**
+ * Optional override for non-owner submits (e.g. APL reps posting on behalf
+ * of a referral). Receives the validated JSON payload; return success=false
+ * with an error message to surface a failure. Default path is unchanged.
+ */
+export type ListingSubmitOverride = (
+  payload: Record<string, unknown>
+) => Promise<{ success: boolean; error?: string }>
+
+export function ListingForm({ submitOverride, redirectTo }: {
+  submitOverride?: ListingSubmitOverride
+  redirectTo?: string
+}) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
@@ -55,6 +67,25 @@ export function ListingForm() {
       setError("Please upload at least one image");
       return;
     }
+    if (submitOverride) {
+      try {
+        const payload: Record<string, unknown> = {};
+        Object.entries(data).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) payload[key] = value;
+        });
+        if (typeof payload.features === "string") {
+          payload.features = payload.features.split(",").map((s: string) => s.trim()).filter(Boolean);
+        }
+        payload.images = imageUrls;
+        const result = await submitOverride(payload);
+        if (!result.success) { setError(result.error || "Failed to create listing"); return }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to create listing");
+        return;
+      }
+      router.push(redirectTo || "/dashboard/listings");
+      return;
+    }
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) formData.append(key, String(value));
@@ -67,7 +98,7 @@ export function ListingForm() {
       setError(err instanceof Error ? err.message : "Failed to create listing");
       return;
     }
-    router.push("/dashboard/listings");
+    router.push(redirectTo || "/dashboard/listings");
   }
 
   const handleImageUploadComplete = (urls: string[]) => {

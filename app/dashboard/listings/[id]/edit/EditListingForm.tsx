@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import PropertyImageUploader from "@/components/property/PropertyImageUploader";
 import { LocationPicker } from "@/components/shared/LocationPicker";
 import { FormBanner } from "@/components/shared/FormFeedback";
+import type { ListingSubmitOverride } from "@/components/dashboard/ListingForm";
 
 interface PropertyData {
   title: string;
@@ -51,7 +52,7 @@ const listingSchema = z.object({
   longitude: z.coerce.number().optional(),
 });
 
-export default function EditListingForm({ propertyId, property, redirectTo }: { propertyId: string; property: PropertyData; redirectTo?: string }) {
+export default function EditListingForm({ propertyId, property, redirectTo, submitOverride }: { propertyId: string; property: PropertyData; redirectTo?: string; submitOverride?: ListingSubmitOverride }) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>(property.images || []);
@@ -87,6 +88,25 @@ export default function EditListingForm({ propertyId, property, redirectTo }: { 
 
   async function onSubmit(data: z.infer<typeof listingSchema>) {
     setError("");
+    if (submitOverride) {
+      try {
+        const payload: Record<string, unknown> = {};
+        Object.entries(data).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) payload[key] = value;
+        });
+        if (typeof payload.features === "string") {
+          payload.features = payload.features.split(",").map((s: string) => s.trim()).filter(Boolean);
+        }
+        payload.images = imageUrls;
+        const result = await submitOverride(payload);
+        if (!result.success) { setError(result.error || "Update failed"); return }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to update listing");
+        return;
+      }
+      router.push(redirectTo || "/dashboard/listings");
+      return;
+    }
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) formData.append(key, String(value));
