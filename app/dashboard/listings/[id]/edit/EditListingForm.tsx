@@ -10,7 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PropertyImageUploader from "@/components/property/PropertyImageUploader";
-import { LocationPicker } from "@/components/shared/LocationPicker";
+import dynamic from "next/dynamic";
+// Leaflet touches `window` at import time — never SSR the map.
+const LocationPicker = dynamic(
+  () => import("@/components/shared/LocationPicker").then((m) => m.LocationPicker),
+  { ssr: false, loading: () => <p className="text-sm text-text-secondary">Loading map…</p> }
+);
 import { FormBanner } from "@/components/shared/FormFeedback";
 import type { ListingSubmitOverride } from "@/components/dashboard/ListingForm";
 
