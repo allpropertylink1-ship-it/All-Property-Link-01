@@ -409,7 +409,7 @@ export function HeroSection() {
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder={persona.placeholder}
+                    placeholder=""
                     aria-label="Search properties"
                     className="w-full bg-transparent text-sm text-white placeholder:text-white/50 focus:outline-none"
                   />
