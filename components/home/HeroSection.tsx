@@ -398,13 +398,10 @@ export function HeroSection() {
 
         <h1
           key={`${persona.id}-headline`}
-          className="mx-auto mt-6 max-w-4xl animate-[fadeUp_0.5s_ease-out] text-[clamp(1.5rem,7vw,2rem)] font-bold leading-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-4xl lg:text-5xl"
+          className="mx-auto mt-6 max-w-4xl animate-[fadeUp_0.5s_ease-out] text-[clamp(1.25rem,5.5vw,1.75rem)] font-bold leading-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-3xl lg:text-4xl"
         >
           {persona.headline}
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-base text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)] sm:text-lg">
-          {persona.subtitle}
-        </p>
 
         {showSearch ? (
           <form
