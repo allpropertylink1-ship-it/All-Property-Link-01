@@ -49,7 +49,7 @@ export function Navbar() {
               alt="All Property Link"
               width={300}
               height={60}
-              className="h-7 w-auto"
+              className="h-8 w-auto"
               priority
             />
           </Link>
