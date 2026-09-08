@@ -17,9 +17,7 @@ type PersonaId = "buy" | "rent" | "stay" | "list"
 interface Persona {
   id: PersonaId
   label: string
-  headlineTop: string
-  headlineAccent: string
-  accentClass: string
+  headline: React.ReactNode
   subtitle: string
   placeholder: string
   purpose: string | null
@@ -30,9 +28,12 @@ const PERSONAS: Persona[] = [
   {
     id: "buy",
     label: "Buy",
-    headlineTop: "Find Your Ideal",
-    headlineAccent: "Property in Kenya",
-    accentClass: "text-teal-200",
+    headline: (
+      <>
+        Find Your Ideal{" "}
+        <span className="text-accent-300">Property in Kenya</span>
+      </>
+    ),
     subtitle:
       "Browse thousands of properties for sale across Kenya. Connect directly with verified agents and property owners.",
     placeholder: "City, estate, or property type...",
@@ -42,9 +43,12 @@ const PERSONAS: Persona[] = [
   {
     id: "rent",
     label: "Rent",
-    headlineTop: "Rent a Home",
-    headlineAccent: "That Feels Like Yours",
-    accentClass: "text-teal-200",
+    headline: (
+      <>
+        Rent a Home{" "}
+        <span className="text-accent-300">That Feels Like Yours</span>
+      </>
+    ),
     subtitle:
       "Long-term rentals in neighbourhoods you'll love. Verified listings, real owners, no middlemen.",
     placeholder: "Which town or estate?",
@@ -54,9 +58,12 @@ const PERSONAS: Persona[] = [
   {
     id: "stay",
     label: "Book a Short Stay",
-    headlineTop: "Weekend Away?",
-    headlineAccent: "Find a Short Stay",
-    accentClass: "text-amber-200",
+    headline: (
+      <>
+        Weekend Away \u2014 Find a{" "}
+        <span className="text-accent-300">Short Stay</span>
+      </>
+    ),
     subtitle:
       "Stays in Diani, Naivasha, Nyahururu and beyond. Book by the night from verified hosts and agents.",
     placeholder: "Beach town or getaway spot...",
@@ -66,9 +73,12 @@ const PERSONAS: Persona[] = [
   {
     id: "list",
     label: "List",
-    headlineTop: "List Your Property",
-    headlineAccent: "Direct to Verified Buyers",
-    accentClass: "text-accent-200",
+    headline: (
+      <>
+        List Your Property{" "}
+        <span className="text-accent-300">Direct to Verified Buyers</span>
+      </>
+    ),
     subtitle:
       "Owners and agents list for free. Your listing is verified by an APL representative before it goes live.",
     placeholder: "",
@@ -388,10 +398,9 @@ export function HeroSection() {
 
         <h1
           key={`${persona.id}-headline`}
-          className="mx-auto mt-6 max-w-4xl animate-[fadeUp_0.5s_ease-out] text-[clamp(1.75rem,8vw,2.25rem)] font-bold leading-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-5xl lg:text-6xl"
+          className="mx-auto mt-6 max-w-4xl animate-[fadeUp_0.5s_ease-out] text-[clamp(1.5rem,7vw,2rem)] font-bold leading-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-4xl lg:text-5xl"
         >
-          {persona.headlineTop}
-          <span className={`block ${persona.accentClass}`}>{persona.headlineAccent}</span>
+          {persona.headline}
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-base text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)] sm:text-lg">
           {persona.subtitle}

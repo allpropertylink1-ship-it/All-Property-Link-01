@@ -1,168 +1,241 @@
-﻿/* eslint-disable @next/next/no-img-element */
-"use client";
+﻿"use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { MapPin, ArrowRight, Home, BedDouble, Briefcase, Loader2 } from "@/components/ui/icons";
-import { formatPrice } from "@/lib/utils";
-import { PLACEHOLDER_PROPERTY, PLACEHOLDER_SERVICE } from "@/lib/placeholders";
-import { optimizeImageUrl } from "@/lib/images";
-import { slugifyCity } from "@/lib/seo";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { Loader2, ChevronRight } from "@/components/ui/icons";
+import { FilterCardGroup } from "./FilterCardGroup";
+import { ActiveFilterBar } from "./ActiveFilterBar";
+import { BrowseResultsGrid } from "./BrowseResultsGrid";
+import { BrowseSkeleton } from "./BrowseSkeleton";
+
+type PropertyFilterKey = "ALL" | "FOR_SALE" | "FOR_RENT_LONG_TERM" | "FOR_RENT_SHORT_TERM" | "LAND";
+type ServiceFilterKey = "ALL" | "FUNDI" | "SERVICE_PROVIDER";
 
 interface BrowseProperty {
-  slug: string; title: string; price: number; currency: string;
-  propertyType: string; listingPurpose?: string; city: string; region: string;
-  bedrooms: number | null; bathrooms: number | null; images: unknown;
+  id: string;
+  slug: string;
+  title: string;
+  price: number | null;
+  currency: string;
+  propertyType: string;
+  listingPurpose?: string | null;
+  city: string;
+  region: string;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  area: number | null;
+  images: unknown;
+  isFeatured: boolean;
+  createdAt: string;
 }
 
 interface BrowseService {
-  id: string; title: string; price: number | null; currency: string;
-  city: string | null; region: string | null; images: unknown;
-  category: { name: string; slug: string } | null;
-  user: { firstName: string; lastName: string; avatar: string | null } | null;
+  id: string;
+  title: string;
+  description: string;
+  price: number | null;
+  currency: string;
+  pricePeriod: string;
+  city: string | null;
+  region: string | null;
+  images: unknown;
+  viewCount: number;
+  createdAt: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    companyName: string | null;
+    businessLogo: string | null;
+  };
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+    icon: string | null;
+  } | null;
 }
 
-interface BrowseData {
-  allProperties: BrowseProperty[];
-  airbnbs: BrowseProperty[];
-  services: BrowseService[];
-  plots: BrowseProperty[];
+interface ApiResponse<T> {
+  properties?: T[];
+  services?: T[];
+  total: number;
+  page: number;
+  totalPages: number;
 }
 
-type PropertyItem = BrowseProperty;
-type ServiceItem = BrowseService;
+const PROPERTY_FILTER_MAP: Record<PropertyFilterKey, Record<string, string>> = {
+  ALL: { limit: "20" },
+  FOR_SALE: { purpose: "FOR_SALE", limit: "20" },
+  FOR_RENT_LONG_TERM: { purpose: "FOR_RENT_LONG_TERM", limit: "20" },
+  FOR_RENT_SHORT_TERM: { purpose: "FOR_RENT_SHORT_TERM", limit: "20" },
+  LAND: { type: "LAND", limit: "20" },
+};
 
-function PropertyCard({ item, link }: { item: BrowseProperty; link: string }) {
-  const images = Array.isArray(item.images) ? item.images : [];
-  const imageUrl = images.length > 0 ? optimizeImageUrl(String(images[0]), 800) : PLACEHOLDER_PROPERTY;
-  return (
-    <Link href={link} className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-md">
-      <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
-        <img src={imageUrl} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_PROPERTY }} />
-        <span className={`absolute left-2 top-2 z-10 rounded-md px-2.5 py-1 text-xs font-semibold text-white ${item.listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-400" : "bg-primary-500"}`}>
-          {item.listingPurpose === "FOR_RENT_SHORT_TERM" ? "Airbnb" : item.propertyType === "LAND" ? "Land" : item.propertyType === "COMMERCIAL" ? "Commercial" : item.propertyType === "APARTMENT" ? "Apartment" : "House"}
-        </span>
-      </div>
-      <div className="flex flex-1 flex-col p-3.5">
-        <h3 className="line-clamp-1 font-heading text-sm font-semibold text-text-primary">{item.title}</h3>
-        <div className="mt-1 flex items-center gap-1 text-xs text-text-secondary">
-          <MapPin size={12} className="shrink-0" />
-          {item.region}, {item.city}
-        </div>
-        <div className="mt-1 flex items-center gap-2 text-xs text-text-secondary">
-          {item.bedrooms != null && item.bedrooms > 0 && <span>{item.bedrooms} beds</span>}
-          {item.bathrooms != null && item.bathrooms > 0 && <span>{item.bathrooms} baths</span>}
-        </div>
-        <p className="mt-1.5 font-heading text-base font-bold text-primary-500">{formatPrice(item.price, item.listingPurpose)}</p>
-      </div>
-    </Link>
-  );
-}
+const SERVICE_FILTER_MAP: Record<ServiceFilterKey, Record<string, string>> = {
+  ALL: { limit: "20" },
+  FUNDI: { type: "FUNDI", limit: "20" },
+  SERVICE_PROVIDER: { type: "SERVICE_PROVIDER", limit: "20" },
+};
 
-function ServiceCard({ item }: { item: BrowseService }) {
-  const images = Array.isArray(item.images) ? item.images : [];
-  const imageUrl = images.length > 0 ? optimizeImageUrl(String(images[0]), 600) : PLACEHOLDER_SERVICE;
-  return (
-    <Link href={`/services/${item.id}`} className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-md">
-      <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
-        <img src={imageUrl} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_SERVICE }} />
-        {item.category && (
-          <span className="absolute left-2 top-2 z-10 rounded-md bg-accent-400 px-2.5 py-1 text-xs font-semibold text-white">
-            {item.category.name}
-          </span>
-        )}
-      </div>
-      <div className="flex flex-1 flex-col p-3.5">
-        <h3 className="line-clamp-1 font-heading text-sm font-semibold text-text-primary">{item.title}</h3>
-        <p className="mt-1 text-xs text-text-secondary">{item.city || item.region || "Kenya"}</p>
-        {item.price != null && (
-        <p className="mt-1.5 font-heading text-base font-bold text-primary-500">{formatPrice(Number(item.price))}</p>
-        )}
-        {item.user && (
-          <p className="mt-1 text-xs text-text-secondary">{item.user.firstName} {item.user.lastName}</p>
-        )}
-      </div>
-    </Link>
-  );
-}
+const PROPERTY_FILTER_LABELS: Record<PropertyFilterKey, string> = {
+  ALL: "All Properties",
+  FOR_SALE: "For Sale",
+  FOR_RENT_LONG_TERM: "For Rent",
+  FOR_RENT_SHORT_TERM: "Short-Term",
+  LAND: "Land & Plots",
+};
+
+const SERVICE_FILTER_LABELS: Record<ServiceFilterKey, string> = {
+  ALL: "All Services",
+  FUNDI: "Fundis",
+  SERVICE_PROVIDER: "Services",
+};
 
 export default function BrowsePageClient() {
-  const [data, setData] = useState<BrowseData | null>(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const [activeTab, setActiveTab] = useState<"properties" | "services">("properties");
+  const [propertyFilter, setPropertyFilter] = useState<PropertyFilterKey>("ALL");
+  const [serviceFilter, setServiceFilter] = useState<ServiceFilterKey>("ALL");
+  const [properties, setProperties] = useState<BrowseProperty[]>([]);
+  const [services, setServices] = useState<BrowseService[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const syncFiltersFromUrl = useCallback(() => {
+    const tab = searchParams.get("tab") as "properties" | "services" | null;
+    const filter = searchParams.get("filter");
+
+    if (tab && (tab === "properties" || tab === "services")) {
+      setActiveTab(tab);
+    }
+
+    if (filter) {
+      if (activeTab === "properties" || tab === "properties") {
+        const validPropertyFilters: PropertyFilterKey[] = ["ALL", "FOR_SALE", "FOR_RENT_LONG_TERM", "FOR_RENT_SHORT_TERM", "LAND"];
+        if (validPropertyFilters.includes(filter as PropertyFilterKey)) {
+          setPropertyFilter(filter as PropertyFilterKey);
+        }
+      }
+      if (activeTab === "services" || tab === "services") {
+        const validServiceFilters: ServiceFilterKey[] = ["ALL", "FUNDI", "SERVICE_PROVIDER"];
+        if (validServiceFilters.includes(filter as ServiceFilterKey)) {
+          setServiceFilter(filter as ServiceFilterKey);
+        }
+      }
+    }
+  }, [searchParams, activeTab]);
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/properties?limit=20").then((r) => r.json()),
-      fetch("/api/properties?purpose=FOR_RENT_SHORT_TERM&limit=6").then((r) => r.json()),
-      fetch("/api/services?limit=6").then((r) => r.json()),
-      fetch("/api/properties?type=LAND&limit=6").then((r) => r.json()),
-    ])
-      .then(([allData, airbnbData, serviceData, plotData]) => {
-        setData({
-          allProperties: (allData as { properties: BrowseProperty[] }).properties || [],
-          airbnbs: (airbnbData as { properties: BrowseProperty[] }).properties || [],
-          services: (serviceData as { services: BrowseService[] }).services || [],
-          plots: (plotData as { properties: BrowseProperty[] }).properties || [],
-        });
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+    syncFiltersFromUrl();
+  }, [syncFiltersFromUrl]);
 
-  if (loading) {
-    return (
-      <div className="mx-auto max-w-content px-4 py-20">
-        <div className="flex justify-center">
-          <Loader2 size={32} className="animate-spin text-primary-500" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!data) {
-    return (
-      <div className="mx-auto max-w-content px-4 py-20 text-center">
-        <p className="text-text-secondary">Failed to load listings</p>
-      </div>
-    );
-  }
-
-  const { allProperties, airbnbs, services, plots } = data;
-
-  const properties = allProperties.filter((p) => p.listingPurpose !== "FOR_RENT_SHORT_TERM").slice(0, 6);
-  const plotsFiltered = plots.length > 0 ? plots : allProperties.filter((p) => p.propertyType === "LAND").slice(0, 6);
-
-  const sectionList: {
-    id: string; title: string; icon: React.ComponentType<{ className?: string }>;
-    items: (PropertyItem | ServiceItem)[];
-    viewAllLink: string; viewAllLabel: string; emptyMsg: string;
-    renderItem: (item: PropertyItem | ServiceItem) => React.ReactNode;
-  }[] = [
-    {
-      id: "properties", title: "Properties for Sale", icon: Home,
-      items: properties, viewAllLink: "/properties?purpose=FOR_SALE",
-      viewAllLabel: "View all properties", emptyMsg: "No properties for sale yet.",
-      renderItem: (item) => <PropertyCard key={(item as PropertyItem).slug} item={item as PropertyItem} link={`/properties/${slugifyCity((item as PropertyItem).city)}/${(item as PropertyItem).slug}`} />,
+  const updateUrl = useCallback(
+    (tab: "properties" | "services", filter: PropertyFilterKey | ServiceFilterKey) => {
+      const params = new URLSearchParams();
+      params.set("tab", tab);
+      if (filter !== "ALL") {
+        params.set("filter", filter);
+      }
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    {
-      id: "airbnbs", title: "Airbnbs & Short-term Stays", icon: BedDouble,
-      items: airbnbs, viewAllLink: "/properties?purpose=FOR_RENT_SHORT_TERM",
-      viewAllLabel: "View all stays", emptyMsg: "No short-term rentals listed yet.",
-      renderItem: (item) => <PropertyCard key={(item as PropertyItem).slug} item={item as PropertyItem} link={`/properties/${slugifyCity((item as PropertyItem).city)}/${(item as PropertyItem).slug}`} />,
-    },
-    {
-      id: "services", title: "Fundis & Service Providers", icon: Briefcase,
-      items: services, viewAllLink: "/services",
-      viewAllLabel: "View all services", emptyMsg: "No services listed yet.",
-      renderItem: (item) => <ServiceCard key={(item as ServiceItem).id} item={item as ServiceItem} />,
-    },
-    {
-      id: "plots", title: "Plots & Land", icon: MapPin,
-      items: plotsFiltered, viewAllLink: "/properties?type=LAND",
-      viewAllLabel: "View all plots", emptyMsg: "No plots listed yet.",
-      renderItem: (item) => <PropertyCard key={(item as PropertyItem).slug} item={item as PropertyItem} link={`/properties/${slugifyCity((item as PropertyItem).city)}/${(item as PropertyItem).slug}`} />,
-    },
-  ];
+    [router, pathname]
+  );
+
+  const fetchResults = useCallback(async () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const params = activeTab === "properties"
+        ? PROPERTY_FILTER_MAP[propertyFilter]
+        : SERVICE_FILTER_MAP[serviceFilter];
+
+      const queryString = new URLSearchParams(params).toString();
+      const endpoint = activeTab === "properties" ? "/api/properties" : "/api/services";
+
+      const response = await fetch(`${endpoint}?${queryString}`, { signal });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data: ApiResponse<BrowseProperty | BrowseService> = await response.json();
+
+      if (activeTab === "properties") {
+        setProperties((data.properties as BrowseProperty[]) || []);
+        setServices([]);
+      } else {
+        setServices((data.services as BrowseService[]) || []);
+        setProperties([]);
+      }
+      setTotal(data.total || 0);
+    } catch (err) {
+      if (err instanceof Error && err.name !== "AbortError") {
+        setError(err.message);
+      }
+    } finally {
+      if (!signal.aborted) {
+        setLoading(false);
+      }
+    }
+  }, [activeTab, propertyFilter, serviceFilter]);
+
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      fetchResults();
+    }, 300);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [fetchResults]);
+
+  const handlePropertyFilterChange = (key: string) => {
+    const newFilter = key as PropertyFilterKey;
+    setPropertyFilter(newFilter);
+    updateUrl("properties", newFilter);
+  };
+
+  const handleServiceFilterChange = (key: string) => {
+    const newFilter = key as ServiceFilterKey;
+    setServiceFilter(newFilter);
+    updateUrl("services", newFilter);
+  };
+
+  const handleTabChange = (tab: "properties" | "services") => {
+    setActiveTab(tab);
+    const filter = tab === "properties" ? propertyFilter : serviceFilter;
+    updateUrl(tab, filter);
+  };
+
+  const handleClearFilter = () => {
+    if (activeTab === "properties") {
+      setPropertyFilter("ALL");
+      updateUrl("properties", "ALL");
+    } else {
+      setServiceFilter("ALL");
+      updateUrl("services", "ALL");
+    }
+  };
 
   return (
     <div className="mx-auto max-w-content px-4 py-8">
@@ -171,40 +244,69 @@ export default function BrowsePageClient() {
         <p className="mt-2 text-text-secondary">Explore everything available on All Property Link</p>
       </div>
 
-      <div className="space-y-12">
-        {sectionList.map((section) => {
-          const Icon = section.icon;
-          return (
-            <section key={section.id}>
-              <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-50">
-                    <Icon className="h-4 w-4 text-primary-500" />
-                  </div>
-                  <h2 className="font-heading text-xl font-bold text-text-primary">{section.title}</h2>
-                </div>
-                <Link
-                  href={section.viewAllLink}
-                  className="touch-target flex items-center gap-1 text-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors"
-                >
-                  {section.viewAllLabel}
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-
-              {section.items.length > 0 ? (
-                <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 md:grid-cols-3">
-                  {section.items.map(section.renderItem)}
-                </div>
-              ) : (
-                <div className="rounded-xl border border-dashed border-border bg-surface-secondary p-10 text-center">
-                  <p className="text-sm text-text-secondary">{section.emptyMsg}</p>
-                </div>
-              )}
-            </section>
-          );
-        })}
+      <div className="mb-6 flex items-center gap-4 border-b border-border pb-4">
+        <button
+          type="button"
+          onClick={() => handleTabChange("properties")}
+          className={`touch-target flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+            activeTab === "properties"
+              ? "bg-primary-50 text-primary-700 border border-primary-200"
+              : "text-text-secondary hover:bg-surface-secondary"
+          }`}
+          aria-pressed={activeTab === "properties"}
+        >
+          Properties
+        </button>
+        <button
+          type="button"
+          onClick={() => handleTabChange("services")}
+          className={`touch-target flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+            activeTab === "services"
+              ? "bg-primary-50 text-primary-700 border border-primary-200"
+              : "text-text-secondary hover:bg-surface-secondary"
+          }`}
+          aria-pressed={activeTab === "services"}
+        >
+          Services
+        </button>
       </div>
+
+      <FilterCardGroup
+        activeTab={activeTab}
+        propertyFilter={propertyFilter}
+        serviceFilter={serviceFilter}
+        onPropertyFilterChange={handlePropertyFilterChange}
+        onServiceFilterChange={handleServiceFilterChange}
+      />
+
+      <ActiveFilterBar
+        activeTab={activeTab}
+        propertyFilter={propertyFilter}
+        serviceFilter={serviceFilter}
+        onClear={handleClearFilter}
+      />
+
+      {loading ? (
+        <BrowseSkeleton count={8} />
+      ) : error ? (
+        <div className="rounded-xl border border-error-200 bg-error-50 p-8 text-center">
+          <p className="text-error-600">Failed to load listings. Please try again.</p>
+          <button
+            type="button"
+            onClick={fetchResults}
+            className="mt-4 touch-target rounded-lg bg-error-500 px-4 py-2 text-sm font-medium text-white"
+          >
+            Retry
+          </button>
+        </div>
+      ) : (
+        <BrowseResultsGrid
+          activeTab={activeTab}
+          properties={properties}
+          services={services}
+          total={total}
+        />
+      )}
     </div>
   );
 }

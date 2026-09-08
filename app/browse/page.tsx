@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import BrowsePageClient from "@/components/browse/BrowsePageClient";
 
 export const metadata: Metadata = {
-  title: "Browse Properties",
-  description: "Browse properties for sale, long-term rentals, short stays, land and plots in Kenya. Connect directly with verified agents and property owners.",
+  title: "Browse All Listings",
+  description: "Browse properties for sale, rent, Airbnbs, land, and services in Kenya. Filter by category to find exactly what you're looking for.",
   alternates: { canonical: "/browse" },
 };
 
