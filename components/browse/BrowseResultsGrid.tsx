@@ -1,10 +1,15 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { PropertyCard } from "@/components/property/PropertyCard";
-import { optimizeImageUrl } from "@/lib/images";
-import { PLACEHOLDER_SERVICE } from "@/lib/placeholders";
-import Link from "next/link";
+import { ServiceCardCompact } from "./ServiceCardCompact";
+import { Grid, List, ChevronDown, X, Loader2 } from "@/components/ui/icons";
 import { formatPrice } from "@/lib/utils";
+import { slugifyCity } from "@/lib/seo";
+
+type SortOption = "newest" | "price-asc" | "price-desc" | "popular";
+type LayoutOption = "grid" | "list";
 
 interface BrowseProperty {
   id: string;
@@ -51,25 +56,45 @@ interface BrowseService {
   } | null;
 }
 
+interface FilterChip {
+  key: string;
+  label: string;
+  onRemove: () => void;
+}
+
 interface BrowseResultsGridProps {
   activeTab: "properties" | "services";
+  propertyFilter: string;
+  serviceFilter: string;
   properties: BrowseProperty[];
   services: BrowseService[];
   total: number;
+  searchParams: Record<string, string | undefined>;
+  onFilterChange: (key: string, value: string) => void;
+  onFilterRemove: (key: string) => void;
 }
 
-function ServiceCard({ item }: { item: BrowseService }) {
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: "newest", label: "Newest First" },
+  { value: "price-asc", label: "Price: Low to High" },
+  { value: "price-desc", label: "Price: High to Low" },
+  { value: "popular", label: "Most Popular" },
+];
+
+function ServiceCardGrid({ item }: { item: BrowseService }) {
   const images = Array.isArray(item.images) ? item.images : [];
-  const imageUrl = images.length > 0 ? optimizeImageUrl(String(images[0]), 600) : PLACEHOLDER_SERVICE;
-  
+  const imageUrl = images.length > 0
+    ? `https://res.cloudinary.com/oxdzvktu/image/upload/w_600,q_auto,f_auto/${images[0]}`
+    : `https://res.cloudinary.com/oxdzvktu/image/upload/w_600,q_auto,f_auto/placeholder_service`;
+
   return (
-    <Link href={`/services/${item.id}`} className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-md">
+    <a href={`/services/${item.id}`} className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
         <img
           src={imageUrl}
           alt={item.title}
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_SERVICE }}
+          onError={(e) => { (e.target as HTMLImageElement).src = `https://res.cloudinary.com/oxdzvktu/image/upload/w_600,q_auto,f_auto/placeholder_service` }}
         />
         {item.category && (
           <span className="absolute left-2 top-2 z-10 rounded-md bg-primary-500 px-2.5 py-1 text-xs font-semibold text-white">
@@ -87,60 +112,275 @@ function ServiceCard({ item }: { item: BrowseService }) {
           <p className="mt-1 text-xs text-text-secondary">{item.user.firstName} {item.user.lastName}</p>
         )}
       </div>
-    </Link>
+    </a>
   );
 }
 
 export function BrowseResultsGrid({
   activeTab,
+  propertyFilter,
+  serviceFilter,
   properties,
   services,
   total,
+  searchParams,
+  onFilterChange,
+  onFilterRemove,
 }: BrowseResultsGridProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const sp = useSearchParams();
+
+  const [layout, setLayout] = useState<LayoutOption>(() => (sp.get("view") as LayoutOption) || "grid");
+  const [sort, setSort] = useState<SortOption>(() => (sp.get("sort") as SortOption) || "newest");
+  const [sortOpen, setSortOpen] = useState(false);
+  const [filterChips, setFilterChips] = useState<FilterChip[]>([]);
+
+  // Build filter chips from active filters
+  useEffect(() => {
+    const chips: FilterChip[] = [];
+
+    if (activeTab === "properties") {
+      if (propertyFilter !== "ALL") {
+        const labels: Record<string, string> = {
+          FOR_SALE: "For Sale",
+          FOR_RENT_LONG_TERM: "For Rent",
+          FOR_RENT_SHORT_TERM: "Short-Term",
+          LAND: "Land & Plots",
+        };
+        chips.push({ key: "purpose", label: labels[propertyFilter] || propertyFilter, onRemove: () => onFilterRemove("purpose") });
+      }
+      // Add city filter chip if present
+      if (searchParams.city) {
+        chips.push({ key: "city", label: searchParams.city, onRemove: () => onFilterRemove("city") });
+      }
+      // Add price range chips
+      if (searchParams.minPrice || searchParams.maxPrice) {
+        const min = searchParams.minPrice ? `KES ${Number(searchParams.minPrice).toLocaleString()}` : "Any";
+        const max = searchParams.maxPrice ? `KES ${Number(searchParams.maxPrice).toLocaleString()}` : "Any";
+        chips.push({ key: "price", label: `${min} - ${max}`, onRemove: () => { onFilterRemove("minPrice"); onFilterRemove("maxPrice"); } });
+      }
+      // Add type filter
+      if (searchParams.propertyType) {
+        chips.push({ key: "propertyType", label: searchParams.propertyType, onRemove: () => onFilterRemove("propertyType") });
+      }
+    } else {
+      if (serviceFilter !== "ALL") {
+        const labels: Record<string, string> = {
+          FUNDI: "Fundis",
+          SERVICE_PROVIDER: "Services",
+        };
+        chips.push({ key: "type", label: labels[serviceFilter] || serviceFilter, onRemove: () => onFilterRemove("type") });
+      }
+      if (searchParams.category) {
+        chips.push({ key: "category", label: searchParams.category, onRemove: () => onFilterRemove("category") });
+      }
+      if (searchParams.city) {
+        chips.push({ key: "city", label: searchParams.city, onRemove: () => onFilterRemove("city") });
+      }
+    }
+
+    setFilterChips(chips);
+  }, [activeTab, propertyFilter, serviceFilter, searchParams, onFilterRemove]);
+
+  // Sort properties/services locally (fallback if backend doesn't support sort)
+  const sortedProperties = [...properties].sort((a, b) => {
+    if (sort === "price-asc") return (a.price || 0) - (b.price || 0);
+    if (sort === "price-desc") return (b.price || 0) - (a.price || 0);
+    if (sort === "popular") return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
+    return 0; // newest - keep API order
+  });
+
+  const sortedServices = [...services].sort((a, b) => {
+    if (sort === "price-asc") return (a.price || 0) - (b.price || 0);
+    if (sort === "price-desc") return (b.price || 0) - (a.price || 0);
+    return 0;
+  });
+
+  const currentItems = activeTab === "properties" ? sortedProperties : sortedServices;
   const itemType = activeTab === "properties" ? "property" : "service";
-  const currentItems = activeTab === "properties" ? properties : services;
+
+  const updateUrl = (updates: Record<string, string>) => {
+    const params = new URLSearchParams(sp.toString());
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    });
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const handleLayoutChange = (newLayout: LayoutOption) => {
+    setLayout(newLayout);
+    updateUrl({ view: newLayout });
+  };
+
+  const handleSortChange = (newSort: SortOption) => {
+    setSort(newSort);
+    updateUrl({ sort: newSort });
+    setSortOpen(false);
+  };
+
+  const handleClearAllFilters = () => {
+    const params = new URLSearchParams(sp.toString());
+    params.delete("filter");
+    params.delete("purpose");
+    params.delete("type");
+    params.delete("city");
+    params.delete("minPrice");
+    params.delete("maxPrice");
+    params.delete("propertyType");
+    params.delete("category");
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
 
   if (currentItems.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border bg-surface-secondary p-10 text-center">
-        <p className="text-sm text-text-secondary">
-          No {itemType}s found for this filter.
-        </p>
+        <p className="text-sm text-text-secondary">No {itemType}s found for this filter.</p>
       </div>
     );
   }
 
+  const isList = layout === "list";
+
   return (
-    <>
-      <p className="mb-4 text-sm text-text-secondary">
+    <div className="space-y-4">
+      {/* Toolbar */}
+      <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 bg-surface/80 backdrop-blur-sm px-4 py-3 rounded-xl border border-border mb-4">
+        <div className="flex items-center gap-2" role="group" aria-label="Layout">
+          <button
+            onClick={() => handleLayoutChange("grid")}
+            aria-pressed={layout === "grid"}
+            className={`p-2 rounded-lg transition-colors ${layout === "grid" ? "bg-primary-50 text-primary-700" : "text-text-secondary hover:bg-surface-secondary"}`}
+            aria-label="Grid view"
+          >
+            <Grid className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => handleLayoutChange("list")}
+            aria-pressed={layout === "list"}
+            className={`p-2 rounded-lg transition-colors ${layout === "list" ? "bg-primary-50 text-primary-700" : "text-text-secondary hover:bg-surface-secondary"}`}
+            aria-label="List view"
+          >
+            <List className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="flex-1" />
+
+        <div className="relative">
+          <button
+            onClick={() => setSortOpen(!sortOpen)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-surface text-sm text-text-primary hover:border-primary-300 transition-colors"
+            aria-haspopup="listbox"
+            aria-expanded={sortOpen}
+          >
+            <span>{SORT_OPTIONS.find(o => o.value === sort)?.label}</span>
+            <ChevronDown className={`h-4 w-4 transition-transform ${sortOpen ? "rotate-180" : ""}`} />
+          </button>
+          {sortOpen && (
+            <div className="absolute right-0 mt-1 w-48 rounded-lg border border-border bg-surface shadow-lg py-1 z-20">
+              {SORT_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => handleSortChange(opt.value)}
+                  className={`w-full px-3 py-2 text-sm text-left transition-colors ${sort === opt.value ? "bg-primary-50 text-primary-700" : "text-text-secondary hover:bg-surface-secondary"}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Filter Summary Bar */}
+      {filterChips.length > 0 && (
+        <div className="sticky top-16 z-10 flex flex-wrap items-center gap-2 bg-surface/80 backdrop-blur-sm px-4 py-2 rounded-xl border border-border">
+          <span className="text-xs font-medium text-text-secondary mr-1">Filters:</span>
+          {filterChips.map((chip) => (
+            <span key={chip.key} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-medium border border-primary-200">
+              {chip.label}
+              <button
+                onClick={chip.onRemove}
+                className="ml-1 hover:text-primary-500 focus:outline-none"
+                aria-label={`Remove ${chip.label} filter`}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ))}
+          <button
+            onClick={handleClearAllFilters}
+            className="ml-auto text-xs text-primary-600 hover:underline font-medium"
+          >
+            Clear all
+          </button>
+        </div>
+      )}
+
+      {/* Results Count */}
+      <p className="mb-3 text-sm text-text-secondary">
         {total} {total === 1 ? itemType : `${itemType}s`} found
       </p>
-      <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {activeTab === "properties" ? (
-          properties.map((item) => (
-            <PropertyCard
-              key={item.id}
-              slug={item.slug}
-              title={item.title}
-              price={item.price}
-              currency={item.currency}
-              propertyType={item.propertyType}
-              listingPurpose={item.listingPurpose}
-              city={item.city}
-              region={item.region}
-              bedrooms={item.bedrooms}
-              bathrooms={item.bathrooms}
-              area={item.area}
-              images={item.images}
-              isFeatured={item.isFeatured}
-            />
-          ))
-        ) : (
-          services.map((item) => (
-            <ServiceCard key={item.id} item={item} />
-          ))
-        )}
-      </div>
-    </>
+
+      {/* Results Grid/List */}
+      {isList ? (
+        <div className="space-y-2" role="list" aria-label={`${itemType} list`}>
+          {activeTab === "properties" ? (
+            sortedProperties.map((item) => (
+              <PropertyCard
+                key={item.id}
+                slug={item.slug}
+                title={item.title}
+                price={item.price}
+                currency={item.currency}
+                propertyType={item.propertyType}
+                listingPurpose={item.listingPurpose}
+                city={item.city}
+                region={item.region}
+                bedrooms={item.bedrooms}
+                bathrooms={item.bathrooms}
+                area={item.area}
+                images={item.images}
+                isFeatured={item.isFeatured}
+                variant="compact"
+              />
+            ))
+          ) : (
+            sortedServices.map((item) => (
+              <ServiceCardCompact key={item.id} item={item} />
+            ))
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4" role="list" aria-label={`${itemType} grid`}>
+          {activeTab === "properties" ? (
+            sortedProperties.map((item) => (
+              <PropertyCard
+                key={item.id}
+                slug={item.slug}
+                title={item.title}
+                price={item.price}
+                currency={item.currency}
+                propertyType={item.propertyType}
+                listingPurpose={item.listingPurpose}
+                city={item.city}
+                region={item.region}
+                bedrooms={item.bedrooms}
+                bathrooms={item.bathrooms}
+                area={item.area}
+                images={item.images}
+                isFeatured={item.isFeatured}
+              />
+            ))
+          ) : (
+            sortedServices.map((item) => (
+              <ServiceCardGrid key={item.id} item={item} />
+            ))
+          )}
+        </div>
+      )}
+    </div>
   );
 }

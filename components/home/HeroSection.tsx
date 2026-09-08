@@ -167,6 +167,9 @@ export function HeroSection() {
   const [tickerOffset, setTickerOffset] = useState(0)
   const [gliding, setGliding] = useState(false)
   const [query, setQuery] = useState("")
+  const [suggestions, setSuggestions] = useState<Slide[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const cacheRef = useRef<Map<string, Slide[]>>(new Map())
   const tickerTrackRef = useRef<HTMLDivElement>(null)
   const tickerRegionRef = useRef<HTMLDivElement>(null)
@@ -337,6 +340,39 @@ export function HeroSection() {
     } else {
       router.push("/properties")
     }
+    setShowSuggestions(false)
+  }
+
+  const handleSearchInput = (value: string) => {
+    setQuery(value)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (!value.trim() || !persona.purpose) {
+      setSuggestions([])
+      setShowSuggestions(false)
+      return
+    }
+    debounceRef.current = setTimeout(() => {
+      fetch(`/api/properties?purpose=${persona.purpose}&search=${encodeURIComponent(value)}&limit=5`)
+        .then((r) => (r.ok ? r.json() : { properties: [] }))
+        .catch(() => ({ properties: [] }))
+        .then((res) => {
+          const next = toSlides(res.properties || []).slice(0, 5)
+          setSuggestions(next)
+          setShowSuggestions(next.length > 0)
+        })
+    }, 200)
+  }
+
+  const handleSearchFocus = () => {
+    if (query.trim() && suggestions.length > 0) {
+      setShowSuggestions(true)
+    }
+  }
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") {
+      setShowSuggestions(false)
+    }
   }
 
   const showSearch = persona.purpose !== null
@@ -400,27 +436,53 @@ export function HeroSection() {
               ))}
             </div>
 
-            {/* Search input - fills remaining space */}
+            {/* Search input with autocomplete - fills remaining space */}
             {showSearch && (
-              <form onSubmit={submitSearch} className="flex flex-1 items-center gap-2 ml-2">
-                <div className="flex flex-1 items-center gap-2">
-                  <Search size={16} className="text-white/60 flex-shrink-0" />
-                  <input
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder=""
-                    aria-label="Search properties"
-                    className="w-full bg-transparent text-sm text-white placeholder:text-white/50 focus:outline-none"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="flex-shrink-0 rounded-xl bg-white px-4 py-1.5 text-sm font-semibold text-primary transition-all hover:bg-teal-50"
-                >
-                  Search
-                </button>
-              </form>
+              <div className="relative flex flex-1 ml-2" role="combobox" aria-controls="search-suggestions" aria-expanded={showSuggestions && suggestions.length > 0}>
+                <form onSubmit={submitSearch} className="w-full">
+                  <div className="relative">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 flex-shrink-0" aria-hidden="true" />
+                    <input
+                      type="text"
+                      value={query}
+                      onChange={(e) => handleSearchInput(e.target.value)}
+                      onFocus={handleSearchFocus}
+                      onKeyDown={handleSearchKeyDown}
+                      placeholder={persona.placeholder}
+                      aria-label="Search properties"
+                      aria-autocomplete="list"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-accent-300/30 focus:border-accent-300 transition-all"
+                      autoComplete="off"
+                    />
+                  </div>
+                  {showSuggestions && suggestions.length > 0 && (
+                    <ul
+                      id="search-suggestions"
+                      role="listbox"
+                      className="absolute top-full left-0 right-0 mt-1.5 max-h-60 overflow-y-auto rounded-xl bg-black/95 backdrop-blur-md border border-white/10 shadow-xl z-50 animate-[fadeIn_0.15s_ease-out]"
+                    >
+                      {suggestions.map((item, idx) => (
+                        <li key={`${item.slug}-${idx}`} role="option" aria-selected="false">
+                          <Link
+                            href={`/properties/${slugifyCity(item.city || "kenya")}/${item.slug}`}
+                            onClick={() => {
+                              setQuery("")
+                              setShowSuggestions(false)
+                            }}
+                            className="flex items-center gap-3 px-4 py-3 text-white/90 hover:bg-white/10 transition-colors"
+                          >
+                            <span className="font-medium truncate">{item.title}</span>
+                            <span className="flex-shrink-0 text-white/50 text-sm">{item.city || "Kenya"}</span>
+                            <span className="flex-shrink-0 font-heading font-bold text-accent-300 ml-auto">
+                              {formatPrice(item.price, item.listingPurpose ?? undefined)}
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </form>
+              </div>
             )}
 
             {/* List persona CTAs - when no search */}

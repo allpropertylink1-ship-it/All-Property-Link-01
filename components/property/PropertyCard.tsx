@@ -5,6 +5,8 @@ import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders";
 import { optimizeImageUrl } from "@/lib/images";
 import { slugifyCity } from "@/lib/seo";
 
+type PropertyCardVariant = "default" | "compact";
+
 interface PropertyCardProps {
   slug: string;
   title: string;
@@ -22,6 +24,7 @@ interface PropertyCardProps {
   urgencyText?: "Trending" | "Just listed" | "Popular";
   isVerified?: boolean;
   priority?: boolean;
+  variant?: PropertyCardVariant;
 }
 
 function FlashIcon() {
@@ -65,15 +68,70 @@ export function PropertyCard({
   urgencyText,
   isVerified = true,
   priority = false,
+  variant = "default",
 }: PropertyCardProps) {
   const imageUrls = Array.isArray(images) ? images : [];
   const imageUrl = imageUrls.length > 0 ? optimizeImageUrl(String(imageUrls[0]), 800) : PLACEHOLDER_PROPERTY;
-  // LCP hint for above-the-fold cards: eager load + high priority via
-  // fetchpriority passthrough (React 18 does not support the camelCase prop).
   const lcpAttrs = priority ? ({ fetchpriority: "high" } as Record<string, string>) : {};
 
+  const isCompact = variant === "compact";
+
+  if (isCompact) {
+    return (
+      <Link
+        href={`/properties/${slugifyCity(city)}/${slug}`}
+        className="group flex gap-4 p-3 rounded-xl border border-border bg-surface hover:bg-surface-secondary hover:border-primary-200 hover:shadow-md transition-all duration-200"
+      >
+        <div className="relative h-24 w-32 flex-shrink-0 rounded-lg overflow-hidden bg-surface-secondary">
+          <img
+            src={imageUrl}
+            alt={title}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            width={320}
+            height={240}
+            loading="lazy"
+            decoding="async"
+            onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_PROPERTY }}
+          />
+          <span
+            className={`absolute left-1.5 top-1.5 z-10 rounded-md px-2 py-0.5 text-[10px] font-semibold text-white ${
+              listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-400" : listingPurpose === "FOR_RENT_LONG_TERM" ? "bg-primary-600" : "bg-primary-500"
+            }`}
+          >
+            {listingPurpose === "FOR_RENT_SHORT_TERM" ? "Airbnb" : listingPurpose === "FOR_RENT_LONG_TERM" ? "Rent" : "Sale"}
+          </span>
+          {urgencyText && (
+            <span className="absolute right-1.5 top-1.5 z-10 flex items-center gap-1 rounded-md bg-white/90 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-primary-600 shadow-sm backdrop-blur-sm">
+              <FlashIcon />
+              {urgencyText}
+            </span>
+          )}
+          {isVerified && (
+            <span className="absolute bottom-1.5 right-1.5 z-10">
+              <VerifiedIcon />
+            </span>
+          )}
+        </div>
+        <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
+          <h3 className="line-clamp-1 font-heading text-sm font-semibold text-text-primary">{title}</h3>
+          <div className="flex items-center gap-1 text-xs text-text-secondary">
+            <MapPinIcon className="h-3 w-3 shrink-0" />
+            <span className="truncate">{region}, {city}</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-secondary">
+            {bedrooms != null && bedrooms > 0 && <span>{bedrooms} bed</span>}
+            {bathrooms != null && bathrooms > 0 && <span>{bathrooms} bath</span>}
+            {area != null && area > 0 && <span>{area.toLocaleString()} sqft</span>}
+            <span className="capitalize">{propertyType.toLowerCase()}</span>
+          </div>
+          <p className="font-heading text-base font-semibold text-primary-600">{formatPrice(price, listingPurpose ?? undefined)}</p>
+        </div>
+      </Link>
+    );
+  }
+
   return (
-<Link
+    <Link
       href={`/properties/${slugifyCity(city)}/${slug}`}
       className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-all duration-300 hover:-translate-y-[3px] hover:shadow-lg"
     >

@@ -222,6 +222,20 @@ export default function BrowsePageClient() {
     }
   };
 
+  const handleFilterChange = useCallback((key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(key, value);
+    params.set("page", "1"); // Reset to first page on filter change
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [searchParams, router, pathname]);
+
+  const handleFilterRemove = useCallback((key: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete(key);
+    params.set("page", "1");
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [searchParams, router, pathname]);
+
   return (
     <div className="mx-auto max-w-content px-4 py-8">
       <div className="mb-8 text-center">
@@ -293,9 +307,14 @@ export default function BrowsePageClient() {
       ) : (
         <BrowseResultsGrid
           activeTab={activeTab}
+          propertyFilter={propertyFilter}
+          serviceFilter={serviceFilter}
           properties={properties}
           services={services}
           total={total}
+          searchParams={Object.fromEntries(searchParams.entries())}
+          onFilterChange={handleFilterChange}
+          onFilterRemove={handleFilterRemove}
         />
       )}
     </div>
