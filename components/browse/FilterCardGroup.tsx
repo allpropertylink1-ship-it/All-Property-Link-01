@@ -67,7 +67,7 @@ export function FilterCardGroup({
 }: FilterCardGroupProps) {
   if (activeTab === "properties") {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {PROPERTY_CARDS.map((card) => {
           const { key, ...cardProps } = card;
           return (
@@ -85,7 +85,7 @@ export function FilterCardGroup({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-md sm:max-w-none mx-auto sm:mx-0">
       {SERVICE_CARDS.map((card) => {
         const { key, ...cardProps } = card;
         return (

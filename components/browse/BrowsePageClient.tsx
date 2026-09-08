@@ -229,30 +229,36 @@ export default function BrowsePageClient() {
         <p className="mt-2 text-text-secondary">Explore everything available on All Property Link</p>
       </div>
 
-      <div className="mb-6 flex items-center gap-4 border-b border-border pb-4">
+      <div className="mb-6 flex gap-4 border-b border-border">
         <button
           type="button"
           onClick={() => handleTabChange("properties")}
-          className={`touch-target flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+          className={`relative flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
             activeTab === "properties"
-              ? "bg-primary-50 text-primary-700 border border-primary-200"
-              : "text-text-secondary hover:bg-surface-secondary"
+              ? "text-primary-700"
+              : "text-text-secondary hover:text-text-primary"
           }`}
           aria-pressed={activeTab === "properties"}
         >
           Properties
+          {activeTab === "properties" && (
+            <span className="absolute bottom-[-1px] left-1/2 -translate-x-1/2 h-1 w-2/3 rounded-full bg-primary-500" />
+          )}
         </button>
         <button
           type="button"
           onClick={() => handleTabChange("services")}
-          className={`touch-target flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+          className={`relative flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
             activeTab === "services"
-              ? "bg-primary-50 text-primary-700 border border-primary-200"
-              : "text-text-secondary hover:bg-surface-secondary"
+              ? "text-primary-700"
+              : "text-text-secondary hover:text-text-primary"
           }`}
           aria-pressed={activeTab === "services"}
         >
           Services
+          {activeTab === "services" && (
+            <span className="absolute bottom-[-1px] left-1/2 -translate-x-1/2 h-1 w-2/3 rounded-full bg-primary-500" />
+          )}
         </button>
       </div>
 

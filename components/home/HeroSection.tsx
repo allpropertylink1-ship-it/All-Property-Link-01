@@ -347,7 +347,7 @@ export function HeroSection() {
 
   return (
     <section
-      className="relative flex min-h-[clamp(520px,100svh,620px)] flex-col overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-accent pb-16 pt-16 sm:pb-20 sm:pt-20"
+      className="relative flex min-h-[clamp(520px,100svh,620px)] flex-col overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-accent pb-8 pt-8 sm:pb-12 sm:pt-12"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -372,158 +372,169 @@ export function HeroSection() {
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-10" />
       )}
       <div className="absolute right-0 top-0 h-96 w-96 translate-x-1/3 -translate-y-1/3 rounded-full bg-white/5 blur-3xl" />
-      <div className="container relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center px-4 text-center">
-        {/* Persona switcher */}
-        <div
-          role="group"
-          aria-label="Choose what you are looking for"
-          className="mx-auto inline-flex max-w-full flex-wrap items-center justify-center gap-1 rounded-2xl border border-white/20 bg-black/25 p-1.5 backdrop-blur-md"
-        >
-          {PERSONAS.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              aria-pressed={persona.id === p.id}
-              onClick={() => switchPersona(p)}
-              className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all sm:px-5 ${
-                persona.id === p.id
-                  ? "bg-white text-primary shadow-md"
-                  : "text-white/70 hover:text-white"
-              }`}
+      <div className="container relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-between px-4 text-center">
+        {/* Top section: Persona switcher + embedded search */}
+        <div className="flex flex-col items-center gap-4 pt-4">
+          {/* Persona switcher with embedded search */}
+          <div
+            role="group"
+            aria-label="Choose what you are looking for"
+            className="mx-auto inline-flex max-w-full flex-wrap items-center justify-center gap-1 rounded-2xl border border-white/20 bg-black/25 p-1.5 backdrop-blur-md"
+          >
+            {PERSONAS.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                aria-pressed={persona.id === p.id}
+                onClick={() => switchPersona(p)}
+                className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all sm:px-5 ${
+                  persona.id === p.id
+                    ? "bg-white text-primary shadow-md"
+                    : "text-white/70 hover:text-white"
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Embedded search form */}
+          {showSearch && (
+            <form
+              onSubmit={submitSearch}
+              className="mx-auto flex max-w-xl items-center gap-2 rounded-2xl border border-white/20 bg-black/25 p-1.5 backdrop-blur-md"
             >
-              {p.label}
-            </button>
-          ))}
+              <div className="flex flex-1 items-center gap-2.5 px-4 py-2.5">
+                <Search size={18} className="text-white/60" />
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={persona.placeholder}
+                  aria-label="Search properties"
+                  className="w-full bg-transparent text-sm text-white placeholder:text-white/50 focus:outline-none"
+                />
+              </div>
+              <button
+                type="submit"
+                className="rounded-xl bg-white px-5 py-2 text-sm font-semibold text-primary transition-all hover:bg-teal-50"
+              >
+                Search
+              </button>
+            </form>
+          )}
+
+          {/* List persona CTAs */}
+          {!showSearch && (
+            <div className="mx-auto flex max-w-xl flex-wrap items-center justify-center gap-3">
+              <Link
+                href="/dashboard/listings/new"
+                className="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-primary transition-all hover:bg-teal-50"
+              >
+                Create a listing
+              </Link>
+              <Link
+                href="/aplreps"
+                className="rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+              >
+                Talk to an APL rep
+              </Link>
+            </div>
+          )}
         </div>
 
+        {/* Center: Headline */}
         <h1
           key={`${persona.id}-headline`}
-          className="mx-auto mt-6 max-w-4xl animate-[fadeUp_0.5s_ease-out] text-[clamp(1.25rem,5.5vw,1.75rem)] font-bold leading-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-3xl lg:text-4xl"
+          className="mx-auto max-w-4xl animate-[fadeUp_0.5s_ease-out] text-[clamp(1.25rem,5.5vw,1.75rem)] font-bold leading-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-3xl lg:text-4xl"
         >
           {persona.headline}
         </h1>
 
-        {showSearch ? (
-          <form
-            onSubmit={submitSearch}
-            className="mx-auto mt-8 flex max-w-xl items-center gap-2 rounded-2xl border border-white/20 bg-black/25 p-1.5 backdrop-blur-md"
-          >
-            <div className="flex flex-1 items-center gap-2.5 px-4 py-2.5">
-              <Search size={18} className="text-white/60" />
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={persona.placeholder}
-                aria-label="Search properties"
-                className="w-full bg-transparent text-sm text-white placeholder:text-white/50 focus:outline-none"
-              />
+        {/* Bottom section: Featured listing card */}
+        <div className="flex flex-col items-center gap-4 pb-4">
+          {/* Featured listing caption card */}
+          {showSearch && !loaded && (
+            <div className="mx-auto w-full max-w-4xl animate-pulse rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-sm">
+              <div className="h-3 w-28 rounded bg-white/25" />
+              <div className="mt-2 h-4 w-2/3 rounded bg-white/25" />
+              <div className="mt-1.5 h-3.5 w-28 rounded bg-white/25" />
             </div>
-            <button
-              type="submit"
-              className="rounded-xl bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-all hover:bg-teal-50"
+          )}
+          {showSearch && loaded && slide && (
+            <div
+              key={`${persona.id}-card`}
+              className="mx-auto w-full max-w-4xl animate-[fadeUp_0.5s_ease-out] rounded-2xl border border-white/20 bg-black/30 p-3 backdrop-blur-md sm:p-4"
             >
-              Search
-            </button>
-          </form>
-        ) : (
-          <div className="mx-auto mt-8 flex max-w-xl flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/dashboard/listings/new"
-              className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-primary transition-all hover:bg-teal-50"
-            >
-              Create a listing
-            </Link>
-            <Link
-              href="/aplreps"
-              className="rounded-xl border border-white/30 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
-            >
-              Talk to an APL rep
-            </Link>
-          </div>
-        )}
-
-        {/* Featured listing caption card */}
-        {showSearch && !loaded && (
-          <div className="mx-auto mt-10 w-full max-w-4xl animate-pulse rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
-            <div className="h-3 w-28 rounded bg-white/25" />
-            <div className="mt-3 h-5 w-2/3 rounded bg-white/25" />
-            <div className="mt-2 h-4 w-32 rounded bg-white/25" />
-          </div>
-        )}
-        {showSearch && loaded && slide && (
-          <div
-            key={`${persona.id}-card`}
-            className="mx-auto mt-10 w-full max-w-4xl animate-[fadeUp_0.5s_ease-out] rounded-2xl border border-white/20 bg-black/30 p-4 backdrop-blur-md sm:p-5"
-          >
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <Link
-                href={`/properties/${slugifyCity(slide.city || "kenya")}/${slide.slug}`}
-                className="group min-w-0 flex-1 text-left"
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-white/70">
-                  {persona.featuredLabel}
-                </p>
-                <h2 className="mt-1 truncate font-heading text-base font-bold leading-tight text-white sm:text-lg">
-                  {slide.title}
-                </h2>
-                <p className="mt-0.5 font-heading text-sm font-bold text-accent-300 sm:text-base">
-                  {formatPrice(slide.price, slide.listingPurpose ?? undefined)}
-                </p>
-              </Link>
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <Link
                   href={`/properties/${slugifyCity(slide.city || "kenya")}/${slide.slug}`}
-                  className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-teal-50"
+                  className="group min-w-0 flex-1 text-left"
                 >
-                  View Listing
-                  <ArrowUpRight />
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/70">
+                    {persona.featuredLabel}
+                  </p>
+                  <h2 className="mt-0.5 truncate font-heading text-sm font-bold leading-tight text-white sm:text-base">
+                    {slide.title}
+                  </h2>
+                  <p className="mt-0.5 font-heading text-sm font-bold text-accent-300 sm:text-base">
+                    {formatPrice(slide.price, slide.listingPurpose ?? undefined)}
+                  </p>
                 </Link>
-                {slides.length > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      aria-label="Previous listing"
-                      onClick={() => go(-1)}
-                      className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/15 text-white backdrop-blur-sm transition-colors hover:bg-white/30"
-                    >
-                      <ChevronLeft />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="Next listing"
-                      onClick={() => go(1)}
-                      className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/15 text-white backdrop-blur-sm transition-colors hover:bg-white/30"
-                    >
-                      <ChevronRight />
-                    </button>
-                  </>
-                )}
+                <div className="flex shrink-0 items-center gap-2">
+                  <Link
+                    href={`/properties/${slugifyCity(slide.city || "kenya")}/${slide.slug}`}
+                    className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-teal-50"
+                  >
+                    View Listing
+                    <ArrowUpRight />
+                  </Link>
+                  {slides.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        aria-label="Previous listing"
+                        onClick={() => go(-1)}
+                        className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/15 text-white backdrop-blur-sm transition-colors hover:bg-white/30"
+                      >
+                        <ChevronLeft />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Next listing"
+                        onClick={() => go(1)}
+                        className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/15 text-white backdrop-blur-sm transition-colors hover:bg-white/30"
+                      >
+                        <ChevronRight />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
+              {slides.length > 1 && (
+                <div className="mt-2 flex items-center justify-center gap-1.5">
+                  {slides.map((s, i) => (
+                    <button
+                      key={s.slug}
+                      type="button"
+                      aria-label={`Go to listing ${i + 1}`}
+                      onClick={() => setActive(i)}
+                      className={`h-2 rounded-full transition-all ${
+                        i === active ? "w-6 bg-white" : "w-2 bg-white/40 hover:bg-white/70"
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-            {slides.length > 1 && (
-              <div className="mt-3 flex items-center justify-center gap-1.5">
-                {slides.map((s, i) => (
-                  <button
-                    key={s.slug}
-                    type="button"
-                    aria-label={`Go to listing ${i + 1}`}
-                    onClick={() => setActive(i)}
-                    className={`h-2 rounded-full transition-all ${
-                      i === active ? "w-6 bg-white" : "w-2 bg-white/40 hover:bg-white/70"
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Fresh on the market ticker */}
+      {/* Fresh on the market ticker - moved to bottom */}
       {ticker.length > 0 && (
         <div
-          className="relative z-10 mt-12 border-t border-white/10 bg-black/30 backdrop-blur-md"
+          className="relative z-10 mt-auto border-t border-white/10 bg-black/30 backdrop-blur-md"
           onMouseEnter={handleTickerEnter}
           onMouseLeave={handleTickerLeave}
         >
@@ -531,7 +542,7 @@ export function HeroSection() {
             <span className="hidden lg:inline-block shrink-0 text-[11px] font-semibold uppercase tracking-wider text-accent-300">
               Fresh on the market
             </span>
-            <div ref={tickerRegionRef} className="overflow-hidden py-3">
+            <div ref={tickerRegionRef} className="overflow-hidden py-2.5">
               <div
                 ref={tickerTrackRef}
                 className="flex w-max gap-8"

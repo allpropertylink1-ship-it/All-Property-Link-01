@@ -28,9 +28,10 @@ export function FilterCard({
       onClick={() => onClick(filterKey)}
       className={`
         relative group overflow-hidden rounded-2xl border transition-all duration-200
+        active:scale-[0.98] active:shadow-none
         ${isActive
-          ? "border-primary-500 ring-3 ring-primary-500 ring-offset-2 bg-primary-50"
-          : "border-border bg-surface hover:border-primary-300 hover:shadow-lg"
+          ? "border-primary-500 ring-3 ring-primary-500 ring-offset-2 bg-primary-50 shadow-md"
+          : "border-border bg-surface hover:border-primary-400 hover:shadow-xl hover:-translate-y-1"
         }
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2
       `}
@@ -51,6 +52,13 @@ export function FilterCard({
             <CheckCircle className="h-10 w-10 text-white drop-shadow-lg" />
           </div>
         )}
+        <div className="absolute bottom-2 left-2 right-2 flex justify-end">
+          {isActive && (
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-600 text-white text-xs font-bold shadow-lg">
+              ✓
+            </span>
+          )}
+        </div>
       </div>
       <div className="p-4">
         <h3 className="font-heading text-lg font-semibold text-text-primary">{title}</h3>
