@@ -373,74 +373,74 @@ export function HeroSection() {
       )}
       <div className="absolute right-0 top-0 h-96 w-96 translate-x-1/3 -translate-y-1/3 rounded-full bg-white/5 blur-3xl" />
       <div className="container relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-between px-4 text-center">
-        {/* Top section: Persona switcher + embedded search */}
-        <div className="flex flex-col items-center gap-4 pt-4">
-          {/* Persona switcher with embedded search */}
+        {/* Top section: Unified persona tabs + search bar */}
+        <div className="flex flex-col items-center gap-2 pt-2">
+          {/* Unified bar: Persona tabs + search */}
           <div
             role="group"
             aria-label="Choose what you are looking for"
-            className="mx-auto inline-flex max-w-full flex-wrap items-center justify-center gap-1 rounded-2xl border border-white/20 bg-black/25 p-1.5 backdrop-blur-md"
+            className="mx-auto flex w-full max-w-5xl items-center gap-2 rounded-2xl border border-white/20 bg-black/25 p-1.5 backdrop-blur-md"
           >
-            {PERSONAS.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                aria-pressed={persona.id === p.id}
-                onClick={() => switchPersona(p)}
-                className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all sm:px-5 ${
-                  persona.id === p.id
-                    ? "bg-white text-primary shadow-md"
-                    : "text-white/70 hover:text-white"
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Embedded search form */}
-          {showSearch && (
-            <form
-              onSubmit={submitSearch}
-              className="mx-auto flex max-w-xl items-center gap-2 rounded-2xl border border-white/20 bg-black/25 p-1.5 backdrop-blur-md"
-            >
-              <div className="flex flex-1 items-center gap-2.5 px-4 py-2.5">
-                <Search size={18} className="text-white/60" />
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder={persona.placeholder}
-                  aria-label="Search properties"
-                  className="w-full bg-transparent text-sm text-white placeholder:text-white/50 focus:outline-none"
-                />
-              </div>
-              <button
-                type="submit"
-                className="rounded-xl bg-white px-5 py-2 text-sm font-semibold text-primary transition-all hover:bg-teal-50"
-              >
-                Search
-              </button>
-            </form>
-          )}
-
-          {/* List persona CTAs */}
-          {!showSearch && (
-            <div className="mx-auto flex max-w-xl flex-wrap items-center justify-center gap-3">
-              <Link
-                href="/dashboard/listings/new"
-                className="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-primary transition-all hover:bg-teal-50"
-              >
-                Create a listing
-              </Link>
-              <Link
-                href="/aplreps"
-                className="rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
-              >
-                Talk to an APL rep
-              </Link>
+            {/* Persona tabs on the left */}
+            <div className="flex items-center gap-1 flex-shrink-0" role="group" aria-label="Property type">
+              {PERSONAS.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  aria-pressed={persona.id === p.id}
+                  onClick={() => switchPersona(p)}
+                  className={`rounded-xl px-3 py-1.5 text-sm font-semibold transition-all ${
+                    persona.id === p.id
+                      ? "bg-white text-primary shadow-sm"
+                      : "text-white/70 hover:text-white"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
             </div>
-          )}
+
+            {/* Search input - fills remaining space */}
+            {showSearch && (
+              <form onSubmit={submitSearch} className="flex flex-1 items-center gap-2 ml-2">
+                <div className="flex flex-1 items-center gap-2">
+                  <Search size={16} className="text-white/60 flex-shrink-0" />
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder={persona.placeholder}
+                    aria-label="Search properties"
+                    className="w-full bg-transparent text-sm text-white placeholder:text-white/50 focus:outline-none"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="flex-shrink-0 rounded-xl bg-white px-4 py-1.5 text-sm font-semibold text-primary transition-all hover:bg-teal-50"
+                >
+                  Search
+                </button>
+              </form>
+            )}
+
+            {/* List persona CTAs - when no search */}
+            {!showSearch && (
+              <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                <Link
+                  href="/dashboard/listings/new"
+                  className="rounded-xl bg-white px-4 py-1.5 text-sm font-semibold text-primary transition-all hover:bg-teal-50"
+                >
+                  Create a listing
+                </Link>
+                <Link
+                  href="/aplreps"
+                  className="rounded-xl border border-white/30 bg-white/10 px-4 py-1.5 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+                >
+                  Talk to an APL rep
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Center: Headline */}
