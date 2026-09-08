@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { Loader2, ChevronRight } from "@/components/ui/icons";
 import { FilterCardGroup } from "./FilterCardGroup";
 import { ActiveFilterBar } from "./ActiveFilterBar";
 import { BrowseResultsGrid } from "./BrowseResultsGrid";
@@ -76,20 +75,6 @@ const SERVICE_FILTER_MAP: Record<ServiceFilterKey, Record<string, string>> = {
   ALL: { limit: "20" },
   FUNDI: { type: "FUNDI", limit: "20" },
   SERVICE_PROVIDER: { type: "SERVICE_PROVIDER", limit: "20" },
-};
-
-const PROPERTY_FILTER_LABELS: Record<PropertyFilterKey, string> = {
-  ALL: "All Properties",
-  FOR_SALE: "For Sale",
-  FOR_RENT_LONG_TERM: "For Rent",
-  FOR_RENT_SHORT_TERM: "Short-Term",
-  LAND: "Land & Plots",
-};
-
-const SERVICE_FILTER_LABELS: Record<ServiceFilterKey, string> = {
-  ALL: "All Services",
-  FUNDI: "Fundis",
-  SERVICE_PROVIDER: "Services",
 };
 
 export default function BrowsePageClient() {

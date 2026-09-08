@@ -4,7 +4,6 @@ import { PropertyCard } from "@/components/property/PropertyCard";
 import { optimizeImageUrl } from "@/lib/images";
 import { PLACEHOLDER_SERVICE } from "@/lib/placeholders";
 import Link from "next/link";
-import { MapPin } from "@/components/ui/icons";
 import { formatPrice } from "@/lib/utils";
 
 interface BrowseProperty {

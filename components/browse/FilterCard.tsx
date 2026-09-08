@@ -11,7 +11,6 @@ interface FilterCardProps {
   filterKey: string;
   isActive: boolean;
   onClick: (key: string) => void;
-  tab: "properties" | "services";
 }
 
 export function FilterCard({
@@ -22,7 +21,6 @@ export function FilterCard({
   filterKey,
   isActive,
   onClick,
-  tab,
 }: FilterCardProps) {
   return (
     <button

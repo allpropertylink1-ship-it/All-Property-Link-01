@@ -77,7 +77,6 @@ export function FilterCardGroup({
               filterKey={key}
               isActive={propertyFilter === key}
               onClick={onPropertyFilterChange}
-              tab="properties"
             />
           );
         })}
@@ -96,7 +95,6 @@ export function FilterCardGroup({
             filterKey={key}
             isActive={serviceFilter === key}
             onClick={onServiceFilterChange}
-            tab="services"
           />
         );
       })}
