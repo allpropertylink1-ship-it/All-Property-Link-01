@@ -35,21 +35,21 @@ export function Navbar() {
     <>
       <nav className="sticky top-0 z-50 border-b border-border bg-surface backdrop-blur">
         <div className="mx-auto flex h-16 max-w-content items-center justify-between gap-4 px-4">
-          <Link href="/" className="flex shrink-0 flex-col items-center justify-center leading-none">
+          <Link href="/" className="flex shrink-0 items-center justify-center gap-2 leading-none">
             <Image
-              src="/logos/logo-icon.png"
+              src="/logos/logo-mark.png"
               alt="All Property Link"
-              width={468}
-              height={343}
-              className="h-8 w-auto"
+              width={120}
+              height={120}
+              className="h-9 w-auto"
               priority
             />
             <Image
-              src="/logos/logo.png"
+              src="/logos/worded.png"
               alt="All Property Link"
-              width={1061}
-              height={151}
-              className="mt-0.5 h-4 w-auto"
+              width={300}
+              height={60}
+              className="h-7 w-auto"
               priority
             />
           </Link>

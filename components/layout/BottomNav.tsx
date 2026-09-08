@@ -120,7 +120,7 @@ export function BottomNav() {
           >
             <div className="flex h-7 w-7 items-center justify-center text-text-secondary">
               <Image
-                src="/logos/logo-icon.png"
+                src="/logos/logo-mark.png"
                 alt="All Property Link"
                 width={28}
                 height={28}
