@@ -1,8 +1,7 @@
 /**
  * Client-side image pipeline: downscale in-browser (canvas) then upload to the
- * API's local-storage endpoint (/api/upload/public). Replaces the retired
- * direct-to-Cloudinary flow — server has no native image lib, so compression
- * happens here before the bytes ever leave the device.
+ * API's local-storage endpoint (/api/upload/public). Server has no native
+ * image lib, so compression happens here before the bytes ever leave the device.
  */
 
 const MAX_DIMENSION = 1600;
