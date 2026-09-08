@@ -12,21 +12,30 @@ interface Props {
   contactMethod: ContactMethod
   password: string
   referralCode: string
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
   error: string
   loading: boolean
   onContactMethodChange: (m: ContactMethod) => void
   onPasswordChange: (v: string) => void
   onReferralCodeChange: (v: string) => void
   onBack: () => void
+  onFirstNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onLastNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onPhoneChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onGoogleSuccess: () => Promise<void>
   onGoogleError: (msg: string) => void
   onSwitchToLogin?: () => void
 }
 
 export function RegisterAccountInfo({
-  contactMethod, password, referralCode, error, loading,
+  contactMethod, password, referralCode, firstName, lastName, email, phone, error, loading,
   onContactMethodChange, onPasswordChange, onReferralCodeChange,
-  onBack, onGoogleSuccess, onGoogleError, onSwitchToLogin,
+  onBack, onFirstNameChange, onLastNameChange, onEmailChange, onPhoneChange,
+  onGoogleSuccess, onGoogleError, onSwitchToLogin,
 }: Props) {
   return (
     <>
@@ -60,12 +69,14 @@ export function RegisterAccountInfo({
           <div>
             <label htmlFor="firstName" className="block text-sm font-medium text-text-primary">First name</label>
             <input id="firstName" name="firstName" type="text" required
+              value={firstName} onChange={onFirstNameChange}
               className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
               style={{ fontSize: "16px" }} />
           </div>
           <div>
             <label htmlFor="lastName" className="block text-sm font-medium text-text-primary">Last name</label>
             <input id="lastName" name="lastName" type="text" required
+              value={lastName} onChange={onLastNameChange}
               className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
               style={{ fontSize: "16px" }} />
           </div>
@@ -93,6 +104,7 @@ export function RegisterAccountInfo({
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-text-primary">Email</label>
             <input id="email" name="email" type="email" autoComplete="email" required
+              value={email} onChange={onEmailChange}
               className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
               style={{ fontSize: "16px" }} placeholder="you@example.com" />
           </div>
@@ -102,6 +114,7 @@ export function RegisterAccountInfo({
             <div className="mt-1 flex">
               <span className="inline-flex items-center rounded-sm rounded-r-none border border-r-0 border-border bg-surface-secondary px-3 text-sm text-text-secondary">+254</span>
               <input id="phone" name="phone" type="tel" inputMode="numeric" required maxLength={9}
+                value={phone} onChange={onPhoneChange}
                 className="block w-full rounded-sm rounded-l-none border border-border bg-surface px-4 py-2.5 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
                 style={{ fontSize: "16px" }} placeholder="712 345 678" />
             </div>

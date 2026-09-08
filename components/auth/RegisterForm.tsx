@@ -32,6 +32,12 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
   const otpTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const cooldownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  // Preserve form data when navigating between steps
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("")
+
   useEffect(() => {
     return () => {
       if (otpTimerRef.current) clearInterval(otpTimerRef.current)
@@ -74,11 +80,13 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
 
     const form = new FormData(e.currentTarget)
     const confirmPassword = form.get("confirmPassword") as string
-    const firstName = form.get("firstName") as string
-    const lastName = form.get("lastName") as string
-    const email = contactMethod === "email" ? (form.get("email") as string) : ""
     const phoneRaw = contactMethod === "phone" ? (form.get("phone") as string) : ""
-    const phone = phoneRaw ? `+254${phoneRaw.replace(/\D/g, "")}` : ""
+
+    // Use state values for all fields (preserved across steps)
+    const firstNameValue = firstName
+    const lastNameValue = lastName
+    const emailValue = email
+    const phoneValue = phone
 
     if (password !== confirmPassword) {
       setError("Passwords do not match")
@@ -93,11 +101,17 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
     }
 
     if (contactMethod === "email") {
-      if (!email) {
+      if (!emailValue) {
         setError("Email is required")
         setLoading(false)
         return
       }
+    }
+
+    if (!firstNameValue || !lastNameValue) {
+      setError("First name and last name are required")
+      setLoading(false)
+      return
     }
 
     let result: { error?: string; otp?: OtpResponse }
@@ -105,12 +119,12 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
     if (otpIdentifier) {
       result = await updateRegistration({
         oldIdentifier: otpIdentifier,
-        ...(email ? { email } : {}),
-        ...(phone ? { phone } : {}),
-        firstName, lastName,
+        ...(emailValue ? { email: emailValue } : {}),
+        ...(phoneValue ? { phone: phoneValue } : {}),
+        firstName: firstNameValue, lastName: lastNameValue,
       })
     } else {
-      result = await signup({ firstName, lastName, password, email, phone, referralCode: referralCode || undefined, userType: userType || undefined })
+      result = await signup({ firstName: firstNameValue, lastName: lastNameValue, password, email: emailValue, phone: phoneValue, referralCode: referralCode || undefined, userType: userType || undefined })
     }
 
     if (result.error) {
@@ -235,13 +249,22 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
     return <RegisterUserTypeSelector userType={userType} onChange={setUserType} onNext={() => setStep("form")} error={error} />
   }
 
+  // Wrapper functions to convert ChangeEvent to string for setState
+  const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)
+  const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)
+
   return (
     <form onSubmit={handleSubmit}>
       <RegisterAccountInfo
         contactMethod={contactMethod} password={password} referralCode={referralCode}
+        firstName={firstName} lastName={lastName} email={email} phone={phone}
         error={error} loading={loading}
         onContactMethodChange={setContactMethod} onPasswordChange={setPassword}
         onReferralCodeChange={setReferralCode} onBack={() => setStep("userType")}
+        onFirstNameChange={handleFirstNameChange} onLastNameChange={handleLastNameChange}
+        onEmailChange={handleEmailChange} onPhoneChange={handlePhoneChange}
         onGoogleSuccess={handleGoogleSuccess} onGoogleError={handleGoogleError}
         onSwitchToLogin={onSwitchToLogin}
       />
