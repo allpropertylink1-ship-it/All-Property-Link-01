@@ -44,9 +44,9 @@ function VerifiedIcon() {
   );
 }
 
-function MapPinIcon() {
+function MapPinIcon({ className }: { className?: string }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className={className}>
       <path d="M7 0C4.5 0 2.5 2 2.5 4.5c0 3.4 4.5 9.5 4.5 9.5s4.5-6.1 4.5-9.5C11.5 2 9.5 0 7 0zm0 6.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" fill="currentColor" />
     </svg>
   );

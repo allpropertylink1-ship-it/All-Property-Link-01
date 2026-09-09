@@ -225,7 +225,7 @@ export default function BrowsePageClient() {
   const handleFilterChange = useCallback((key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set(key, value);
-    params.set("page", "1"); // Reset to first page on filter change
+    params.set("page", "1");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }, [searchParams, router, pathname]);
 
@@ -313,7 +313,7 @@ export default function BrowsePageClient() {
           services={services}
           total={total}
           searchParams={Object.fromEntries(searchParams.entries())}
-          onFilterChange={handleFilterChange}
+          _onFilterChange={handleFilterChange}
           onFilterRemove={handleFilterRemove}
         />
       )}

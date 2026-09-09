@@ -4,9 +4,29 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { ServiceCardCompact } from "./ServiceCardCompact";
-import { Grid, List, ChevronDown, X, Loader2 } from "@/components/ui/icons";
+import { ChevronDown, X } from "@/components/ui/icons";
 import { formatPrice } from "@/lib/utils";
-import { slugifyCity } from "@/lib/seo";
+
+function GridIcon({ className, size = 24 }: { className?: string; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+    </svg>
+  );
+}
+
+function ListIcon({ className, size = 24 }: { className?: string; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="4" y1="12" x2="20" y2="12" />
+      <line x1="4" y1="18" x2="20" y2="18" />
+    </svg>
+  );
+}
 
 type SortOption = "newest" | "price-asc" | "price-desc" | "popular";
 type LayoutOption = "grid" | "list";
@@ -70,7 +90,7 @@ interface BrowseResultsGridProps {
   services: BrowseService[];
   total: number;
   searchParams: Record<string, string | undefined>;
-  onFilterChange: (key: string, value: string) => void;
+  _onFilterChange?: (key: string, value: string) => void;
   onFilterRemove: (key: string) => void;
 }
 
@@ -124,7 +144,7 @@ export function BrowseResultsGrid({
   services,
   total,
   searchParams,
-  onFilterChange,
+  _onFilterChange,
   onFilterRemove,
 }: BrowseResultsGridProps) {
   const router = useRouter();
@@ -150,17 +170,14 @@ export function BrowseResultsGrid({
         };
         chips.push({ key: "purpose", label: labels[propertyFilter] || propertyFilter, onRemove: () => onFilterRemove("purpose") });
       }
-      // Add city filter chip if present
       if (searchParams.city) {
         chips.push({ key: "city", label: searchParams.city, onRemove: () => onFilterRemove("city") });
       }
-      // Add price range chips
       if (searchParams.minPrice || searchParams.maxPrice) {
         const min = searchParams.minPrice ? `KES ${Number(searchParams.minPrice).toLocaleString()}` : "Any";
         const max = searchParams.maxPrice ? `KES ${Number(searchParams.maxPrice).toLocaleString()}` : "Any";
         chips.push({ key: "price", label: `${min} - ${max}`, onRemove: () => { onFilterRemove("minPrice"); onFilterRemove("maxPrice"); } });
       }
-      // Add type filter
       if (searchParams.propertyType) {
         chips.push({ key: "propertyType", label: searchParams.propertyType, onRemove: () => onFilterRemove("propertyType") });
       }
@@ -183,12 +200,11 @@ export function BrowseResultsGrid({
     setFilterChips(chips);
   }, [activeTab, propertyFilter, serviceFilter, searchParams, onFilterRemove]);
 
-  // Sort properties/services locally (fallback if backend doesn't support sort)
   const sortedProperties = [...properties].sort((a, b) => {
     if (sort === "price-asc") return (a.price || 0) - (b.price || 0);
     if (sort === "price-desc") return (b.price || 0) - (a.price || 0);
     if (sort === "popular") return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
-    return 0; // newest - keep API order
+    return 0;
   });
 
   const sortedServices = [...services].sort((a, b) => {
@@ -245,7 +261,6 @@ export function BrowseResultsGrid({
 
   return (
     <div className="space-y-4">
-      {/* Toolbar */}
       <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 bg-surface/80 backdrop-blur-sm px-4 py-3 rounded-xl border border-border mb-4">
         <div className="flex items-center gap-2" role="group" aria-label="Layout">
           <button
@@ -254,7 +269,7 @@ export function BrowseResultsGrid({
             className={`p-2 rounded-lg transition-colors ${layout === "grid" ? "bg-primary-50 text-primary-700" : "text-text-secondary hover:bg-surface-secondary"}`}
             aria-label="Grid view"
           >
-            <Grid className="h-5 w-5" />
+            <GridIcon className="h-5 w-5" />
           </button>
           <button
             onClick={() => handleLayoutChange("list")}
@@ -262,7 +277,7 @@ export function BrowseResultsGrid({
             className={`p-2 rounded-lg transition-colors ${layout === "list" ? "bg-primary-50 text-primary-700" : "text-text-secondary hover:bg-surface-secondary"}`}
             aria-label="List view"
           >
-            <List className="h-5 w-5" />
+            <ListIcon className="h-5 w-5" />
           </button>
         </div>
 
@@ -294,7 +309,6 @@ export function BrowseResultsGrid({
         </div>
       </div>
 
-      {/* Filter Summary Bar */}
       {filterChips.length > 0 && (
         <div className="sticky top-16 z-10 flex flex-wrap items-center gap-2 bg-surface/80 backdrop-blur-sm px-4 py-2 rounded-xl border border-border">
           <span className="text-xs font-medium text-text-secondary mr-1">Filters:</span>
@@ -319,12 +333,10 @@ export function BrowseResultsGrid({
         </div>
       )}
 
-      {/* Results Count */}
       <p className="mb-3 text-sm text-text-secondary">
         {total} {total === 1 ? itemType : `${itemType}s`} found
       </p>
 
-      {/* Results Grid/List */}
       {isList ? (
         <div className="space-y-2" role="list" aria-label={`${itemType} list`}>
           {activeTab === "properties" ? (
@@ -349,7 +361,19 @@ export function BrowseResultsGrid({
             ))
           ) : (
             sortedServices.map((item) => (
-              <ServiceCardCompact key={item.id} item={item} />
+              <ServiceCardCompact
+                key={item.id}
+                id={item.id}
+                title={item.title}
+                price={item.price}
+                currency={item.currency}
+                pricePeriod={item.pricePeriod}
+                city={item.city}
+                region={item.region}
+                images={item.images}
+                category={item.category}
+                user={item.user}
+              />
             ))
           )}
         </div>

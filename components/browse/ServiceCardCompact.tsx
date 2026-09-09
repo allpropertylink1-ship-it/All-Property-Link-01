@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin } from "@/components/ui/icons";
 import { optimizeImageUrl } from "@/lib/images";
 import { PLACEHOLDER_SERVICE } from "@/lib/placeholders";
 import { formatPrice } from "@/lib/utils";
@@ -17,14 +16,13 @@ interface ServiceCardCompactProps {
   region: string | null;
   images: unknown;
   category: { name: string; slug: string } | null;
-  user: { firstName: string; lastName: string; avatar: string | null } | null;
+  user: { firstName: string; lastName: string; companyName: string | null; businessLogo: string | null } | null;
 }
 
 export function ServiceCardCompact({
   id,
   title,
   price,
-  currency,
   pricePeriod,
   city,
   region,
@@ -55,7 +53,7 @@ export function ServiceCardCompact({
         <p className="text-xs text-text-secondary mt-0.5">{city || region || "Kenya"}</p>
         <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm">
           {price != null && (
-            <span className="font-semibold text-primary-600">{formatPrice(Number(price), pricePeriod as any)}</span>
+            <span className="font-semibold text-primary-600">{formatPrice(Number(price), pricePeriod)}</span>
           )}
           {user && (
             <span className="text-text-secondary">{user.firstName} {user.lastName}</span>
