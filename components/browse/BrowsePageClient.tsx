@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { FilterCardGroup } from "./FilterCardGroup";
+import { FilterPillsGroup } from "./FilterPills";
 import { ActiveFilterBar } from "./ActiveFilterBar";
 import { BrowseResultsGrid } from "./BrowseResultsGrid";
 import { BrowseSkeleton } from "./BrowseSkeleton";
@@ -77,6 +77,25 @@ const SERVICE_FILTER_MAP: Record<ServiceFilterKey, Record<string, string>> = {
   SERVICE_PROVIDER: { type: "SERVICE_PROVIDER", limit: "20" },
 };
 
+// URL param to filter key mapping
+const URL_TO_PROPERTY_FILTER: Record<string, PropertyFilterKey> = {
+  "FOR_SALE": "FOR_SALE",
+  "FOR_RENT_LONG_TERM": "FOR_RENT_LONG_TERM",
+  "FOR_RENT_SHORT_TERM": "FOR_RENT_SHORT_TERM",
+  "LAND": "LAND",
+  "sale": "FOR_SALE",
+  "rent": "FOR_RENT_LONG_TERM",
+  "short-term": "FOR_RENT_SHORT_TERM",
+  "land": "LAND",
+};
+
+const URL_TO_SERVICE_FILTER: Record<string, ServiceFilterKey> = {
+  "FUNDI": "FUNDI",
+  "SERVICE_PROVIDER": "SERVICE_PROVIDER",
+  "fundi": "FUNDI",
+  "service_provider": "SERVICE_PROVIDER",
+};
+
 export default function BrowsePageClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -94,29 +113,38 @@ export default function BrowsePageClient() {
   const abortControllerRef = useRef<AbortController | null>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Read URL params and set initial filters
   const syncFiltersFromUrl = useCallback(() => {
     const tab = searchParams.get("tab") as "properties" | "services" | null;
-    const filter = searchParams.get("filter");
+    const purpose = searchParams.get("purpose");
+    const type = searchParams.get("type");
+    const serviceType = searchParams.get("serviceType");
+    const filter = searchParams.get("filter"); // legacy filter param
 
     if (tab && (tab === "properties" || tab === "services")) {
       setActiveTab(tab);
     }
 
-    if (filter) {
-      if (activeTab === "properties" || tab === "properties") {
-        const validPropertyFilters: PropertyFilterKey[] = ["ALL", "FOR_SALE", "FOR_RENT_LONG_TERM", "FOR_RENT_SHORT_TERM", "LAND"];
-        if (validPropertyFilters.includes(filter as PropertyFilterKey)) {
-          setPropertyFilter(filter as PropertyFilterKey);
-        }
-      }
-      if (activeTab === "services" || tab === "services") {
-        const validServiceFilters: ServiceFilterKey[] = ["ALL", "FUNDI", "SERVICE_PROVIDER"];
-        if (validServiceFilters.includes(filter as ServiceFilterKey)) {
-          setServiceFilter(filter as ServiceFilterKey);
-        }
-      }
+    // Determine property filter from URL params
+    let detectedPropertyFilter: PropertyFilterKey = "ALL";
+    if (purpose && URL_TO_PROPERTY_FILTER[purpose]) {
+      detectedPropertyFilter = URL_TO_PROPERTY_FILTER[purpose];
+    } else if (type && URL_TO_PROPERTY_FILTER[type]) {
+      detectedPropertyFilter = URL_TO_PROPERTY_FILTER[type];
+    } else if (filter && URL_TO_PROPERTY_FILTER[filter]) {
+      detectedPropertyFilter = URL_TO_PROPERTY_FILTER[filter];
     }
-  }, [searchParams, activeTab]);
+    setPropertyFilter(detectedPropertyFilter);
+
+    // Determine service filter from URL params
+    let detectedServiceFilter: ServiceFilterKey = "ALL";
+    if (serviceType && URL_TO_SERVICE_FILTER[serviceType]) {
+      detectedServiceFilter = URL_TO_SERVICE_FILTER[serviceType];
+    } else if (filter && URL_TO_SERVICE_FILTER[filter]) {
+      detectedServiceFilter = URL_TO_SERVICE_FILTER[filter];
+    }
+    setServiceFilter(detectedServiceFilter);
+  }, [searchParams]);
 
   useEffect(() => {
     syncFiltersFromUrl();
@@ -124,14 +152,30 @@ export default function BrowsePageClient() {
 
   const updateUrl = useCallback(
     (tab: "properties" | "services", filter: PropertyFilterKey | ServiceFilterKey) => {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams(searchParams.toString());
       params.set("tab", tab);
-      if (filter !== "ALL") {
-        params.set("filter", filter);
+      
+      if (tab === "properties") {
+        params.delete("serviceType");
+        params.delete("filter");
+        if (filter === "LAND") {
+          params.set("type", "LAND");
+        } else if (filter !== "ALL") {
+          params.set("purpose", filter);
+        }
+      } else {
+        params.delete("purpose");
+        params.delete("type");
+        params.delete("filter");
+        if (filter !== "ALL") {
+          params.set("serviceType", filter);
+        }
       }
+      
+      params.set("page", "1");
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    [router, pathname]
+    [router, pathname, searchParams]
   );
 
   const fetchResults = useCallback(async () => {
@@ -236,6 +280,21 @@ export default function BrowsePageClient() {
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }, [searchParams, router, pathname]);
 
+  // Determine if filter came from URL (not user interaction)
+  const isFilterFromUrl = propertyFilter !== "ALL" || serviceFilter !== "ALL";
+  const currentFilter = activeTab === "properties" ? propertyFilter : serviceFilter;
+  const isDefaultFilter = currentFilter === "ALL";
+
+  const filterLabels: Record<string, string> = {
+    FOR_SALE: "For Sale",
+    FOR_RENT_LONG_TERM: "For Rent",
+    FOR_RENT_SHORT_TERM: "Short-Term",
+    LAND: "Land & Plots",
+    FUNDI: "Fundis",
+    SERVICE_PROVIDER: "Services",
+    ALL: activeTab === "properties" ? "All Properties" : "All Services",
+  };
+
   return (
     <div className="mx-auto max-w-content px-4 py-8">
       <div className="mb-8 text-center">
@@ -276,20 +335,33 @@ export default function BrowsePageClient() {
         </button>
       </div>
 
-      <FilterCardGroup
-        activeTab={activeTab}
-        propertyFilter={propertyFilter}
-        serviceFilter={serviceFilter}
-        onPropertyFilterChange={handlePropertyFilterChange}
-        onServiceFilterChange={handleServiceFilterChange}
-      />
+      {/* Only show filter pills if no filter is active from URL, or if user wants to change filter */}
+      {!isFilterFromUrl && (
+        <FilterPillsGroup
+          activeTab={activeTab}
+          propertyFilter={propertyFilter}
+          serviceFilter={serviceFilter}
+          onPropertyFilterChange={handlePropertyFilterChange}
+          onServiceFilterChange={handleServiceFilterChange}
+        />
+      )}
 
-      <ActiveFilterBar
-        activeTab={activeTab}
-        propertyFilter={propertyFilter}
-        serviceFilter={serviceFilter}
-        onClear={handleClearFilter}
-      />
+      {/* Show active filter indicator when filter is applied (from URL or user) */}
+      {!isDefaultFilter && (
+        <div className="mb-6 flex items-center gap-2 rounded-lg border border-primary-200 bg-primary-50 px-4 py-3" role="status" aria-live="polite">
+          <span className="text-sm font-medium text-primary-700">
+            Showing: <strong>{filterLabels[currentFilter] || currentFilter}</strong>
+          </span>
+          <button
+            type="button"
+            onClick={handleClearFilter}
+            className="ml-auto touch-target flex h-8 w-8 items-center justify-center rounded-md text-primary-600 hover:bg-primary-100 transition-colors"
+            aria-label="Clear filter"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <BrowseSkeleton count={8} />

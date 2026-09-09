@@ -440,12 +440,12 @@ export function HeroSection() {
       <div className="absolute right-0 top-0 h-96 w-96 translate-x-1/3 -translate-y-1/3 rounded-full bg-white/5 blur-3xl" />
       <div className="container relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-between px-4 text-center">
         {/* Top section: Unified persona tabs + search bar */}
-        <div className="flex flex-col items-center gap-2 pt-2">
+        <div className="flex flex-col items-center gap-2 pt-2 relative z-50">
           {/* Unified bar: Persona tabs + search */}
           <div
             role="group"
             aria-label="Choose what you are looking for"
-            className="mx-auto flex w-full max-w-5xl items-center gap-2 rounded-2xl border border-white/20 bg-black/25 p-1.5 backdrop-blur-md"
+            className="mx-auto flex w-full max-w-5xl items-center gap-2 rounded-2xl border border-white/20 bg-black/25 p-1.5 backdrop-blur-md relative overflow-visible"
           >
             {/* Persona tabs on the left */}
             <div className="flex items-center gap-1 flex-shrink-0" role="group" aria-label="Property type">
@@ -489,7 +489,7 @@ export function HeroSection() {
                     <ul
                       id="search-suggestions"
                       role="listbox"
-                      className="absolute top-full left-0 right-0 mt-1.5 max-h-60 overflow-y-auto rounded-xl bg-white border border-border shadow-xl z-50 animate-[fadeIn_0.15s_ease-out]"
+                      className="absolute top-full left-[-110px] right-0 mt-1.5 max-h-60 overflow-y-auto rounded-xl bg-white border border-border shadow-xl z-50 animate-[fadeIn_0.15s_ease-out]"
                     >
                       {suggestions.map((item, idx) => (
                         <li key={`${item.slug}-${idx}`} role="option" aria-selected="false">
