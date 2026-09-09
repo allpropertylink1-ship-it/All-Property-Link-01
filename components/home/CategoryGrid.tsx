@@ -88,7 +88,8 @@ export function CategoryGrid() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
+        {/* Mobile: 2-column vertical stacks */}
+        <div className="grid grid-cols-2 gap-6 lg:hidden">
           <div className="space-y-3">
             <h3 className="font-heading text-lg font-semibold text-text-primary">Properties</h3>
             <div className="flex flex-col gap-2" role="list" aria-label="Property categories">
@@ -101,6 +102,27 @@ export function CategoryGrid() {
           <div className="space-y-3">
             <h3 className="font-heading text-lg font-semibold text-text-primary">Services</h3>
             <div className="flex flex-col gap-2" role="list" aria-label="Service categories">
+              {serviceCategories.map((cat) => (
+                <CategoryPill key={cat.title} category={cat} isService />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop: horizontal wrapping pills like "Popular cities" in QuickSearch */}
+        <div className="hidden lg:block space-y-6">
+          <div>
+            <h3 className="mb-3 font-heading text-lg font-semibold text-text-primary">Properties</h3>
+            <div className="flex flex-wrap gap-2" role="list" aria-label="Property categories">
+              {propertyCategories.map((cat) => (
+                <CategoryPill key={cat.title} category={cat} />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="mb-3 font-heading text-lg font-semibold text-text-primary">Services</h3>
+            <div className="flex flex-wrap gap-2" role="list" aria-label="Service categories">
               {serviceCategories.map((cat) => (
                 <CategoryPill key={cat.title} category={cat} isService />
               ))}
