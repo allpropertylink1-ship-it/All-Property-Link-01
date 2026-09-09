@@ -76,6 +76,14 @@
     min-width: 44px;
   }
 
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   .wrap {
     width: 100%;
     max-width: 1240px;

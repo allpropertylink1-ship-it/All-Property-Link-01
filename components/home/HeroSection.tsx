@@ -325,17 +325,17 @@ export function HeroSection() {
           <div
             role="group"
             aria-label="Choose what you are looking for"
-            className="mx-auto flex w-full max-w-5xl items-center gap-2 rounded-2xl border border-white/20 bg-black/25 p-1.5 backdrop-blur-md relative overflow-visible"
+            className="mx-auto flex w-full max-w-5xl items-center gap-1.5 rounded-2xl border border-white/20 bg-black/25 p-1 backdrop-blur-md relative overflow-visible"
           >
             {/* Persona tabs on the left */}
-            <div className="flex items-center gap-1 flex-shrink-0" role="group" aria-label="Property type">
+            <div className="flex items-center gap-0.5 flex-shrink-0" role="group" aria-label="Property type">
               {PERSONAS.map((p) => (
                 <button
                   key={p.id}
                   type="button"
                   aria-pressed={persona.id === p.id}
                   onClick={() => switchPersona(p)}
-                  className={`rounded-xl px-3 py-1.5 text-sm font-semibold transition-all ${
+                  className={`rounded-xl px-2.5 py-1 text-sm font-semibold transition-all ${
                     persona.id === p.id
                       ? "bg-white text-primary shadow-sm"
                       : "text-white/70 hover:text-white"
@@ -443,7 +443,7 @@ export function HeroSection() {
         </div>
 
         {/* Bottom section: Featured listing card - lowered with more bottom padding */}
-        <div className="flex flex-col items-center gap-4 pb-8">
+        <div className="flex flex-col items-center gap-3 pb-2">
           {/* Featured listing caption card */}
           {showSearch && !loaded && (
             <div className="mx-auto w-full max-w-4xl animate-pulse rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-sm">
