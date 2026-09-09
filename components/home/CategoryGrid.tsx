@@ -63,10 +63,10 @@ function CategoryPill({ category, isService = false }: { category: Category; isS
   return (
     <Link
       href={`${baseHref}?${param}=${category.filterKey}`}
-      className="flex h-[32px] items-center gap-1.5 rounded-full border border-border bg-surface px-3 text-sm font-medium text-text-secondary transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary hover:shadow-sm"
+      className="flex h-[32px] lg:h-[36px] items-center gap-1.5 lg:gap-2 rounded-full border border-border bg-surface px-3 lg:px-4 text-sm font-medium text-text-secondary transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary hover:shadow-sm"
       aria-label={`${category.title}: ${category.desc}`}
     >
-      <category.icon size={12} className="shrink-0" />
+      <category.icon size={12} className="shrink-0 lg:size-14" />
       <span>{category.title}</span>
     </Link>
   )
@@ -88,7 +88,7 @@ export function CategoryGrid() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 lg:gap-6">
           <div className="space-y-3">
             <h3 className="font-heading text-lg font-semibold text-text-primary">Properties</h3>
             <div className="flex flex-col gap-2" role="list" aria-label="Property categories">
