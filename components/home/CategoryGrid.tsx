@@ -88,9 +88,9 @@ export function CategoryGrid() {
           </p>
         </div>
 
-        <div className="space-y-6">
-          <div>
-            <h3 className="mb-3 font-heading text-lg font-semibold text-text-primary">Properties</h3>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="space-y-3">
+            <h3 className="font-heading text-lg font-semibold text-text-primary">Properties</h3>
             <div className="flex flex-wrap gap-2" role="list" aria-label="Property categories">
               {propertyCategories.map((cat) => (
                 <CategoryPill key={cat.title} category={cat} />
@@ -98,8 +98,8 @@ export function CategoryGrid() {
             </div>
           </div>
 
-          <div>
-            <h3 className="mb-3 font-heading text-lg font-semibold text-text-primary">Services</h3>
+          <div className="space-y-3">
+            <h3 className="font-heading text-lg font-semibold text-text-primary">Services</h3>
             <div className="flex flex-wrap gap-2" role="list" aria-label="Service categories">
               {serviceCategories.map((cat) => (
                 <CategoryPill key={cat.title} category={cat} isService />
