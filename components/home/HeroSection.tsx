@@ -293,7 +293,7 @@ export function HeroSection() {
 
   return (
     <section
-      className="relative flex min-h-[clamp(520px,100svh,620px)] flex-col overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-accent pb-8 pt-8 sm:pb-12 sm:pt-12"
+      className="relative flex min-h-[clamp(520px,100svh,620px)] flex-col overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-accent pb-3 pt-3 sm:pb-5 sm:pt-5"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -320,7 +320,7 @@ export function HeroSection() {
       <div className="absolute right-0 top-0 h-96 w-96 translate-x-1/3 -translate-y-1/3 rounded-full bg-white/5 blur-3xl" />
       <div className="container relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-between px-4 text-center">
         {/* Top section: Unified persona tabs + search bar + headline */}
-        <div className="flex flex-col items-center gap-1 pt-1 relative z-50">
+        <div className="flex flex-col items-center gap-0.5 pt-0.5 relative z-50">
           {/* Unified bar: Persona tabs + search */}
           <div
             role="group"
