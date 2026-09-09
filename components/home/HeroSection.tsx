@@ -166,14 +166,6 @@ function toSlides(rows: ApiProperty[]): Slide[] {
   return slides
 }
 
-interface TickerItem {
-  slug: string
-  title: string
-  price: number | null
-  city: string
-  listingPurpose: string | null
-}
-
 export function HeroSection() {
   const router = useRouter()
   const [persona, setPersona] = useState<Persona>(PERSONAS[0])
@@ -181,20 +173,11 @@ export function HeroSection() {
   const [active, setActive] = useState(0)
   const [loaded, setLoaded] = useState(false)
   const [paused, setPaused] = useState(false)
-  const [ticker, setTicker] = useState<TickerItem[]>([])
-  const [tickerOffset, setTickerOffset] = useState(0)
-  const [gliding, setGliding] = useState(false)
   const [query, setQuery] = useState("")
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const cacheRef = useRef<Map<string, Slide[]>>(new Map())
-  const tickerTrackRef = useRef<HTMLDivElement>(null)
-  const tickerRegionRef = useRef<HTMLDivElement>(null)
-  const tickerOffsetRef = useRef(0)
-  const tickerLastRef = useRef(0)
-  const tickerRAF = useRef<number | null>(null)
-  const tickerTimer = useRef<number | null>(null)
 
   const loadSlides = (purpose: string | null) => {
     if (!purpose) {
@@ -226,107 +209,8 @@ export function HeroSection() {
 
   useEffect(() => {
     loadSlides(PERSONAS[0].purpose)
-    fetch("/api/properties?limit=12")
-      .then((r) => (r.ok ? r.json() : { properties: [] }))
-      .catch(() => ({ properties: [] }))
-      .then((res) => {
-        const seen = new Set<string>()
-        const items: TickerItem[] = []
-        for (const p of res.properties || []) {
-          if (seen.has(p.slug)) continue
-          seen.add(p.slug)
-          items.push({
-            slug: p.slug,
-            title: p.title,
-            price: p.price == null ? null : Number(p.price),
-            city: p.city ?? "",
-            listingPurpose: p.listingPurpose,
-          })
-          if (items.length === 10) break
-        }
-        setTicker(items)
-      })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  const stopTicker = () => {
-    if (tickerRAF.current !== null) {
-      cancelAnimationFrame(tickerRAF.current)
-      tickerRAF.current = null
-    }
-  }
-
-  const startTicker = () => {
-    if (ticker.length < 2) return
-    stopTicker()
-    tickerLastRef.current = performance.now()
-    const tick = (t: number) => {
-      const dt = Math.min(0.05, (t - tickerLastRef.current) / 1000)
-      tickerLastRef.current = t
-      const track = tickerTrackRef.current
-      if (track) {
-        const half = track.scrollWidth / 2
-        if (half > 0) {
-          const speed = half / 120
-          tickerOffsetRef.current -= dt * speed
-          while (tickerOffsetRef.current <= -half) tickerOffsetRef.current += half
-          while (tickerOffsetRef.current > 0) tickerOffsetRef.current -= half
-        }
-      }
-      setTickerOffset(Math.round(tickerOffsetRef.current))
-      tickerRAF.current = requestAnimationFrame(tick)
-    }
-    tickerRAF.current = requestAnimationFrame(tick)
-  }
-
-  useEffect(() => {
-    if (ticker.length >= 2) startTicker()
-    return () => {
-      stopTicker()
-      if (tickerTimer.current !== null) clearTimeout(tickerTimer.current)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticker.length])
-
-  // When an item is hovered, freeze the strip and glide it so the whole
-  // label is inside the visible region (no clipping at either edge).
-  const handleTickerItemEnter = (el: HTMLAnchorElement) => {
-    stopTicker()
-    const region = tickerRegionRef.current
-    if (!region) return
-    const rr = region.getBoundingClientRect()
-    const ir = el.getBoundingClientRect()
-    const pad = 28
-    let delta = 0
-    if (ir.left < rr.left) delta = rr.left - ir.left + pad
-    else if (ir.right > rr.right) delta = rr.right - ir.right - pad
-    if (delta === 0) return
-    const target = tickerOffsetRef.current + delta
-    tickerOffsetRef.current = target
-    setGliding(true)
-    setTickerOffset(target)
-  }
-
-  const handleTickerEnter = () => {
-    if (tickerTimer.current !== null) {
-      clearTimeout(tickerTimer.current)
-      tickerTimer.current = null
-    }
-    stopTicker()
-  }
-
-  const handleTickerLeave = () => {
-    if (gliding) {
-      if (tickerTimer.current !== null) clearTimeout(tickerTimer.current)
-      tickerTimer.current = window.setTimeout(() => {
-        tickerTimer.current = null
-        setGliding(false)
-        startTicker()
-      }, 700)
-    } else {
-      startTicker()
-    }
-  }
 
   const switchPersona = (next: Persona) => {
     setPersona(next)
@@ -407,10 +291,6 @@ export function HeroSection() {
 
   const showSearch = persona.purpose !== null
 
-  const marquee = (ticker.length > 1 ? [...ticker, ...ticker] : ticker).map(
-    (item, idx) => ({ ...item, key: `${item.slug}-${idx}` })
-  )
-
   return (
     <section
       className="relative flex min-h-[clamp(520px,100svh,620px)] flex-col overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-accent pb-8 pt-8 sm:pb-12 sm:pt-12"
@@ -439,8 +319,8 @@ export function HeroSection() {
       )}
       <div className="absolute right-0 top-0 h-96 w-96 translate-x-1/3 -translate-y-1/3 rounded-full bg-white/5 blur-3xl" />
       <div className="container relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-between px-4 text-center">
-        {/* Top section: Unified persona tabs + search bar */}
-        <div className="flex flex-col items-center gap-2 pt-2 relative z-50">
+        {/* Top section: Unified persona tabs + search bar + headline */}
+        <div className="flex flex-col items-center gap-1 pt-1 relative z-50">
           {/* Unified bar: Persona tabs + search */}
           <div
             role="group"
@@ -540,7 +420,7 @@ export function HeroSection() {
               </div>
             )}
 
-            {/* List persona CTAs - when no search */}
+            {/* List persona CTAs - when no search (only Create a listing) */}
             {!showSearch && (
               <div className="flex items-center gap-2 ml-2 flex-shrink-0">
                 <Link
@@ -549,27 +429,21 @@ export function HeroSection() {
                 >
                   Create a listing
                 </Link>
-                <Link
-                  href="/aplreps"
-                  className="rounded-xl border border-white/30 bg-white/10 px-4 py-1.5 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
-                >
-                  Talk to an APL rep
-                </Link>
               </div>
             )}
           </div>
+
+          {/* Headline directly under tabs */}
+          <h1
+            key={`${persona.id}-headline`}
+            className="mx-auto max-w-4xl animate-[fadeUp_0.5s_ease-out] text-[clamp(1.25rem,5.5vw,1.75rem)] font-bold leading-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-3xl lg:text-4xl"
+          >
+            {persona.headline}
+          </h1>
         </div>
 
-        {/* Center: Headline */}
-        <h1
-          key={`${persona.id}-headline`}
-          className="mx-auto max-w-4xl animate-[fadeUp_0.5s_ease-out] text-[clamp(1.25rem,5.5vw,1.75rem)] font-bold leading-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-3xl lg:text-4xl"
-        >
-          {persona.headline}
-        </h1>
-
-        {/* Bottom section: Featured listing card */}
-        <div className="flex flex-col items-center gap-4 pb-4">
+        {/* Bottom section: Featured listing card - lowered with more bottom padding */}
+        <div className="flex flex-col items-center gap-4 pb-8">
           {/* Featured listing caption card */}
           {showSearch && !loaded && (
             <div className="mx-auto w-full max-w-4xl animate-pulse rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-sm">
@@ -647,46 +521,6 @@ export function HeroSection() {
           )}
         </div>
       </div>
-
-      {/* Fresh on the market ticker - moved to bottom */}
-      {ticker.length > 0 && (
-        <div
-          className="relative z-10 mt-auto border-t border-white/10 bg-black/30 backdrop-blur-md"
-          onMouseEnter={handleTickerEnter}
-          onMouseLeave={handleTickerLeave}
-        >
-          <div className="container mx-auto flex max-w-7xl items-center gap-6 overflow-hidden px-4">
-            <span className="hidden lg:inline-block shrink-0 text-[11px] font-semibold uppercase tracking-wider text-accent-300">
-              Fresh on the market
-            </span>
-            <div ref={tickerRegionRef} className="overflow-hidden py-2.5">
-              <div
-                ref={tickerTrackRef}
-                className="flex w-max gap-8"
-                style={{
-                  transform: `translateX(${tickerOffset}px)`,
-                  transition: gliding ? "transform 0.6s ease" : "none",
-                }}
-              >
-                {marquee.map((item) => (
-                  <Link
-                    key={item.key}
-                    href={`/properties/${slugifyCity(item.city || "kenya")}/${item.slug}`}
-                    onMouseEnter={(e) => handleTickerItemEnter(e.currentTarget)}
-                    className="group flex shrink-0 items-baseline gap-2.5 whitespace-nowrap rounded-lg px-3 py-1 text-sm text-white/80 transition-all duration-300 hover:scale-110 hover:bg-accent-300/15 hover:shadow-[0_0_18px_rgba(212,154,68,0.55)] hover:text-white"
-                  >
-                    <span className="font-medium">{item.city || "Kenya"}</span>
-                    <span className="truncate text-white/60">{item.title}</span>
-                    <span className="font-heading font-bold text-accent-300 transition-colors group-hover:text-accent-200">
-                      {formatPrice(item.price, item.listingPurpose ?? undefined)}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   )
 }
