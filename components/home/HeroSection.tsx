@@ -96,12 +96,30 @@ interface Slide {
   image: string
 }
 
+interface SearchSuggestion {
+  slug: string
+  title: string
+  city: string
+  region?: string | null
+  propertyType?: string | null
+  bedrooms?: number | null
+  bathrooms?: number | null
+  area?: number | null
+  listingPurpose?: string | null
+  price?: number | null
+}
+
 interface ApiProperty {
   slug: string
   title: string
   price: number | string | null
   city: string
-  listingPurpose: string | null
+  region?: string | null
+  propertyType?: string | null
+  bedrooms?: number | null
+  bathrooms?: number | null
+  area?: number | null
+  listingPurpose?: string | null
   images: unknown
 }
 
@@ -141,7 +159,7 @@ function toSlides(rows: ApiProperty[]): Slide[] {
       title: p.title,
       price: p.price == null ? null : Number(p.price),
       city: p.city ?? "",
-      listingPurpose: p.listingPurpose,
+      listingPurpose: p.listingPurpose ?? null,
       image: imgs[0],
     })
   }
@@ -167,7 +185,7 @@ export function HeroSection() {
   const [tickerOffset, setTickerOffset] = useState(0)
   const [gliding, setGliding] = useState(false)
   const [query, setQuery] = useState("")
-  const [suggestions, setSuggestions] = useState<Slide[]>([])
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const cacheRef = useRef<Map<string, Slide[]>>(new Map())
@@ -356,7 +374,19 @@ export function HeroSection() {
         .then((r) => (r.ok ? r.json() : { properties: [] }))
         .catch(() => ({ properties: [] }))
         .then((res) => {
-          const next = toSlides(res.properties || []).slice(0, 5)
+          const props = res.properties || []
+          const next: SearchSuggestion[] = props.slice(0, 5).map((p: ApiProperty) => ({
+            slug: p.slug,
+            title: p.title,
+            city: p.city ?? "",
+            region: p.region ?? null,
+            propertyType: p.propertyType ?? null,
+            bedrooms: p.bedrooms ?? null,
+            bathrooms: p.bathrooms ?? null,
+            area: p.area ?? null,
+            listingPurpose: p.listingPurpose ?? null,
+            price: p.price == null ? null : Number(p.price),
+          }))
           setSuggestions(next)
           setShowSuggestions(next.length > 0)
         })
@@ -459,7 +489,7 @@ export function HeroSection() {
                     <ul
                       id="search-suggestions"
                       role="listbox"
-                      className="absolute top-full left-0 right-0 mt-1.5 max-h-60 overflow-y-auto rounded-xl bg-black/95 backdrop-blur-md border border-white/10 shadow-xl z-50 animate-[fadeIn_0.15s_ease-out]"
+                      className="absolute top-full left-0 right-0 mt-1.5 max-h-60 overflow-y-auto rounded-xl bg-white border border-border shadow-xl z-50 animate-[fadeIn_0.15s_ease-out]"
                     >
                       {suggestions.map((item, idx) => (
                         <li key={`${item.slug}-${idx}`} role="option" aria-selected="false">
@@ -469,13 +499,38 @@ export function HeroSection() {
                               setQuery("")
                               setShowSuggestions(false)
                             }}
-                            className="flex items-center gap-3 px-4 py-3 text-white/90 hover:bg-white/10 transition-colors"
+                            className="flex items-start gap-3 px-4 py-2.5 text-text-primary hover:bg-surface-secondary transition-colors border-b border-border last:border-0"
                           >
-                            <span className="font-medium truncate">{item.title}</span>
-                            <span className="flex-shrink-0 text-white/50 text-sm">{item.city || "Kenya"}</span>
-                            <span className="flex-shrink-0 font-heading font-bold text-accent-300 ml-auto">
-                              {formatPrice(item.price, item.listingPurpose ?? undefined)}
-                            </span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium line-clamp-1">{item.title}</p>
+                              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-text-secondary">
+                                <span className="font-medium">{item.city}</span>
+                                {item.region && item.region !== item.city && (
+                                  <>
+                                    <span aria-hidden="true">·</span>
+                                    <span>{item.region}</span>
+                                  </>
+                                )}
+                                {item.propertyType && (
+                                  <>
+                                    <span aria-hidden="true">·</span>
+                                    <span className="capitalize">{item.propertyType.toLowerCase()}</span>
+                                  </>
+                                )}
+                                {item.bedrooms != null && item.bedrooms > 0 && (
+                                  <>
+                                    <span aria-hidden="true">·</span>
+                                    <span>{item.bedrooms} bed{item.bedrooms > 1 ? "s" : ""}</span>
+                                  </>
+                                )}
+                                {item.bathrooms != null && item.bathrooms > 0 && (
+                                  <>
+                                    <span aria-hidden="true">·</span>
+                                    <span>{item.bathrooms} bath{item.bathrooms > 1 ? "s" : ""}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
                           </Link>
                         </li>
                       ))}
