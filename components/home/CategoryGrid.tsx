@@ -88,7 +88,7 @@ export function CategoryGrid() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-3">
             <h3 className="font-heading text-lg font-semibold text-text-primary">Properties</h3>
             <div className="flex flex-col gap-2" role="list" aria-label="Property categories">
