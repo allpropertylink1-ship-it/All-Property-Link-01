@@ -14,6 +14,7 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
   const { agentLogin } = useAuth()
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [rememberMe, setRememberMe] = useState(true)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -24,7 +25,7 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
     const agentCode = form.get("agentCode") as string
     const password = form.get("password") as string
 
-    const result = await agentLogin(agentCode, password)
+    const result = await agentLogin(agentCode, password, rememberMe)
 
     if (result?.error) {
       setError(result.error)
@@ -76,7 +77,16 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
         </div>
       </div>
 
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-between">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            className="rounded-sm border border-border bg-surface text-accent-300 focus:ring-accent-300 focus:ring-2"
+          />
+          <span className="text-sm text-text-secondary">Remember me</span>
+        </label>
         {onForgotPassword && (
           <button
             type="button"

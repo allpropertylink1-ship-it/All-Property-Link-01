@@ -12,6 +12,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
   const { login, sendMagicLink, phoneLogin, verifyOtp, refreshUser } = useAuth()
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [rememberMe, setRememberMe] = useState(true)
   const [magicEmail, setMagicEmail] = useState("")
   const [magicSent, setMagicSent] = useState(false)
   const [showMagicLink, setShowMagicLink] = useState(false)
@@ -34,7 +35,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
     const email = form.get("email") as string
     const password = form.get("password") as string
 
-    const result = await login(email, password)
+    const result = await login(email, password, rememberMe)
 
     if (result?.error) {
       setError(result.error)
@@ -94,7 +95,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
     setPhoneError("")
     const digits = phone.replace(/\D/g, "")
     const fullPhone = `+254${digits}`
-    const result = await verifyOtp(fullPhone, code, "PHONE_VERIFICATION")
+    const result = await verifyOtp(fullPhone, code, "PHONE_VERIFICATION", rememberMe)
     if (result?.error) {
       setPhoneError(result.error)
       setOtpLoading(false)
@@ -164,22 +165,33 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
         </div>
 
         <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => {
-              if (magicSent) { setMagicSent(false); setMagicEmail(""); setMagicError("") }
-              setShowMagicLink(!showMagicLink)
-            }}
-            className="text-sm font-medium text-accent-300 hover:text-accent-400"
-          >
-            {showMagicLink ? "Cancel magic link" : "Use magic link"}
-          </button>
-          <a
-            href="/auth/forgot-password"
-            className="text-sm font-medium text-accent-300 hover:text-accent-400"
-          >
-            Forgot password?
-          </a>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="rounded-sm border border-border bg-surface text-accent-300 focus:ring-accent-300 focus:ring-2"
+            />
+            <span className="text-sm text-text-secondary">Remember me</span>
+          </label>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => {
+                if (magicSent) { setMagicSent(false); setMagicEmail(""); setMagicError("") }
+                setShowMagicLink(!showMagicLink)
+              }}
+              className="text-sm font-medium text-accent-300 hover:text-accent-400"
+            >
+              {showMagicLink ? "Cancel magic link" : "Use magic link"}
+            </button>
+            <a
+              href="/auth/forgot-password"
+              className="text-sm font-medium text-accent-300 hover:text-accent-400"
+            >
+              Forgot password?
+            </a>
+          </div>
         </div>
 
         {showMagicLink && (
@@ -255,6 +267,15 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
               </div>
               <p className="mt-1 text-xs text-text-secondary">Enter the last 9 digits of your Kenyan phone number</p>
             </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="rounded-sm border border-border bg-surface text-accent-300 focus:ring-accent-300 focus:ring-2"
+              />
+              <span className="text-sm text-text-secondary">Remember me</span>
+            </label>
             <button
               type="button"
               onClick={handlePhoneSendCode}

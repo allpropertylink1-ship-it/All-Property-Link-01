@@ -15,6 +15,7 @@ interface User {
   accountStatus?: string
   isAgent?: boolean
   aplAgentId?: string
+  referredByAgentCode?: string
   primaryUserType?: string | null
   companyName?: string
   agentCode?: string
@@ -36,16 +37,16 @@ export interface OtpResponse {
 interface AuthContextType {
   user: User | null
   loading: boolean
-  login: (emailOrPhone: string, password: string) => Promise<{ error?: string }>
+  login: (emailOrPhone: string, password: string, rememberMe?: boolean) => Promise<{ error?: string }>
   logout: () => Promise<void>
   phoneLogin: (phone: string) => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
   signup: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string; userType?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
   sendOtp: (identifier: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
-  verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string }>
+  verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION", rememberMe?: boolean) => Promise<{ error?: string }>
   updateRegistration: (data: { oldIdentifier: string; email?: string; phone?: string; firstName?: string; lastName?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
   refreshUser: () => Promise<void>
   sendMagicLink: (email: string) => Promise<{ error?: string }>
-  agentLogin: (agentCode: string, password: string) => Promise<{ error?: string; requiresPasswordChange?: boolean }>
+  agentLogin: (agentCode: string, password: string, rememberMe?: boolean) => Promise<{ error?: string; requiresPasswordChange?: boolean }>
   agentForgotPassword: (identifier: string) => Promise<{ error?: string }>
   agentResetPassword: (token: string, password: string) => Promise<{ error?: string }>
   firstPasswordChange: (newPassword: string) => Promise<{ error?: string }>
@@ -94,11 +95,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchUser()
   }, [fetchUser])
 
-  const login = useCallback(async (emailOrPhone: string, password: string) => {
+  const login = useCallback(async (emailOrPhone: string, password: string, rememberMe = true) => {
     const isPhone = /^(\+254|0?7\d{8})$/.test(emailOrPhone.replace(/\s/g, ""))
     const payload = isPhone
-      ? { phone: emailOrPhone.replace(/\s/g, "").replace(/^0/, "+254"), password }
-      : { email: emailOrPhone, password }
+      ? { phone: emailOrPhone.replace(/\s/g, "").replace(/^0/, "+254"), password, rememberMe }
+      : { email: emailOrPhone, password, rememberMe }
     const { data, error } = await api.post<{ user: User }>("/api/auth/login", payload)
     if (data?.user) {
       setUser({ ...data.user, authMethod: "user" })
@@ -124,8 +125,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { data }
   }, [])
 
-  const verifyOtp = useCallback(async (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => {
-    const { data, error } = await api.post<{ user: User }>("/api/auth/verify-otp", { identifier, token, type })
+  const verifyOtp = useCallback(async (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION", rememberMe = true) => {
+    const { data, error } = await api.post<{ user: User }>("/api/auth/verify-otp", { identifier, token, type, rememberMe })
     if (error) return { error }
     if (data?.user) setUser({ ...data.user, authMethod: "user" })
     return {}
@@ -143,8 +144,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {}
   }, [])
 
-  const agentLogin = useCallback(async (agentCode: string, password: string) => {
-    const { data, error } = await api.post<{ user: User; requiresPasswordChange?: boolean }>("/api/auth/agent-login", { agentCode, password })
+  const agentLogin = useCallback(async (agentCode: string, password: string, rememberMe = true) => {
+    const { data, error } = await api.post<{ user: User; requiresPasswordChange?: boolean }>("/api/auth/agent-login", { agentCode, password, rememberMe })
     if (data?.user) {
       setUser({ ...data.user, authMethod: "agent" })
       return { requiresPasswordChange: data.requiresPasswordChange }

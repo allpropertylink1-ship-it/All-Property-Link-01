@@ -136,6 +136,24 @@ export default function KycPage() {
 
   useEffect(() => { fetchKyc() }, [fetchKyc])
 
+  // Auto-detect existing referral from authenticated user
+  useEffect(() => {
+    if (user?.aplAgentId && user?.referredByAgentCode && !agentConfirmed && agentCodeState === "idle") {
+      setAgentCode(user.referredByAgentCode)
+      setAplAgentId(user.aplAgentId)
+      setAgentConfirmed(true)
+      setAgentCodeState("confirmed")
+      api.post<{ agent: { fullName: string; phone: string } }>("/api/apl-agents/lookup", { agentCode: user.referredByAgentCode })
+        .then(res => {
+          if (res.data?.agent) {
+            setAgentName(res.data.agent.fullName)
+            setAgentPhone(res.data.agent.phone)
+          }
+        })
+        .catch(() => {})
+    }
+  }, [user?.aplAgentId, user?.referredByAgentCode, agentConfirmed, agentCodeState])
+
   const kycStatus = data?.kycStatus || "NONE"
 
   useEffect(() => {
@@ -229,7 +247,8 @@ export default function KycPage() {
       }
       if (backUrl_) body.backImage = backUrl_
       if (businessPermitUrl_) body.businessPermit = businessPermitUrl_
-      if (aplAgentId && agentConfirmed) body.aplAgentId = aplAgentId
+      const effectiveAplAgentId = user?.aplAgentId ?? (aplAgentId && agentConfirmed ? aplAgentId : null)
+      if (effectiveAplAgentId) body.aplAgentId = effectiveAplAgentId
 
       const res = coreDoc?.status === "REJECTED"
         ? await api.patch(`/api/user/kyc/${coreDoc.id}`, body)
