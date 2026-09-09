@@ -88,10 +88,10 @@ export function CategoryGrid() {
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-2 gap-6">
           <div className="space-y-3">
             <h3 className="font-heading text-lg font-semibold text-text-primary">Properties</h3>
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" role="list" aria-label="Property categories">
+            <div className="flex flex-col gap-2" role="list" aria-label="Property categories">
               {propertyCategories.map((cat) => (
                 <CategoryPill key={cat.title} category={cat} />
               ))}
@@ -100,7 +100,7 @@ export function CategoryGrid() {
 
           <div className="space-y-3">
             <h3 className="font-heading text-lg font-semibold text-text-primary">Services</h3>
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" role="list" aria-label="Service categories">
+            <div className="flex flex-col gap-2" role="list" aria-label="Service categories">
               {serviceCategories.map((cat) => (
                 <CategoryPill key={cat.title} category={cat} isService />
               ))}

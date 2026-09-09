@@ -361,7 +361,7 @@ export function HeroSection() {
                       placeholder={persona.placeholder}
                       aria-label="Search properties"
                       aria-autocomplete="list"
-                      className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-accent-300/30 focus:border-accent-300 transition-all"
+                      className="w-full pl-9 pr-3 py-2 bg-white/10 border border-white/20 rounded-xl text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-accent-300/30 focus:border-accent-300 transition-all"
                       autoComplete="off"
                     />
                   </div>
@@ -379,11 +379,11 @@ export function HeroSection() {
                               setQuery("")
                               setShowSuggestions(false)
                             }}
-                            className="flex items-start gap-3 px-4 py-2.5 text-text-primary hover:bg-surface-secondary transition-colors border-b border-border last:border-0"
+                            className="flex items-start gap-2.5 px-3 py-2 text-text-primary hover:bg-surface-secondary transition-colors border-b border-border last:border-0"
                           >
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium line-clamp-1">{item.title}</p>
-                              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-text-secondary">
+                              <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-text-secondary">
                                 <span className="font-medium">{item.city}</span>
                                 {item.region && item.region !== item.city && (
                                   <>
