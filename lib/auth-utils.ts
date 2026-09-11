@@ -50,10 +50,22 @@ export const getSession = cache(async () => {
     const cookieStore = await cookies();
     const token = cookieStore.get("access_token")?.value;
     if (!token) return null;
-    const res = await fetch(`${API_URL}/api/auth/me`, {
-      headers: { Cookie: `access_token=${token}` },
-    });
-    if (!res.ok) return null;
+    // The shared-hosting origin drops requests intermittently (502/503/504);
+    // retry session reads so a single blip doesn't bounce users to login.
+    let res: Response | null = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        res = await fetch(`${API_URL}/api/auth/me`, {
+          headers: { Cookie: `access_token=${token}` },
+        });
+        if (res.status !== 502 && res.status !== 503 && res.status !== 504) break;
+        res = null;
+      } catch {
+        res = null;
+      }
+      if (attempt < 3) await new Promise((r) => setTimeout(r, 300 * attempt));
+    }
+    if (!res || !res.ok) return null;
     const data = await res.json();
     if (!data.user) return null;
     const u = data.user as SessionUser
