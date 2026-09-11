@@ -10,6 +10,7 @@ import { PersonalDetailsForm } from "./PersonalDetailsForm"
 import { DocumentUpload } from "./DocumentUpload"
 import { SubmissionHistory } from "./SubmissionHistory"
 import { FormBanner } from "@/components/shared/FormFeedback"
+import { PersonaGate } from "@/components/dashboard/PersonaGate"
 
 interface KycDocument {
   id: string
@@ -45,7 +46,7 @@ function Badge({ status }: { status: string }) {
   )
 }
 
-export default function KycPage() {
+function KycPageInner() {
   const { user } = useAuth()
   const [data, setData] = useState<KycData | null>(null)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
@@ -387,4 +388,12 @@ export default function KycPage() {
       />
     </div>
   )
+}
+
+export default function KycPage() {
+  return (
+    <PersonaGate>
+      <KycPageInner />
+    </PersonaGate>
+  );
 }

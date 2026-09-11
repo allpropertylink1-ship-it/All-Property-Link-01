@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
 import { resolveImageUrl } from "@/lib/images";
 import { FormBanner } from "@/components/shared/FormFeedback"
+import { PersonaGate } from "@/components/dashboard/PersonaGate"
 
 const categories = [
   { value: "AGENT", label: "Agent" },
@@ -109,7 +110,7 @@ const specialtiesService = [
   { value: "WINES_SPIRITS", group: "Wines & Spirits" },
 ]
 
-export default function BusinessProfilePage() {
+function BusinessProfilePageInner() {
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
   const [error, setError] = useState("")
@@ -536,4 +537,12 @@ export default function BusinessProfilePage() {
       </form>
     </div>
   )
+}
+
+export default function BusinessProfilePage() {
+  return (
+    <PersonaGate>
+      <BusinessProfilePageInner />
+    </PersonaGate>
+  );
 }

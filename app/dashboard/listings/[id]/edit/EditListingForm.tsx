@@ -18,6 +18,7 @@ const LocationPicker = dynamic(
 );
 import { FormBanner } from "@/components/shared/FormFeedback";
 import type { ListingSubmitOverride } from "@/components/dashboard/ListingForm";
+import { subTypeOptionsFor } from "@/lib/property-subtypes";
 
 interface PropertyData {
   title: string;
@@ -25,6 +26,7 @@ interface PropertyData {
   price: number | null;
   propertyType: "APARTMENT" | "HOUSE" | "LAND" | "COMMERCIAL";
   listingPurpose?: "FOR_SALE" | "FOR_RENT_LONG_TERM" | "FOR_RENT_SHORT_TERM" | null;
+  subType?: string | null;
   city: string;
   region: string;
   address: string;
@@ -46,6 +48,7 @@ const listingSchema = z.object({
   ).nullable(),
   propertyType: z.enum(["APARTMENT", "HOUSE", "LAND", "COMMERCIAL"]),
   listingPurpose: z.enum(["FOR_SALE", "FOR_RENT_LONG_TERM", "FOR_RENT_SHORT_TERM"]).optional(),
+  subType: z.string().optional(),
   city: z.string().min(1, "City is required"),
   region: z.string().min(1, "Region is required"),
   address: z.string().min(1, "Address is required"),
@@ -63,7 +66,7 @@ export default function EditListingForm({ propertyId, property, redirectTo, subm
   const [imageUrls, setImageUrls] = useState<string[]>(property.images || []);
 
   const [imagesDirty, setImagesDirty] = useState(false)
-  const { register, handleSubmit, setValue, formState: { errors, isSubmitting, isDirty } } = useForm<z.infer<typeof listingSchema>>({
+  const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting, isDirty } } = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
     defaultValues: {
       title: property.title,
@@ -71,6 +74,7 @@ export default function EditListingForm({ propertyId, property, redirectTo, subm
       price: property.price,
       propertyType: property.propertyType,
       listingPurpose: property.listingPurpose ?? undefined,
+      subType: property.subType ?? undefined,
       city: property.city,
       region: property.region,
       address: property.address,
@@ -162,7 +166,7 @@ export default function EditListingForm({ propertyId, property, redirectTo, subm
         </div>
         <div className="space-y-2">
           <Label htmlFor="propertyType">Property type</Label>
-          <select id="propertyType" className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" {...register("propertyType")}>
+          <select id="propertyType" className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" {...register("propertyType", { onChange: () => setValue("subType", "") })}>
             <option value="APARTMENT">Apartment</option>
             <option value="HOUSE">House</option>
             <option value="LAND">Land</option>
@@ -179,6 +183,15 @@ export default function EditListingForm({ propertyId, property, redirectTo, subm
             <option value="FOR_RENT_SHORT_TERM">For Rent (short-term / Airbnb)</option>
           </select>
           {errors.listingPurpose && <p className="text-xs text-error-500">{errors.listingPurpose.message}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="subType">Sub-type <span className="text-text-secondary">(optional)</span></Label>
+          <select id="subType" className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" {...register("subType")}>
+            <option value="">Select sub-type</option>
+            {subTypeOptionsFor(watch("propertyType")).map((s) => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
+          </select>
         </div>
         <div className="space-y-2 sm:col-span-2">
           <Label>Location</Label>

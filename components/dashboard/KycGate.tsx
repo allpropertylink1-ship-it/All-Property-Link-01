@@ -8,13 +8,17 @@ interface KycGateProps {
   children: React.ReactNode
   kycStatus: string | null | undefined
   isAgent?: boolean
+  authMethod?: string
+  primaryUserType?: string | null
 }
 
-export function KycGate({ children, kycStatus, isAgent }: KycGateProps) {
+export function KycGate({ children, kycStatus, isAgent, authMethod, primaryUserType }: KycGateProps) {
   const pathname = usePathname()
   const isKycPage = pathname === "/dashboard/kyc" || pathname.startsWith("/dashboard/kyc/")
 
-  if (isAgent) return <>{children}</>
+  // APL Representatives never do KYC; customers are exempt from verification.
+  if (isAgent || authMethod === "agent") return <>{children}</>
+  if (primaryUserType === "CUSTOMER") return <>{children}</>
   if (kycStatus === "VERIFIED") return <>{children}</>
   if (isKycPage) return <>{children}</>
 

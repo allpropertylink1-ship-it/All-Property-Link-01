@@ -12,6 +12,7 @@ interface SessionUser {
   isAgent?: boolean
   companyName?: string
   userTypes?: string[]
+  primaryUserType?: string | null
   onboardingComplete?: boolean
   authMethod?: "user" | "agent" | "admin"
 }

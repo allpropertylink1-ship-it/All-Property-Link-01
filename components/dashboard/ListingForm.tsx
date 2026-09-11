@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createProperty } from "@/app/actions/properties";
+import { subTypeOptionsFor } from "@/lib/property-subtypes";
 import PropertyImageUploader from "@/components/property/PropertyImageUploader";
 import dynamic from "next/dynamic";
 // Leaflet touches `window` at import time — never SSR the map.
@@ -24,6 +25,7 @@ const listingSchema = z.object({
   price: z.coerce.number().positive("Price must be positive"),
   propertyType: z.enum(["APARTMENT", "HOUSE", "LAND", "COMMERCIAL"]),
   listingPurpose: z.enum(["FOR_SALE", "FOR_RENT_LONG_TERM", "FOR_RENT_SHORT_TERM"]).optional(),
+  subType: z.string().optional(),
   city: z.string().min(1, "City is required"),
   region: z.string().min(1, "Region is required"),
   address: z.string().min(1, "Address is required"),
@@ -54,9 +56,11 @@ export function ListingForm({ submitOverride, redirectTo }: {
   const [error, setError] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [imagesDirty, setImagesDirty] = useState(false);
-  const { register, handleSubmit, setValue, formState: { errors, isSubmitting, isDirty } } = useForm<ListingFormData>({
+  const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting, isDirty } } = useForm<ListingFormData>({
     resolver: zodResolver(listingSchema),
   });
+  const selectedType = watch("propertyType");
+  const subTypeOptions = subTypeOptionsFor(selectedType);
 
   const handleLocationChange = useCallback((loc: { lat: number; lng: number; address: string; city: string; region: string }) => {
     setValue("address", loc.address, { shouldDirty: true })
@@ -141,13 +145,22 @@ export function ListingForm({ submitOverride, redirectTo }: {
         </div>
         <div className="space-y-2">
           <Label htmlFor="propertyType">Property type</Label>
-          <select id="propertyType" className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" {...register("propertyType")}>
+          <select id="propertyType" className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" {...register("propertyType", { onChange: () => setValue("subType", "") })}>
             <option value="APARTMENT">Apartment</option>
             <option value="HOUSE">House</option>
             <option value="LAND">Land</option>
             <option value="COMMERCIAL">Commercial</option>
           </select>
           {errors.propertyType && <p className="text-xs text-error-500">{errors.propertyType.message}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="subType">Sub-type <span className="text-text-secondary">(optional)</span></Label>
+          <select id="subType" className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" {...register("subType")}>
+            <option value="">Select sub-type</option>
+            {subTypeOptions.map((s) => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
+          </select>
         </div>
         <div className="space-y-2">
           <Label htmlFor="listingPurpose">Listing purpose</Label>

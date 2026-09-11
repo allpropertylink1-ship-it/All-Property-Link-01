@@ -17,6 +17,7 @@ export default function AgentPostReferralPropertyPage() {
   const [referralName, setReferralName] = useState("")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [ownerConsent, setOwnerConsent] = useState(false)
 
   const fetchReferral = useCallback(async () => {
     setLoading(true)
@@ -59,14 +60,30 @@ export default function AgentPostReferralPropertyPage() {
         Post a listing{referralName ? ` for ${referralName}` : ""}
       </h1>
       <p className="mb-8 text-sm text-text-secondary">
-        The listing is created under your referral&apos;s account and goes to admin review before appearing publicly.
+        The listing is created under your referral&apos;s account and goes live immediately.
       </p>
 
       <div className="mx-auto max-w-2xl rounded-xl border border-border bg-surface p-6">
+        <label className="mb-6 flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-surface-secondary px-4 py-3 text-sm">
+          <input
+            type="checkbox"
+            checked={ownerConsent}
+            onChange={(e) => setOwnerConsent(e.target.checked)}
+            className="mt-0.5 h-5 w-5 shrink-0 accent-primary-600"
+          />
+          <span className="text-text-primary">
+            I confirm the property owner has agreed to this listing being posted on their behalf.
+          </span>
+        </label>
+        {!ownerConsent && (
+          <p className="mb-4 text-xs text-text-secondary">
+            You must confirm owner consent before posting.
+          </p>
+        )}
         <ListingForm
           redirectTo={`/dashboard/agent/referrals/${referralId}`}
           submitOverride={async (payload) => {
-            const { error } = await api.post(`/api/agent/referrals/${referralId}/properties`, payload)
+            const { error } = await api.post(`/api/agent/referrals/${referralId}/properties`, { ...payload, ownerConsent })
             if (error) return { success: false, error }
             return { success: true }
           }}

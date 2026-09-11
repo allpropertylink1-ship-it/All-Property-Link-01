@@ -22,6 +22,7 @@ function parseForm(formData: FormData) {
   if (typeof raw.features === "string") { raw.features = raw.features.split(",").map((s) => s.trim()).filter(Boolean); }
   if (typeof raw.images === "string") { try { raw.images = JSON.parse(raw.images); } catch { raw.images = []; } }
   if (raw.listingPurpose === "") raw.listingPurpose = undefined;
+  if (raw.subType === "") raw.subType = undefined;
   return raw;
 }
 

@@ -74,7 +74,7 @@ export default function AgentPostReferralServicePage() {
         Post a service{referralName ? ` for ${referralName}` : ""}
       </h1>
       <p className="mb-8 text-sm text-text-secondary">
-        The service is created under your referral&apos;s account and goes to admin review before appearing publicly.
+        The service is created under your referral&apos;s account and goes live immediately.
       </p>
 
       <div className="mx-auto max-w-2xl rounded-xl border border-border bg-surface p-6">
@@ -82,6 +82,7 @@ export default function AgentPostReferralServicePage() {
           categories={categories}
           endpoint={`/api/agent/referrals/${referralId}/services`}
           redirectTo={`/dashboard/agent/referrals/${referralId}`}
+          requireOwnerConsent
         />
       </div>
     </div>

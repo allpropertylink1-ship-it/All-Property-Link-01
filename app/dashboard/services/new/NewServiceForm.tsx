@@ -18,11 +18,13 @@ interface Category {
 const CURRENCIES = ["KES", "USD"] as const;
 const PRICE_PERIODS = ["TOTAL", "PER_MONTH", "PER_NIGHT", "PER_WEEK", "PER_SQM"] as const;
 
-export function NewServiceForm({ categories, endpoint, redirectTo }: {
+export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerConsent }: {
   categories: Category[]
   /** Override for non-owner submits (e.g. APL reps posting for a referral). */
   endpoint?: string
   redirectTo?: string
+  /** When true, renders a mandatory owner-consent checkbox included in the payload. */
+  requireOwnerConsent?: boolean
 }) {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -110,6 +112,7 @@ export function NewServiceForm({ categories, endpoint, redirectTo }: {
       city: fd.get("city") as string,
       region: (fd.get("region") as string) || undefined,
       images: imageUrls.length > 0 ? imageUrls : undefined,
+      ...(requireOwnerConsent ? { ownerConsent: fd.get("ownerConsent") === "on" } : {}),
     };
 
     try {
@@ -328,8 +331,21 @@ export function NewServiceForm({ categories, endpoint, redirectTo }: {
       </div>
 
       <div className="flex items-center gap-4 pt-2">
+        {requireOwnerConsent && (
+          <label className="flex w-full cursor-pointer items-start gap-3 rounded-lg border border-border bg-surface-secondary px-4 py-3 text-sm">
+            <input
+              type="checkbox"
+              name="ownerConsent"
+              required
+              className="mt-0.5 h-5 w-5 shrink-0 accent-primary-600"
+            />
+            <span className="text-text-primary">
+              I confirm the service provider has agreed to this service being posted on their behalf.
+            </span>
+          </label>
+        )}
         <button
- type="submit"
+          type="submit"
           disabled={submitting || !isDirty}
           aria-busy={submitting}
           title={!isDirty ? "Make changes before saving" : undefined}

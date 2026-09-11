@@ -1,8 +1,14 @@
 import { requireAuth, serverFetch } from "@/lib/auth-utils";
+import { redirect } from "next/navigation";
 import { ProfileForm } from "@/components/dashboard/ProfileForm";
 
 export default async function ProfilePage() {
-  await requireAuth();
+  const session = await requireAuth();
+  const me = session.user as { authMethod?: string };
+  // Reps have their own settings surface; customers keep this page.
+  if (me.authMethod === "agent") {
+    redirect("/dashboard/agent");
+  }
 
   const res = await serverFetch("/api/user/profile");
   const data = await res.json().catch(() => null);

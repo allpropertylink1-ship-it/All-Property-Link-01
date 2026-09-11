@@ -1,4 +1,5 @@
 import { requireAuth, serverFetch } from "@/lib/auth-utils"
+import { personaRedirectTarget } from "@/lib/persona"
 import { redirect } from "next/navigation"
 import {
   Building2, Bell, Wrench,
@@ -33,6 +34,18 @@ export default async function DashboardPage() {
     kycStatus?: string
     onboardingComplete?: boolean
     companyName?: string | null
+    authMethod?: "user" | "agent" | "admin"
+    primaryUserType?: string | null
+    userTypes?: string[]
+  }
+
+  // Reps and customers never see the Business Summary dashboard.
+  const personaTarget = personaRedirectTarget(
+    { authMethod: user.authMethod, primaryUserType: user.primaryUserType, userTypes: user.userTypes },
+    { customerTo: "/dashboard/notifications" }
+  )
+  if (personaTarget) {
+    redirect(personaTarget)
   }
 
   if (user.kycStatus === "NONE" || user.kycStatus === "REJECTED") {

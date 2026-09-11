@@ -51,6 +51,7 @@ interface PropertyData {
   currency: string;
   propertyType: string;
   listingPurpose?: string | null;
+  subType?: string | null;
   city: string;
   region?: string | null;
   country: string;
@@ -270,6 +271,11 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                 <span className="inline-block rounded-full bg-surface-secondary px-3 py-1 text-xs font-semibold text-text-secondary capitalize">
                   {property.propertyType.toLowerCase()}
                 </span>
+                {property.subType && (
+                  <span className="inline-block rounded-full bg-surface-secondary px-3 py-1 text-xs font-semibold text-text-secondary">
+                    {property.subType.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())}
+                  </span>
+                )}
               </div>
             </div>
 

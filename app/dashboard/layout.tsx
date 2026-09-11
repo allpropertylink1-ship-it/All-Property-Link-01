@@ -16,6 +16,8 @@ export default async function DashboardLayout({
     kycStatus?: string;
     isAgent?: boolean;
     authMethod?: string;
+    primaryUserType?: string | null;
+    userTypes?: string[];
   };
 
   return (
@@ -28,8 +30,15 @@ export default async function DashboardLayout({
             onboardingComplete={user.onboardingComplete ?? false}
             kycStatus={user.kycStatus ?? "NONE"}
             isAgent={user.isAgent}
+            authMethod={user.authMethod}
+            primaryUserType={user.primaryUserType}
           />
-          <KycGate kycStatus={user.kycStatus} isAgent={user.isAgent}>
+          <KycGate
+            kycStatus={user.kycStatus}
+            isAgent={user.isAgent}
+            authMethod={user.authMethod}
+            primaryUserType={user.primaryUserType}
+          >
             <div className="p-4 sm:p-6 lg:p-8">
               <div className="mx-auto max-w-7xl min-w-0">{children}</div>
             </div>

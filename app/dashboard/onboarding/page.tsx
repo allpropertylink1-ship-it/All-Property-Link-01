@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Check } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { FormBanner } from "@/components/shared/FormFeedback";
+import { PersonaGate } from "@/components/dashboard/PersonaGate";
 
 const categories = [
   { value: "AGENT", label: "Agent" },
@@ -106,7 +107,7 @@ const specialtiesService: { value: string; group: string }[] = [
   { value: "WINES_SPIRITS", group: "Wines & Spirits" },
 ];
 
-export default function OnboardingPage() {
+function OnboardingPageInner() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -380,5 +381,13 @@ export default function OnboardingPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <PersonaGate>
+      <OnboardingPageInner />
+    </PersonaGate>
   );
 }

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { serverFetch } from "@/lib/auth-utils";
 import { requireAuth } from "@/lib/auth-utils";
+import { personaRedirectTarget } from "@/lib/persona";
+import { redirect } from "next/navigation";
 import { Building2 } from "@/components/ui/icons";
 import { NewServiceForm } from "./NewServiceForm";
 
@@ -13,8 +15,13 @@ interface Category {
 
 export default async function NewServicePage() {
   const session = await requireAuth();
+  const me = session.user as { authMethod?: string; primaryUserType?: string | null; userTypes?: string[] };
+  const personaTarget = personaRedirectTarget(me);
+  if (personaTarget) {
+    redirect(personaTarget);
+  }
 
-  const types = (session.user as { userTypes?: string[] }).userTypes ?? []
+  const types = me.userTypes ?? []
   if (!types.includes("FUNDI") && !types.includes("SERVICE_PROVIDER")) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
