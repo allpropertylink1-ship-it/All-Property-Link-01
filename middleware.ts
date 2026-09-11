@@ -13,6 +13,12 @@ export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   if (pathname.startsWith("/api/")) {
+    // Public reads are served by app/api/[...path]/route.ts (edge-cached
+    // with controlled headers). Everything else proxies straight through
+    // so auth cookies reach the origin untouched.
+    if (isPublicGet(request.method, pathname)) {
+      return NextResponse.next()
+    }
     const url = new URL(request.url)
     url.host = new URL(API_BACKEND).host
     url.protocol = "https"
@@ -24,19 +30,7 @@ export default async function middleware(request: NextRequest) {
     if (cookieHeader) {
       res.headers.set("cookie", cookieHeader)
     }
-    
-    if (isPublicGet(request.method, pathname)) {
-      // Cache public listings data at the Vercel CDN edge so users never
-      // wait on the shared-hosting origin for the same public payload.
-      res.headers.set(
-        "Cache-Control",
-        "public, max-age=60, s-maxage=120, stale-while-revalidate=300"
-      )
-      res.headers.set("CDN-Cache-Control", "public, s-maxage=120, stale-while-revalidate=300")
-      res.headers.set("Vercel-CDN-Cache-Control", "public, s-maxage=120, stale-while-revalidate=300")
-      res.headers.set("Vercel-Cache-Tag", "api-public")
-      res.headers.delete("Vary")
-    }
+
     return res
   }
 

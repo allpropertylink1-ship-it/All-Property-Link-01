@@ -180,7 +180,7 @@ export function PropertyGallery({ images: rawImages, title }: Props) {
                 }`}
                 aria-label={`View image ${i + 1}`}
               >
-                <img src={url} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }} />
+                <img src={url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }} />
               </button>
             ))}
           </div>
