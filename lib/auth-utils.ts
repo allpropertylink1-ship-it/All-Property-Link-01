@@ -38,10 +38,26 @@ export const serverFetch = cache(async (path: string, init?: RequestInit) => {
     const csrf = cookieStore.get("csrf-token")?.value;
     if (csrf) headers["x-csrf-token"] = csrf;
   }
-  return fetch(`${API_URL}${path}`, {
-    ...init,
-    headers: { ...headers, ...(init?.headers as Record<string, string> | undefined) },
-  });
+  // Retry idempotent reads through transient origin 502/503/504s.
+  const maxAttempts = method === "GET" || method === "HEAD" ? 3 : 1;
+  let attempt = 0;
+  for (;;) {
+    attempt += 1;
+    try {
+      const res = await fetch(`${API_URL}${path}`, {
+        ...init,
+        headers: { ...headers, ...(init?.headers as Record<string, string> | undefined) },
+      });
+      if ((res.status === 502 || res.status === 503 || res.status === 504) && attempt < maxAttempts) {
+        await new Promise((r) => setTimeout(r, 300 * attempt));
+        continue;
+      }
+      return res;
+    } catch {
+      if (attempt >= maxAttempts) throw new Error(`fetch failed: ${API_URL}${path}`);
+      await new Promise((r) => setTimeout(r, 300 * attempt));
+    }
+  }
 });
 
 export const getSession = cache(async () => {
