@@ -137,22 +137,31 @@ function KycPageInner() {
 
   useEffect(() => { fetchKyc() }, [fetchKyc])
 
-  // Auto-detect existing referral from authenticated user
+  // Auto-fill the referral code from signup so the user doesn't enter it twice.
+  // Triggers on the stored code alone: if the linked rep id is already known,
+  // confirm instantly; otherwise resolve it via lookup and confirm automatically.
+  // The field stays editable via "Change APL Representative".
   useEffect(() => {
-    if (user?.aplAgentId && user?.referredByAgentCode && !agentConfirmed && agentCodeState === "idle") {
-      setAgentCode(user.referredByAgentCode)
+    const storedCode = user?.referredByAgentCode
+    if (!storedCode || agentConfirmed || agentCodeState !== "idle") return
+    const normalized = storedCode.trim().toUpperCase()
+    setAgentCode(normalized)
+    if (user?.aplAgentId) {
       setAplAgentId(user.aplAgentId)
       setAgentConfirmed(true)
       setAgentCodeState("confirmed")
-      api.post<{ agent: { fullName: string; phone: string } }>("/api/apl-agents/lookup", { agentCode: user.referredByAgentCode })
-        .then(res => {
-          if (res.data?.agent) {
-            setAgentName(res.data.agent.fullName)
-            setAgentPhone(res.data.agent.phone)
-          }
-        })
-        .catch(() => {})
     }
+    api.post<{ agent: { id: string; fullName: string; phone: string } }>("/api/apl-agents/lookup", { agentCode: normalized })
+      .then(res => {
+        if (res.data?.agent) {
+          setAplAgentId(res.data.agent.id)
+          setAgentName(res.data.agent.fullName)
+          setAgentPhone(res.data.agent.phone)
+          setAgentConfirmed(true)
+          setAgentCodeState("confirmed")
+        }
+      })
+      .catch(() => {})
   }, [user?.aplAgentId, user?.referredByAgentCode, agentConfirmed, agentCodeState])
 
   const kycStatus = data?.kycStatus || "NONE"
@@ -248,7 +257,8 @@ function KycPageInner() {
       }
       if (backUrl_) body.backImage = backUrl_
       if (businessPermitUrl_) body.businessPermit = businessPermitUrl_
-      const effectiveAplAgentId = user?.aplAgentId ?? (aplAgentId && agentConfirmed ? aplAgentId : null)
+      // A manually confirmed code wins so edits stick; otherwise reuse the signup referral.
+      const effectiveAplAgentId = (aplAgentId && agentConfirmed ? aplAgentId : null) ?? user?.aplAgentId ?? null
       if (effectiveAplAgentId) body.aplAgentId = effectiveAplAgentId
 
       const res = coreDoc?.status === "REJECTED"
@@ -335,7 +345,8 @@ function KycPageInner() {
                   <CheckCircle size={18} className="text-green-600" />
                   <p className="text-sm font-medium text-green-800">APL Representative Confirmed</p>
                 </div>
-                <p className="mt-2 text-sm text-green-700"><strong>Name:</strong> {agentName}</p>
+                <p className="mt-2 text-sm text-green-700"><strong>Code:</strong> <span className="font-mono uppercase">{agentCode}</span></p>
+                <p className="mt-1 text-sm text-green-700"><strong>Name:</strong> {agentName}</p>
                 <p className="text-sm text-green-700"><strong>Phone:</strong> {agentPhone}</p>
                 <p className="mt-1 text-xs text-green-500">This APL Representative will be credited with your referral.</p>
                 <button type="button" onClick={resetAgentCode}
