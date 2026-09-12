@@ -75,17 +75,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   const fetchUser = useCallback(async () => {
+    // Retry idempotent session reads through transient origin 502/503/504s
+    // and timeouts (shared-hosting blips). A retriable failure must NOT clear
+    // a known session: only a definitive 401/403/404 (or a 200 with no user)
+    // signs the user out.
+    let res: Response | null = null
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 15000)
+        try {
+          res = await fetch("/api/auth/me", { credentials: "include", signal: controller.signal })
+        } finally {
+          clearTimeout(timeoutId)
+        }
+        if (res.status !== 502 && res.status !== 503 && res.status !== 504) break
+        res = null
+      } catch {
+        res = null
+      }
+      if (attempt < 3) await new Promise((r) => setTimeout(r, 300 * attempt))
+    }
     try {
-      const res = await fetch("/api/auth/me", { credentials: "include" })
+      if (!res) return
       if (res.ok) {
         const data = await res.json()
         if (data?.user) setUser(data.user)
         else setUser(null)
-      } else {
+      } else if (res.status === 401 || res.status === 403 || res.status === 404) {
         setUser(null)
       }
     } catch {
-      setUser(null)
+      // Unparseable body on an ok response: leave session untouched.
     } finally {
       setLoading(false)
     }

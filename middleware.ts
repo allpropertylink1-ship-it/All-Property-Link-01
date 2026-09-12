@@ -35,8 +35,12 @@ export default async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/dashboard")) {
-    const token = request.cookies.get("access_token")?.value
-    if (!token) {
+    // Either cookie grants entry: the access cookie expires after 15 min but
+    // /api/auth/me rotates a valid refresh token into a fresh pair, so gating
+    // on the access cookie alone bounced users to login on every refresh.
+    const access = request.cookies.get("access_token")?.value
+    const refresh = request.cookies.get("refresh_token")?.value
+    if (!access && !refresh) {
       const loginUrl = new URL("/auth/login", request.url)
       loginUrl.searchParams.set("redirect", pathname)
       return NextResponse.redirect(loginUrl)
