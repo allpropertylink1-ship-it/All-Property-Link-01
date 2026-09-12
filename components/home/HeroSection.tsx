@@ -26,21 +26,6 @@ interface Persona {
 
 const PERSONAS: Persona[] = [
   {
-    id: "buy",
-    label: "Buy",
-    headline: (
-      <>
-        Find Your Ideal{" "}
-        <span className="text-accent-300">Property in Kenya</span>
-      </>
-    ),
-    subtitle:
-      "Browse thousands of properties for sale across Kenya. Connect directly with verified agents and property owners.",
-    placeholder: "City, estate, or property type...",
-    purpose: "FOR_SALE",
-    featuredLabel: "Featured for sale",
-  },
-  {
     id: "rent",
     label: "Rent",
     headline: (
@@ -54,6 +39,21 @@ const PERSONAS: Persona[] = [
     placeholder: "Which town or estate?",
     purpose: "FOR_RENT_LONG_TERM",
     featuredLabel: "Featured rentals",
+  },
+  {
+    id: "buy",
+    label: "Buy",
+    headline: (
+      <>
+        Find Your Ideal{" "}
+        <span className="text-accent-300">Property in Kenya</span>
+      </>
+    ),
+    subtitle:
+      "Browse thousands of properties for sale across Kenya. Connect directly with verified agents and property owners.",
+    placeholder: "City, estate, or property type...",
+    purpose: "FOR_SALE",
+    featuredLabel: "Featured for sale",
   },
   {
     id: "stay",
@@ -304,7 +304,7 @@ export function HeroSection() {
             src={optimizeImageUrl(slide.image, 1920)}
             alt={`${slide.title} in ${slide.city}`}
             className="h-full w-full object-cover"
-            fetchPriority={persona.id === "buy" ? "high" : "auto"}
+            fetchPriority={persona.id === "rent" ? "high" : "auto"}
             decoding="async"
             onError={(e) => {
               ;(e.target as HTMLImageElement).src = PLACEHOLDER_PROPERTY
