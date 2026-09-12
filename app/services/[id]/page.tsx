@@ -293,7 +293,7 @@ export default async function ServiceDetailPage({ params }: Props) {
         </div>
 
         {/* ─── RIGHT SIDEBAR: Contact + Share ─── */}
-        <aside className="space-y-5">
+        <aside className="min-w-0 space-y-5">
           {service.user && (
             <>
               <div className="rounded-xl border border-border bg-surface p-5">
@@ -312,21 +312,21 @@ export default async function ServiceDetailPage({ params }: Props) {
                       </a>
                       <a
                         href={`tel:${service.user.phone}`}
-                        className="flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
+                        className="flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
                       >
-                        <Phone size={16} />
+                        <Phone size={16} className="shrink-0" />
                         {service.user.phone}
                       </a>
                     </>
                   )}
                   {service.user.email && (
-                    <a
-                      href={`mailto:${service.user.email}`}
-                      className="flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
-                    >
-                      <Mail size={16} />
-                      {service.user.email}
-                    </a>
+                      <a
+                        href={`mailto:${service.user.email}`}
+                        className="flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
+                      >
+                        <Mail size={16} className="shrink-0" />
+                        {service.user.email}
+                      </a>
                   )}
                 </div>
               </div>

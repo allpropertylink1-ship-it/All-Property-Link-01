@@ -135,10 +135,10 @@ export default function SearchPageClient({
               <a
                 key={c.city}
                 href={`/properties/${slugifyCity(c.city)}`}
-                className="flex items-center justify-between rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-md"
+                className="flex min-w-0 items-center justify-between gap-2 rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-md"
               >
-                <span className="font-medium text-text-primary">{c.city}</span>
-                <span className="text-sm text-text-secondary">{c._count.city} properties</span>
+                <span className="min-w-0 flex-1 truncate font-medium text-text-primary">{c.city}</span>
+                <span className="shrink-0 text-sm text-text-secondary">{c._count.city} properties</span>
               </a>
             ))}
           </div>

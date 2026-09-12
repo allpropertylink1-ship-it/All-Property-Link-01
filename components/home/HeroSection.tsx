@@ -325,17 +325,17 @@ export function HeroSection() {
           <div
             role="group"
             aria-label="Choose what you are looking for"
-            className="mx-auto flex w-full max-w-5xl items-center gap-1.5 rounded-2xl border border-white/20 bg-black/25 p-1 backdrop-blur-md relative overflow-visible"
+            className="mx-auto flex w-full max-w-5xl flex-col items-stretch gap-1.5 rounded-2xl border border-white/20 bg-black/25 p-1 backdrop-blur-md relative overflow-visible min-[480px]:flex-row min-[480px]:items-center"
           >
             {/* Persona tabs on the left */}
-            <div className="flex items-center gap-0.5 flex-shrink-0" role="group" aria-label="Property type">
+            <div className="flex w-full items-center gap-0.5 overflow-x-auto scrollbar-none min-[480px]:w-auto min-[480px]:flex-shrink-0" role="group" aria-label="Property type">
               {PERSONAS.map((p) => (
                 <button
                   key={p.id}
                   type="button"
                   aria-pressed={persona.id === p.id}
                   onClick={() => switchPersona(p)}
-                  className={`rounded-xl px-2.5 py-1 text-sm font-semibold transition-all ${
+                  className={`shrink-0 rounded-xl px-2 py-1 text-[13px] font-semibold transition-all min-[480px]:px-2.5 min-[480px]:text-sm ${
                     persona.id === p.id
                       ? "bg-white text-primary shadow-sm"
                       : "text-white/70 hover:text-white"
@@ -348,7 +348,7 @@ export function HeroSection() {
 
             {/* Search input with autocomplete - fills remaining space */}
             {showSearch && (
-              <div className="relative flex flex-1 ml-2" role="combobox" aria-controls="search-suggestions" aria-expanded={showSuggestions && suggestions.length > 0}>
+              <div className="relative flex min-w-0 flex-1 ml-0 mt-1 min-[480px]:ml-2 min-[480px]:mt-0" role="combobox" aria-controls="search-suggestions" aria-expanded={showSuggestions && suggestions.length > 0}>
                 <form onSubmit={submitSearch} className="w-full">
                   <div className="relative">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 flex-shrink-0" aria-hidden="true" />
@@ -369,7 +369,7 @@ export function HeroSection() {
                     <ul
                       id="search-suggestions"
                       role="listbox"
-                      className="absolute top-full left-[-110px] right-0 mt-1.5 max-h-60 overflow-y-auto rounded-xl bg-white border border-border shadow-xl z-50 animate-[fadeIn_0.15s_ease-out]"
+                      className="absolute top-full left-0 right-0 min-[480px]:left-[-110px] mt-1.5 max-h-60 overflow-y-auto rounded-xl bg-white border border-border shadow-xl z-50 animate-[fadeIn_0.15s_ease-out]"
                     >
                       {suggestions.map((item, idx) => (
                         <li key={`${item.slug}-${idx}`} role="option" aria-selected="false">
@@ -422,7 +422,7 @@ export function HeroSection() {
 
             {/* List persona CTAs - when no search (only Create a listing) */}
             {!showSearch && (
-              <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+              <div className="flex items-center justify-center gap-2 ml-0 mt-1 flex-shrink-0 min-[480px]:ml-2 min-[480px]:mt-0 min-[480px]:justify-start">
                 <Link
                   href="/dashboard/listings/new"
                   className="rounded-xl bg-white px-4 py-1.5 text-sm font-semibold text-primary transition-all hover:bg-teal-50"

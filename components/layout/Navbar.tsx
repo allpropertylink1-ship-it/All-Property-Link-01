@@ -34,14 +34,14 @@ export function Navbar() {
   return (
     <>
       <nav className="sticky top-0 z-50 border-b border-border bg-surface backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-content items-center justify-between gap-4 px-4">
-          <Link href="/" className="flex shrink-0 items-center justify-center gap-2 leading-none">
+        <div className="mx-auto flex h-16 max-w-content items-center justify-between gap-2 px-3 sm:gap-4 sm:px-4">
+          <Link href="/" className="flex min-w-0 shrink-0 items-center justify-center gap-2 leading-none">
             <Image
               src="/logos/logo-mark.png"
               alt="All Property Link"
               width={120}
               height={120}
-              className="h-9 w-auto"
+              className="h-8 w-auto sm:h-9"
               priority
             />
             <Image
@@ -49,7 +49,7 @@ export function Navbar() {
               alt="All Property Link"
               width={300}
               height={60}
-              className="h-9 w-auto"
+              className="hidden h-7 w-auto min-[400px]:block sm:h-9"
               priority
             />
           </Link>
@@ -76,7 +76,7 @@ export function Navbar() {
             )}
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
             <ClientProfileButton />
             {/* Mobile hamburger - only on home page, far right */}
             {isHome && (

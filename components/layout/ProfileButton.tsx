@@ -49,17 +49,17 @@ export function ProfileButton() {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="touch-target flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-secondary transition-colors hover:bg-surface-secondary hover:text-primary"
+        className="touch-target flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-secondary transition-colors hover:bg-surface-secondary hover:text-primary sm:px-3"
         aria-label="User menu"
         aria-expanded={open}
         aria-haspopup="true"
       >
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-300 text-xs font-bold text-white">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent-300 text-xs font-bold text-white sm:h-8 sm:w-8">
           {initial}
         </span>
         <span className="hidden sm:block truncate max-w-[160px]">{displayName}</span>
         <svg
-          className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`hidden h-4 w-4 min-[480px]:block transition-transform ${open ? "rotate-180" : ""}`}
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"

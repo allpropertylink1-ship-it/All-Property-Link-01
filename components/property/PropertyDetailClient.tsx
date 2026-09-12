@@ -439,7 +439,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
           </div>
 
           {/* ─── RIGHT SIDEBAR ─── */}
-          <aside className="hidden lg:block space-y-5">
+          <aside className="hidden lg:block min-w-0 space-y-5">
             {property.agent && (
               <>
                 <div className="rounded-xl border border-border bg-surface p-5">
@@ -458,9 +458,9 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                         </a>
                         <a
                           href={`tel:${property.agent.phone}`}
-                          className="touch-target flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
+                          className="touch-target flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
                         >
-                          <Phone size={16} />
+                          <Phone size={16} className="shrink-0" />
                           {property.agent.phone}
                         </a>
                       </>
@@ -468,9 +468,9 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                     {property.agent.email && (
                       <a
                         href={`mailto:${property.agent.email}`}
-                        className="touch-target flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
+                        className="touch-target flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
                       >
-                        <Mail size={16} />
+                        <Mail size={16} className="shrink-0" />
                         {property.agent.email}
                       </a>
                     )}

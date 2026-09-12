@@ -21,7 +21,8 @@ export default function PWASplashDemo() {
         {splashSizes.map(({ w, h, label }) => (
           <div key={`${w}x${h}`} className="bg-white rounded-xl shadow-lg p-6">
             <h2 className="text-lg font-semibold mb-4">{label} ({w}×{h})</h2>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="overflow-x-auto pb-2">
+            <div className="grid w-max grid-cols-3 gap-4">
               {/* fit: cover */}
               <div className="space-y-2">
                 <h3 className="font-medium text-green-700 text-center">fit: cover (current)</h3>
@@ -53,6 +54,7 @@ export default function PWASplashDemo() {
                 </div>
                 <p className="text-xs text-center text-gray-500">Distorts to fill exactly</p>
               </div>
+            </div>
             </div>
           </div>
         ))}
