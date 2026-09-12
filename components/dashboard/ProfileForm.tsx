@@ -47,6 +47,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const [cropping, setCropping] = useState(false);
   const [isProfileDirty, setIsProfileDirty] = useState(false);
   const [isPasswordDirty, setIsPasswordDirty] = useState(false);
+  const [accountDeleted, setAccountDeleted] = useState(false);
 
   function handlePassportSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -182,6 +183,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
       }
 
       await logout();
+      setAccountDeleted(true);
+      setTimeout(() => router.push("/"), 3500);
     } catch (err) {
       setMessage({
         type: "error",
@@ -201,10 +204,16 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
   return (
     <div className="space-y-8">
-{message && (
+{accountDeleted ? (
+        <FormBanner variant="success">
+          Your account and everything linked to it — listings, services, KYC documents, and reviews — has been permanently deleted. You can register again any time with the same email. Taking you home…
+        </FormBanner>
+      ) : (
+message && (
         <FormBanner variant={message.type === "success" ? "success" : "error"}>
           {message.text}
         </FormBanner>
+      )
       )}
 
       <div className="flex min-w-0 items-center gap-4 min-[375px]:gap-6">
@@ -412,7 +421,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
           title="Delete account"
           description={
             <div className="space-y-3">
-              <p>This will permanently delete your account and all associated data — listings, KYC documents, reviews, and everything linked to you. This cannot be undone. APL Representatives and Admin will still be able to see your name and contact info in the Deleted Accounts section.</p>
+              <p>This will permanently delete your account and everything linked to you — listings, services, KYC documents, reviews, and files. Nothing is kept and this cannot be undone. Your email address will be freed up so you can register again in the future.</p>
               <p className="text-sm text-text-secondary">Type <strong>delete-account</strong> to confirm:</p>
             </div>
           }
