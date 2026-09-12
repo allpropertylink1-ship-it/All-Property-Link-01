@@ -320,6 +320,56 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
               </div>
             )}
 
+            {/* Mobile: condensed business + contact (just under listing details) */}
+            {property.agent && (
+              <div className="rounded-xl border border-border bg-surface p-4 lg:hidden">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-50 border border-border">
+                    <Building2 size={18} className="text-primary-500" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-text-primary truncate">
+                      {property.agent.companyName || `${property.agent.firstName} ${property.agent.lastName}`}
+                    </p>
+                    {property.agent.category && (
+                      <span className="text-xs text-primary-600">{property.agent.category}</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+{property.agent.phone && (
+                      <>
+                        <a
+                          href={`https://wa.me/${property.agent.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="touch-target flex items-center gap-1.5 rounded-lg bg-[#25D366] px-3 py-3 text-xs font-semibold text-white"
+                        >
+                          <MessageCircle size={14} />
+                          WhatsApp
+                        </a>
+                        <a
+                          href={`tel:${property.agent.phone}`}
+                          className="touch-target flex items-center gap-1.5 rounded-lg border border-border px-3 py-3 text-xs font-semibold text-text-primary"
+                        >
+                          <Phone size={14} />
+                          Call
+                        </a>
+                      </>
+                    )}
+                    {property.agent.email && (
+                      <a
+                        href={`mailto:${property.agent.email}`}
+                        className="touch-target flex items-center gap-1.5 rounded-lg border border-border px-3 py-3 text-xs font-semibold text-text-primary"
+                      >
+                        <Mail size={14} />
+                        Email
+                      </a>
+                    )}
+                </div>
+              </div>
+            )}
+
             {/* ─── Customer reviews of the seller (always shown) ─── */}
             {sellerReviews && property.agent && (
               <section id="reviews" aria-label="Customer reviews of the seller" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
@@ -386,56 +436,6 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                 address={`${property.city}, ${property.region || ""}, ${property.country}`}
               />
             </div>
-
-            {/* Mobile: condensed business + contact */}
-            {property.agent && (
-              <div className="rounded-xl border border-border bg-surface p-4 lg:hidden">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-50 border border-border">
-                    <Building2 size={18} className="text-primary-500" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-text-primary truncate">
-                      {property.agent.companyName || `${property.agent.firstName} ${property.agent.lastName}`}
-                    </p>
-                    {property.agent.category && (
-                      <span className="text-xs text-primary-600">{property.agent.category}</span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-{property.agent.phone && (
-                      <>
-                        <a
-                          href={`https://wa.me/${property.agent.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="touch-target flex items-center gap-1.5 rounded-lg bg-[#25D366] px-3 py-3 text-xs font-semibold text-white"
-                        >
-                          <MessageCircle size={14} />
-                          WhatsApp
-                        </a>
-                        <a
-                          href={`tel:${property.agent.phone}`}
-                          className="touch-target flex items-center gap-1.5 rounded-lg border border-border px-3 py-3 text-xs font-semibold text-text-primary"
-                        >
-                          <Phone size={14} />
-                          Call
-                        </a>
-                      </>
-                    )}
-                    {property.agent.email && (
-                      <a
-                        href={`mailto:${property.agent.email}`}
-                        className="touch-target flex items-center gap-1.5 rounded-lg border border-border px-3 py-3 text-xs font-semibold text-text-primary"
-                      >
-                        <Mail size={14} />
-                        Email
-                      </a>
-                    )}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* ─── RIGHT SIDEBAR ─── */}
