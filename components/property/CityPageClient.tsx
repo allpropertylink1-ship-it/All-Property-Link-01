@@ -7,6 +7,7 @@ import { FilterPanel } from "@/components/property/FilterPanel";
 import { Pagination } from "@/components/shared/Pagination";
 import { Loader2 } from "@/components/ui/icons";
 import { slugifyCity } from "@/lib/seo";
+import { fetchCityCounts } from "@/lib/cities-client";
 
 interface CityInfo {
   city: string;
@@ -36,7 +37,7 @@ interface PropertiesData {
   total: number;
   page: number;
   totalPages: number;
-  cities: { city: string; count: number }[];
+  cities?: { city: string; count: number }[];
 }
 
 export default function CityPageClient({
@@ -66,10 +67,9 @@ export default function CityPageClient({
     if (page) params.set("page", page);
     params.set("limit", "20");
 
-    fetch(`/api/properties?limit=1`)
-      .then((r) => r.json())
-      .then(async (citiesData: PropertiesData) => {
-        const match = (citiesData.cities || []).find(
+    fetchCityCounts()
+      .then(async (cityCounts) => {
+        const match = (cityCounts || []).find(
           (c) => slugifyCity(c.city) === slugifyCity(city)
         );
         if (!match) {
@@ -81,7 +81,7 @@ export default function CityPageClient({
         const propsData: PropertiesData = await fetch(`/api/properties?${params.toString()}`).then((r) => r.json());
         setData(propsData);
         setCities(
-          (citiesData.cities || []).map((c) => ({
+          (cityCounts || []).map((c) => ({
             city: c.city,
             _count: { city: c.count },
           }))

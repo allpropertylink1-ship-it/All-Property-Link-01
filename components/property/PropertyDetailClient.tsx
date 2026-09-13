@@ -95,6 +95,27 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
 
   useEffect(() => {
     if (!slug) return;
+    // If SSR already gave us this exact property, don't re-fetch it —
+    // the edge cache for /api/properties/:slug can be stale (old JSON
+    // without userTypes) and the loading flash overwrites the fresh SSR
+    // badge for a second then hides it.
+    if (initial && initial.slug === slug) {
+      setProperty(initial);
+      setError(false);
+      setLoading(false);
+      if (initial.agent?.id) {
+        fetch(`/api/properties?agentId=${initial.agent.id}&limit=6`)
+          .then((r) => r.json())
+          .then((res: { properties: OtherProperty[] }) => {
+            setOtherProperties(res.properties?.filter((op) => op.id !== initial.id) || []);
+          })
+          .catch(() => {});
+      } else {
+        setOtherProperties([]);
+      }
+      return;
+    }
+
     setLoading(true);
     setError(false);
 
@@ -117,7 +138,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, [slug]);
+  }, [slug, initial]);
 
   if (loading) {
     return (

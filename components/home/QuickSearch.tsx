@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { ChevronDown, ChevronUp } from "@/components/ui/icons"
 import { slugifyCity } from "@/lib/seo"
+import { fetchCityCounts } from "@/lib/cities-client"
 
 interface CityItem { city: string; count: number }
 
@@ -17,10 +18,9 @@ export function QuickSearch() {
   const chipsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    fetch("/api/properties?limit=6")
-      .then((r) => (r.ok ? r.json() : {}))
-      .then((data: { cities?: { city: string; count: number }[] }) =>
-        setCities(data?.cities?.map((c) => ({ city: c.city, count: c.count })) || [])
+    fetchCityCounts()
+      .then((cityCounts) =>
+        setCities(cityCounts.map((c) => ({ city: c.city, count: c.count })))
       )
       .catch(() => {})
   }, [])

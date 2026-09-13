@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { PropertyGrid } from "@/components/property/PropertyGrid";
+import { Pagination } from "@/components/shared/Pagination";
 import { Loader2 } from "@/components/ui/icons";
 import { slugifyCity } from "@/lib/seo";
+import { fetchCityCounts } from "@/lib/cities-client";
 
 interface CityInfo {
   city: string;
@@ -33,7 +35,7 @@ interface PropertiesData {
   total: number;
   page: number;
   totalPages: number;
-  cities: { city: string; count: number }[];
+  cities?: { city: string; count: number }[];
 }
 
 export default function SearchPageClient({
@@ -72,11 +74,10 @@ export default function SearchPageClient({
     }
 
     fetches.push(
-      fetch(`/api/properties?limit=1`)
-        .then((r) => r.json())
-        .then((d: PropertiesData) => {
+      fetchCityCounts()
+        .then((cityCounts) => {
           setCities(
-            (d.cities || []).map((c) => ({
+            (cityCounts || []).map((c) => ({
               city: c.city,
               _count: { city: c.count },
             }))
@@ -124,7 +125,15 @@ export default function SearchPageClient({
       )}
 
       {q ? (
-        <PropertyGrid properties={data?.properties || []} />
+        <>
+          <PropertyGrid properties={data?.properties || []} />
+          <Pagination
+            currentPage={data?.page || currentPage}
+            totalPages={data?.totalPages || 0}
+            basePath="/properties/search"
+            searchParams={q ? { q } : {}}
+          />
+        </>
       ) : (
         <div>
           <h2 className="mb-4 font-heading text-xl font-semibold text-text-primary">

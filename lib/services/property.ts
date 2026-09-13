@@ -91,13 +91,14 @@ export const getOtherPropertiesByAgent = cache(async (agentId: string, currentPr
 });
 
 export const getCities = cache(async (): Promise<{ city: string; _count: { city: number } }[]> => {
-  const data = await fetchApi<{ cities: { city: string; count: number }[] }>("/api/properties?limit=1");
-  return (data?.cities || []).map(c => ({ city: c.city, _count: { city: c.count } }));
+  const direct = await fetchApi<{ cities: { city: string; count: number }[] }>("/api/properties/cities");
+  const legacy = direct?.cities ? null : await fetchApi<{ cities: { city: string; count: number }[] }>("/api/properties?limit=1");
+  return ((direct ?? legacy)?.cities || []).map(c => ({ city: c.city, _count: { city: c.count } }));
 });
 
 type MutateResult<T = undefined> = { success: boolean; error?: string; data?: T };
 
-export const createProperty = cache(async (data: Record<string, unknown>): Promise<MutateResult<{ id: string }>> => {
+export async function createProperty(data: Record<string, unknown>): Promise<MutateResult<{ id: string }>> {
   try {
     const { serverFetch } = await import("@/lib/auth-utils");
     const res = await serverFetch("/api/properties", {
@@ -107,9 +108,9 @@ export const createProperty = cache(async (data: Record<string, unknown>): Promi
     if (!res.ok) return { success: false, error: `API returned ${res.status}` };
     return { success: true, data: await res.json() };
   } catch (e) { return { success: false, error: String(e) }; }
-});
+}
 
-export const updateProperty = cache(async (id: string, data: Record<string, unknown>): Promise<MutateResult> => {
+export async function updateProperty(id: string, data: Record<string, unknown>): Promise<MutateResult> {
   try {
     const { serverFetch } = await import("@/lib/auth-utils");
     const res = await serverFetch(`/api/properties/${encodeURIComponent(id)}`, {
@@ -119,9 +120,9 @@ export const updateProperty = cache(async (id: string, data: Record<string, unkn
     if (!res.ok) return { success: false, error: `API returned ${res.status}` };
     return { success: true };
   } catch (e) { return { success: false, error: String(e) }; }
-});
+}
 
-export const deleteProperty = cache(async (id: string): Promise<MutateResult> => {
+export async function deleteProperty(id: string): Promise<MutateResult> {
   try {
     const { serverFetch } = await import("@/lib/auth-utils");
     const res = await serverFetch(`/api/properties/${encodeURIComponent(id)}`, {
@@ -130,9 +131,9 @@ export const deleteProperty = cache(async (id: string): Promise<MutateResult> =>
     if (!res.ok) return { success: false, error: `API returned ${res.status}` };
     return { success: true };
   } catch (e) { return { success: false, error: String(e) }; }
-});
+}
 
-export const approveProperty = cache(async (id: string, reviewerId: string): Promise<MutateResult> => {
+export async function approveProperty(id: string, reviewerId: string): Promise<MutateResult> {
   try {
     const { serverFetch } = await import("@/lib/auth-utils");
     const res = await serverFetch(`/api/admin/properties/${encodeURIComponent(id)}/approve`, {
@@ -142,9 +143,9 @@ export const approveProperty = cache(async (id: string, reviewerId: string): Pro
     if (!res.ok) return { success: false, error: `API returned ${res.status}` };
     return { success: true };
   } catch (e) { return { success: false, error: String(e) }; }
-});
+}
 
-export const rejectProperty = cache(async (id: string, reason: string, reviewerId: string): Promise<MutateResult> => {
+export async function rejectProperty(id: string, reason: string, reviewerId: string): Promise<MutateResult> {
   try {
     const { serverFetch } = await import("@/lib/auth-utils");
     const res = await serverFetch(`/api/admin/properties/${encodeURIComponent(id)}/reject`, {
@@ -154,9 +155,9 @@ export const rejectProperty = cache(async (id: string, reason: string, reviewerI
     if (!res.ok) return { success: false, error: `API returned ${res.status}` };
     return { success: true };
   } catch (e) { return { success: false, error: String(e) }; }
-});
+}
 
-export const publishProperty = cache(async (id: string): Promise<MutateResult> => {
+export async function publishProperty(id: string): Promise<MutateResult> {
   try {
     const { serverFetch } = await import("@/lib/auth-utils");
     const res = await serverFetch(`/api/admin/properties/${encodeURIComponent(id)}/publish`, {
@@ -165,4 +166,4 @@ export const publishProperty = cache(async (id: string): Promise<MutateResult> =
     if (!res.ok) return { success: false, error: `API returned ${res.status}` };
     return { success: true };
   } catch (e) { return { success: false, error: String(e) }; }
-});
+}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { PropertyGrid } from "./PropertyGrid"
 import { PropertyFilters } from "./PropertyFilters"
 import { FilterPanel } from "./FilterPanel"
+import { fetchCityCounts } from "@/lib/cities-client"
 
 interface Prop {
   id: string; slug: string; title: string; price: number; currency: string;
@@ -39,10 +40,10 @@ export function PropertiesPageClient({ searchParams }: Props) {
 
     Promise.all([
       fetch(`/api/properties?${params}`).then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json() }),
-      fetch("/api/properties?limit=1").then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json() }),
-    ]).then(([propData, cityData]) => {
+      fetchCityCounts(),
+    ]).then(([propData, cityCounts]) => {
       setData(propData)
-      setCities((cityData?.cities || []).map((c: { city: string; count: number }) => ({ city: c.city, _count: { city: c.count } })))
+      setCities((cityCounts || []).map((c: { city: string; count: number }) => ({ city: c.city, _count: { city: c.count } })))
     }).catch(e => setError(e.message))
   }, [city, propertyType, purpose, minPrice, maxPrice, bedrooms, page])
 
