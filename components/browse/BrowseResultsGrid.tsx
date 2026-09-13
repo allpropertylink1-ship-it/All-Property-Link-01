@@ -6,6 +6,7 @@ import { PropertyCard } from "@/components/property/PropertyCard";
 import { ServiceCardCompact } from "./ServiceCardCompact";
 import { ChevronDown, X } from "@/components/ui/icons";
 import { formatPrice } from "@/lib/utils";
+import { Pagination } from "@/components/shared/Pagination";
 
 function GridIcon({ className, size = 24 }: { className?: string; size?: number }) {
   return (
@@ -89,6 +90,8 @@ interface BrowseResultsGridProps {
   properties: BrowseProperty[];
   services: BrowseService[];
   total: number;
+  totalPages: number;
+  page: number;
   searchParams: Record<string, string | undefined>;
   _onFilterChange?: (key: string, value: string) => void;
   onFilterRemove: (key: string) => void;
@@ -143,6 +146,8 @@ export function BrowseResultsGrid({
   properties,
   services,
   total,
+  totalPages,
+  page,
   searchParams,
   _onFilterChange,
   onFilterRemove,
@@ -200,20 +205,8 @@ export function BrowseResultsGrid({
     setFilterChips(chips);
   }, [activeTab, propertyFilter, serviceFilter, searchParams, onFilterRemove]);
 
-  const sortedProperties = [...properties].sort((a, b) => {
-    if (sort === "price-asc") return (a.price || 0) - (b.price || 0);
-    if (sort === "price-desc") return (b.price || 0) - (a.price || 0);
-    if (sort === "popular") return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
-    return 0;
-  });
-
-  const sortedServices = [...services].sort((a, b) => {
-    if (sort === "price-asc") return (a.price || 0) - (b.price || 0);
-    if (sort === "price-desc") return (b.price || 0) - (a.price || 0);
-    return 0;
-  });
-
-  const currentItems = activeTab === "properties" ? sortedProperties : sortedServices;
+  // Server-side sorting now (browse sends sort/order to API); no in-memory sort.
+  const currentItems = activeTab === "properties" ? properties : services;
   const itemType = activeTab === "properties" ? "property" : "service";
 
   const updateUrl = (updates: Record<string, string>) => {
@@ -340,7 +333,7 @@ export function BrowseResultsGrid({
       {isList ? (
         <div className="space-y-2" role="list" aria-label={`${itemType} list`}>
           {activeTab === "properties" ? (
-            sortedProperties.map((item) => (
+            properties.map((item) => (
               <PropertyCard
                 key={item.id}
                 slug={item.slug}
@@ -360,7 +353,7 @@ export function BrowseResultsGrid({
               />
             ))
           ) : (
-            sortedServices.map((item) => (
+            services.map((item) => (
               <ServiceCardCompact
                 key={item.id}
                 id={item.id}
@@ -380,7 +373,7 @@ export function BrowseResultsGrid({
       ) : (
         <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4" role="list" aria-label={`${itemType} grid`}>
           {activeTab === "properties" ? (
-            sortedProperties.map((item) => (
+            properties.map((item) => (
               <PropertyCard
                 key={item.id}
                 slug={item.slug}
@@ -399,12 +392,25 @@ export function BrowseResultsGrid({
               />
             ))
           ) : (
-            sortedServices.map((item) => (
+            services.map((item) => (
               <ServiceCardGrid key={item.id} item={item} />
             ))
           )}
         </div>
       )}
+
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        basePath={pathname}
+        searchParams={searchParams}
+        onChange={(p) => {
+          const params = new URLSearchParams(sp.toString());
+          if (p > 1) params.set("page", String(p));
+          else params.delete("page");
+          router.push(`${pathname}?${params.toString()}`, { scroll: false });
+        }}
+      />
     </div>
   );
 }

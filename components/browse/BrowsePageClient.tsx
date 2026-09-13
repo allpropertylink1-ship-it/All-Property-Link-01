@@ -107,6 +107,8 @@ export default function BrowsePageClient() {
   const [properties, setProperties] = useState<BrowseProperty[]>([]);
   const [services, setServices] = useState<BrowseService[]>([]);
   const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [page, setPage] = useState(() => Math.max(1, parseInt(searchParams.get("page") || "1")));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -144,6 +146,9 @@ export default function BrowsePageClient() {
       detectedServiceFilter = URL_TO_SERVICE_FILTER[filter];
     }
     setServiceFilter(detectedServiceFilter);
+
+    const pageParam = Math.max(1, parseInt(searchParams.get("page") || "1"));
+    setPage(pageParam);
   }, [searchParams]);
 
   useEffect(() => {
@@ -189,14 +194,36 @@ export default function BrowsePageClient() {
     setError(null);
 
     try {
-      const params = activeTab === "properties"
-        ? PROPERTY_FILTER_MAP[propertyFilter]
-        : SERVICE_FILTER_MAP[serviceFilter];
+      const params = new URLSearchParams();
 
-      const queryString = new URLSearchParams(params).toString();
+      // Base filters from tab/filter pills
+      if (activeTab === "properties") {
+        const baseParams = PROPERTY_FILTER_MAP[propertyFilter];
+        Object.entries(baseParams).forEach(([k, v]) => params.set(k, v));
+      } else {
+        const baseParams = SERVICE_FILTER_MAP[serviceFilter];
+        Object.entries(baseParams).forEach(([k, v]) => params.set(k, v));
+      }
+
+      // Additional filters from URL (use .get() — searchParams is URLSearchParams)
+      if (searchParams.get("city")) params.set("city", searchParams.get("city")!);
+      if (searchParams.get("minPrice")) params.set("minPrice", searchParams.get("minPrice")!);
+      if (searchParams.get("maxPrice")) params.set("maxPrice", searchParams.get("maxPrice")!);
+      if (searchParams.get("propertyType")) params.set("type", searchParams.get("propertyType")!);
+      if (searchParams.get("category")) params.set("category", searchParams.get("category")!);
+      if (searchParams.get("bedrooms")) params.set("bedrooms", searchParams.get("bedrooms")!);
+      if (page > 1) params.set("page", String(page));
+      // Sort mapping: UI "newest"/"popular" -> backend "createdAt"/"viewCount"
+      const rawSort = searchParams.get("sort");
+      if (rawSort === "price-asc") { params.set("sort", "price"); params.set("order", "asc"); }
+      else if (rawSort === "price-desc") { params.set("sort", "price"); params.set("order", "desc"); }
+      else if (rawSort === "popular") { params.set("sort", "viewCount"); params.set("order", "desc"); }
+      else if (rawSort) { params.set("sort", rawSort); }
+      params.set("limit", "20");
+
       const endpoint = activeTab === "properties" ? "/api/properties" : "/api/services";
 
-      const response = await fetch(`${endpoint}?${queryString}`, { signal });
+      const response = await fetch(`${endpoint}?${params.toString()}`, { signal });
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
@@ -212,6 +239,7 @@ export default function BrowsePageClient() {
         setProperties([]);
       }
       setTotal(data.total || 0);
+      setTotalPages(data.totalPages || 1);
     } catch (err) {
       if (err instanceof Error && err.name !== "AbortError") {
         setError(err.message);
@@ -221,7 +249,7 @@ export default function BrowsePageClient() {
         setLoading(false);
       }
     }
-  }, [activeTab, propertyFilter, serviceFilter]);
+  }, [activeTab, propertyFilter, serviceFilter, searchParams, page]);
 
   useEffect(() => {
     if (debounceTimerRef.current) {
@@ -384,6 +412,8 @@ export default function BrowsePageClient() {
           properties={properties}
           services={services}
           total={total}
+          totalPages={totalPages}
+          page={page}
           searchParams={Object.fromEntries(searchParams.entries())}
           _onFilterChange={handleFilterChange}
           onFilterRemove={handleFilterRemove}
