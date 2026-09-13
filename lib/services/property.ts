@@ -26,6 +26,7 @@ interface PropertyDetailAgent {
   id: string; firstName: string; lastName: string; phone: string | null; email: string | null;
   avatar: string | null; businessLogo: string | null; companyName: string | null;
   category: string | null; specialties: string[]; website: string | null;
+  userTypes: string[] | null; primaryUserType: string | null;
 }
 
 export interface PropertyDetail {
