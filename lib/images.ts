@@ -1,9 +1,10 @@
 export function optimizeImageUrl(url: string, width: number): string {
   if (!url) return url
-  // Local uploads: make absolute if relative
+  // Local uploads: keep relative so the browser loads them same-origin
+  // through the /uploads middleware proxy (the cPanel origin is not
+  // directly reachable from all user networks).
   if (url.startsWith("/uploads/")) {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.allpropertylink.co.ke"
-    return `${apiUrl}${url}`
+    return url
   }
   if (url.includes("/uploads/") && url.includes("api.allpropertylink.co.ke")) {
     return url
@@ -31,9 +32,11 @@ export function optimizeImageUrl(url: string, width: number): string {
 
 export function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null
+  // Local uploads: keep relative so the browser loads them same-origin
+  // through the /uploads middleware proxy (the cPanel origin is not
+  // directly reachable from all user networks).
   if (url.startsWith("/uploads/")) {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.allpropertylink.co.ke"
-    return `${apiUrl}${url}`
+    return url
   }
   return url
 }
