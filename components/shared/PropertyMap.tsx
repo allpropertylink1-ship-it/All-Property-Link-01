@@ -80,9 +80,9 @@ export function PropertyMap({ lat, lng, address }: Props) {
         </div>
       )}
       {status === "error" && (
-        <div className="flex h-[200px] w-full items-center justify-center gap-2 text-text-secondary">
-          <AlertCircle size={18} />
-          <span className="text-sm">Could not load map location</span>
+        <div className="flex h-[72px] w-full items-center justify-center gap-2 px-4 text-text-secondary">
+          <AlertCircle size={16} />
+          <span className="text-xs">Location not available</span>
         </div>
       )}
       <div

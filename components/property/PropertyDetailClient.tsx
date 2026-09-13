@@ -421,6 +421,15 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
               </div>
             )}
 
+            {/* Map (mobile only — between contact and reviews) */}
+            <div className="lg:hidden">
+              <PropertyMap
+                lat={property.latitude ? Number(property.latitude) : null}
+                lng={property.longitude ? Number(property.longitude) : null}
+                address={`${property.city}, ${property.region || ""}, ${property.country}`}
+              />
+            </div>
+
             {/* ─── Customer reviews of the seller (always shown) ─── */}
             {sellerReviews && property.agent && (
               <section id="reviews" aria-label="Customer reviews of the seller" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
@@ -478,15 +487,6 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                 </div>
               </div>
             )}
-
-            {/* Map (mobile only — desktop map is in left sidebar) */}
-            <div className="lg:hidden">
-              <PropertyMap
-                lat={property.latitude ? Number(property.latitude) : null}
-                lng={property.longitude ? Number(property.longitude) : null}
-                address={`${property.city}, ${property.region || ""}, ${property.country}`}
-              />
-            </div>
           </div>
 
           {/* ─── RIGHT SIDEBAR ─── */}
