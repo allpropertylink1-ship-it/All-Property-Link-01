@@ -40,3 +40,23 @@ export function resolveImageUrl(url: string | null | undefined): string | null {
   }
   return url
 }
+
+export function toThumbUrl(url: string, fallbackWidth = 400): string {
+  if (!url) return url
+  if (url.startsWith("/uploads/properties/") || url.startsWith("/uploads/services/")) {
+    // /uploads/properties/uuid-name.jpg -> /uploads/properties/uuid-name-thumb.jpg
+    // If already a thumb, return as-is.
+    if (url.includes("-thumb.")) return url
+    const dot = url.lastIndexOf(".")
+    if (dot > 0) {
+      const base = url.slice(0, dot)
+      const ext = url.slice(dot)
+      // Thumb is always jpg/webp; keep original ext for fallback, but prefer jpg
+      const thumbExt = ext.toLowerCase() === ".webp" ? ".webp" : ".jpg"
+      const thumbBase = ext.toLowerCase() === ".webp" ? base : base
+      // If ext was .webp, thumb is .webp, else .jpg
+      return `${base}-thumb${thumbExt}`
+    }
+  }
+  return optimizeImageUrl(url, fallbackWidth)
+}

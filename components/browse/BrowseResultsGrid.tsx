@@ -106,18 +106,23 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 
 function ServiceCardGrid({ item }: { item: BrowseService }) {
   const images = Array.isArray(item.images) ? item.images : [];
-  const imageUrl = images.length > 0
-    ? `https://res.cloudinary.com/oxdzvktu/image/upload/w_600,q_auto,f_auto/${images[0]}`
-    : `https://res.cloudinary.com/oxdzvktu/image/upload/w_600,q_auto,f_auto/placeholder_service`;
+  let imageUrl = ""
+  if (images.length > 0) {
+    const raw = String(images[0])
+    if (raw.startsWith("/uploads/")) imageUrl = raw
+    else if (raw.includes("res.cloudinary.com/")) imageUrl = raw.replace("/image/upload/", "/image/upload/w_600,q_auto,f_auto/")
+    else if (raw) imageUrl = raw
+  }
+  const fallback = "/placeholder-service.jpg"
 
   return (
     <a href={`/services/${item.id}`} className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
         <img
-          src={imageUrl}
+          src={imageUrl || fallback}
           alt={item.title}
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          onError={(e) => { (e.target as HTMLImageElement).src = `https://res.cloudinary.com/oxdzvktu/image/upload/w_600,q_auto,f_auto/placeholder_service` }}
+          onError={(e) => { (e.target as HTMLImageElement).src = fallback }}
         />
         {item.category && (
           <span className="absolute left-2 top-2 z-10 rounded-md bg-primary-500 px-2.5 py-1 text-xs font-semibold text-white">

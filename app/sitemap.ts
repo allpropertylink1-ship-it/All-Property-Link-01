@@ -24,10 +24,12 @@ async function propertyPages(base: string): Promise<MetadataRoute.Sitemap> {
   try {
     const first = await getProperties({ page: 1, pageSize: 50 });
     const pageCount = Math.max(1, first.totalPages || 1);
-    const pages = [first];
-    for (let p = 2; p <= pageCount; p++) {
-      pages.push(await getProperties({ page: p, pageSize: 50 }));
-    }
+    const rest = pageCount > 1
+      ? await Promise.all(
+          Array.from({ length: pageCount - 1 }, (_, i) => getProperties({ page: i + 2, pageSize: 50 }))
+        )
+      : [];
+    const pages = [first, ...rest];
 
     const seen = new Set<string>();
     const entries: MetadataRoute.Sitemap = [];
@@ -67,10 +69,14 @@ async function servicePages(base: string): Promise<MetadataRoute.Sitemap> {
   try {
     const first = await getServiceListings({ page: "1", limit: "50" });
     const pageCount = Math.max(1, first.totalPages || 1);
-    const pages = [first];
-    for (let p = 2; p <= pageCount; p++) {
-      pages.push(await getServiceListings({ page: String(p), limit: "50" }));
-    }
+    const rest = pageCount > 1
+      ? await Promise.all(
+          Array.from({ length: pageCount - 1 }, (_, i) =>
+            getServiceListings({ page: String(i + 2), limit: "50" })
+          )
+        )
+      : [];
+    const pages = [first, ...rest];
 
     const entries: MetadataRoute.Sitemap = [];
     const seen = new Set<string>();

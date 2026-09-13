@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders";
-import { optimizeImageUrl } from "@/lib/images";
+import { toThumbUrl } from "@/lib/images";
 import { slugifyCity } from "@/lib/seo";
 
 type PropertyCardVariant = "default" | "compact";
@@ -71,7 +71,8 @@ export function PropertyCard({
   variant = "default",
 }: PropertyCardProps) {
   const imageUrls = Array.isArray(images) ? images : [];
-  const imageUrl = imageUrls.length > 0 ? optimizeImageUrl(String(imageUrls[0]), 800) : PLACEHOLDER_PROPERTY;
+  const rawImage = imageUrls.length > 0 ? String(imageUrls[0]) : ""
+  const imageUrl = rawImage ? toThumbUrl(rawImage, 400) : PLACEHOLDER_PROPERTY;
   const lcpAttrs = priority ? ({ fetchpriority: "high" } as Record<string, string>) : {};
 
   const isCompact = variant === "compact";
@@ -91,7 +92,11 @@ export function PropertyCard({
             height={240}
             loading="lazy"
             decoding="async"
-            onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_PROPERTY }}
+            onError={(e) => {
+              const img = e.target as HTMLImageElement
+              if (rawImage && img.src.includes("-thumb.")) { img.src = rawImage; return }
+              img.src = PLACEHOLDER_PROPERTY
+            }}
           />
           <span
             className={`absolute left-1.5 top-1.5 z-10 rounded-md px-2 py-0.5 text-[10px] font-semibold text-white ${
@@ -146,7 +151,11 @@ export function PropertyCard({
             loading={priority ? "eager" : "lazy"}
             decoding={priority ? "sync" : "async"}
             {...lcpAttrs}
-            onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_PROPERTY }}
+            onError={(e) => {
+              const img = e.target as HTMLImageElement
+              if (rawImage && img.src.includes("-thumb.")) { img.src = rawImage; return }
+              img.src = PLACEHOLDER_PROPERTY
+            }}
           />
           <span
             className={`absolute left-2 top-2 z-10 rounded-md px-2.5 py-1 text-xs font-semibold text-white ${
