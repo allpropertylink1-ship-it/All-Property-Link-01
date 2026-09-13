@@ -8,7 +8,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
-import { Building2, Bed, Bath, Maximize2, Phone, Mail, Globe, Sparkles, MessageCircle, Loader2, Star, ArrowRight, User, Home, Briefcase } from "@/components/ui/icons";
+import { Building2, Bed, Bath, Maximize2, Phone, Mail, Globe, Sparkles, MessageCircle, Loader2, Star, ArrowRight } from "@/components/ui/icons";
 import { optimizeImageUrl } from "@/lib/images";
 import { slugifyCity } from "@/lib/seo";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
@@ -78,12 +78,12 @@ interface OtherProperty {
   listingPurpose?: string | null;
 }
 
-function listerRole(agent: AgentInfo): { label: string; Icon: typeof User } | null {
+function listerRole(agent: AgentInfo): string | null {
   const t = agent.primaryUserType ?? agent.userTypes?.[0] ?? null;
-  if (t === "AGENT") return { label: "Agent", Icon: Briefcase };
-  if (t === "PROPERTY_OWNER") return { label: "Property Owner", Icon: Home };
-  if (t === "FUNDI") return { label: "Fundi", Icon: User };
-  if (t === "SERVICE_PROVIDER") return { label: "Service Provider", Icon: User };
+  if (t === "AGENT") return "Agent";
+  if (t === "PROPERTY_OWNER") return "Property Owner";
+  if (t === "FUNDI") return "Fundi";
+  if (t === "SERVICE_PROVIDER") return "Service Provider";
   return null;
 }
 
@@ -219,9 +219,8 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                   {(role || property.agent.category) && (
                     <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
                       {role && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-primary-600 px-2.5 py-0.5 text-xs font-semibold text-white">
-                          <role.Icon size={12} />
-                          {role.label}
+                        <span className="inline-flex items-center rounded-full bg-primary-600 px-2.5 py-0.5 text-xs font-semibold text-white">
+                          {role}
                         </span>
                       )}
                       {property.agent.category && (
@@ -377,9 +376,8 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                     {(role || property.agent.category) && (
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
                         {role && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-primary-600 px-2 py-0.5 text-[11px] font-semibold text-white">
-                            <role.Icon size={11} />
-                            {role.label}
+                          <span className="inline-flex items-center rounded-full bg-primary-600 px-2 py-0.5 text-[11px] font-semibold text-white">
+                            {role}
                           </span>
                         )}
                         {property.agent.category && (
