@@ -7,6 +7,7 @@ interface ApiResponse<T = unknown> {
 
 class ApiClient {
   private baseUrl: string
+  private refreshPromise: Promise<boolean> | null = null
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl
@@ -103,6 +104,16 @@ class ApiClient {
   }
 
   private async refresh(): Promise<boolean> {
+    if (this.refreshPromise) return this.refreshPromise
+    this.refreshPromise = this._refresh()
+    try {
+      return await this.refreshPromise
+    } finally {
+      this.refreshPromise = null
+    }
+  }
+
+  private async _refresh(): Promise<boolean> {
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 10000)
