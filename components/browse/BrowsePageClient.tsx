@@ -3,9 +3,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { FilterPillsGroup } from "./FilterPills";
-import { ActiveFilterBar } from "./ActiveFilterBar";
 import { BrowseResultsGrid } from "./BrowseResultsGrid";
 import { BrowseSkeleton } from "./BrowseSkeleton";
+import { Search, X } from "@/components/ui/icons";
 
 type PropertyFilterKey = "ALL" | "FOR_SALE" | "FOR_RENT_LONG_TERM" | "FOR_RENT_SHORT_TERM" | "LAND";
 type ServiceFilterKey = "ALL" | "FUNDI" | "SERVICE_PROVIDER";
@@ -115,6 +115,50 @@ export default function BrowsePageClient() {
   const abortControllerRef = useRef<AbortController | null>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // --- search state (integrated with category filter) ---
+  const searchParam = searchParams.get("search") ?? searchParams.get("q") ?? "";
+  const [searchInput, setSearchInput] = useState(searchParam);
+  const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    setSearchInput(searchParam);
+  }, [searchParam]);
+
+  const pushSearch = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      const trimmed = value.trim();
+      if (trimmed) {
+        params.set("search", trimmed);
+        params.delete("q");
+      } else {
+        params.delete("search");
+        params.delete("q");
+      }
+      params.delete("page");
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, router, pathname]
+  );
+
+  const handleSearchChange = (value: string) => {
+    setSearchInput(value);
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => pushSearch(value), 350);
+  };
+
+  const handleSearchClear = () => {
+    setSearchInput("");
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    pushSearch("");
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    pushSearch(searchInput);
+  };
+
   // Read URL params and set initial filters
   const syncFiltersFromUrl = useCallback(() => {
     const tab = searchParams.get("tab") as "properties" | "services" | null;
@@ -167,6 +211,9 @@ export default function BrowsePageClient() {
           params.set("type", "LAND");
         } else if (filter !== "ALL") {
           params.set("purpose", filter);
+        } else {
+          params.delete("purpose");
+          params.delete("type");
         }
       } else {
         params.delete("purpose");
@@ -174,6 +221,8 @@ export default function BrowsePageClient() {
         params.delete("filter");
         if (filter !== "ALL") {
           params.set("serviceType", filter);
+        } else {
+          params.delete("serviceType");
         }
       }
       
@@ -212,6 +261,9 @@ export default function BrowsePageClient() {
       if (searchParams.get("propertyType")) params.set("type", searchParams.get("propertyType")!);
       if (searchParams.get("category")) params.set("category", searchParams.get("category")!);
       if (searchParams.get("bedrooms")) params.set("bedrooms", searchParams.get("bedrooms")!);
+      // Search integrates alongside category/type filters (AND)
+      const searchVal = searchParams.get("search") || searchParams.get("q");
+      if (searchVal) params.set("search", searchVal);
       if (page > 1) params.set("page", String(page));
       // Sort mapping: UI "newest"/"popular" -> backend "createdAt"/"viewCount"
       const rawSort = searchParams.get("sort");
@@ -303,7 +355,28 @@ export default function BrowsePageClient() {
 
   const handleFilterRemove = useCallback((key: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.delete(key);
+    // search/q share the same logical filter — remove both
+    if (key === "search" || key === "q") {
+      params.delete("search");
+      params.delete("q");
+    } else {
+      params.delete(key);
+    }
+    // price chip removes both min/max
+    if (key === "price") {
+      params.delete("minPrice");
+      params.delete("maxPrice");
+    }
+    if (key === "purpose") {
+      params.delete("purpose");
+      params.delete("type");
+      params.delete("filter");
+    }
+    if (key === "type") {
+      params.delete("type");
+      params.delete("serviceType");
+      params.delete("filter");
+    }
     params.set("page", "1");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }, [searchParams, router, pathname]);
@@ -322,6 +395,11 @@ export default function BrowsePageClient() {
     SERVICE_PROVIDER: "Services",
     ALL: activeTab === "properties" ? "All Properties" : "All Services",
   };
+
+  const searchPlaceholder =
+    activeTab === "properties"
+      ? "Search properties by title, city or area…"
+      : "Search fundis & services by title or description…";
 
   return (
     <div className="mx-auto max-w-content px-4 py-8">
@@ -363,15 +441,57 @@ export default function BrowsePageClient() {
         </button>
       </div>
 
+      {/* Search — always visible, integrates with active category filter */}
+      <form
+        onSubmit={handleSearchSubmit}
+        role="search"
+        aria-label={activeTab === "properties" ? "Search properties" : "Search services"}
+        className="mb-6"
+      >
+        <div className="relative flex items-center">
+          <Search
+            size={18}
+            className="pointer-events-none absolute left-3.5 text-muted"
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder={searchPlaceholder}
+            className="w-full rounded-xl border border-border bg-surface py-3 pl-11 pr-14 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            aria-label={activeTab === "properties" ? "Search properties" : "Search services"}
+            autoComplete="off"
+          />
+          {searchInput ? (
+            <button
+              type="button"
+              onClick={handleSearchClear}
+              className="absolute right-1 flex h-11 w-11 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
+              aria-label="Clear search"
+            >
+              <X size={16} />
+            </button>
+          ) : null}
+        </div>
+        {searchParam && !loading && (
+          <p className="mt-2 text-xs text-text-secondary" aria-live="polite">
+            Searching {activeTab} {isDefaultFilter ? "" : `in ${filterLabels[currentFilter] ?? currentFilter} `}for <span className="font-medium text-text-primary">&ldquo;{searchParam}&rdquo;</span>
+          </p>
+        )}
+      </form>
+
       {/* Only show filter pills if no filter is active from URL, or if user wants to change filter */}
       {!isFilterFromUrl && (
-        <FilterPillsGroup
-          activeTab={activeTab}
-          propertyFilter={propertyFilter}
-          serviceFilter={serviceFilter}
-          onPropertyFilterChange={handlePropertyFilterChange}
-          onServiceFilterChange={handleServiceFilterChange}
-        />
+        <div className="mb-6">
+          <FilterPillsGroup
+            activeTab={activeTab}
+            propertyFilter={propertyFilter}
+            serviceFilter={serviceFilter}
+            onPropertyFilterChange={handlePropertyFilterChange}
+            onServiceFilterChange={handleServiceFilterChange}
+          />
+        </div>
       )}
 
       {/* Show active filter indicator when filter is applied (from URL or user) */}
@@ -379,6 +499,7 @@ export default function BrowsePageClient() {
         <div className="mb-6 flex items-center gap-2 rounded-lg border border-primary-200 bg-primary-50 px-4 py-3" role="status" aria-live="polite">
           <span className="text-sm font-medium text-primary-700">
             Showing: <strong>{filterLabels[currentFilter] || currentFilter}</strong>
+            {searchParam ? <span className="font-normal"> · “{searchParam}”</span> : null}
           </span>
           <button
             type="button"

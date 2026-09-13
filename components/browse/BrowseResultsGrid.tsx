@@ -166,9 +166,15 @@ export function BrowseResultsGrid({
   const [sortOpen, setSortOpen] = useState(false);
   const [filterChips, setFilterChips] = useState<FilterChip[]>([]);
 
-  // Build filter chips from active filters
+  // Build filter chips from active filters (including search — integrated with category)
   useEffect(() => {
     const chips: FilterChip[] = [];
+
+    const searchVal = (searchParams.search as string | undefined) ?? (searchParams.q as string | undefined);
+    if (searchVal) {
+      const label = searchVal.length > 28 ? `${searchVal.slice(0, 28)}…` : searchVal;
+      chips.push({ key: "search", label: `“${label}”`, onRemove: () => onFilterRemove("search") });
+    }
 
     if (activeTab === "properties") {
       if (propertyFilter !== "ALL") {
@@ -239,18 +245,40 @@ export function BrowseResultsGrid({
     params.delete("filter");
     params.delete("purpose");
     params.delete("type");
+    params.delete("serviceType");
     params.delete("city");
     params.delete("minPrice");
     params.delete("maxPrice");
     params.delete("propertyType");
     params.delete("category");
+    params.delete("search");
+    params.delete("q");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
+
+  const searchVal = (searchParams.search as string | undefined) ?? (searchParams.q as string | undefined);
+  const activeFilterLabel =
+    activeTab === "properties"
+      ? ({ FOR_SALE: "For Sale", FOR_RENT_LONG_TERM: "For Rent", FOR_RENT_SHORT_TERM: "Short-Term", LAND: "Land & Plots" } as Record<string, string>)[propertyFilter] ?? propertyFilter
+      : ({ FUNDI: "Fundis", SERVICE_PROVIDER: "Services" } as Record<string, string>)[serviceFilter] ?? serviceFilter;
+  const hasCategory = activeTab === "properties" ? propertyFilter !== "ALL" : serviceFilter !== "ALL";
 
   if (currentItems.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border bg-surface-secondary p-10 text-center">
-        <p className="text-sm text-text-secondary">No {itemType}s found for this filter.</p>
+        <p className="text-sm font-medium text-text-primary">
+          No {itemType}s found{searchVal ? ` for “${searchVal}”` : ""}{hasCategory ? ` in ${activeFilterLabel}` : ""}.
+        </p>
+        <p className="mt-1 text-sm text-text-secondary">Try adjusting your search or filter.</p>
+        {(searchVal || hasCategory) && (
+          <button
+            type="button"
+            onClick={handleClearAllFilters}
+            className="mt-4 touch-target rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-secondary"
+          >
+            Clear search & filters
+          </button>
+        )}
       </div>
     );
   }
@@ -331,8 +359,15 @@ export function BrowseResultsGrid({
         </div>
       )}
 
-      <p className="mb-3 text-sm text-text-secondary">
+      <p className="mb-3 text-sm text-text-secondary" aria-live="polite">
         {total} {total === 1 ? itemType : `${itemType}s`} found
+        {searchVal ? (
+          <span>
+            {" "}
+            for <span className="font-medium text-text-primary">“{searchVal}”</span>
+          </span>
+        ) : null}
+        {hasCategory ? <span> in {activeFilterLabel}</span> : null}
       </p>
 
       {isList ? (
