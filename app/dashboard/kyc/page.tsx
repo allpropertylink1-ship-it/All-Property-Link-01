@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { uploadImage } from "@/lib/image-client";
+import { uploadImage, uploadPdf } from "@/lib/image-client";
 import { Shield, CheckCircle, Clock, XCircle, Loader2 } from "@/components/ui/icons"
 import { api } from "@/lib/api-client"
 import { cn } from "@/lib/utils"
@@ -116,12 +116,8 @@ function KycPageInner() {
   const uploadFiles = async (files: File[]): Promise<{ url: string }[]> => {
     return Promise.all(files.map(async (file) => {
       if (file.type === "application/pdf") {
-        const fd = new FormData()
-        fd.append("file", file)
-        const res = await fetch("/api/upload/pdf", { method: "POST", credentials: "include", body: fd })
-        if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Upload failed") }
-        const result = await res.json()
-        return { url: result.url }
+        const url = await uploadPdf(file)
+        return { url }
       }
             const url = await uploadImage(file, "kyc")
       return { url }
