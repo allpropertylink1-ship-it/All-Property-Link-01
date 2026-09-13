@@ -23,6 +23,12 @@
       "headers": [
         { "key": "x-vercel-enable-rewrite-caching", "value": "1" }
       ]
+    },
+    {
+      "source": "/uploads/:path*",
+      "headers": [
+        { "key": "x-vercel-enable-rewrite-caching", "value": "1" }
+      ]
     }
   ]
 }
