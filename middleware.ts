@@ -3,12 +3,6 @@ import type { NextRequest } from "next/server"
 
 const API_BACKEND = process.env.API_BACKEND_URL || "https://api.allpropertylink.co.ke"
 
-const PUBLIC_API_PREFIXES = ["/api/properties", "/api/services", "/api/reviews", "/api/health"]
-
-const isPublicGet = (method: string, pathname: string) =>
-  method === "GET" &&
-  PUBLIC_API_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))
-
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
@@ -24,27 +18,12 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.rewrite(url.toString())
   }
 
-  if (pathname.startsWith("/api/")) {
-    // Public reads are served by app/api/[...path]/route.ts (edge-cached
-    // with controlled headers). Everything else proxies straight through
-    // so auth cookies reach the origin untouched.
-    if (isPublicGet(request.method, pathname)) {
-      return NextResponse.next()
-    }
-    const url = new URL(request.url)
-    url.host = new URL(API_BACKEND).host
-    url.protocol = "https"
-    url.port = ""
-    const res = NextResponse.rewrite(url.toString())
-    
-    // Forward cookies from the original request to the backend API
-    const cookieHeader = request.headers.get("cookie")
-    if (cookieHeader) {
-      res.headers.set("cookie", cookieHeader)
-    }
-
-    return res
-  }
+  // NOTE: /api/* is intentionally NOT rewritten here. All API traffic is
+  // proxied via app/api/[...path]/route.ts (serverless) which forwards
+  // cookies/method/body to the origin. Edge rewrites to
+  // api.allpropertylink.co.ke were timing out due to host-level IP filtering
+  // on Vercel edge → origin, while serverless → origin succeeds (different
+  // IP pool). See Session 22 incident.
 
   if (pathname.startsWith("/dashboard")) {
     // Either cookie grants entry: the access cookie expires after 15 min but
