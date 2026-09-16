@@ -6,6 +6,8 @@ import { CookieConsent } from "@/components/shared/CookieConsent";
 import { Footer } from "@/components/layout/Footer";
 import { AuthProvider } from "@/lib/auth-context";
 import { siteUrl } from "@/lib/seo";
+import { getSiteStatus } from "@/lib/services/status";
+import MaintenanceNotice from "@/components/shared/MaintenanceNotice";
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 import "./globals.css";
 
@@ -43,11 +45,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const status = await getSiteStatus();
+  const inMaintenance = status?.maintenanceMode === true;
   return (
     <html lang="en">
       <head>
@@ -63,7 +67,7 @@ export default function RootLayout({
       <body className={`${sora.variable} ${dmSans.variable} flex min-h-[100dvh] flex-col antialiased`}>
         <AuthProvider>
           <Navbar />
-          <main className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6">{children}</main>
+          <main className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6">{inMaintenance ? <MaintenanceNotice title={status?.maintenanceTitle} message={status?.maintenanceMessage} /> : children}</main>
           <CookieConsent />
           <BottomNav />
           <Footer />
