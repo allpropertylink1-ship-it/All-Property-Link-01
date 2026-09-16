@@ -107,16 +107,9 @@ export function FeaturedFundis({
       <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-accent-600">
-              <span aria-hidden="true" className="h-2 w-2 rounded-full bg-accent-500" />
-              Vetted National Artisan Registry
-            </p>
             <h2 id="home-fundis-heading" className="font-heading text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
               Verified Fundis &amp; Specialized Technicians
             </h2>
-            <p className="mt-1 max-w-text text-sm text-text-secondary">
-              Identity-checked, trade-certified Kenyan specialists ready for immediate deployment.
-            </p>
           </div>
           <Link
             href="/services"

@@ -255,8 +255,10 @@ function BusinessProfilePageInner() {
     }))
   }
 
+  // Agents list properties on behalf of owners (like Property Owners) — no specialties.
+  // Only Fundis (trade skills) and Service Providers (services) select specialties.
   const selectedSpecialties =
-    form.category === "FUNDI" || form.category === "AGENT"
+    form.category === "FUNDI"
       ? specialtiesAgent
       : form.category === "SERVICE_PROVIDER"
         ? specialtiesService

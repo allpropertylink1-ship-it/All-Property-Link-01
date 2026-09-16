@@ -56,16 +56,9 @@ export function FeaturedAirbnbs({ initialData }: { initialData?: ApiProperty[] }
       <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-accent-600">
-              <span aria-hidden="true" className="h-2 w-2 rounded-full bg-accent-500" />
-              Instant Booking Stays
-            </p>
             <h2 id="home-airbnb-heading" className="font-heading text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
               Featured Airbnbs
             </h2>
-            <p className="mt-1 max-w-text text-sm text-text-secondary">
-              Instant booking stays with reliable amenities &amp; WiFi.
-            </p>
           </div>
           <Link
             href="/properties?purpose=FOR_RENT_SHORT_TERM"
