@@ -460,7 +460,7 @@ export function HeroSection() {
               <div className="absolute inset-0 bg-gradient-to-t from-primary-900/95 via-primary-900/30 to-transparent" />
               <div className="absolute inset-x-0 bottom-0 flex flex-col gap-4 p-4 text-white sm:p-6 md:flex-row md:items-end md:justify-between lg:p-8">
                 <div className="max-w-2xl">
-                  <p className="mb-2 inline-flex items-center rounded-lg bg-accent-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white">
+                  <p className="mb-2 hidden items-center rounded-lg bg-accent-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white md:inline-flex">
                     {persona.featuredLabel}{slide.city ? ` • ${slide.city}` : ""}
                   </p>
                   <h2 className="font-heading text-xl font-bold tracking-tight sm:text-2xl">
@@ -498,7 +498,7 @@ export function HeroSection() {
                   <span className="font-heading text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
                     {formatPrice(slide.price, slide.listingPurpose ?? undefined)}
                   </span>
-                  <div className="mt-2 flex flex-wrap items-center gap-2 md:justify-end">
+                  <div className="mt-2 flex w-full flex-wrap items-center justify-end gap-2 md:w-auto">
                     <Link
                       href={`/properties/${slugifyCity(slide.city || "kenya")}/${slide.slug}`}
                       className="inline-flex min-h-touch items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary-50"
@@ -507,7 +507,7 @@ export function HeroSection() {
                       <ArrowUpRight size={15} aria-hidden="true" />
                     </Link>
                     {slide.phone ? (
-                      <>
+                      <span className="hidden items-center gap-2 md:flex">
                         <a
                           href={`tel:${slide.phone}`}
                           aria-label={`Call agent about ${slide.title}`}
@@ -526,7 +526,7 @@ export function HeroSection() {
                           <MessageCircle size={15} aria-hidden="true" />
                           WhatsApp
                         </a>
-                      </>
+                      </span>
                     ) : null}
                   </div>
                 </div>
