@@ -19,7 +19,7 @@ export interface PropertyCard {
   id: string; slug: string; title: string; price: number | null; currency: string;
   propertyType: string; listingPurpose: string | null;
   city: string; region: string; bedrooms: number | null; bathrooms: number | null;
-  area: number | null; images: unknown; coverImage?: string | null; isFeatured: boolean; createdAt: Date;
+  area: number | null; images: unknown; coverImage?: string | null; thumbUrl?: string | null; isFeatured: boolean; createdAt: Date;
 }
 
 interface PropertyDetailAgent {

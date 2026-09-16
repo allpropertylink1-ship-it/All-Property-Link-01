@@ -19,6 +19,8 @@ import {
   Maximize2,
   BadgeCheck,
   SlidersHorizontal,
+  Phone,
+  MessageCircle,
 } from "@/components/ui/icons"
 import { formatPrice } from "@/lib/utils"
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders"
@@ -159,6 +161,7 @@ interface Slide {
   area?: number | null
   listingPurpose: string | null
   image: string
+  phone?: string | null
 }
 
 interface SearchSuggestion {
@@ -187,6 +190,20 @@ interface ApiProperty {
   listingPurpose?: string | null
   coverImage?: string | null
   images: unknown
+  agent?: { phone?: string | null } | null
+}
+
+function agentPhone(p: ApiProperty): string | null {
+  const raw = p.agent?.phone
+  if (typeof raw !== "string") return null
+  const trimmed = raw.trim()
+  return trimmed.length > 0 ? trimmed : null
+}
+
+function waNumber(phone: string): string {
+  let digits = phone.replace(/\D/g, "")
+  if (digits.startsWith("0")) digits = `254${digits.slice(1)}`
+  return digits
 }
 
 function toSlides(rows: ApiProperty[]): Slide[] {
@@ -206,6 +223,7 @@ function toSlides(rows: ApiProperty[]): Slide[] {
       area: p.area ?? null,
       listingPurpose: p.listingPurpose ?? null,
       image: cover,
+      phone: agentPhone(p),
     })
   }
   return slides
@@ -480,13 +498,37 @@ export function HeroSection() {
                   <span className="font-heading text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
                     {formatPrice(slide.price, slide.listingPurpose ?? undefined)}
                   </span>
-                  <Link
-                    href={`/properties/${slugifyCity(slide.city || "kenya")}/${slide.slug}`}
-                    className="mt-2 inline-flex min-h-touch items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary-50"
-                  >
-                    View Listing
-                    <ArrowUpRight size={15} aria-hidden="true" />
-                  </Link>
+                  <div className="mt-2 flex flex-wrap items-center gap-2 md:justify-end">
+                    <Link
+                      href={`/properties/${slugifyCity(slide.city || "kenya")}/${slide.slug}`}
+                      className="inline-flex min-h-touch items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary-50"
+                    >
+                      View Listing
+                      <ArrowUpRight size={15} aria-hidden="true" />
+                    </Link>
+                    {slide.phone ? (
+                      <>
+                        <a
+                          href={`tel:${slide.phone}`}
+                          aria-label={`Call agent about ${slide.title}`}
+                          className="inline-flex min-h-touch items-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/25"
+                        >
+                          <Phone size={15} aria-hidden="true" />
+                          Call
+                        </a>
+                        <a
+                          href={`https://wa.me/${waNumber(slide.phone)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`WhatsApp agent about ${slide.title}`}
+                          className="inline-flex min-h-touch items-center gap-2 rounded-xl bg-whatsapp px-4 py-2.5 text-sm font-bold text-white shadow-md transition-colors hover:bg-whatsapp-dark"
+                        >
+                          <MessageCircle size={15} aria-hidden="true" />
+                          WhatsApp
+                        </a>
+                      </>
+                    ) : null}
+                  </div>
                 </div>
               </div>
             </div>
@@ -534,6 +576,55 @@ export function HeroSection() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Mobile region context + For Sale / To Let segmented (Stitch mobile hero) */}
+        <div className="mb-3 rounded-xl border border-border bg-surface p-3 shadow-sm md:hidden">
+          <div className="mb-2.5 flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-secondary text-primary">
+                <MapPin size={16} aria-hidden="true" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary">
+                  Search Region
+                </span>
+                <span className="block truncate text-sm font-bold text-text-primary">
+                  Nairobi &amp; Kiambu, KE
+                </span>
+              </span>
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-accent-100 px-2.5 py-1 text-[11px] font-bold text-accent-700">
+              <BadgeCheck size={14} aria-hidden="true" />
+              Vetted Hub
+            </span>
+          </div>
+          <div className="flex items-center rounded-xl bg-surface-secondary p-1" role="group" aria-label="Listing type">
+            <button
+              type="button"
+              aria-pressed={persona.id === "sale"}
+              onClick={() => switchPersona(PERSONAS[0])}
+              className={`min-h-touch flex-1 rounded-lg py-2 text-center text-sm font-semibold transition-all ${
+                persona.id === "sale"
+                  ? "bg-primary text-text-onPrimary shadow-sm"
+                  : "text-text-secondary hover:text-primary"
+              }`}
+            >
+              For Sale
+            </button>
+            <button
+              type="button"
+              aria-pressed={persona.id === "rent"}
+              onClick={() => switchPersona(PERSONAS[1])}
+              className={`min-h-touch flex-1 rounded-lg py-2 text-center text-sm font-semibold transition-all ${
+                persona.id === "rent"
+                  ? "bg-primary text-text-onPrimary shadow-sm"
+                  : "text-text-secondary hover:text-primary"
+              }`}
+            >
+              To Let (Rent)
+            </button>
+          </div>
         </div>
 
         {/* Integrated multi-tab quick search console (overlapping card) */}

@@ -16,6 +16,7 @@ interface PropertyGridProps {
     area: number | null;
     images: unknown;
     coverImage?: string | null;
+    thumbUrl?: string | null;
     isFeatured: boolean;
     createdAt: Date | string;
     urgencyText?: "Trending" | "Just listed" | "Popular";
@@ -54,7 +55,7 @@ export function PropertyGrid({ properties, viewToggle = "grid", variant = "full"
   return (
     <div className={gridClass} role="list" aria-label="Property grid">
       {properties.map((property, i) => (
-        <PropertyCard key={property.id} priority={i === 0} {...property} />
+        <PropertyCard key={property.id} priority={i < 4} {...property} />
       ))}
     </div>
   );

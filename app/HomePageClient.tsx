@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { ArrowRight } from "@/components/ui/icons"
 import { HeroSection } from "@/components/home/HeroSection"
 import { CategoryGrid } from "@/components/home/CategoryGrid"
 import { QuickSearch } from "@/components/home/QuickSearch"
@@ -31,7 +32,7 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
               Pre-searched land parcels in Kenya&apos;s fastest capital appreciation growth corridors.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm text-text-secondary">Filter by:</span>
             <Link
               href="/land"
@@ -45,9 +46,16 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
             >
               Gated Plots
             </Link>
+            <Link
+              href="/land"
+              className="inline-flex min-h-touch items-center gap-1.5 px-1 text-sm font-bold text-primary transition-colors hover:text-accent-600"
+            >
+              View All Plots
+              <ArrowRight size={18} aria-hidden="true" />
+            </Link>
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {initialData.map((p, i) => (
             <PropertyCard
               key={p.slug}
@@ -60,10 +68,11 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
               city={p.city}
               region={p.region}
               images={p.images}
+              coverImage={p.coverImage ?? null}
               isFeatured={p.isFeatured}
-              bedrooms={null}
-              bathrooms={null}
-              area={null}
+              bedrooms={p.bedrooms}
+              bathrooms={p.bathrooms}
+              area={p.area}
               priority={i === 0}
             />
           ))}
@@ -93,7 +102,7 @@ export function HomePageClient({
       <QuickSearch />
       <FeaturedProperties initialData={saleRent} />
       <FeaturedAirbnbs initialData={airbnbs} />
-      <FeaturedFundis initialData={fundis} />
+      <FeaturedFundis initialData={fundis} servicePills={providers.slice(0, 2)} />
       <FeaturedLand initialData={land} />
       <FeaturedProviders initialData={providers} />
       <CTASection />

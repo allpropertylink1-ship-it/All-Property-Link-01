@@ -104,15 +104,15 @@ export function CategoryGrid() {
         <h2 className="sr-only">Browse by category</h2>
         {/* Mobile: horizontal snap rail (Stitch) — Desktop: wrapping row */}
         <div
-          className="flex items-center gap-2 overflow-x-auto py-1 scrollbar-hide lg:flex-wrap lg:overflow-visible"
+          className="flex snap-x snap-mandatory items-center gap-2 overflow-x-auto py-1 scrollbar-hide lg:snap-none lg:flex-wrap lg:overflow-visible"
           role="list"
           aria-label="Property and service categories"
         >
-          <div role="listitem">
+          <div role="listitem" className="snap-start shrink-0">
             <CategoryPill href="/browse" icon={LayoutDashboard} title="All" desc="Everything on All Property Link" active />
           </div>
           {categories.map((cat) => (
-            <div key={cat.title} role="listitem">
+            <div key={cat.title} role="listitem" className="snap-start shrink-0">
               <CategoryPill href={hrefFor(cat)} icon={cat.icon} title={cat.title} desc={cat.desc} />
             </div>
           ))}

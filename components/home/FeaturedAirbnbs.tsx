@@ -9,8 +9,30 @@ import { PropertyCard } from "@/components/property/PropertyCard"
 interface ApiProperty {
   slug: string; title: string; price: number | null; currency: string;
   propertyType: string; listingPurpose: string | null;
-  city: string; region: string; images: unknown;
+  city: string; region: string; images: unknown; coverImage?: string | null; thumbUrl?: string | null;
+  bedrooms?: number | null; bathrooms?: number | null; area?: number | null;
   isFeatured: boolean; createdAt: string | Date;
+}
+
+function cardProps(p: ApiProperty, priority: boolean) {
+  return {
+    slug: p.slug,
+    title: p.title,
+    price: p.price == null ? null : Number(p.price),
+    currency: p.currency,
+    propertyType: p.propertyType,
+    listingPurpose: p.listingPurpose,
+    city: p.city,
+    region: p.region,
+    images: p.images,
+    coverImage: p.coverImage ?? null,
+    thumbUrl: p.thumbUrl ?? null,
+    isFeatured: p.isFeatured,
+    bedrooms: p.bedrooms ?? null,
+    bathrooms: p.bathrooms ?? null,
+    area: p.area ?? null,
+    priority,
+  }
 }
 
 export function FeaturedAirbnbs({ initialData }: { initialData?: ApiProperty[] }) {
@@ -42,7 +64,7 @@ export function FeaturedAirbnbs({ initialData }: { initialData?: ApiProperty[] }
               Featured Airbnbs
             </h2>
             <p className="mt-1 max-w-text text-sm text-text-secondary">
-              Short-term stays with reliable amenities &amp; WiFi.
+              Instant booking stays with reliable amenities &amp; WiFi.
             </p>
           </div>
           <Link
@@ -72,12 +94,10 @@ export function FeaturedAirbnbs({ initialData }: { initialData?: ApiProperty[] }
             No short-term rentals listed yet.
           </p>
         ) : (
-          <div className="flex snap-x gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
+          <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
             {properties.map((p, i) => (
               <div key={p.slug} className="w-[270px] shrink-0 snap-start min-[480px]:w-[300px] md:w-auto">
-                <PropertyCard slug={p.slug} title={p.title} price={p.price == null ? null : Number(p.price)} currency={p.currency}
-                  propertyType={p.propertyType} listingPurpose={p.listingPurpose} city={p.city} region={p.region}
-                  images={p.images} isFeatured={p.isFeatured} bedrooms={null} bathrooms={null} area={null} priority={i === 0} />
+                <PropertyCard {...cardProps(p, i === 0)} />
               </div>
             ))}
           </div>

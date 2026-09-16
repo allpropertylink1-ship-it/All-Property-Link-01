@@ -47,6 +47,7 @@ interface BrowseProperty {
   area: number | null;
   images: unknown;
   coverImage?: string | null;
+  thumbUrl?: string | null;
   isFeatured: boolean;
   createdAt: string;
 }
@@ -395,6 +396,7 @@ export function BrowseResultsGrid({
                 area={item.area}
                 images={item.images}
                 coverImage={item.coverImage ?? null}
+                thumbUrl={item.thumbUrl ?? null}
                 isFeatured={item.isFeatured}
                 variant="compact"
               />
@@ -436,6 +438,7 @@ export function BrowseResultsGrid({
                 area={item.area}
                 images={item.images}
                 coverImage={item.coverImage ?? null}
+                thumbUrl={item.thumbUrl ?? null}
                 isFeatured={item.isFeatured}
               />
             ))

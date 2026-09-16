@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders";
-import { getCoverImage, toThumbUrl } from "@/lib/images";
+import { getCoverImage } from "@/lib/images";
 import { slugifyCity } from "@/lib/seo";
 
 type PropertyCardVariant = "default" | "compact";
@@ -21,6 +21,7 @@ interface PropertyCardProps {
   area: number | null;
   images: unknown;
   coverImage?: string | null;
+  thumbUrl?: string | null;
   isFeatured: boolean;
   urgencyText?: "Trending" | "Just listed" | "Popular";
   isVerified?: boolean;
@@ -65,6 +66,7 @@ export function PropertyCard({
   area,
   images,
   coverImage,
+  thumbUrl,
   isFeatured: _isFeatured,
   listingPurpose,
   urgencyText,
@@ -73,8 +75,9 @@ export function PropertyCard({
   variant = "default",
 }: PropertyCardProps) {
   const rawImage = getCoverImage({ coverImage, images }) ?? ""
-  const imageUrl = rawImage ? toThumbUrl(rawImage, 400) : PLACEHOLDER_PROPERTY;
-  const lcpAttrs = priority ? ({ fetchpriority: "high" } as Record<string, string>) : {};
+  // thumbUrl from API (verified on disk) — avoids 404 double-fetch for historic rows
+  const imageUrl = thumbUrl && thumbUrl.trim() ? thumbUrl.trim() : (rawImage || PLACEHOLDER_PROPERTY);
+  const lcpAttrs = priority ? ({ fetchPriority: "high" } as Record<string, string>) : {};
 
   const isCompact = variant === "compact";
 
@@ -95,12 +98,14 @@ export function PropertyCard({
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             width={320}
             height={240}
-            loading="lazy"
-            decoding="async"
+            loading={priority ? "eager" : "lazy"}
+            decoding={priority ? "sync" : "async"}
+            {...lcpAttrs}
+            sizes="128px"
             onError={(e) => {
               const img = e.target as HTMLImageElement
-              if (rawImage && img.src.includes("-thumb.")) { img.src = rawImage; return }
-              img.src = PLACEHOLDER_PROPERTY
+              if (rawImage && img.src !== rawImage && img.src.includes("-thumb.")) { img.src = rawImage; return }
+              if (img.src !== PLACEHOLDER_PROPERTY) img.src = PLACEHOLDER_PROPERTY
             }}
           />
           <span
@@ -146,20 +151,28 @@ export function PropertyCard({
       className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-all duration-300 hover:-translate-y-[3px] hover:shadow-lg"
     >
       <div className="relative w-full overflow-hidden">
-        <div className="relative aspect-[4/3] w-full overflow-hidden">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface-secondary">
+          <div className="absolute inset-0 animate-pulse bg-surface-secondary" aria-hidden="true" />
           <img
             src={imageUrl}
             alt={title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="relative h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             width={800}
             height={600}
             loading={priority ? "eager" : "lazy"}
             decoding={priority ? "sync" : "async"}
             {...lcpAttrs}
+            sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 400px"
+            onLoad={(e) => {
+              const p = (e.target as HTMLImageElement).previousElementSibling as HTMLElement | null
+              if (p) p.style.display = "none"
+            }}
             onError={(e) => {
               const img = e.target as HTMLImageElement
-              if (rawImage && img.src.includes("-thumb.")) { img.src = rawImage; return }
-              img.src = PLACEHOLDER_PROPERTY
+              const pulse = img.previousElementSibling as HTMLElement | null
+              if (pulse) pulse.style.display = "none"
+              if (rawImage && img.src !== rawImage && img.src.includes("-thumb.")) { img.src = rawImage; return }
+              if (img.src !== PLACEHOLDER_PROPERTY) img.src = PLACEHOLDER_PROPERTY
             }}
           />
           <span

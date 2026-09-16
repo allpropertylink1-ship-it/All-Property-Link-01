@@ -47,13 +47,30 @@ export function resolveImageUrl(url: string | null | undefined): string | null {
  * CONTRACT: cover = coverImage ?? images[0] ?? null
  * Helpers are the single source of truth for every consumer.
  */
+function normalizeImages(images: unknown): string[] {
+  if (Array.isArray(images)) {
+    return (images as unknown[]).filter((u): u is string => typeof u === "string" && u.trim().length > 0).map((s) => s.trim())
+  }
+  if (typeof images === "string" && images.trim()) {
+    const t = images.trim()
+    if (t.startsWith("[") && t.endsWith("]")) {
+      try {
+        const parsed = JSON.parse(t)
+        if (Array.isArray(parsed)) return parsed.filter((u: unknown): u is string => typeof u === "string" && u.trim().length > 0).map((s: string) => s.trim())
+      } catch { /* fall through */ }
+    }
+  }
+  return []
+}
+
 export function getCoverImage(p: { coverImage?: string | null; images?: unknown }): string | null {
   const cover = typeof p.coverImage === "string" ? p.coverImage.trim() : ""
-  if (cover) return p.coverImage!.trim()
-  if (Array.isArray(p.images)) {
-    for (const v of p.images) {
-      if (typeof v === "string" && v.trim()) return v
-    }
+  if (cover) return resolveImageUrl(p.coverImage!.trim()) || p.coverImage!.trim()
+  const normalized = normalizeImages(p.images)
+  for (const v of normalized) {
+    const r = resolveImageUrl(v)
+    if (r) return r
+    if (v.trim()) return v.trim()
   }
   return null
 }
@@ -63,9 +80,7 @@ export function getCoverImage(p: { coverImage?: string | null; images?: unknown 
  */
 export function getGalleryImages(p: { coverImage?: string | null; images?: unknown }): string[] {
   const cover = getCoverImage(p)
-  const raw: string[] = Array.isArray(p.images)
-    ? (p.images as unknown[]).filter((u): u is string => typeof u === "string" && u.trim().length > 0).map((s) => s.trim())
-    : []
+  const raw: string[] = normalizeImages(p.images).map((s) => resolveImageUrl(s) || s)
   if (!cover) return Array.from(new Set(raw))
   const deduped = raw.filter((u) => u !== cover)
   return [cover, ...deduped.filter((v, i, a) => a.indexOf(v) === i)]
