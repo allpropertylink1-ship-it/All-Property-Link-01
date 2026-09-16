@@ -391,8 +391,8 @@ export function HeroSection() {
   return (
     <section aria-label="Featured listings and search" className="bg-surface">
       <div className="mx-auto w-full max-w-7xl px-4 pt-6 sm:pt-8">
-        {/* Title & value statement header */}
-        <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        {/* Title & value statement header — desktop only (mobile goes straight to search) */}
+        <div className="mb-6 hidden flex-col justify-between gap-4 md:flex md:flex-row md:items-end">
           <div>
             <p className="mb-2 inline-flex items-center gap-1.5 rounded-lg bg-surface-secondary px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-text-secondary">
               <BadgeCheck size={14} className="text-primary" aria-hidden="true" />
