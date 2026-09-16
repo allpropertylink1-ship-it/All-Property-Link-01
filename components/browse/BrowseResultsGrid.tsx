@@ -110,7 +110,6 @@ function ServiceCardGrid({ item }: { item: BrowseService }) {
   if (images.length > 0) {
     const raw = String(images[0])
     if (raw.startsWith("/uploads/")) imageUrl = raw
-    else if (raw.includes("res.cloudinary.com/")) imageUrl = raw.replace("/image/upload/", "/image/upload/w_600,q_auto,f_auto/")
     else if (raw) imageUrl = raw
   }
   const fallback = "/placeholder-service.jpg"

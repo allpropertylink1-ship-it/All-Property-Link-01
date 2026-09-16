@@ -175,11 +175,15 @@ function KycPageInner() {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") => {
     const file = e.target.files?.[0]
     if (!file) return
+    handleFileDirect(file, side)
+  }
+
+  const handleFileDirect = (file: File, side: "front" | "back") => {
     if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
-      setMessage({ type: "error", text: "Only JPG and PNG files are allowed" }); e.target.value = ""; return
+      setMessage({ type: "error", text: "Only JPG and PNG files are allowed" }); return
     }
     if (file.size > 10 * 1024 * 1024) {
-      setMessage({ type: "error", text: "File must be under 10MB" }); e.target.value = ""; return
+      setMessage({ type: "error", text: "File must be under 10MB" }); return
     }
     setMessage(null)
     if (side === "front") setFrontFile(file)
@@ -372,7 +376,7 @@ function KycPageInner() {
             frontFile={frontFile} backFile={backFile} frontUrl={frontUrl} backUrl={backUrl}
             businessPermitFile={businessPermitFile} businessPermitUrl={businessPermitUrl}
             onDocTypeChange={setDocType} onDocNumberChange={setDocNumber}
-            onFileSelect={handleFileSelect} onBusinessPermitSelect={handleBusinessPermitSelect}
+            onFileSelect={handleFileSelect} onFileDirect={handleFileDirect} onBusinessPermitSelect={handleBusinessPermitSelect}
             onRemoveFile={(side) => side === "front" ? setFrontFile(null) : setBackFile(null)}
             onRemoveBusinessPermit={() => setBusinessPermitFile(null)}
             onStartCrop={setCropping} onCropComplete={handleCropComplete} onCancelCrop={() => setCropping(null)}

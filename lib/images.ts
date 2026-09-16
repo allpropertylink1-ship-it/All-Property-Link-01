@@ -9,13 +9,6 @@ export function optimizeImageUrl(url: string, width: number): string {
   if (url.includes("/uploads/") && url.includes("api.allpropertylink.co.ke")) {
     return url
   }
-  if (url.includes("res.cloudinary.com/")) {
-    const parts = url.split("/image/upload/")
-    if (parts.length === 2) {
-      const transform = `f_auto,q_auto,w_${Math.round(width)},dpr_auto`
-      return `${parts[0]}/image/upload/${transform}/${parts[1]}`
-    }
-  }
   if (url.includes("images.pexels.com/")) {
     try {
       const u = new URL(url)
@@ -51,10 +44,8 @@ export function toThumbUrl(url: string, fallbackWidth = 400): string {
     if (dot > 0) {
       const base = url.slice(0, dot)
       const ext = url.slice(dot)
-      // Thumb is always jpg/webp; keep original ext for fallback, but prefer jpg
+      // Thumb is always jpg/webp: .webp stays .webp, everything else .jpg
       const thumbExt = ext.toLowerCase() === ".webp" ? ".webp" : ".jpg"
-      const thumbBase = ext.toLowerCase() === ".webp" ? base : base
-      // If ext was .webp, thumb is .webp, else .jpg
       return `${base}-thumb${thumbExt}`
     }
   }

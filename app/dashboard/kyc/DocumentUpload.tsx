@@ -3,9 +3,10 @@
 
 import { useState } from "react"
 import { resolveImageUrl } from "@/lib/images";
-import { Upload, XCircle, FileText, Trash2 } from "@/components/ui/icons"
+import { XCircle, FileText, Trash2 } from "@/components/ui/icons"
 import PdfViewer from "@/components/kyc/PdfViewer"
 import ImageCropper from "@/components/kyc/ImageCropper"
+import DragDropUploader from "@/components/kyc/DragDropUploader"
 import { FormBanner } from "@/components/shared/FormFeedback"
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
   onDocTypeChange: (v: string) => void
   onDocNumberChange: (v: string) => void
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") => void
+  onFileDirect?: (file: File, side: "front" | "back") => void
   onBusinessPermitSelect: (e: React.ChangeEvent<HTMLInputElement>) => void
   onRemoveFile: (side: "front" | "back") => void
   onRemoveBusinessPermit: () => void
@@ -146,12 +148,21 @@ export function DocumentUpload(props: Props) {
                 {isPdf(props.frontUrl) ? <PdfViewer url={resolveImageUrl(props.frontUrl) ?? props.frontUrl} compact /> : <img src={resolveImageUrl(props.frontUrl) ?? undefined} alt="" className="h-44 w-full rounded-lg object-cover" />}
               </div>
             ) : (
-              <label className="flex h-44 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background hover:border-primary/50 hover:bg-primary/5 transition-colors">
-                <Upload className="mb-2 h-6 w-6 text-muted" />
-                <span className="text-sm text-muted">Upload front image</span>
-                <span className="mt-1 text-xs text-muted">JPG or PNG, max 10MB</span>
-                <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={e => handleFileSelect(e, "front")} className="hidden" />
-              </label>
+              <DragDropUploader
+                label="front image"
+                hint="JPG or PNG, max 10MB — drag & drop, click, or camera"
+                onFile={(f) => {
+                  if (props.onFileDirect) props.onFileDirect(f, "front")
+                  else {
+                    const dt = new DataTransfer()
+                    dt.items.add(f)
+                    const input = document.createElement("input")
+                    input.files = dt.files
+                    handleFileSelect({ target: input } as unknown as React.ChangeEvent<HTMLInputElement>, "front")
+                  }
+                }}
+                onError={(t) => setLocalMsg({ type: "error", text: t })}
+              />
             )}
           </div>
           <div>
@@ -172,12 +183,21 @@ export function DocumentUpload(props: Props) {
                 {isPdf(props.backUrl) ? <PdfViewer url={resolveImageUrl(props.backUrl) ?? props.backUrl} compact /> : <img src={resolveImageUrl(props.backUrl) ?? undefined} alt="" className="h-44 w-full rounded-lg object-cover" />}
               </div>
             ) : (
-              <label className="flex h-44 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background hover:border-primary/50 hover:bg-primary/5 transition-colors">
-                <Upload className="mb-2 h-6 w-6 text-muted" />
-                <span className="text-sm text-muted">Upload back image</span>
-                <span className="mt-1 text-xs text-muted">JPG or PNG</span>
-                <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={e => handleFileSelect(e, "back")} className="hidden" />
-              </label>
+              <DragDropUploader
+                label="back image"
+                hint="JPG or PNG — drag & drop, click, or camera"
+                onFile={(f) => {
+                  if (props.onFileDirect) props.onFileDirect(f, "back")
+                  else {
+                    const dt = new DataTransfer()
+                    dt.items.add(f)
+                    const input = document.createElement("input")
+                    input.files = dt.files
+                    handleFileSelect({ target: input } as unknown as React.ChangeEvent<HTMLInputElement>, "back")
+                  }
+                }}
+                onError={(t) => setLocalMsg({ type: "error", text: t })}
+              />
             )}
           </div>
         </div>
