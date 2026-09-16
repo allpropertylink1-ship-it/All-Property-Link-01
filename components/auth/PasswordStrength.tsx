@@ -41,13 +41,21 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
   const metCount = requirements.filter((r) => r.test(password)).length;
 
   return (
-    <div className="mt-4 space-y-3">
+    <div className="mt-3 space-y-3 rounded-xl bg-surface-secondary p-3.5">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
+          Security requirements
+        </p>
+        <span className="text-xs font-semibold text-text-secondary">
+          {metCount} / {requirements.length} met
+        </span>
+      </div>
       <div className="space-y-1.5">
-        <div className="flex gap-1">
+        <div className="flex gap-1" aria-hidden="true">
           {[0, 1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className={`h-2 flex-1 rounded-full transition-all duration-300 ${
+              className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
                 i <= score ? color.bar : "bg-border"
               }`}
               style={{
@@ -85,23 +93,20 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
       )}
 
       <div className="space-y-1.5">
-        <p className="text-xs font-medium text-text-secondary">
-          Requirements ({metCount}/{requirements.length})
-        </p>
         {requirements.map((req) => {
           const met = req.test(password);
           return (
             <div key={req.label} className="flex items-center gap-2">
               {met ? (
-                <svg className="h-3.5 w-3.5 shrink-0 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                <svg className="h-3.5 w-3.5 shrink-0 text-success-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               ) : (
-                <svg className="h-3.5 w-3.5 shrink-0 text-text-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <svg className="h-3.5 w-3.5 shrink-0 text-text-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <circle cx="12" cy="12" r="10" />
                 </svg>
               )}
-              <span className={`text-xs ${met ? "text-green-600 font-medium" : "text-text-secondary"}`}>
+              <span className={`text-xs ${met ? "font-medium text-success-600" : "text-text-secondary"}`}>
                 {req.label}
               </span>
             </div>

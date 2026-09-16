@@ -73,20 +73,21 @@ export default function CoreDocumentForm({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-border bg-surface p-6">
-        <h2 className="mb-4 text-lg font-semibold text-foreground">
+      <section aria-labelledby="core-doc-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <h2 id="core-doc-heading" className="font-heading text-base font-semibold text-text-primary">
           {isReSubmit ? "Re-submit Core Document" : "Core Identity Document"}
-          <span className="ml-2 text-sm font-normal text-muted">(Required)</span>
         </h2>
+        <p className="mb-4 mt-0.5 text-sm text-text-secondary">Required — front image plus document number.</p>
 
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Document type</label>
+              <label className="mb-1 block text-sm font-medium text-text-primary" htmlFor="coreDocType">Document type</label>
               <select
+                id="coreDocType"
                 value={documentType}
                 onChange={e => { onDocumentTypeChange(e.target.value) }}
-                className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                className="block min-h-[44px] w-full rounded-lg border border-border bg-surface px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30"
               >
                 {["NATIONAL_ID", "DRIVERS_LICENSE", "PASSPORT"].map(t => (
                   <option key={t} value={t}>{docTypeLabels[t]}</option>
@@ -94,19 +95,20 @@ export default function CoreDocumentForm({
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Document number</label>
+              <label className="mb-1 block text-sm font-medium text-text-primary" htmlFor="coreDocNumber">Document number</label>
               <input
+                id="coreDocNumber"
                 value={documentNumber}
                 onChange={e => onDocumentNumberChange(e.target.value)}
                 placeholder="Enter your ID number"
-                className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                className="block min-h-[44px] w-full rounded-lg border border-border bg-surface px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30"
               />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Front image</label>
+              <span className="mb-1 block text-sm font-medium text-text-primary" id="core-front-label">Front image</span>
               <UploadZone
                 preview={frontPreview}
                 fileUrl={frontImageUrl}
@@ -121,9 +123,9 @@ export default function CoreDocumentForm({
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">
-                Back image <span className="text-xs text-muted">(optional)</span>
-              </label>
+              <span className="mb-1 block text-sm font-medium text-text-primary" id="core-back-label">
+                Back image <span className="text-xs font-normal text-text-secondary">(optional)</span>
+              </span>
               <UploadZone
                 preview={backPreview}
                 fileUrl={backImageUrl}
@@ -157,13 +159,13 @@ export default function CoreDocumentForm({
             <>
               {frontImageUrl && !uploadingFront && !croppingFor && (
                 <div className="mt-4">
-                  <h3 className="text-sm font-medium text-foreground">Front Image</h3>
+                  <h3 className="font-heading text-sm font-semibold text-text-primary">Front Image</h3>
                   {frontImageUrl.match(/\.pdf/i) ? (
                     <PdfViewer url={frontImageUrl} label="Front" compact />
                   ) : (
                     <div className="space-y-2">
-                      <img src={resolveImageUrl(frontImageUrl) ?? undefined} alt="Front ID" className="h-32 w-full rounded object-cover" />
-                      <button onClick={handleRemoveFront} className="text-xs text-red-500 hover:text-red-600">
+                      <img src={resolveImageUrl(frontImageUrl) ?? undefined} alt="Front ID" className="h-32 w-full rounded-xl object-cover border border-border" />
+                      <button type="button" onClick={handleRemoveFront} className="touch-target rounded-lg px-2 py-1 text-xs font-medium text-error-600 hover:bg-error-50">
                         Remove Front Image
                       </button>
                     </div>
@@ -172,13 +174,13 @@ export default function CoreDocumentForm({
               )}
               {backImageUrl && !uploadingBack && !croppingFor && (
                 <div className="mt-4">
-                  <h3 className="text-sm font-medium text-foreground">Back Image</h3>
+                  <h3 className="font-heading text-sm font-semibold text-text-primary">Back Image</h3>
                   {backImageUrl.match(/\.pdf/i) ? (
                     <PdfViewer url={backImageUrl} label="Back" compact />
                   ) : (
                     <div className="space-y-2">
-                      <img src={resolveImageUrl(backImageUrl) ?? undefined} alt="Back ID" className="h-32 w-full rounded object-cover" />
-                      <button onClick={handleRemoveBack} className="text-xs text-red-500 hover:text-red-600">
+                      <img src={resolveImageUrl(backImageUrl) ?? undefined} alt="Back ID" className="h-32 w-full rounded-xl object-cover border border-border" />
+                      <button type="button" onClick={handleRemoveBack} className="touch-target rounded-lg px-2 py-1 text-xs font-medium text-error-600 hover:bg-error-50">
                         Remove Back Image
                       </button>
                     </div>
@@ -188,7 +190,7 @@ export default function CoreDocumentForm({
             </>
           )}
         </div>
-      </div>
+      </section>
     </div>
   )
 }

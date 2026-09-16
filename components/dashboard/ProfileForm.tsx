@@ -204,152 +204,172 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const kyc = kycDisplay[kycStatus as keyof typeof kycDisplay] || kycDisplay.NONE;
 
   return (
-    <div className="space-y-8">
-{accountDeleted ? (
+    <div className="space-y-6">
+      {accountDeleted ? (
         <FormBanner variant="success">
           Your account and everything linked to it — listings, services, KYC documents, and reviews — has been permanently deleted. You can register again any time with the same email. Taking you home…
         </FormBanner>
       ) : (
-message && (
-        <FormBanner variant={message.type === "success" ? "success" : "error"}>
-          {message.text}
-        </FormBanner>
-      )
+        message && (
+          <FormBanner variant={message.type === "success" ? "success" : "error"}>
+            {message.text}
+          </FormBanner>
+        )
       )}
 
-      <div className="flex min-w-0 items-center gap-4 min-[375px]:gap-6">
-        <div className="relative shrink-0">
-          <label className="block cursor-pointer">
-            {passportPhotoUrl ? (
-              <img src={resolveImageUrl(passportPhotoUrl) ?? undefined} alt="" className="h-20 w-20 rounded-full object-cover ring-2 ring-primary/20" />
-            ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-50 text-2xl font-bold text-primary-600">
-                {user.firstName[0]}
-                {user.lastName[0]}
+      {/* Stitch edit-profile identity header */}
+      <section aria-labelledby="profile-identity-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <p className="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-secondary">
+          Profile identity
+        </p>
+        <div className="mt-3 flex min-w-0 items-center gap-4 min-[375px]:gap-6">
+          <div className="relative shrink-0">
+            <label className="block cursor-pointer">
+              <span className="sr-only">Change profile photo</span>
+              {passportPhotoUrl ? (
+                <img src={resolveImageUrl(passportPhotoUrl) ?? undefined} alt="" className="h-20 w-20 rounded-full object-cover ring-2 ring-primary-600/20" />
+              ) : (
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-50 text-2xl font-bold text-primary-600" aria-hidden="true">
+                  {user.firstName[0]}
+                  {user.lastName[0]}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-primary-600 text-white shadow transition-colors hover:bg-primary-700" aria-hidden="true">
+                {passportUploading ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
               </div>
-            )}
-            <div className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-primary-600 text-white shadow hover:bg-primary-700 transition-colors">
-              {passportUploading ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
+              <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handlePassportSelect} className="hidden" disabled={passportUploading} aria-label="Upload profile photo" />
+            </label>
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 id="profile-identity-heading" className="truncate font-heading text-lg font-semibold text-text-primary min-[375px]:text-xl">
+              {user.firstName} {user.lastName}
+            </h2>
+            <p className="truncate text-sm text-text-secondary">{user.email}</p>
+            <div className="mt-1 flex items-center gap-2">
+              <kyc.icon size={14} className={kyc.color} />
+              <span className={cn("text-xs font-medium", kyc.color)}>KYC: {kyc.label}</span>
             </div>
-            <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handlePassportSelect} className="hidden" disabled={passportUploading} />
-          </label>
-        </div>
-        <div className="min-w-0 flex-1">
-          <h2 className="truncate font-heading text-lg font-semibold text-text-primary min-[375px]:text-xl">
-            {user.firstName} {user.lastName}
-          </h2>
-          <p className="text-sm text-text-secondary">{user.email}</p>
-          <div className="mt-1 flex items-center gap-2">
-            <kyc.icon size={14} className={kyc.color} />
-            <span className={cn("text-xs", kyc.color)}>KYC: {kyc.label}</span>
-          </div>
-          <p className="mt-0.5 text-xs text-text-secondary">Click the camera icon to change your profile photo</p>
-        </div>
-      </div>
-
-      {cropping && passportFile && (
-        <ImageCropper
-          imageUrl={URL.createObjectURL(passportFile)}
-          onCropComplete={handleCropComplete}
-          onCancel={() => { setCropping(false); setPassportFile(null); }}
-          sideLabel="Passport Photo"
-        />
-      )}
-
-      <form onSubmit={handleProfileSubmit} onChange={() => setIsProfileDirty(true)} className="space-y-6">
-        <h3 className="font-heading text-lg font-semibold text-text-primary">
-          Personal Information
-        </h3>
-
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="firstName">First name</Label>
-            <Input
-              id="firstName"
-              name="firstName"
-              defaultValue={user.firstName}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Last name</Label>
-            <Input
-              id="lastName"
-              name="lastName"
-              defaultValue={user.lastName}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              defaultValue={user.email || ""}
-              disabled
-              className="cursor-not-allowed opacity-60"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              name="phone"
-              type="tel"
-              defaultValue={user.phone || ""}
-              placeholder="+254 7XX XXX XXX"
-            />
+            <p className="mt-0.5 text-xs text-text-secondary">Select the camera badge to change your profile photo</p>
           </div>
         </div>
 
-        <h3 className="font-heading text-lg font-semibold text-text-primary">
-          Address
-        </h3>
-
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
-            <Input
-              id="address"
-              name="address"
-              defaultValue={user.address || ""}
-              placeholder="Street address"
+        {cropping && passportFile && (
+          <div className="mt-4">
+            <ImageCropper
+              imageUrl={URL.createObjectURL(passportFile)}
+              onCropComplete={handleCropComplete}
+              onCancel={() => { setCropping(false); setPassportFile(null); }}
+              sideLabel="Passport Photo"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="city">City</Label>
-            <Input
-              id="city"
-              name="city"
-              defaultValue={user.city || ""}
-              placeholder="e.g., Nairobi"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="location">Region / County</Label>
-            <Input
-              id="location"
-              name="location"
-              defaultValue={user.location || ""}
-              placeholder="e.g., Nairobi County"
-            />
-          </div>
-        </div>
+        )}
+      </section>
 
-        <div className="flex justify-end">
-          <Button type="submit" disabled={profileLoading || !isProfileDirty} title={!isProfileDirty ? "No changes to save" : undefined}>
-            <Save size={16} className="mr-2" />
-            {profileLoading ? "Saving..." : "Save changes"}
-          </Button>
-        </div>
-      </form>
+      {/* Stitch section: personal information */}
+      <section aria-labelledby="profile-personal-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <form onSubmit={handleProfileSubmit} onChange={() => setIsProfileDirty(true)} className="space-y-6">
+          <div>
+            <h3 id="profile-personal-heading" className="font-heading text-base font-semibold text-text-primary">
+              Personal Information
+            </h3>
+            <p className="mt-0.5 text-sm text-text-secondary">How clients reach and recognise you.</p>
+          </div>
 
-      <div className="border-t border-border pt-6">
-        <h3 className="mb-4 font-heading text-lg font-semibold text-text-primary">
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="firstName">First name</Label>
+              <Input
+                id="firstName"
+                name="firstName"
+                defaultValue={user.firstName}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Last name</Label>
+              <Input
+                id="lastName"
+                name="lastName"
+                defaultValue={user.lastName}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                defaultValue={user.email || ""}
+                disabled
+                className="cursor-not-allowed opacity-60"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                defaultValue={user.phone || ""}
+                placeholder="+254 7XX XXX XXX"
+              />
+            </div>
+          </div>
+
+          <div className="border-t border-border pt-6">
+            <h3 className="font-heading text-base font-semibold text-text-primary">
+              Address
+            </h3>
+            <p className="mb-4 mt-0.5 text-sm text-text-secondary">Where you operate from.</p>
+
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  name="address"
+                  defaultValue={user.address || ""}
+                  placeholder="Street address"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  name="city"
+                  defaultValue={user.city || ""}
+                  placeholder="e.g., Nairobi"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="location">Region / County</Label>
+                <Input
+                  id="location"
+                  name="location"
+                  defaultValue={user.location || ""}
+                  placeholder="e.g., Nairobi County"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end border-t border-border pt-6">
+            <Button type="submit" disabled={profileLoading || !isProfileDirty} aria-busy={profileLoading} title={!isProfileDirty ? "No changes to save" : undefined}>
+              <Save size={16} className="mr-2" />
+              {profileLoading ? "Saving..." : "Save changes"}
+            </Button>
+          </div>
+        </form>
+      </section>
+
+      {/* Stitch section: account security */}
+      <section aria-labelledby="profile-security-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <h3 id="profile-security-heading" className="font-heading text-base font-semibold text-text-primary">
           Account Security
         </h3>
+        <p className="mb-4 mt-0.5 text-sm text-text-secondary">Keep sign-in safe with a strong password.</p>
 
         {showPasswordForm ? (
-          <form onSubmit={handlePasswordChange} onChange={() => setIsPasswordDirty(true)} className="space-y-4 rounded-lg border border-border bg-surface-secondary p-4">
+          <form onSubmit={handlePasswordChange} onChange={() => setIsPasswordDirty(true)} className="space-y-4 rounded-xl border border-border bg-surface-secondary p-4">
             <div className="space-y-2">
               <Label htmlFor="currentPassword">Current password</Label>
               <Input
@@ -380,7 +400,7 @@ message && (
               />
             </div>
             <div className="flex gap-2">
-              <Button type="submit" disabled={passwordLoading || !isPasswordDirty} title={!isPasswordDirty ? "Fill in all password fields" : undefined}>
+              <Button type="submit" disabled={passwordLoading || !isPasswordDirty} aria-busy={passwordLoading} title={!isPasswordDirty ? "Fill in all password fields" : undefined}>
                 {passwordLoading ? "Changing..." : "Change password"}
               </Button>
               <Button
@@ -402,13 +422,14 @@ message && (
             Change password
           </Button>
         )}
-      </div>
+      </section>
 
-      <div className="border-t border-border pt-6">
-        <h3 className="mb-2 font-heading text-lg font-semibold text-text-primary">
+      {/* Stitch section: danger zone */}
+      <section aria-labelledby="profile-danger-heading" className="rounded-xl border border-error-200 bg-surface p-5 sm:p-6">
+        <h3 id="profile-danger-heading" className="font-heading text-base font-semibold text-text-primary">
           Danger Zone
         </h3>
-        <p className="mb-4 text-sm text-text-secondary">
+        <p className="mb-4 mt-0.5 text-sm text-text-secondary">
           Irreversible actions on your account
         </p>
 
@@ -435,7 +456,7 @@ message && (
           inputType="text"
           onConfirmWithInput={handleDeleteAccount}
         />
-      </div>
+      </section>
     </div>
   );
 }

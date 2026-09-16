@@ -97,19 +97,30 @@ export default async function ServiceDetailPage({ params }: Props) {
           {service.user && (
             <div className="rounded-xl border border-border bg-surface p-5">
               <div className="mb-4 flex items-center gap-3.5">
-                {service.user.businessLogo ? (
-                  <Image
-                    src={resolveImageUrl(service.user.businessLogo) as string} unoptimized
-                    alt={service.user.companyName || "Business logo"}
-                    width={48}
-                    height={48}
-                    className="h-12 w-12 shrink-0 rounded-full border border-border object-cover"
-                  />
-                ) : (
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-border bg-primary-50">
-                    <Briefcase size={20} className="text-primary-500" />
-                  </div>
-                )}
+                <div className="relative shrink-0">
+                  {service.user.businessLogo ? (
+                    <Image
+                      src={resolveImageUrl(service.user.businessLogo) as string} unoptimized
+                      alt={service.user.companyName || "Business logo"}
+                      width={48}
+                      height={48}
+                      className="h-12 w-12 rounded-full border border-border object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-primary-50">
+                      <Briefcase size={20} className="text-primary-500" />
+                    </div>
+                  )}
+                  <span
+                    aria-hidden
+                    className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent-500 text-white"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      <polyline points="9,12 11,14 15,10" />
+                    </svg>
+                  </span>
+                </div>
               </div>
 
               <div className="mb-3 min-w-0 space-y-0.5">
@@ -240,28 +251,28 @@ export default async function ServiceDetailPage({ params }: Props) {
               <div className="flex flex-wrap gap-2">
                 {service.user.phone && (
                   <>
-                    <a
-                      href={`https://wa.me/${service.user.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in ${service.title}`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 rounded-lg bg-[#25D366] px-3 py-2 text-xs font-semibold text-white"
-                    >
-                      <MessageCircle size={14} />
-                      WhatsApp
-                    </a>
-                    <a
-                      href={`tel:${service.user.phone}`}
-                      className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-primary"
-                    >
-                      <Phone size={14} />
-                      Call
-                    </a>
+                      <a
+                        href={`https://wa.me/${service.user.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in ${service.title}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex min-h-touch items-center gap-1.5 rounded-lg bg-whatsapp px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-whatsapp-dark"
+                      >
+                        <MessageCircle size={14} />
+                        WhatsApp
+                      </a>
+                      <a
+                        href={`tel:${service.user.phone}`}
+                        className="flex min-h-touch items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
+                      >
+                        <Phone size={14} />
+                        Call
+                      </a>
                   </>
                 )}
                 {service.user.email && (
                   <a
                     href={`mailto:${service.user.email}`}
-                    className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-primary"
+                    className="flex min-h-touch items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
                   >
                     <Mail size={14} />
                     Email
@@ -305,14 +316,14 @@ export default async function ServiceDetailPage({ params }: Props) {
                         href={`https://wa.me/${service.user.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in ${service.title}`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1ebe5c]"
+                        className="flex min-h-touch w-full items-center justify-center gap-2 rounded-lg bg-whatsapp px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-whatsapp-dark"
                       >
                         <MessageCircle size={16} />
                         WhatsApp
                       </a>
                       <a
                         href={`tel:${service.user.phone}`}
-                        className="flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
+                        className="flex min-h-touch w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
                       >
                         <Phone size={16} className="shrink-0" />
                         {service.user.phone}

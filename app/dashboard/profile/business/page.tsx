@@ -295,15 +295,18 @@ function BusinessProfilePageInner() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <div className="mb-8">
-        <h1 className="font-heading text-2xl font-bold text-text-primary">Business Profile</h1>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <section aria-labelledby="business-profile-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <p className="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-secondary">
+          Service business
+        </p>
+        <h1 id="business-profile-heading" className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">Business Profile</h1>
         <p className="mt-1 text-sm text-text-secondary">
           View and update your business information.
         </p>
-      </div>
+      </section>
 
-      <div className="mb-6 rounded-lg border border-primary-200 bg-primary-50/50 px-4 py-3 text-sm text-primary-800">
+      <div className="rounded-xl border border-primary-200 bg-primary-50/50 px-4 py-3 text-sm text-primary-800">
         <p className="font-medium">Public Information</p>
         <p className="mt-1 text-primary-600">
           Information entered here will be visible to all All Property Link users viewing your profile, listings, and services.
@@ -311,232 +314,259 @@ function BusinessProfilePageInner() {
       </div>
 
 {error && (
-        <div className="mb-6">
+        <div>
           <FormBanner variant="error">{error}</FormBanner>
         </div>
       )}
 
       {success && (
-        <div className="mb-6">
+        <div>
           <FormBanner variant="success">
             Business profile updated successfully
           </FormBanner>
         </div>
       )}
 
-      <form className="space-y-6 rounded-xl border border-border bg-surface p-6" onSubmit={handleSave}>
+      <form className="space-y-6" onSubmit={handleSave} aria-label="Business profile">
+        {/* Stitch section: profile identity */}
+        <section aria-labelledby="biz-identity-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+          <h2 id="biz-identity-heading" className="font-heading text-base font-semibold text-text-primary">
+            Profile Identity
+          </h2>
+          <p className="mb-4 mt-0.5 text-sm text-text-secondary">Logo and photo clients see first.</p>
 
-        <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-primary">
+            <label className="block text-sm font-medium text-text-primary" htmlFor="bizCompanyName">
               Full name / Company Name <span className="text-error-500">*</span>
             </label>
             <input
+              id="bizCompanyName"
               type="text"
               value={form.companyName}
               onChange={(e) => updateField("companyName", e.target.value)}
               placeholder="Your full name or company name"
-              className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className="min-h-[44px] w-full rounded-lg border border-border bg-surface px-4 py-3 text-base text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
           </div>
 
-          <div className="flex items-center gap-4 justify-self-end">
-            <div className="min-w-0 text-right flex-1">
-              <h3 className="font-heading text-sm font-semibold text-text-primary">Business Logo</h3>
-              <p className="text-xs text-text-secondary">Appears on your listings & services</p>
-              <label className="mt-2 touch-target inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700">
-                {logoUploading ? (
-                  <><Loader2 size={14} className="animate-spin" /> Uploading...</>
+          <div className="mt-6 grid gap-6 sm:grid-cols-2">
+            <div className="flex items-center gap-4">
+              <div className="shrink-0">
+                {businessLogoUrl ? (
+                  <img src={resolveImageUrl(businessLogoUrl) ?? undefined} alt="Business logo" className="h-20 w-20 rounded-xl object-cover ring-2 ring-primary-600/20" />
                 ) : (
-                  <><Camera size={14} /> {businessLogoUrl ? "Change" : "Upload"}</>
-                )}
-                <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handleLogoUpload} className="hidden" disabled={logoUploading} />
-              </label>
-            </div>
-            <div className="shrink-0">
-              {businessLogoUrl ? (
-                <img src={resolveImageUrl(businessLogoUrl) ?? undefined} alt="Logo" className="h-28 w-28 rounded-xl object-cover ring-2 ring-primary/20" />
-              ) : (
-                <div className="flex h-28 w-28 items-center justify-center rounded-xl bg-primary-50 ring-2 ring-primary/10">
-                  <Building2 size={40} className="text-primary-400" />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-primary">
-              Contact Person <span className="text-error-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={form.contactPerson}
-              onChange={(e) => updateField("contactPerson", e.target.value)}
-              placeholder="Contact person name"
-              className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-            />
-          </div>
-
-          <div className="flex items-center gap-4 justify-self-end">
-            <div className="min-w-0 text-right flex-1">
-              <h3 className="font-heading text-sm font-semibold text-text-primary">Profile Photo</h3>
-              <p className="text-xs text-text-secondary">This photo appears on your public profile</p>
-              <div className="mt-2 flex flex-wrap justify-end gap-2">
-                <label className="touch-target inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700">
-                  {avatarUploading ? (
-                    <><Loader2 size={14} className="animate-spin" /> Uploading...</>
-                  ) : (
-                    <><Camera size={14} /> {businessProfilePhotoUrl ? "Change" : "Upload"}</>
-                  )}
-                  <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handleBusinessProfilePhotoUpload} className="hidden" disabled={avatarUploading} />
-                </label>
-                {businessProfilePhotoUrl && (
-                  <button
-                    type="button"
-                    onClick={handleRotatePhoto}
-                    disabled={avatarUploading}
-                    className="touch-target inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary disabled:opacity-50"
-                    title="Rotate 90° clockwise"
-                  >
-                    <RotateCw size={14} /> Rotate
-                  </button>
+                  <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-primary-50 ring-2 ring-primary-600/10">
+                    <Building2 size={32} className="text-primary-400" />
+                  </div>
                 )}
               </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-heading text-sm font-semibold text-text-primary">Business Logo</h3>
+                <p className="text-xs text-text-secondary">Appears on your listings & services</p>
+                <label className="touch-target mt-2 inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700">
+                  {logoUploading ? (
+                    <><Loader2 size={14} className="animate-spin" /> Uploading...</>
+                  ) : (
+                    <><Camera size={14} /> {businessLogoUrl ? "Change" : "Upload"}</>
+                  )}
+                  <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handleLogoUpload} className="hidden" disabled={logoUploading} aria-label="Upload business logo" />
+                </label>
+              </div>
             </div>
-            <div className="shrink-0">
-              {businessProfilePhotoUrl ? (
-                <img src={resolveImageUrl(businessProfilePhotoUrl) ?? undefined} alt="" className="h-20 w-20 rounded-full object-cover ring-2 ring-primary/20" />
-              ) : (
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-50 text-2xl font-bold text-primary-600">
-                  <User size={28} />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
 
-        <hr className="border-border" />
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-text-primary">
-            Category <span className="text-error-500">*</span>
-          </label>
-          <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2">
-            {categories.map((cat) => (
-              <button
-                key={cat.value}
-                type="button"
-                onClick={() => {
-                  updateField("category", cat.value)
-                  setForm((prev) => ({ ...prev, specialties: [] }))
-                }}
-                className={cn(
-                  "rounded-lg border px-4 py-3 text-sm font-medium transition-colors",
-                  form.category === cat.value
-                    ? "border-primary-500 bg-primary-50 text-primary-600"
-                    : "border-border text-text-secondary hover:border-primary-300"
+            <div className="flex items-center gap-4">
+              <div className="shrink-0">
+                {businessProfilePhotoUrl ? (
+                  <img src={resolveImageUrl(businessProfilePhotoUrl) ?? undefined} alt="Profile" className="h-20 w-20 rounded-full object-cover ring-2 ring-primary-600/20" />
+                ) : (
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-50 text-2xl font-bold text-primary-600">
+                    <User size={28} />
+                  </div>
                 )}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {selectedSpecialties.length > 0 && (
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-primary">
-              Select your specialties <span className="text-error-500">*</span>
-              <span className="ml-2 text-xs font-normal text-text-secondary">(tap to select multiple)</span>
-            </label>
-            <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:grid-cols-3">
-              {selectedSpecialties.map((spec) => {
-                const isSelected = form.specialties.includes(spec.value);
-                return (
-                  <button
-                    key={spec.value}
-                    type="button"
-                    onClick={() => toggleSpecialty(spec.value)}
-                    className={cn(
-                      "relative flex items-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all",
-                      isSelected
-                        ? "border-accent-500 bg-accent-50 text-accent-700 shadow-sm"
-                        : "border-border bg-surface text-text-secondary hover:border-accent-500 hover:bg-accent-50/50"
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-heading text-sm font-semibold text-text-primary">Profile Photo</h3>
+                <p className="text-xs text-text-secondary">This photo appears on your public profile</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <label className="touch-target inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700">
+                    {avatarUploading ? (
+                      <><Loader2 size={14} className="animate-spin" /> Uploading...</>
+                    ) : (
+                      <><Camera size={14} /> {businessProfilePhotoUrl ? "Change" : "Upload"}</>
                     )}
-                  >
-                    <div className={cn(
-                      "flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors",
-                      isSelected
-                        ? "border-accent-500 bg-accent-500 text-white"
-                        : "border-border bg-surface"
-                    )}>
-                      {isSelected && <Check className="h-3.5 w-3.5" />}
-                    </div>
-                    <span className="text-left leading-tight">{spec.group}</span>
-                  </button>
-                );
-              })}
+                    <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handleBusinessProfilePhotoUpload} className="hidden" disabled={avatarUploading} aria-label="Upload profile photo" />
+                  </label>
+                  {businessProfilePhotoUrl && (
+                    <button
+                      type="button"
+                      onClick={handleRotatePhoto}
+                      disabled={avatarUploading}
+                      className="touch-target inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary disabled:opacity-50"
+                      title="Rotate 90° clockwise"
+                    >
+                      <RotateCw size={14} /> Rotate
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        )}
+        </section>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-text-primary">Website (optional)</label>
-          <input
-            type="url"
-            value={form.website}
-            onChange={(e) => updateField("website", e.target.value)}
-            placeholder="https://your-website.com"
-            className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-          />
-        </div>
+        {/* Stitch section: business details */}
+        <section aria-labelledby="biz-details-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+          <h2 id="biz-details-heading" className="font-heading text-base font-semibold text-text-primary">
+            Business Details
+          </h2>
+          <p className="mb-4 mt-0.5 text-sm text-text-secondary">Contact person, category, and specialties.</p>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-primary">Location</label>
-            <input
-              type="text"
-              value={form.location}
-              onChange={(e) => updateField("location", e.target.value)}
-              placeholder="e.g., Nairobi"
-              className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-            />
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-text-primary" htmlFor="bizContactPerson">
+                Contact Person <span className="text-error-500">*</span>
+              </label>
+              <input
+                id="bizContactPerson"
+                type="text"
+                value={form.contactPerson}
+                onChange={(e) => updateField("contactPerson", e.target.value)}
+                placeholder="Contact person name"
+                className="min-h-[44px] w-full rounded-lg border border-border bg-surface px-4 py-3 text-base text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-text-primary" htmlFor="bizWebsite">Website (optional)</label>
+              <input
+                id="bizWebsite"
+                type="url"
+                value={form.website}
+                onChange={(e) => updateField("website", e.target.value)}
+                placeholder="https://your-website.com"
+                className="min-h-[44px] w-full rounded-lg border border-border bg-surface px-4 py-3 text-base text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-primary">Estate / Sub-location</label>
-            <input
-              type="text"
-              value={form.estateSubLocation}
-              onChange={(e) => updateField("estateSubLocation", e.target.value)}
-              placeholder="e.g., Westlands"
-              className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-            />
-          </div>
-        </div>
 
-        <div className="flex justify-end border-t border-border pt-6">
-          <button
- type="submit"
-            disabled={loading || !isDirty}
-            aria-busy={loading}
-            title={!isDirty ? "No changes to save" : undefined}
-            className="touch-target flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {loading ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save size={16} />
-                Save changes
-              </>
-            )}
-          </button>
-        </div>
+          <div className="mt-6 space-y-2">
+            <span className="block text-sm font-medium text-text-primary" id="bizCategoryLabel">
+              Category <span className="text-error-500">*</span>
+            </span>
+            <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2" role="group" aria-labelledby="bizCategoryLabel">
+              {categories.map((cat) => (
+                <button
+                  key={cat.value}
+                  type="button"
+                  aria-pressed={form.category === cat.value}
+                  onClick={() => {
+                    updateField("category", cat.value)
+                    setForm((prev) => ({ ...prev, specialties: [] }))
+                  }}
+                  className={cn(
+                    "touch-target rounded-lg border px-4 py-3 text-sm font-medium transition-colors",
+                    form.category === cat.value
+                      ? "border-primary-500 bg-primary-50 text-primary-600"
+                      : "border-border text-text-secondary hover:border-primary-300"
+                  )}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {selectedSpecialties.length > 0 && (
+            <div className="mt-6 space-y-2">
+              <span className="block text-sm font-medium text-text-primary" id="bizSpecialtiesLabel">
+                Select your specialties <span className="text-error-500">*</span>
+                <span className="ml-2 text-xs font-normal text-text-secondary">(tap to select multiple)</span>
+              </span>
+              <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:grid-cols-3" role="group" aria-labelledby="bizSpecialtiesLabel">
+                {selectedSpecialties.map((spec) => {
+                  const isSelected = form.specialties.includes(spec.value);
+                  return (
+                    <button
+                      key={spec.value}
+                      type="button"
+                      aria-pressed={isSelected}
+                      onClick={() => toggleSpecialty(spec.value)}
+                      className={cn(
+                        "touch-target relative flex items-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all",
+                        isSelected
+                          ? "border-accent-500 bg-accent-50 text-accent-700 shadow-sm"
+                          : "border-border bg-surface text-text-secondary hover:border-accent-500 hover:bg-accent-50/50"
+                      )}
+                    >
+                      <span className={cn(
+                        "flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors",
+                        isSelected
+                          ? "border-accent-500 bg-accent-500 text-white"
+                          : "border-border bg-surface"
+                      )} aria-hidden="true">
+                        {isSelected && <Check className="h-3.5 w-3.5" />}
+                      </span>
+                      <span className="text-left leading-tight">{spec.group}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* Stitch section: operating locations */}
+        <section aria-labelledby="biz-location-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+          <h2 id="biz-location-heading" className="font-heading text-base font-semibold text-text-primary">
+            Operating Locations
+          </h2>
+          <p className="mb-4 mt-0.5 text-sm text-text-secondary">Where clients can find and hire you.</p>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-text-primary" htmlFor="bizLocation">Location</label>
+              <input
+                id="bizLocation"
+                type="text"
+                value={form.location}
+                onChange={(e) => updateField("location", e.target.value)}
+                placeholder="e.g., Nairobi"
+                className="min-h-[44px] w-full rounded-lg border border-border bg-surface px-4 py-3 text-base text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-text-primary" htmlFor="bizEstate">Estate / Sub-location</label>
+              <input
+                id="bizEstate"
+                type="text"
+                value={form.estateSubLocation}
+                onChange={(e) => updateField("estateSubLocation", e.target.value)}
+                placeholder="e.g., Westlands"
+                className="min-h-[44px] w-full rounded-lg border border-border bg-surface px-4 py-3 text-base text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              />
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-end border-t border-border pt-6">
+            <button
+              type="submit"
+              disabled={loading || !isDirty}
+              aria-busy={loading}
+              title={!isDirty ? "No changes to save" : undefined}
+              className="touch-target flex min-h-[44px] items-center gap-2 rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save size={16} />
+                  Save changes
+                </>
+              )}
+            </button>
+          </div>
+        </section>
       </form>
     </div>
   )

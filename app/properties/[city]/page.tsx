@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
 import CityPageClient from "@/components/property/CityPageClient";
 import { getCities } from "@/lib/services/property";
 import { slugifyCity } from "@/lib/seo";
@@ -28,5 +29,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default function CityPage({ params, searchParams }: Props) {
+  if (searchParams.type === "LAND" || searchParams.propertyType === "LAND") {
+    permanentRedirect(`/land/${params.city}`);
+  }
   return <CityPageClient city={params.city} searchParams={searchParams} />;
 }

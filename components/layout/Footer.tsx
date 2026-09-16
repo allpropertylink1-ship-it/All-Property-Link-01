@@ -58,7 +58,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/properties?type=LAND"
+                  href="/land"
                   className="touch-target inline-block py-1.5 transition-colors hover:text-primary"
                 >
                   Plots & Land

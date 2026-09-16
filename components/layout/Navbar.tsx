@@ -15,7 +15,7 @@ const navLinks = [
   { href: "/browse", label: "Browse" },
   { href: "/properties", label: "Properties" },
   { href: "/services", label: "Services" },
-  { href: "/properties?type=LAND", label: "Plots & Land" },
+  { href: "/land", label: "Plots & Land" },
   { href: "/aplreps", label: "Reps" },
   { href: "/about", label: "About" },
 ]

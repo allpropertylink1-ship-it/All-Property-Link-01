@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { slugifyCity } from "@/lib/seo";
 
-export default function PropertyBreadcrumbs({ city, title }: { city: string; title: string }) {
+export default function PropertyBreadcrumbs({ city, title, basePath = "/properties", baseLabel = "Properties" }: { city: string; title: string; basePath?: string; baseLabel?: string }) {
   return (
     <nav aria-label="Breadcrumb" className="mx-auto max-w-7xl px-4 pt-4 sm:pt-5">
       <ol className="flex flex-wrap items-center gap-1.5 text-xs text-text-secondary">
@@ -10,11 +10,11 @@ export default function PropertyBreadcrumbs({ city, title }: { city: string; tit
         </li>
         <li aria-hidden="true">/</li>
         <li>
-          <Link href="/properties" className="transition-colors hover:text-primary-600">Properties</Link>
+          <Link href={basePath} className="transition-colors hover:text-primary-600">{baseLabel}</Link>
         </li>
         <li aria-hidden="true">/</li>
         <li>
-          <Link href={`/properties/${slugifyCity(city)}`} className="capitalize transition-colors hover:text-primary-600">
+          <Link href={`${basePath}/${slugifyCity(city)}`} className="capitalize transition-colors hover:text-primary-600">
             {city}
           </Link>
         </li>

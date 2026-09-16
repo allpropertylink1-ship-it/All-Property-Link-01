@@ -19,9 +19,10 @@ function toProfileRows(services: ServiceListingCard[]): ProfileRow[] {
 export default async function HomePage() {
   // Server-side fetches cached by ISR (revalidate: 60) — embedded in HTML so
   // the browser renders cards immediately instead of a client-side waterfall.
-  const [saleRent, airbnbs, fundis, providers] = await Promise.all([
+  const [saleRent, airbnbs, land, fundis, providers] = await Promise.all([
     getProperties({ pageSize: 6 }),
     getProperties({ purpose: "FOR_RENT_SHORT_TERM", pageSize: 6 }),
+    getProperties({ propertyType: "LAND", pageSize: 3 }),
     getServiceListings({ type: "FUNDI", limit: "6" }),
     getServiceListings({ type: "SERVICE_PROVIDER", limit: "6" }),
   ])
@@ -30,6 +31,7 @@ export default async function HomePage() {
     <HomePageClient
       saleRent={saleRent.properties}
       airbnbs={airbnbs.properties}
+      land={land.properties}
       fundis={toProfileRows(fundis.services)}
       providers={toProfileRows(providers.services)}
     />

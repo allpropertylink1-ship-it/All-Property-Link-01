@@ -3,7 +3,9 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { PasswordToggle } from "./PasswordToggle"
+import { AuthAssurance, AuthSubmitButton, InputLeadingIcon, stitchInputWithIconClass } from "./stitch-auth"
 import { FormBanner } from "@/components/shared/FormFeedback"
+import { BadgeCheck } from "@/components/ui/icons"
 
 interface Props {
   onForgotPassword?: () => void
@@ -43,68 +45,73 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2.5">
-      {error && (
-        <FormBanner variant="error">{error}</FormBanner>
-      )}
-      <div>
-        <label htmlFor="agentCode" className="block text-sm font-medium text-text-primary">
-          APL Representative Code
-        </label>
-        <input
-          id="agentCode"
-          name="agentCode"
-          type="text"
-          required
-          autoComplete="off"
-          className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-          style={{ fontSize: "16px" }}
-          placeholder="APL-XXX-000-00/00"
-        />
-      </div>
-      <div>
-        <label htmlFor="agent-password" className="block text-sm font-medium text-text-primary">
-          Password
-        </label>
-        <div className="mt-1">
-          <PasswordToggle
-            id="agent-password"
-            name="password"
-            autoComplete="current-password"
-            required
-            placeholder="Enter your password"
-          />
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            className="rounded-sm border border-border bg-surface text-primary-600 focus:ring-primary focus:ring-2"
-          />
-          <span className="text-sm text-text-secondary">Remember me</span>
-        </label>
-        {onForgotPassword && (
-          <button
-            type="button"
-            onClick={onForgotPassword}
-            className="text-sm text-primary-600 hover:text-primary-700 transition-colors"
-          >
-            Forgot password?
-          </button>
+    <div className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <FormBanner variant="error">{error}</FormBanner>
         )}
-      </div>
+        <div>
+          <label htmlFor="agentCode" className="block text-sm font-semibold text-text-primary">
+            Representative Email or Agent ID
+          </label>
+          <div className="relative">
+            <InputLeadingIcon icon={BadgeCheck} />
+            <input
+              id="agentCode"
+              name="agentCode"
+              type="text"
+              required
+              autoComplete="off"
+              aria-label="Representative Email or Agent ID"
+              className={stitchInputWithIconClass}
+              style={{ fontSize: "16px" }}
+              placeholder="e.g. REP-NAI-4028 or rep.name@example.co.ke"
+            />
+          </div>
+        </div>
+        <div>
+          <label htmlFor="agent-password" className="block text-sm font-semibold text-text-primary">
+            Password
+          </label>
+          <div className="mt-1">
+            <PasswordToggle
+              id="agent-password"
+              name="password"
+              autoComplete="current-password"
+              required
+              placeholder="Enter your secure password"
+            />
+          </div>
+        </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="touch-target w-full rounded-sm bg-primary px-4 py-2.5 font-medium text-white transition-colors hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {loading ? "Signing in..." : "Sign in"}
-      </button>
-    </form>
+        <div className="flex items-center justify-between">
+          <label className="flex cursor-pointer items-center gap-2" htmlFor="agent-remember-me">
+            <input
+              id="agent-remember-me"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 rounded border border-border bg-surface text-primary-600 focus:ring-2 focus:ring-primary"
+            />
+            <span className="text-sm text-text-secondary">Remember this device for 30 days</span>
+          </label>
+          {onForgotPassword && (
+            <button
+              type="button"
+              onClick={onForgotPassword}
+              className="text-sm font-semibold text-accent-600 transition-colors hover:text-accent-700"
+            >
+              Forgot Password?
+            </button>
+          )}
+        </div>
+
+        <AuthSubmitButton loading={loading} label="Access Field Console" loadingLabel="Verifying Credentials..." />
+      </form>
+
+      <AuthAssurance>
+        Official Representative Console and 256-Bit SSL Encrypted Session
+      </AuthAssurance>
+    </div>
   )
 }

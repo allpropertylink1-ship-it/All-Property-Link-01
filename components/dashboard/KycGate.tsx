@@ -24,15 +24,15 @@ export function KycGate({ children, kycStatus, isAgent, authMethod, primaryUserT
 
   if (kycStatus === "NONE") {
     return (
-      <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
+      <div className="flex flex-col items-center justify-center px-6 py-20 text-center" role="alert">
         <ShieldX size={64} className="mb-4 text-text-secondary" />
-        <h2 className="mb-2 text-xl font-bold text-text-primary">Identity Verification Required</h2>
+        <h2 className="mb-2 font-heading text-xl font-bold tracking-tight text-text-primary">Identity Verification Required</h2>
         <p className="mb-6 max-w-md text-sm text-text-secondary">
           You must verify your identity before accessing other features. Please submit your KYC documents.
         </p>
         <Link
           href="/dashboard/kyc"
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+          className="touch-target inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700"
         >
           <Shield size={18} />
           Complete KYC Verification
@@ -43,15 +43,15 @@ export function KycGate({ children, kycStatus, isAgent, authMethod, primaryUserT
 
   if (kycStatus === "REJECTED") {
     return (
-      <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
+      <div className="flex flex-col items-center justify-center px-6 py-20 text-center" role="alert">
         <ShieldX size={64} className="mb-4 text-error-500" />
-        <h2 className="mb-2 text-xl font-bold text-text-primary">KYC Documents Rejected</h2>
+        <h2 className="mb-2 font-heading text-xl font-bold tracking-tight text-text-primary">KYC Documents Rejected</h2>
         <p className="mb-6 max-w-md text-sm text-text-secondary">
           Your submitted documents did not meet requirements. Please check the rejection reason and resubmit.
         </p>
         <Link
           href="/dashboard/kyc"
-          className="inline-flex items-center gap-2 rounded-lg bg-error-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-error-700"
+          className="touch-target inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-error-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-error-700"
         >
           <Shield size={18} />
           Resubmit KYC Documents
@@ -63,7 +63,7 @@ export function KycGate({ children, kycStatus, isAgent, authMethod, primaryUserT
   if (kycStatus === "PENDING") {
     return (
       <div className="flex flex-col">
-        <div className="mx-6 mt-4 flex items-center gap-3 rounded-xl border border-warning-200 bg-warning-50 px-4 py-3 text-sm lg:mx-8">
+        <div className="mx-4 mt-4 flex min-w-0 flex-col gap-3 rounded-xl border border-warning-200 bg-warning-50 px-4 py-3 text-sm sm:mx-6 sm:flex-row sm:items-center lg:mx-8" role="status">
           <Clock size={18} className="shrink-0 text-warning-500" />
           <div className="min-w-0 flex-1">
             <p className="font-medium text-warning-700">KYC under review</p>
@@ -71,7 +71,7 @@ export function KycGate({ children, kycStatus, isAgent, authMethod, primaryUserT
           </div>
           <Link
             href="/dashboard/kyc"
-            className="shrink-0 rounded-lg bg-warning-500 px-4 py-2 text-sm font-medium text-white hover:bg-warning-600"
+            className="touch-target inline-flex shrink-0 items-center justify-center rounded-lg bg-warning-500 px-4 py-2 text-sm font-medium text-white hover:bg-warning-600"
           >
             View status
           </Link>

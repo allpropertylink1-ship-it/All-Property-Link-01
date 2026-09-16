@@ -43,14 +43,20 @@ export default function NewDisputePage() {
 
   return (
     <AgentGuard>
-      <div className="max-w-2xl">
-        <Link href="/dashboard/agent/disputes" className="mb-6 inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700">
+      <div className="mx-auto max-w-3xl space-y-6">
+        <Link href="/dashboard/agent/disputes" className="touch-target inline-flex min-h-[44px] items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-primary-600 hover:text-primary-700">
           <ArrowLeft size={16} /> Back to disputes
         </Link>
 
-        <h1 className="mb-6 font-heading text-2xl font-bold text-text-primary">New Dispute</h1>
+        <section aria-labelledby="new-dispute-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+          <p className="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-secondary">
+            Commission hub
+          </p>
+          <h1 id="new-dispute-heading" className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">New Dispute</h1>
+          <p className="mt-1 text-sm text-text-secondary">Describe the issue — an admin will review and respond.</p>
+        </section>
 
-        <form onSubmit={handleSubmit} className="space-y-6 rounded-xl border border-border bg-surface p-6">
+        <form onSubmit={handleSubmit} className="space-y-6 rounded-xl border border-border bg-surface p-5 sm:p-6" aria-label="New dispute">
           {error && (
             <FormBanner variant="error">{error}</FormBanner>
           )}

@@ -78,10 +78,14 @@ export function PropertyCard({
 
   const isCompact = variant === "compact";
 
+  // Land lives in its own section — link it directly (avoids a redirect hop).
+  const detailBase = (propertyType || "").toUpperCase() === "LAND" ? "/land" : "/properties";
+  const detailHref = `${detailBase}/${slugifyCity(city)}/${slug}`;
+
   if (isCompact) {
     return (
       <Link
-        href={`/properties/${slugifyCity(city)}/${slug}`}
+        href={detailHref}
         className="group flex gap-4 p-3 rounded-xl border border-border bg-surface hover:bg-surface-secondary hover:border-primary-200 hover:shadow-md transition-all duration-200"
       >
         <div className="relative h-24 w-32 flex-shrink-0 rounded-lg overflow-hidden bg-surface-secondary">
@@ -138,7 +142,7 @@ export function PropertyCard({
 
   return (
     <Link
-      href={`/properties/${slugifyCity(city)}/${slug}`}
+      href={detailHref}
       className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-all duration-300 hover:-translate-y-[3px] hover:shadow-lg"
     >
       <div className="relative w-full overflow-hidden">

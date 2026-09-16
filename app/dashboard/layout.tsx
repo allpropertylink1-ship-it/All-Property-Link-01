@@ -22,9 +22,9 @@ export default async function DashboardLayout({
 
   return (
     <RequireAuthMethod allowedMethods={["user", "agent"]}>
-      <div className="flex min-h-[calc(100dvh-4rem)]">
+      <div className="flex min-h-[calc(100dvh-4rem)] flex-col lg:flex-row">
         <DashboardNav />
-        <div className="flex-1 bg-surface-secondary">
+        <div className="min-w-0 flex-1 bg-surface-secondary">
           <DashboardBanner
             accountStatus={user.accountStatus ?? ""}
             onboardingComplete={user.onboardingComplete ?? false}

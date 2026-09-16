@@ -131,20 +131,25 @@ export default function AgentClaimsPage() {
 
   return (
     <AgentGuard>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-heading text-2xl font-bold text-text-primary">Payment Claims</h1>
-          <p className="mt-1 text-sm text-text-secondary">{total} total claim{total !== 1 ? "s" : ""}</p>
+      <section aria-labelledby="claims-heading" className="mb-6 rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <p className="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-secondary">
+          Commission hub
+        </p>
+        <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 id="claims-heading" className="font-heading text-2xl font-bold tracking-tight text-text-primary">Payment Claims</h1>
+            <p className="mt-1 text-sm text-text-secondary">{total} total claim{total !== 1 ? "s" : ""}</p>
+          </div>
+          <button type="button" onClick={openForm}
+            className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-primary-700"
+          ><Plus size={18} />New Claim</button>
         </div>
-        <button type="button" onClick={openForm}
-          className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-primary-700"
-        ><Plus size={18} />New Claim</button>
-      </div>
+      </section>
 
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filter claims by status">
         {statuses.map((s) => (
-          <button key={s} type="button" onClick={() => { setStatusFilter(s); setPage(1) }}
-            className={`touch-target rounded-lg px-4 py-2 text-sm font-medium transition-colors ${statusFilter === s ? "bg-primary-600 text-white" : "bg-surface-secondary text-text-secondary hover:bg-border"}`}
+          <button key={s} type="button" onClick={() => { setStatusFilter(s); setPage(1) }} aria-pressed={statusFilter === s}
+            className={`touch-target rounded-lg px-4 py-2 text-sm font-medium transition-colors ${statusFilter === s ? "bg-primary-600 text-white" : "bg-surface text-text-secondary hover:bg-surface-secondary border border-border"}`}
           >{statusLabels[s]}</button>
         ))}
       </div>
@@ -169,9 +174,45 @@ export default function AgentClaimsPage() {
           <button type="button" onClick={fetchClaims} className="touch-target rounded-lg bg-primary-600 px-5 py-2 text-sm font-medium text-white">Retry</button>
         </div>
       ) : claims.length === 0 ? (
-        <div className="py-20 text-center text-sm text-text-secondary">No claims found. Submit your first payment claim above.</div>
+        <div className="rounded-xl border border-border bg-surface px-4 py-20 text-center text-sm text-text-secondary" role="status">No claims found. Submit your first payment claim above.</div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
+        <>
+          {/* Mobile: Stitch claim cards */}
+          <ul className="space-y-3 sm:hidden" aria-label="Payment claims">
+            {claims.map((c) => (
+              <li key={c.id} className="rounded-xl border border-border bg-surface p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="min-w-0 flex-1 truncate text-sm font-medium text-text-primary">
+                    {c.property ? `${c.property.title} (${c.property.city})` : "-"}
+                  </p>
+                  <StatusPill
+                    status={c.status}
+                    icon={
+                      c.status === "PAID" ? <CheckCircle size={12} /> :
+                      c.status === "REJECTED" ? <XCircle size={12} /> :
+                      c.status === "AWAITING_AGENT_ACCEPTANCE" ? <Clock size={12} /> : undefined
+                    }
+                  />
+                </div>
+                <p className="mt-1 text-base font-bold text-text-primary">
+                  {c.adminModifiedAmount ? (
+                    <span><span className="font-normal text-text-secondary line-through">{fmtKES(c.amount)}</span> {fmtKES(Number(c.adminModifiedAmount))}</span>
+                  ) : fmtKES(c.amount)}
+                </p>
+                <p className="mt-0.5 truncate text-xs text-text-secondary">{c.agentNotes || c.adminNotes || "-"} &middot; {new Date(c.createdAt).toLocaleDateString()}</p>
+                {c.status === "AWAITING_AGENT_ACCEPTANCE" && (
+                  <div className="mt-3 flex gap-2 border-t border-border pt-3">
+                    <button type="button" onClick={() => handleAccept(c.id)}
+                      className="touch-target flex-1 rounded-lg bg-success-50 px-2.5 py-2 text-xs font-medium text-success-700 transition-colors hover:bg-success-500/20">Accept</button>
+                    <button type="button" onClick={() => handleReject(c.id)}
+                      className="touch-target flex-1 rounded-lg bg-error-50 px-2.5 py-2 text-xs font-medium text-error-600 transition-colors hover:bg-error-500/20">Reject</button>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+          {/* Desktop: register table in a section card */}
+          <div className="hidden overflow-x-auto rounded-xl border border-border bg-surface sm:block">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="bg-surface-secondary text-text-secondary">
               <tr>
@@ -210,9 +251,9 @@ export default function AgentClaimsPage() {
                     {c.status === "AWAITING_AGENT_ACCEPTANCE" && (
                       <div className="flex gap-1">
                         <button type="button" onClick={() => handleAccept(c.id)}
-                          className="rounded-md bg-success-50 px-2.5 py-1 text-xs font-medium text-success-700 transition-colors hover:bg-success-500/20">Accept</button>
+                          className="touch-target rounded-md bg-success-50 px-2.5 py-2 text-xs font-medium text-success-700 transition-colors hover:bg-success-500/20">Accept</button>
                         <button type="button" onClick={() => handleReject(c.id)}
-                          className="rounded-md bg-error-50 px-2.5 py-1 text-xs font-medium text-error-600 transition-colors hover:bg-error-500/20">Reject</button>
+                          className="touch-target rounded-md bg-error-50 px-2.5 py-2 text-xs font-medium text-error-600 transition-colors hover:bg-error-500/20">Reject</button>
                       </div>
                     )}
                   </td>
@@ -220,7 +261,8 @@ export default function AgentClaimsPage() {
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+        </>
       )}
 
       <Pagination currentPage={page} totalPages={totalPages} onChange={setPage} />
@@ -232,8 +274,8 @@ export default function AgentClaimsPage() {
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-text-primary">Listing (optional)</label>
-              <select value={selectedListing} onChange={(e) => setSelectedListing(e.target.value)}
+              <label htmlFor="claim-listing" className="mb-1 block text-sm font-medium text-text-primary">Listing (optional)</label>
+              <select id="claim-listing" value={selectedListing} onChange={(e) => setSelectedListing(e.target.value)}
                 className="w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-sm focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15"
               >
                 <option value="">No specific listing</option>
@@ -246,13 +288,13 @@ export default function AgentClaimsPage() {
               )}
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-text-primary">Amount (KES) *</label>
-              <input type="number" min="1" step="0.01" required value={formAmount} onChange={(e) => setFormAmount(e.target.value)}
+              <label htmlFor="claim-amount" className="mb-1 block text-sm font-medium text-text-primary">Amount (KES) *</label>
+              <input id="claim-amount" type="number" min="1" step="0.01" required value={formAmount} onChange={(e) => setFormAmount(e.target.value)}
                 className="w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-sm placeholder:text-muted/60 focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-text-primary">Notes</label>
-              <textarea value={formNotes} onChange={(e) => setFormNotes(e.target.value)} rows={3} placeholder="Reason for claim..."
+              <label htmlFor="claim-notes" className="mb-1 block text-sm font-medium text-text-primary">Notes</label>
+              <textarea id="claim-notes" value={formNotes} onChange={(e) => setFormNotes(e.target.value)} rows={3} placeholder="Reason for claim..."
                 className="w-full resize-none rounded-lg border border-border bg-surface px-4 py-2.5 text-sm placeholder:text-muted/60 focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15" />
             </div>
             <button type="submit" disabled={submitting || !formAmount} aria-busy={submitting}

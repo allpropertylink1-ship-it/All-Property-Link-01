@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import {
@@ -11,13 +10,10 @@ import {
   Building2,
   Bell,
   User,
-  ArrowLeft,
-  LogOut,
   Menu,
   X,
 } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
-import { useRouter } from "next/navigation"
 
 interface NavLink {
   href: string
@@ -58,15 +54,15 @@ const SECTION_LABELS: Record<string, string> = {
   agent: "APL Representative",
 }
 
-function NavGroup({ links, section }: { links: NavLink[]; section: keyof typeof SECTION_LABELS }) {
+function NavGroup({ links, section, onNavigate }: { links: NavLink[]; section: keyof typeof SECTION_LABELS; onNavigate?: () => void }) {
   const pathname = usePathname()
 
   return (
     <div>
-      <p className="px-4 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-widest text-muted">
+      <p className="px-4 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-widest text-text-secondary">
         {SECTION_LABELS[section]}
       </p>
-      <div className="space-y-0.5">
+      <div className="space-y-0.5" role="list">
         {links.map((link) => {
           const Icon = link.icon
           const isActive =
@@ -78,6 +74,8 @@ function NavGroup({ links, section }: { links: NavLink[]; section: keyof typeof 
             <Link
               key={link.href}
               href={link.href}
+              onClick={onNavigate}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
                 "touch-target relative flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-150",
                 isActive
@@ -86,7 +84,7 @@ function NavGroup({ links, section }: { links: NavLink[]; section: keyof typeof 
               )}
             >
               {isActive && (
-                <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary-500" />
+                <span aria-hidden="true" className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary-500" />
               )}
               <Icon size={18} className="shrink-0" />
               {link.label}
@@ -98,61 +96,81 @@ function NavGroup({ links, section }: { links: NavLink[]; section: keyof typeof 
   )
 }
 
+function NavSections({ onNavigate }: { onNavigate?: () => void }) {
+  const { user } = useAuth()
+  const userTypes = user?.userTypes ?? []
+  const hasServiceAccess = userTypes.includes("FUNDI") || userTypes.includes("SERVICE_PROVIDER")
+
+  if (user?.authMethod === "agent") {
+    return <NavGroup links={agentPrimary} section="agent" onNavigate={onNavigate} />
+  }
+  return (
+    <>
+      <NavGroup links={primary} section="primary" onNavigate={onNavigate} />
+      <NavGroup links={getSecondaryNav(hasServiceAccess)} section="secondary" onNavigate={onNavigate} />
+      <NavGroup links={tertiary} section="tertiary" onNavigate={onNavigate} />
+    </>
+  )
+}
+
 export function DashboardNav() {
-  const { user, logout } = useAuth()
-  const pathname = usePathname()
-  const router = useRouter()
-  const isHome = pathname === "/"
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : ""
     return () => { document.body.style.overflow = "" }
-  }, [open])
+  }, [open ])
 
-  const userTypes = user?.userTypes ?? []
-  const hasServiceAccess = userTypes.includes("FUNDI") || userTypes.includes("SERVICE_PROVIDER")
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false)
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [])
 
   return (
     <>
-      {isHome && (
+      {/* Mobile top rail — Stitch owner dashboard collapses the left rail into a drawer */}
+      <div className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-surface px-4 lg:hidden">
+        <span className="font-heading text-sm font-bold tracking-tight text-text-primary">Dashboard</span>
         <button
           type="button"
           onClick={() => setOpen(!open)}
-          className="touch-target fixed right-4 top-4 z-50 flex items-center justify-center rounded-lg border border-transparent hover:bg-surface-secondary lg:hidden"
+          className="touch-target flex items-center justify-center rounded-lg px-3 text-sm font-medium text-text-secondary hover:bg-surface-secondary hover:text-text-primary"
           aria-label={open ? "Close navigation" : "Open navigation"}
           aria-expanded={open}
           aria-controls="dashboard-nav"
         >
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
-      )}
+      </div>
 
+      {/* Desktop left rail — Stitch desktop owner/agent console */}
+      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 overflow-y-auto border-r border-border bg-surface px-3 py-4 lg:block" aria-label="Dashboard">
+        <nav id="dashboard-nav-desktop">
+          <NavSections />
+        </nav>
+      </aside>
+
+      {/* Mobile drawer */}
       {open && (
-        <div className="fixed inset-0 z-[60] lg:hidden">
-          <button type="button" aria-label="Close menu" className="absolute inset-0 bg-black/20" onClick={() => setOpen(false)} />
-          <div className="absolute right-4 top-[calc(4rem+env(safe-area-inset-top))] max-h-[calc(100dvh-5rem)] w-full max-w-[85vw] sm:w-64 overflow-y-auto rounded-2xl bg-white border border-border shadow-2xl">
-            <div className="flex h-12 items-center justify-between px-4 border-b border-border">
+        <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true" aria-label="Dashboard navigation">
+          <button type="button" aria-label="Close menu" className="absolute inset-0 cursor-default bg-text-primary/20" onClick={() => setOpen(false)} tabIndex={-1} />
+          <div className="absolute left-4 right-4 top-[calc(4rem+env(safe-area-inset-top))] max-h-[calc(100dvh-5rem)] overflow-y-auto rounded-2xl border border-border bg-surface shadow-lg">
+            <div className="flex h-12 items-center justify-between border-b border-border px-4">
               <span className="text-[15px] font-bold tracking-tight text-text-primary">Navigation</span>
               <button
                 type="button"
-                className="flex h-11 w-11 touch-target items-center justify-center rounded-full hover:bg-surface-secondary"
+                className="touch-target flex h-11 w-11 items-center justify-center rounded-full hover:bg-surface-secondary"
                 onClick={() => setOpen(false)}
                 aria-label="Close menu"
               >
                 <X size={16} />
               </button>
             </div>
-            <nav className="p-3 space-y-1">
-              {user?.authMethod === "agent" ? (
-                <NavGroup links={agentPrimary} section="agent" />
-              ) : (
-                <>
-                  <NavGroup links={primary} section="primary" />
-                  <NavGroup links={getSecondaryNav(hasServiceAccess)} section="secondary" />
-                  <NavGroup links={tertiary} section="tertiary" />
-                </>
-              )}
+            <nav className="space-y-1 p-3" id="dashboard-nav">
+              <NavSections onNavigate={() => setOpen(false)} />
             </nav>
           </div>
         </div>

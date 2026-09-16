@@ -35,14 +35,17 @@ export function OtpInput({ value, onChange, length = 6, disabled = false }: OtpI
   }
 
   return (
-    <div className="flex gap-1.5 sm:gap-2 justify-center" onPaste={handlePaste}>
+    <div className="flex justify-center gap-2 sm:gap-2.5" onPaste={handlePaste} role="group" aria-label="6-digit verification code">
       {Array.from({ length }).map((_, i) => (
         <input key={i} ref={(el) => { inputs.current[i] = el }}
           type="text" inputMode="numeric" maxLength={1}
           value={value[i] || ""} onChange={(e) => handleChange(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)} disabled={disabled}
           autoFocus={i === 0}
-          className="h-10 w-10 max-w-10 flex-1 min-w-0 rounded-xl border sm:h-12 sm:w-12 border-border text-center text-lg font-bold focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15 disabled:opacity-50" />
+          aria-label={`Digit ${i + 1} of ${length}`}
+          autoComplete={i === 0 ? "one-time-code" : "off"}
+          style={{ fontSize: "16px" }}
+          className="h-12 w-12 min-w-0 max-w-12 flex-1 rounded-xl border border-border bg-surface-secondary text-center text-lg font-bold text-text-primary focus:border-accent-500 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-accent-500/25 disabled:opacity-50" />
       ))}
     </div>
   )

@@ -186,35 +186,43 @@ function OnboardingPageInner() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
-      <div className="mb-8 text-center">
-        <h1 className="font-heading text-2xl font-bold text-text-primary">Complete Your Business Profile</h1>
-        <p className="mt-2 text-sm text-text-secondary">
+    <div className="mx-auto max-w-3xl space-y-6">
+      <section aria-labelledby="onboarding-heading" className="rounded-xl border border-border bg-surface p-5 text-center sm:p-6">
+        <p className="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-secondary">
+          Get started
+        </p>
+        <h1 id="onboarding-heading" className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">Complete Your Business Profile</h1>
+        <p className="mt-1 text-sm text-text-secondary">
           Tell us about your business or profession. Approval required.
         </p>
-      </div>
+      </section>
 
       {error && (
-        <div className="mb-6">
+        <div>
           <FormBanner variant="error">{error}</FormBanner>
         </div>
       )}
 
       {loading && (
-        <div className="mb-6 rounded-lg bg-primary-50 px-4 py-3 text-sm text-primary-600">
+        <div className="rounded-xl border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-700" role="status">
           <Loader2 size={16} className="mr-2 inline animate-spin" />
           Submitting your information... Please wait.
         </div>
       )}
 
-      <form className="space-y-6 rounded-xl border border-border bg-surface p-6" onSubmit={handleSubmit}>
-        <h2 className="font-heading text-lg font-semibold text-text-primary">Personal & Business Information</h2>
+      <form className="space-y-6" onSubmit={handleSubmit} aria-label="Business onboarding">
+        <section aria-labelledby="onboarding-identity-heading" className="space-y-6 rounded-xl border border-border bg-surface p-5 sm:p-6">
+          <div>
+            <h2 id="onboarding-identity-heading" className="font-heading text-base font-semibold text-text-primary">Personal & Business Information</h2>
+            <p className="mt-0.5 text-sm text-text-secondary">How clients reach you.</p>
+          </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-text-primary">
+          <label className="block text-sm font-medium text-text-primary" htmlFor="obCompany">
             Full name / Company Name
           </label>
           <input
+            id="obCompany"
             type="text"
             value={form.companyName}
             onChange={(e) => updateField("companyName", e.target.value)}
@@ -224,10 +232,11 @@ function OnboardingPageInner() {
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-text-primary">
+          <label className="block text-sm font-medium text-text-primary" htmlFor="obContact">
             Contact Person <span className="text-error-500">*</span>
           </label>
           <input
+            id="obContact"
             type="text"
             value={form.contactPerson}
             onChange={(e) => updateField("contactPerson", e.target.value)}
@@ -239,10 +248,11 @@ function OnboardingPageInner() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-primary">
+            <label className="block text-sm font-medium text-text-primary" htmlFor="obPhone">
               Phone Number <span className="text-error-500">*</span>
             </label>
             <input
+              id="obPhone"
               type="tel"
               value={form.phone}
               onChange={(e) => updateField("phone", e.target.value)}
@@ -253,10 +263,11 @@ function OnboardingPageInner() {
             <p className="text-xs text-text-secondary">Must be unique</p>
           </div>
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-primary">
+            <label className="block text-sm font-medium text-text-primary" htmlFor="obEmail">
               Email Address <span className="text-error-500">*</span>
             </label>
             <input
+              id="obEmail"
               type="email"
               value={form.email}
               onChange={(e) => updateField("email", e.target.value)}
@@ -269,17 +280,18 @@ function OnboardingPageInner() {
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-text-primary">
+          <span className="block text-sm font-medium text-text-primary" id="onboarding-category-label">
             Category <span className="text-error-500">*</span>
-          </label>
-          <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2">
+          </span>
+          <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2" role="group" aria-labelledby="onboarding-category-label">
             {categories.map((cat) => (
               <button
                 key={cat.value}
                 type="button"
+                aria-pressed={form.category === cat.value}
                 onClick={() => { updateField("category", cat.value); setForm((prev) => ({ ...prev, specialties: [] })); }}
                 className={cn(
-                  "rounded-lg border px-4 py-3 text-sm font-medium transition-colors",
+                  "touch-target rounded-lg border px-4 py-3 text-sm font-medium transition-colors",
                   form.category === cat.value
                     ? "border-primary-500 bg-primary-50 text-primary-600"
                     : "border-border text-text-secondary hover:border-primary-300"
@@ -293,33 +305,34 @@ function OnboardingPageInner() {
 
         {selectedSpecialties.length > 0 && (
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-primary">
+            <span className="block text-sm font-medium text-text-primary" id="onboarding-specialties-label">
               Select your specialties <span className="text-error-500">*</span>
               <span className="ml-2 text-xs font-normal text-text-secondary">(tap to select multiple)</span>
-            </label>
-            <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:grid-cols-3">
+            </span>
+            <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:grid-cols-3" role="group" aria-labelledby="onboarding-specialties-label">
               {selectedSpecialties.map((spec) => {
                 const isSelected = form.specialties.includes(spec.value);
                 return (
                   <button
                     key={spec.value}
                     type="button"
+                    aria-pressed={isSelected}
                     onClick={() => toggleSpecialty(spec.value)}
                     className={cn(
-                      "relative flex items-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all",
+                      "touch-target relative flex items-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all",
                       isSelected
                         ? "border-accent-500 bg-accent-50 text-accent-700 shadow-sm"
                         : "border-border bg-surface text-text-secondary hover:border-accent-500 hover:bg-accent-50/50"
                     )}
                   >
-                    <div className={cn(
+                    <span className={cn(
                       "flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors",
                       isSelected
                         ? "border-accent-500 bg-accent-500 text-white"
                         : "border-border bg-surface"
-                    )}>
+                    )} aria-hidden="true">
                       {isSelected && <Check className="h-3.5 w-3.5" />}
-                    </div>
+                    </span>
                     <span className="text-left leading-tight">{spec.group}</span>
                   </button>
                 );
@@ -327,10 +340,18 @@ function OnboardingPageInner() {
             </div>
           </div>
         )}
+        </section>
+
+        <section aria-labelledby="onboarding-location-heading" className="space-y-6 rounded-xl border border-border bg-surface p-5 sm:p-6">
+          <div>
+            <h2 id="onboarding-location-heading" className="font-heading text-base font-semibold text-text-primary">Online & Location Presence</h2>
+            <p className="mt-0.5 text-sm text-text-secondary">Website and where you operate.</p>
+          </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-text-primary">Website (optional)</label>
+          <label className="block text-sm font-medium text-text-primary" htmlFor="obWebsite">Website (optional)</label>
           <input
+            id="obWebsite"
             type="url"
             value={form.website}
             onChange={(e) => updateField("website", e.target.value)}
@@ -341,10 +362,11 @@ function OnboardingPageInner() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-primary">
+            <label className="block text-sm font-medium text-text-primary" htmlFor="obLocation">
               Location <span className="text-error-500">*</span>
             </label>
             <input
+              id="obLocation"
               type="text"
               value={form.location}
               onChange={(e) => updateField("location", e.target.value)}
@@ -354,10 +376,11 @@ function OnboardingPageInner() {
             />
           </div>
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-primary">
+            <label className="block text-sm font-medium text-text-primary" htmlFor="obEstate">
               Estate / Sub-location <span className="text-error-500">*</span>
             </label>
             <input
+              id="obEstate"
               type="text"
               value={form.estateSubLocation}
               onChange={(e) => updateField("estateSubLocation", e.target.value)}
@@ -369,16 +392,17 @@ function OnboardingPageInner() {
         </div>
 
 
-        <div className="flex justify-end">
+        <div className="flex justify-end border-t border-border pt-6">
           <button
             type="submit"
             disabled={loading || !form.contactPerson || !form.phone || !form.email || !form.category}
             aria-busy={loading}
-            className="touch-target rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="touch-target min-h-[44px] rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Submitting..." : "Submit for Approval"}
           </button>
         </div>
+        </section>
       </form>
     </div>
   );

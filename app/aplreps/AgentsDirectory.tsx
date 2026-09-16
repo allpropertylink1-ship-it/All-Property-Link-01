@@ -5,7 +5,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { api } from "@/lib/api-client"
 import { resolveImageUrl } from "@/lib/images"
-import { Loader2, AlertCircle, Phone, Mail, CitiesCovered, ExternalLink } from "@/components/ui/icons"
+import { FormBanner } from "@/components/shared/FormFeedback"
+import { Loader2, Phone, Mail, CitiesCovered, ExternalLink, Search, Shield } from "@/components/ui/icons"
 
 interface Agent {
   id: string
@@ -88,36 +89,47 @@ export function AgentsDirectory() {
   )
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20"><Loader2 size={24} className="animate-spin text-muted" /></div>
+    return <div className="flex items-center justify-center py-20" role="status" aria-busy="true" aria-label="Loading representatives"><Loader2 size={24} className="animate-spin text-muted" /></div>
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center gap-4 py-20">
-        <AlertCircle size={24} className="text-error-500" />
-        <p className="text-sm text-text-secondary">{error}</p>
+      <div className="mx-auto max-w-lg py-20">
+        <FormBanner variant="error">{error}</FormBanner>
       </div>
     )
   }
 
   return (
     <div>
-      <div className="mb-8">
-        <input
-          type="text" value={search} onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name or code..."
-          className="w-full max-w-md rounded-xl border border-border bg-surface px-4 py-2.5 text-sm placeholder:text-muted/60 focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15"
-        />
+      <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full max-w-md">
+          <Search size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+          <label htmlFor="aplrep-search" className="sr-only">
+            Search representatives by name or code
+          </label>
+          <input
+            id="aplrep-search"
+            type="search" value={search} onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name or code..."
+            autoComplete="off"
+            className="min-h-touch w-full rounded-xl border border-border bg-surface py-3 pl-10 pr-4 text-[16px] placeholder:text-muted/60 focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15"
+          />
+        </div>
+        <p className="inline-flex items-center gap-1.5 text-sm text-text-secondary" role="status">
+          <Shield size={15} className="text-primary-600" />
+          {filtered.length} verified {filtered.length === 1 ? "representative" : "representatives"}
+        </p>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="py-20 text-center text-sm text-text-secondary">No representatives found.</div>
+        <div className="py-20 text-center text-sm text-text-secondary" role="status">No representatives found.</div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2" role="list" aria-label="APL representatives">
           {filtered.map((agent) => {
             const cities = agent.specificArea ? [...agent.regions, agent.specificArea] : agent.regions
             return (
-              <div key={agent.id} className="flex flex-col rounded-3xl border-2 border-accent-500/60 bg-surface p-5 sm:p-6">
+              <div key={agent.id} role="listitem" className="flex min-w-0 flex-col rounded-3xl border-2 border-accent-500/60 bg-surface p-5 sm:p-6">
                 {/* ===== Mobile layout ===== */}
                 <div className="lg:hidden">
                   <AgentPhoto agent={agent} sizeClass="mx-auto h-[130px] w-[130px]" />
@@ -133,7 +145,7 @@ export function AgentsDirectory() {
                     </p>
 <Link
                       href={`/aplreps/${agent.id}`}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-4 py-1.5 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-100"
+                      className="inline-flex min-h-touch items-center gap-1.5 rounded-full bg-primary-50 px-4 py-1.5 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-100"
                     >
                         View profile <ExternalLink size={12} className="text-primary-500/70" />
                       </Link>
@@ -141,21 +153,21 @@ export function AgentsDirectory() {
                   <div className="mt-3 flex flex-wrap gap-2">
                     {agent.phone && (
                       <a href={`tel:${agent.phone}`}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-primary-700 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary-800"
+                        className="inline-flex min-h-touch items-center gap-1.5 rounded-full bg-primary-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-800"
                       ><Phone size={14} />Call</a>
                     )}
                     {agent.phone && (
                       <a href={`https://wa.me/${formatPhoneForWhatsApp(agent.phone)}`} target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-full bg-whatsapp px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-whatsapp-dark"
+                        className="inline-flex min-h-touch items-center gap-1.5 rounded-full bg-whatsapp px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-whatsapp-dark"
                       ><WhatsAppIcon size={14} />WhatsApp</a>
                     )}
-{agent.email && (
-                        <a href={`mailto:${agent.email}`}
-                          className="inline-flex items-center justify-center gap-2 rounded-full bg-primary-50 px-4 py-2 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-100"
-                        >
-                          <Mail size={15} className="text-primary-600" />E-Mail
-                        </a>
-                      )}
+                    {agent.email && (
+                      <a href={`mailto:${agent.email}`}
+                        className="inline-flex min-h-touch items-center justify-center gap-2 rounded-full bg-primary-50 px-4 py-2 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-100"
+                      >
+                        <Mail size={15} className="text-primary-600" />E-Mail
+                      </a>
+                    )}
                   </div>
                   {cities.length > 0 && (
                     <>
@@ -191,24 +203,24 @@ export function AgentsDirectory() {
                     <div className="mt-4 grid max-w-full grid-cols-1 gap-x-4 gap-y-3 min-[360px]:grid-cols-2 sm:max-w-[320px]">
                       <Link
                         href={`/aplreps/${agent.id}`}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary-50 px-4 py-2 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-100"
+                        className="inline-flex min-h-touch items-center justify-center gap-1.5 rounded-full bg-primary-50 px-4 py-2 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-100"
                       >
                         View profile <ExternalLink size={12} className="text-primary-500/70" />
                       </Link>
                       {agent.phone && (
                         <a href={`https://wa.me/${formatPhoneForWhatsApp(agent.phone)}`} target="_blank" rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 rounded-full bg-whatsapp px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-whatsapp-dark"
+                          className="inline-flex min-h-touch items-center justify-center gap-2 rounded-full bg-whatsapp px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-whatsapp-dark"
                         ><WhatsAppIcon />WhatsApp</a>
                       )}
                       {agent.phone && (
                         <a href={`tel:${agent.phone}`}
-                          className="inline-flex items-center justify-center gap-2 rounded-full bg-primary-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-800"
+                          className="inline-flex min-h-touch items-center justify-center gap-2 rounded-full bg-primary-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-800"
                         ><Phone size={15} />Call</a>
                       )}
                       {agent.email && (
                         <a href={`mailto:${agent.email}`}
-                          className="inline-flex items-center justify-center gap-2 rounded-full bg-rose-200 px-4 py-2 text-sm font-medium text-rose-950 transition-colors hover:bg-rose-300"
-                        ><Mail size={15} className="text-red-600" />E-Mail</a>
+                          className="inline-flex min-h-touch items-center justify-center gap-2 rounded-full bg-primary-50 px-4 py-2 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-100"
+                        ><Mail size={15} className="text-primary-600" />E-Mail</a>
                       )}
                     </div>
                     {cities.length > 0 && <div className="mt-auto pt-5"><div className="border-t border-accent-500/60" /></div>}

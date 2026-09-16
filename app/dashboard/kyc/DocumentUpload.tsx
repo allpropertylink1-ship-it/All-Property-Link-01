@@ -45,12 +45,12 @@ function FilePreview({ url, onRemove }: { url: string; onRemove?: () => void }) 
       {isPdf ? (
         <PdfViewer url={url} compact />
       ) : (
-        <a href={url} target="_blank" rel="noopener noreferrer" className="relative block overflow-hidden rounded-lg border border-border hover:ring-2 hover:ring-primary/50 transition-all">
+          <a href={url} target="_blank" rel="noopener noreferrer" className="relative block overflow-hidden rounded-xl border border-border hover:ring-2 hover:ring-primary-600/30 transition-all">
           <img src={url} alt="" className="h-44 w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }} />
         </a>
       )}
       {onRemove && (
-        <button type="button" onClick={onRemove} className="absolute -right-2 -top-2 rounded-full bg-white p-1 text-red-500 shadow hover:bg-red-50 transition-colors">
+        <button type="button" onClick={onRemove} aria-label="Remove preview" className="touch-target absolute -right-2 -top-2 rounded-full bg-surface p-2 text-error-500 shadow hover:bg-error-50 transition-colors">
           <XCircle size={16} />
         </button>
       )}
@@ -111,37 +111,38 @@ export function DocumentUpload(props: Props) {
         </div>
       )}
 
-      <div className="rounded-xl border border-border bg-surface p-6">
-        <h2 className="mb-4 text-lg font-semibold text-foreground">
-          Core Identity Document <span className="text-sm font-normal text-muted">(Required)</span>
+      <section aria-labelledby="kyc-core-doc-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <h2 id="kyc-core-doc-heading" className="font-heading text-base font-semibold text-text-primary">
+          Core Identity Document
         </h2>
+        <p className="mb-4 mt-0.5 text-sm text-text-secondary">Required — front image plus document number.</p>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">Document type</label>
-            <select value={props.docType} onChange={e => props.onDocTypeChange(e.target.value)}
-              className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+            <label className="mb-1 block text-sm font-medium text-text-primary" htmlFor="kycDocType">Document type</label>
+            <select id="kycDocType" value={props.docType} onChange={e => props.onDocTypeChange(e.target.value)}
+              className="block min-h-[44px] w-full rounded-lg border border-border bg-surface px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary-600/20">
               {CORE_TYPES.map(t => <option key={t} value={t}>{LABELS[t]}</option>)}
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">Document number</label>
-            <input value={props.docNumber} onChange={e => props.onDocNumberChange(e.target.value)} placeholder="Enter ID number"
-              className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+            <label className="mb-1 block text-sm font-medium text-text-primary" htmlFor="kycDocNumber">Document number</label>
+            <input id="kycDocNumber" value={props.docNumber} onChange={e => props.onDocNumberChange(e.target.value)} placeholder="Enter ID number"
+              className="block min-h-[44px] w-full rounded-lg border border-border bg-surface px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary-600/20" />
           </div>
         </div>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">Front image</label>
+            <span className="mb-1 block text-sm font-medium text-text-primary" id="kyc-front-label">Front image</span>
             {props.frontFile ? (
-              <div className="space-y-2">
+              <div className="space-y-2" role="group" aria-labelledby="kyc-front-label">
                 {props.cropping === "front" && props.frontFile ? (
                   <ImageCropper imageUrl={previewUrl(props.frontFile)!} onCropComplete={props.onCropComplete} onCancel={props.onCancelCrop} sideLabel="Front" />
                 ) : (
                   <>
                     <FilePreview url={previewUrl(props.frontFile)!} onRemove={() => { props.onRemoveFile("front"); URL.revokeObjectURL(previewUrl(props.frontFile)!) }} />
-                    <button type="button" onClick={() => props.onStartCrop("front")} className="text-xs text-primary hover:underline">Re-crop</button>
+                    <button type="button" onClick={() => props.onStartCrop("front")} className="touch-target rounded-lg px-2 py-1 text-xs font-medium text-primary-600 hover:underline">Re-crop</button>
                   </>
                 )}
               </div>
@@ -168,15 +169,15 @@ export function DocumentUpload(props: Props) {
             )}
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">Back image <span className="text-xs text-muted">(optional)</span></label>
+            <span className="mb-1 block text-sm font-medium text-text-primary" id="kyc-back-label">Back image <span className="text-xs font-normal text-text-secondary">(optional)</span></span>
             {props.backFile ? (
-              <div className="space-y-2">
+              <div className="space-y-2" role="group" aria-labelledby="kyc-back-label">
                 {props.cropping === "back" && props.backFile ? (
                   <ImageCropper imageUrl={previewUrl(props.backFile)!} onCropComplete={props.onCropComplete} onCancel={props.onCancelCrop} sideLabel="Back" />
                 ) : (
                   <>
                     <FilePreview url={previewUrl(props.backFile)!} onRemove={() => { props.onRemoveFile("back"); URL.revokeObjectURL(previewUrl(props.backFile)!) }} />
-                    <button type="button" onClick={() => props.onStartCrop("back")} className="text-xs text-primary hover:underline">Re-crop</button>
+                    <button type="button" onClick={() => props.onStartCrop("back")} className="touch-target rounded-lg px-2 py-1 text-xs font-medium text-primary-600 hover:underline">Re-crop</button>
                   </>
                 )}
               </div>
@@ -203,40 +204,41 @@ export function DocumentUpload(props: Props) {
             )}
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="rounded-xl border border-border bg-surface p-6">
-        <h2 className="mb-4 text-lg font-semibold text-foreground">
-          Business Permit <span className="text-sm font-normal text-muted">(Optional — upload your business permit document)</span>
+      <section aria-labelledby="kyc-permit-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <h2 id="kyc-permit-heading" className="font-heading text-base font-semibold text-text-primary">
+          Business Permit
         </h2>
+        <p className="mb-4 mt-0.5 text-sm text-text-secondary">Optional — upload your business permit document.</p>
         {props.businessPermitFile ? (
-          <div className="flex items-center gap-3 rounded-lg border border-border bg-background p-4">
-            <FileText size={24} className="text-primary shrink-0" />
+          <div className="flex items-center gap-3 rounded-lg border border-border bg-surface-secondary p-4">
+            <FileText size={24} className="text-primary-600 shrink-0" />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-foreground truncate">{props.businessPermitFile.name}</p>
-              <p className="text-xs text-muted">{(props.businessPermitFile.size / 1024 / 1024).toFixed(1)} MB</p>
+              <p className="text-sm font-medium text-text-primary truncate">{props.businessPermitFile.name}</p>
+              <p className="text-xs text-text-secondary">{(props.businessPermitFile.size / 1024 / 1024).toFixed(1)} MB</p>
             </div>
-            <button type="button" onClick={props.onRemoveBusinessPermit} className="rounded p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors">
+            <button type="button" onClick={props.onRemoveBusinessPermit} aria-label="Remove business permit" className="touch-target rounded-lg p-2.5 text-error-500 hover:bg-error-50 hover:text-error-600 transition-colors">
               <Trash2 size={16} />
             </button>
           </div>
         ) : props.businessPermitUrl ? (
-          <div className="flex items-center gap-3 rounded-lg border border-border bg-background p-4">
-            <FileText size={24} className="text-primary shrink-0" />
+          <div className="flex items-center gap-3 rounded-lg border border-border bg-surface-secondary p-4">
+            <FileText size={24} className="text-primary-600 shrink-0" />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-foreground">Business Permit</p>
+              <p className="text-sm font-medium text-text-primary">Business Permit</p>
             </div>
-            <a href={props.businessPermitUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">View</a>
+            <a href={props.businessPermitUrl} target="_blank" rel="noopener noreferrer" className="touch-target rounded-lg px-2 py-1 text-xs font-medium text-primary-600 hover:underline">View</a>
           </div>
         ) : (
-          <label className="flex h-32 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted/50 bg-background hover:border-primary/50 hover:bg-primary/5 transition-colors">
-            <FileText className="mb-2 h-6 w-6 text-muted" />
-            <span className="text-sm text-muted">Upload business permit (PDF)</span>
-            <span className="mt-1 text-xs text-muted">PDF only, max 10MB</span>
-            <input type="file" accept="application/pdf" onChange={handleBusinessPermitSelect} className="hidden" />
+          <label className="touch-target flex min-h-[44px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-surface-secondary hover:border-primary-500 hover:bg-primary-50/50 transition-colors p-6">
+            <FileText className="mb-2 h-6 w-6 text-text-secondary" />
+            <span className="text-sm font-medium text-text-primary">Upload business permit (PDF)</span>
+            <span className="mt-1 text-xs text-text-secondary">PDF only, max 10MB</span>
+            <input type="file" accept="application/pdf" onChange={handleBusinessPermitSelect} className="hidden" aria-label="Upload business permit PDF" />
           </label>
         )}
-      </div>
+      </section>
     </>
   )
 }

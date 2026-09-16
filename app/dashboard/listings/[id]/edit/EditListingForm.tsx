@@ -170,87 +170,119 @@ export default function EditListingForm({ propertyId, property, redirectTo, subm
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" aria-label="Edit property listing">
       {error && <FormBanner variant="error">{error}</FormBanner>}
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="title">Title</Label>
-          <Input id="title" {...register("title")} />
-          {errors.title && <p className="text-xs text-error-500">{errors.title.message}</p>}
+
+      {/* Step 1 — Category & Intent */}
+      <section aria-labelledby="edit-step-1" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <div className="mb-5 flex items-start gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-600 font-heading text-sm font-bold text-white">1</span>
+          <div>
+            <h2 id="edit-step-1" className="font-heading text-base font-semibold text-text-primary">Step 1 of 4 &middot; Category & Intent</h2>
+            <p className="text-sm text-text-secondary">What is listed, and why</p>
+          </div>
         </div>
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="description">Description</Label>
-          <textarea id="description" rows={4} className="flex w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" {...register("description")} />
-          {errors.description && <p className="text-xs text-error-500">{errors.description.message}</p>}
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="propertyType">Property type</Label>
+            <select id="propertyType" className="flex min-h-[44px] w-full rounded-lg border border-border bg-surface px-4 py-3 text-base text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" {...register("propertyType", { onChange: () => setValue("subType", "") })}>
+              <option value="APARTMENT">Apartment</option>
+              <option value="HOUSE">House</option>
+              <option value="LAND">Land</option>
+              <option value="COMMERCIAL">Commercial</option>
+            </select>
+            {errors.propertyType && <p className="text-xs text-error-500">{errors.propertyType.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="listingPurpose">Listing purpose</Label>
+            <select id="listingPurpose" className="flex min-h-[44px] w-full rounded-lg border border-border bg-surface px-4 py-3 text-base text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" {...register("listingPurpose")}>
+              <option value="">Select purpose</option>
+              <option value="FOR_SALE">For Sale</option>
+              <option value="FOR_RENT_LONG_TERM">For Rent (long-term)</option>
+              <option value="FOR_RENT_SHORT_TERM">For Rent (short-term / Airbnb)</option>
+            </select>
+            {errors.listingPurpose && <p className="text-xs text-error-500">{errors.listingPurpose.message}</p>}
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="subType">Sub-type <span className="font-normal text-text-secondary">(optional)</span></Label>
+            <select id="subType" className="flex min-h-[44px] w-full rounded-lg border border-border bg-surface px-4 py-3 text-base text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" {...register("subType")}>
+              <option value="">Select sub-type</option>
+              {subTypeOptionsFor(watch("propertyType")).map((s) => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="price">Price</Label>
-          <Input id="price" type="number" step="0.01" {...register("price")} />
-          {errors.price && <p className="text-xs text-error-500">{errors.price.message}</p>}
+      </section>
+
+      {/* Step 2 — Location & Specs */}
+      <section aria-labelledby="edit-step-2" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <div className="mb-5 flex items-start gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-600 font-heading text-sm font-bold text-white">2</span>
+          <div>
+            <h2 id="edit-step-2" className="font-heading text-base font-semibold text-text-primary">Step 2 of 4 &middot; Location & Specs</h2>
+            <p className="text-sm text-text-secondary">Where it is and what it offers</p>
+          </div>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="propertyType">Property type</Label>
-          <select id="propertyType" className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" {...register("propertyType", { onChange: () => setValue("subType", "") })}>
-            <option value="APARTMENT">Apartment</option>
-            <option value="HOUSE">House</option>
-            <option value="LAND">Land</option>
-            <option value="COMMERCIAL">Commercial</option>
-          </select>
-          {errors.propertyType && <p className="text-xs text-error-500">{errors.propertyType.message}</p>}
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="title">Title</Label>
+            <Input id="title" {...register("title")} />
+            {errors.title && <p className="text-xs text-error-500">{errors.title.message}</p>}
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="description">Description</Label>
+            <textarea id="description" rows={4} className="flex w-full rounded-lg border border-border bg-surface px-4 py-3 text-base text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" {...register("description")} />
+            {errors.description && <p className="text-xs text-error-500">{errors.description.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="price">Price</Label>
+            <Input id="price" type="number" step="0.01" {...register("price")} />
+            {errors.price && <p className="text-xs text-error-500">{errors.price.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="area">Area (sq ft)</Label>
+            <Input id="area" type="number" {...register("area")} />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label>Location</Label>
+            <LocationPicker
+              initialAddress={property.address}
+              initialLat={property.latitude}
+              initialLng={property.longitude}
+              onLocationChange={handleLocationChange}
+            />
+            <input type="hidden" {...register("city")} />
+            <input type="hidden" {...register("region")} />
+            <input type="hidden" {...register("address")} />
+            <input type="hidden" {...register("latitude")} />
+            <input type="hidden" {...register("longitude")} />
+            {errors.address && <p className="text-xs text-error-500">{errors.address.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="bedrooms">Bedrooms</Label>
+            <Input id="bedrooms" type="number" {...register("bedrooms")} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="bathrooms">Bathrooms</Label>
+            <Input id="bathrooms" type="number" {...register("bathrooms")} />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="features">Features <span className="font-normal text-text-secondary">(comma separated)</span></Label>
+            <Input id="features" placeholder="Parking, Pool, Garden" {...register("features")} />
+          </div>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="listingPurpose">Listing purpose</Label>
-          <select id="listingPurpose" className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" {...register("listingPurpose")}>
-            <option value="">Select purpose</option>
-            <option value="FOR_SALE">For Sale</option>
-            <option value="FOR_RENT_LONG_TERM">For Rent (long-term)</option>
-            <option value="FOR_RENT_SHORT_TERM">For Rent (short-term / Airbnb)</option>
-          </select>
-          {errors.listingPurpose && <p className="text-xs text-error-500">{errors.listingPurpose.message}</p>}
+      </section>
+
+      {/* Step 3 — Photos */}
+      <section aria-labelledby="edit-step-3" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <div className="mb-5 flex items-start gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-600 font-heading text-sm font-bold text-white">3</span>
+          <div>
+            <h2 id="edit-step-3" className="font-heading text-base font-semibold text-text-primary">Step 3 of 4 &middot; Photos</h2>
+            <p className="text-sm text-text-secondary">Cover photo plus gallery</p>
+          </div>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="subType">Sub-type <span className="text-text-secondary">(optional)</span></Label>
-          <select id="subType" className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" {...register("subType")}>
-            <option value="">Select sub-type</option>
-            {subTypeOptionsFor(watch("propertyType")).map((s) => (
-              <option key={s.value} value={s.value}>{s.label}</option>
-            ))}
-          </select>
-        </div>
-        <div className="space-y-2 sm:col-span-2">
-          <Label>Location</Label>
-          <LocationPicker
-            initialAddress={property.address}
-            initialLat={property.latitude}
-            initialLng={property.longitude}
-            onLocationChange={handleLocationChange}
-          />
-          <input type="hidden" {...register("city")} />
-          <input type="hidden" {...register("region")} />
-          <input type="hidden" {...register("address")} />
-          <input type="hidden" {...register("latitude")} />
-          <input type="hidden" {...register("longitude")} />
-          {errors.address && <p className="text-xs text-error-500">{errors.address.message}</p>}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="bedrooms">Bedrooms</Label>
-          <Input id="bedrooms" type="number" {...register("bedrooms")} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="bathrooms">Bathrooms</Label>
-          <Input id="bathrooms" type="number" {...register("bathrooms")} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="area">Area (sq ft)</Label>
-          <Input id="area" type="number" {...register("area")} />
-        </div>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="features">Features <span className="text-text-secondary">(comma separated)</span></Label>
-        <Input id="features" placeholder="Parking, Pool, Garden" {...register("features")} />
-      </div>
-      <div className="space-y-6">
-        <h2 className="font-semibold text-text-primary">Property Images</h2>
         <PropertyImageUploader
           onUploadComplete={handleImageUploadComplete}
           onUploadError={handleImageUploadError}
@@ -260,13 +292,24 @@ export default function EditListingForm({ propertyId, property, redirectTo, subm
           maxFiles={10}
           initialUrls={imageUrls}
         />
-      </div>
-      <div className="flex flex-wrap items-center gap-4 pt-2">
-        <Button type="submit" disabled={isSubmitting || (!isDirty && !imagesDirty) || !coverUrl} aria-busy={isSubmitting} title={!coverUrl ? "Add a cover photo" : !isDirty && !imagesDirty ? "No changes to save" : undefined}>
-          {isSubmitting ? "Updating..." : "Update listing"}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-      </div>
+      </section>
+
+      {/* Step 4 — Review & Save */}
+      <section aria-labelledby="edit-step-4" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <div className="mb-5 flex items-start gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-600 font-heading text-sm font-bold text-white">4</span>
+          <div>
+            <h2 id="edit-step-4" className="font-heading text-base font-semibold text-text-primary">Step 4 of 4 &middot; Review & Save</h2>
+            <p className="text-sm text-text-secondary">Confirm details and save changes</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-4">
+          <Button type="submit" disabled={isSubmitting || (!isDirty && !imagesDirty) || !coverUrl} aria-busy={isSubmitting} title={!coverUrl ? "Add a cover photo" : !isDirty && !imagesDirty ? "No changes to save" : undefined}>
+            {isSubmitting ? "Updating..." : "Update listing"}
+          </Button>
+          <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
+        </div>
+      </section>
     </form>
   );
 }

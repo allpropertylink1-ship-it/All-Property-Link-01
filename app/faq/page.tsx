@@ -46,7 +46,7 @@ const faqCategories: FAQCategory[] = [
     faqs: [
       {
         question: "How do I search for properties in a specific area?",
-        answer: "Use the search bar on the homepage or properties page. Filter by location (city, neighborhood), property type (apartment, house, land), price range, bedrooms, and more. You can also browse by city from the homepage.",
+        answer: "Use the search bar on the homepage or properties page. Filter by location (city, neighborhood), property type (apartment, house), price range, bedrooms, and more. Land and plots have their own dedicated section. You can also browse by city from the homepage.",
       },
       {
         question: "Can I save searches and get alerts for new listings?",

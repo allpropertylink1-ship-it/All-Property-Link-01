@@ -3,8 +3,11 @@
 import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { PasswordToggle } from "@/components/auth/PasswordToggle"
+import { PasswordStrength } from "@/components/auth/PasswordStrength"
+import { CenteredAuthShell } from "@/components/auth/stitch-auth"
 import { api } from "@/lib/api-client"
 import { FormBanner } from "@/components/shared/FormFeedback"
+import { BadgeCheck } from "@/components/ui/icons"
 
 function ActivateForm() {
   const router = useRouter()
@@ -57,14 +60,14 @@ function ActivateForm() {
 
   if (success) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4">
         <FormBanner variant="success">
           Your account has been activated. Redirecting to login...
         </FormBanner>
         <button
           type="button"
           onClick={() => router.push("/auth/login?tab=agent")}
-          className="touch-target w-full rounded-sm bg-primary px-4 py-3 font-medium text-white transition-colors hover:bg-primary-600"
+          className="touch-target w-full rounded-xl bg-primary px-4 py-3.5 font-semibold text-white transition-colors hover:bg-primary-600"
         >
           Go to login
         </button>
@@ -73,11 +76,7 @@ function ActivateForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <p className="text-sm text-text-secondary">
-        Set your password to activate your APL Representative account.
-      </p>
-
+    <form onSubmit={handleSubmit} className="space-y-4">
       {!token && (
         <FormBanner variant="error">
           Invalid activation link. Please contact your administrator.
@@ -91,7 +90,7 @@ function ActivateForm() {
       )}
 
       <div>
-        <label htmlFor="new-password" className="block text-sm font-medium text-text-primary">
+        <label htmlFor="new-password" className="block text-sm font-semibold text-text-primary">
           Password
         </label>
         <div className="mt-1">
@@ -105,10 +104,11 @@ function ActivateForm() {
             placeholder="At least 8 characters"
           />
         </div>
+        <PasswordStrength password={password} />
       </div>
 
       <div>
-        <label htmlFor="confirm-password" className="block text-sm font-medium text-text-primary">
+        <label htmlFor="confirm-password" className="block text-sm font-semibold text-text-primary">
           Confirm Password
         </label>
         <div className="mt-1">
@@ -126,7 +126,8 @@ function ActivateForm() {
       <button
         type="submit"
         disabled={loading || !token}
-        className="touch-target w-full rounded-sm bg-primary px-4 py-3 font-medium text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
+        aria-busy={loading}
+        className="touch-target w-full rounded-xl bg-primary px-4 py-3.5 font-semibold text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? "Activating..." : "Activate account"}
       </button>
@@ -136,27 +137,18 @@ function ActivateForm() {
 
 export default function AgentActivatePage() {
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-surface px-4">
-      <div className="w-full max-w-md">
-        <div className="mb-6 text-center">
-          <h2 className="font-heading text-xl font-bold text-text-primary">
-            All Property <span className="text-accent-600">Link</span>
-          </h2>
-        </div>
-        <div className="rounded-xl border border-border bg-surface p-6 sm:p-8">
-          <div className="mb-6 text-center">
-            <h1 className="font-heading text-3xl font-bold text-text-primary">
-              Activate your account
-            </h1>
-            <p className="mt-2 text-sm text-text-secondary">
-              Set your password to get started
-            </p>
-          </div>
-          <Suspense fallback={<div className="text-center text-text-secondary">Loading...</div>}>
-            <ActivateForm />
-          </Suspense>
-        </div>
-      </div>
-    </div>
+    <CenteredAuthShell
+      icon={BadgeCheck}
+      eyebrow="Representative Onboarding"
+      title="Activate your account"
+      subtitle="Set your password to activate your APL Representative account."
+      assurance="Official Representative Console and 256-Bit SSL Encrypted Session"
+      backHref="/auth/login?tab=agent"
+      backLabel="Back to login"
+    >
+      <Suspense fallback={<div className="text-center text-sm text-text-secondary">Loading...</div>}>
+        <ActivateForm />
+      </Suspense>
+    </CenteredAuthShell>
   )
 }

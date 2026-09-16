@@ -131,11 +131,20 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
   }
 
   return (
-    <form onSubmit={handleSubmit} onChange={() => setIsDirty(true)} className="space-y-6">
+    <form onSubmit={handleSubmit} onChange={() => setIsDirty(true)} className="space-y-6" aria-label="Create service listing">
 {error && (
         <FormBanner variant="error">{error}</FormBanner>
       )}
 
+      {/* Section 1 — Service details */}
+      <section aria-labelledby="svc-new-details" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <div className="mb-5 flex items-start gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-600 font-heading text-sm font-bold text-white">1</span>
+          <div>
+            <h2 id="svc-new-details" className="font-heading text-base font-semibold text-text-primary">Step 1 of 4 &middot; Service Details</h2>
+            <p className="text-sm text-text-secondary">Category, title, and description</p>
+          </div>
+        </div>
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
           <label htmlFor="categoryId" className="text-sm font-medium text-text-primary">
@@ -188,9 +197,22 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
             rows={4}
             required
             minLength={10}
-            className="flex w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            className="flex w-full rounded-lg border border-border bg-surface px-4 py-3 text-base text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
           />
         </div>
+      </div>
+      </section>
+
+      {/* Section 2 — Pricing & location */}
+      <section aria-labelledby="svc-new-pricing" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <div className="mb-5 flex items-start gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-600 font-heading text-sm font-bold text-white">2</span>
+          <div>
+            <h2 id="svc-new-pricing" className="font-heading text-base font-semibold text-text-primary">Step 2 of 4 &middot; Pricing & Location</h2>
+            <p className="text-sm text-text-secondary">What it costs and where it is offered</p>
+          </div>
+        </div>
+      <div className="grid gap-6 sm:grid-cols-2">
 
         <div className="space-y-2">
           <label htmlFor="price" className="text-sm font-medium text-text-primary">
@@ -274,9 +296,18 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
           />
         </div>
       </div>
+      </section>
 
+      {/* Section 3 — Photos */}
+      <section aria-labelledby="svc-new-photos" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <div className="mb-5 flex items-start gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-600 font-heading text-sm font-bold text-white">3</span>
+          <div>
+            <h2 id="svc-new-photos" className="font-heading text-base font-semibold text-text-primary">Step 3 of 4 &middot; Photos</h2>
+            <p className="text-sm text-text-secondary">Up to 10 images showing your work</p>
+          </div>
+        </div>
       <div className="space-y-4">
-        <h2 className="font-semibold text-text-primary">Service Images</h2>
 
         {imagePreviews.length < 10 && (
           <>
@@ -292,7 +323,7 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
             />
             <label
               htmlFor={inputId}
-              className="block cursor-pointer border-2 border-dashed rounded-lg bg-surface-secondary p-6 text-center hover:border-primary-500 transition-border"
+              className="touch-target block cursor-pointer border-2 border-dashed rounded-xl bg-surface-secondary p-6 text-center hover:border-primary-500 transition-colors"
             >
               <div className="flex flex-col items-center gap-3 pointer-events-none">
                 {uploading ? (
@@ -300,18 +331,19 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
                 ) : (
                   <Upload className="h-8 w-8 text-primary-500" />
                 )}
-                <span className="text-sm text-text-primary">
+                <span className="text-sm font-medium text-text-primary">
                   {uploading ? "Uploading..." : "Click to upload images"}
                 </span>
+                <span className="text-xs text-text-secondary">JPEG, PNG, WebP — Max 10MB each</span>
               </div>
             </label>
           </>
         )}
 
         {imagePreviews.length > 0 && (
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-3" role="list" aria-label="Service images">
             {imagePreviews.map((preview, index) => (
-              <div key={index} className="relative group">
+              <div key={index} className="relative group rounded-xl border border-border bg-surface p-2" role="listitem">
                 <img
                   src={preview}
                   alt="Service image"
@@ -320,7 +352,7 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(index)}
-                  className="absolute top-2 right-2 rounded-full bg-error-500/80 p-1 text-white hover:bg-error-500 transition-colors"
+                  className="touch-target absolute top-3 right-3 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-error-500/80 text-white hover:bg-error-500 transition-colors"
                   aria-label="Remove image"
                 >
                   <X size={14} />
@@ -330,8 +362,18 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
           </div>
         )}
       </div>
+      </section>
 
-      <div className="flex items-center gap-4 pt-2">
+      {/* Section 4 — Review & publish */}
+      <section aria-labelledby="svc-new-review" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <div className="mb-5 flex items-start gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-600 font-heading text-sm font-bold text-white">4</span>
+          <div>
+            <h2 id="svc-new-review" className="font-heading text-base font-semibold text-text-primary">Step 4 of 4 &middot; Review & Publish</h2>
+            <p className="text-sm text-text-secondary">Confirm and publish your service</p>
+          </div>
+        </div>
+      <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center pt-2">
         {requireOwnerConsent && (
           <label className="flex w-full cursor-pointer items-start gap-3 rounded-lg border border-border bg-surface-secondary px-4 py-3 text-sm">
             <input
@@ -363,6 +405,7 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
           Cancel
         </button>
       </div>
+      </section>
     </form>
   );
 }

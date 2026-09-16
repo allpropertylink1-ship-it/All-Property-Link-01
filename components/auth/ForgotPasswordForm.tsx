@@ -1,7 +1,9 @@
 ﻿"use client"
 import { useState } from "react"
 import { api } from "@/lib/api-client"
+import { AuthSubmitButton, InputLeadingIcon, stitchInputWithIconClass } from "./stitch-auth"
 import { FormBanner } from "@/components/shared/FormFeedback"
+import { CheckCircle, Mail } from "@/components/ui/icons"
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("")
@@ -27,46 +29,55 @@ export function ForgotPasswordForm() {
 
   if (sent) {
     return (
-      <div className="rounded-lg bg-success-500/10 px-4 py-8 text-center">
-        <p className="text-sm text-text-primary">
-          If an account exists with that email, we&apos;ve sent a reset link.
-        </p>
+      <div className="space-y-4 text-center">
+        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-success-50 text-success-600">
+          <CheckCircle size={22} />
+        </span>
+        <FormBanner variant="success">
+          If an account exists with that email, we&apos;ve sent a reset link. A password reset token valid for 15 minutes will be sent to this email.
+        </FormBanner>
+        <a
+          href="/auth/login"
+          className="touch-target inline-flex w-full items-center justify-center rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-primary-600"
+        >
+          Back to sign in
+        </a>
       </div>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
         <FormBanner variant="error">{error}</FormBanner>
       )}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-text-primary">
-          Email
+        <label htmlFor="email" className="block text-sm font-semibold text-text-primary">
+          Registered Email Address
         </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-          style={{ fontSize: "16px" }}
-          placeholder="you@example.com"
-        />
+        <div className="relative">
+          <InputLeadingIcon icon={Mail} />
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            aria-label="Registered Email Address"
+            className={stitchInputWithIconClass}
+            style={{ fontSize: "16px" }}
+            placeholder="e.g. kamau.mwangi@example.co.ke"
+          />
+        </div>
+        <p className="mt-1 text-xs text-text-secondary">A password reset token valid for 15 minutes will be sent to this email.</p>
       </div>
-      <button
-        type="submit"
-        disabled={loading}
-        className="touch-target w-full rounded-sm bg-primary px-4 py-3 font-medium text-white transition-colors hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {loading ? "Sending..." : "Send reset link"}
-      </button>
+      <AuthSubmitButton loading={loading} label="Send Password Reset Link" loadingLabel="Sending..." />
       <p className="text-center text-sm text-text-secondary">
-        <a href="/auth/login" className="font-medium text-primary-600 hover:text-primary-700">
-          Back to sign in
+        Remember your password?{" "}
+        <a href="/auth/login" className="font-semibold text-accent-600 hover:text-accent-700">
+          Log In
         </a>
       </p>
     </form>

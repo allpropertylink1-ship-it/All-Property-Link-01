@@ -32,16 +32,23 @@ async function proxy(req: NextRequest, key: string) {
   }
 
   let upstream: Response
+  const controller = new AbortController()
+  const t = setTimeout(() => controller.abort(), 8000)
   try {
     upstream = await fetch(target, {
       method,
       headers,
       body,
+      signal: controller.signal,
       // Use Next cache only for public GETs; other requests bypass cache
       ...(method === "GET" && isPublicPath(key) ? { next: { revalidate: 60 } } : { cache: "no-store" }),
     })
-  } catch {
+  } catch (e) {
+    clearTimeout(t)
+    console.error(`[proxy] upstream failed ${method} ${key} -> ${target}:`, e instanceof Error ? e.message : e)
     return NextResponse.json({ error: "Upstream unavailable" }, { status: 502 })
+  } finally {
+    clearTimeout(t)
   }
 
   const respBody = await upstream.arrayBuffer()

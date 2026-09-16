@@ -1,16 +1,17 @@
 import Link from "next/link";
-import Image from "next/image";
 import { getServiceListings, getServiceCategories } from "@/lib/services/service";
 import type { ServiceCategory, ServiceListingCard } from "@/lib/services/service";
-import { Search, MapPin, Briefcase } from "@/components/ui/icons";
+import { Search, MapPin, Shield, Clock, Briefcase, ArrowRight } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
-import { resolveImageUrl } from "@/lib/images";
+import { siteUrl } from "@/lib/seo";
+import { ServiceCardCompact } from "@/components/browse/ServiceCardCompact";
 
 export const revalidate = 60;
 
 export const metadata = {
   title: "Services & Fundis in Kenya",
-  description: "Find trusted fundis and service providers in Kenya — plumbing, electrical, carpentry, cleaning, security, property management and more.",
+  description:
+    "Find trusted fundis and service providers in Kenya — plumbing, electrical, carpentry, cleaning, security, property management and more.",
   alternates: { canonical: "/services" },
 };
 
@@ -25,188 +26,329 @@ export default async function ServicesPage({ searchParams }: Props) {
     getServiceCategories(),
   ]);
 
-  return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
-      <h1 className="mb-8 font-heading text-3xl font-bold text-text-primary">
-        Find Fundis &amp; Service Providers in Kenya
-      </h1>
+  const hasFilters = Boolean(search || city || category || type);
 
-      {categories.length > 0 && (
-        <div className="mb-8">
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
-            <Link
-              href="/services"
-              className={`shrink-0 rounded-xl border px-4 py-3 text-center transition-colors ${
-                !category
-                  ? "border-primary-600 bg-primary-600 text-white"
-                  : "border-border bg-surface text-text-primary hover:bg-surface-secondary"
-              }`}
-            >
-              <p className="text-sm font-medium">All</p>
-            </Link>
-            {categories.map((cat: ServiceCategory) => (
-              <Link
-                key={cat.id}
-                href={`/services?category=${cat.slug}`}
-                className={`shrink-0 rounded-xl border px-4 py-3 text-center transition-colors ${
-                  category === cat.slug
-                    ? "border-primary-600 bg-primary-600 text-white"
-                    : "border-border bg-surface text-text-primary hover:bg-surface-secondary"
-                }`}
+  const typeHref = (value?: string) => {
+    const params = new URLSearchParams();
+    if (category) params.set("category", category);
+    if (city) params.set("city", city);
+    if (search) params.set("search", search);
+    if (value) params.set("type", value);
+    const qs = params.toString();
+    return qs ? `/services?${qs}` : "/services";
+  };
+
+  const categoryHref = (slug?: string) => {
+    const params = new URLSearchParams();
+    if (slug) params.set("category", slug);
+    if (city) params.set("city", city);
+    if (search) params.set("search", search);
+    if (type) params.set("type", type);
+    const qs = params.toString();
+    return qs ? `/services?${qs}` : "/services";
+  };
+
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SearchResultsPage",
+    name: "Services & Fundis in Kenya",
+    url: `${siteUrl()}/services`,
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: data.total,
+      itemListElement: data.services.slice(0, 20).map((s, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `${siteUrl()}/services/${s.id}`,
+        name: s.title,
+      })),
+    },
+  };
+
+  return (
+    <div className="bg-surface">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+
+      {/* ─── Directory header (Stitch: eyebrow, H1, trust chips) ─── */}
+      <section className="border-b border-border bg-surface">
+        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-8 sm:py-10">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-accent-600">
+                <Shield size={16} />
+                Verified Trades &amp; Pros
+                <span aria-hidden className="text-text-secondary">/</span>
+                <span className="text-text-secondary">Directory Desk</span>
+              </p>
+              <h1 className="font-heading text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
+                Verified Fundis &amp; Trade Specialists
+              </h1>
+              <p className="mt-2 text-sm leading-relaxed text-text-secondary sm:text-base">
+                Contract directly with certified technicians, registered contractors, and trusted
+                professional artisans across Kenya. Zero markup, zero middlemen.
+              </p>
+            </div>
+            <div className="flex shrink-0 flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2.5 rounded-xl bg-surface-secondary px-4 py-2.5">
+                <Shield size={20} className="text-primary-600" />
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-text-primary">100% ID-Vetted</span>
+                  <span className="text-xs text-text-secondary">Background checked</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5 rounded-xl bg-surface-secondary px-4 py-2.5">
+                <Clock size={20} className="text-accent-600" />
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-text-primary">Direct Contact</span>
+                  <span className="text-xs text-text-secondary">Call or WhatsApp</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ─── Search matrix ─── */}
+          <form method="GET" role="search" aria-label="Search fundis and services" className="flex flex-col gap-2 rounded-xl bg-surface-secondary p-2 lg:flex-row lg:items-center">
+            {category && <input type="hidden" name="category" value={category} />}
+            {type && <input type="hidden" name="type" value={type} />}
+            <div className="relative flex-1">
+              <Search size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+              <label htmlFor="service-search" className="sr-only">
+                Search plumber, electrician, mason, painter
+              </label>
+              <input
+                id="service-search"
+                type="search"
+                name="search"
+                defaultValue={search || ""}
+                placeholder="Search plumber, electrician, mason, painter..."
+                autoComplete="off"
+                className="min-h-touch w-full rounded-lg border border-transparent bg-surface py-3 pl-10 pr-4 text-[16px] text-text-primary placeholder:text-muted focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              />
+            </div>
+            <div className="relative w-full lg:w-72">
+              <MapPin size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+              <label htmlFor="service-city" className="sr-only">
+                Location
+              </label>
+              <input
+                id="service-city"
+                type="text"
+                name="city"
+                defaultValue={city || ""}
+                placeholder="All locations"
+                autoComplete="address-level2"
+                className="min-h-touch w-full rounded-lg border border-transparent bg-surface py-3 pl-10 pr-4 text-[16px] text-text-primary placeholder:text-muted focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="inline-flex min-h-touch flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-600 lg:flex-none"
               >
-                {cat.icon && <span className="mb-1 block text-2xl">{cat.icon}</span>}
-                <p className="text-sm font-medium">{cat.name}</p>
-                {cat._count && cat._count.serviceListings > 0 && (
-                  <p className="text-xs text-muted">{cat._count.serviceListings}</p>
+                <Search size={16} />
+                Filter Pros
+              </button>
+              {hasFilters && (
+                <Link
+                  href="/services"
+                  className="inline-flex min-h-touch items-center justify-center rounded-lg border border-border bg-surface px-4 py-3 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-secondary"
+                >
+                  Clear
+                </Link>
+              )}
+            </div>
+          </form>
+
+          {/* ─── Category rails ─── */}
+          {categories.length > 0 && (
+            <nav aria-label="Service categories" className="flex gap-2 overflow-x-auto pb-1">
+              <Link
+                href={categoryHref(undefined)}
+                aria-current={!category ? "page" : undefined}
+                className={cn(
+                  "inline-flex min-h-touch shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                  !category
+                    ? "bg-primary font-bold text-white"
+                    : "bg-surface-secondary text-text-primary hover:bg-surface",
                 )}
+              >
+                All Specialists
+                <span className="text-xs opacity-80">({data.total})</span>
               </Link>
+              {categories.map((cat: ServiceCategory) => (
+                <Link
+                  key={cat.id}
+                  href={categoryHref(cat.slug)}
+                  aria-current={category === cat.slug ? "page" : undefined}
+                  className={cn(
+                    "inline-flex min-h-touch shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                    category === cat.slug
+                      ? "bg-primary font-bold text-white"
+                      : "bg-surface-secondary text-text-primary hover:bg-surface",
+                  )}
+                >
+                  {cat.name}
+                  {cat._count && cat._count.serviceListings > 0 && (
+                    <span className="text-xs opacity-80">({cat._count.serviceListings})</span>
+                  )}
+                </Link>
+              ))}
+            </nav>
+          )}
+
+          {/* ─── Fundi / provider toggle ─── */}
+          <div className="flex gap-2" role="group" aria-label="Provider type">
+            <Link
+              href={typeHref(undefined)}
+              aria-current={!type ? "page" : undefined}
+              className={cn(
+                "inline-flex min-h-touch items-center rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                !type
+                  ? "bg-primary-600 text-white"
+                  : "border border-border bg-surface text-text-secondary hover:bg-surface-secondary",
+              )}
+            >
+              All
+            </Link>
+            <Link
+              href={typeHref("FUNDI")}
+              aria-current={type === "FUNDI" ? "page" : undefined}
+              className={cn(
+                "inline-flex min-h-touch items-center rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                type === "FUNDI"
+                  ? "bg-primary-600 text-white"
+                  : "border border-border bg-surface text-text-secondary hover:bg-surface-secondary",
+              )}
+            >
+              Fundis
+            </Link>
+            <Link
+              href={typeHref("SERVICE_PROVIDER")}
+              aria-current={type === "SERVICE_PROVIDER" ? "page" : undefined}
+              className={cn(
+                "inline-flex min-h-touch items-center rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                type === "SERVICE_PROVIDER"
+                  ? "bg-primary-600 text-white"
+                  : "border border-border bg-surface text-text-secondary hover:bg-surface-secondary",
+              )}
+            >
+              Service Providers
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Results ─── */}
+      <section className="mx-auto max-w-7xl px-4 py-8" aria-live="polite">
+        <p className="mb-6 border-b border-border pb-3 text-sm text-text-secondary">
+          Showing{" "}
+          <strong className="text-text-primary">
+            {data.services.length} of {data.total}
+          </strong>{" "}
+          {data.total === 1 ? "verified specialist" : "verified specialists"}
+          {category && (
+            <>
+              {" "}in <strong className="text-text-primary">{category}</strong>
+            </>
+          )}
+        </p>
+
+        {data.services.length === 0 ? (
+          <div role="status" className="py-16 text-center">
+            <Briefcase size={48} className="mx-auto mb-4 text-muted" />
+            <p className="font-medium text-text-primary">No verified specialists found</p>
+            <p className="mt-1 text-sm text-text-secondary">
+              Try adjusting your search or clearing the filters.
+            </p>
+            {hasFilters && (
+              <Link
+                href="/services"
+                className="mt-4 inline-flex min-h-touch items-center rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-text-secondary hover:bg-surface-secondary"
+              >
+                Clear all filters
+              </Link>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" role="list" aria-label="Verified fundis and service providers">
+            {data.services.map((service: ServiceListingCard) => (
+              <div key={service.id} role="listitem" className="min-w-0">
+                <ServiceCardCompact
+                  id={service.id}
+                  title={service.title}
+                  description={service.description}
+                  price={service.price != null ? Number(service.price) : null}
+                  currency={service.currency}
+                  pricePeriod={service.pricePeriod}
+                  city={service.city}
+                  region={service.region}
+                  images={service.images}
+                  category={service.category}
+                  user={service.user}
+                  phone={service.user?.phone ?? null}
+                />
+              </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="mb-6 flex gap-2">
-        <Link href="/services" className={cn("rounded-lg px-4 py-2 text-sm font-medium transition-colors", !type ? "bg-primary-600 text-white" : "bg-surface border border-border text-text-secondary hover:bg-surface-secondary")}>All</Link>
-        <Link href="/services?type=FUNDI" className={cn("rounded-lg px-4 py-2 text-sm font-medium transition-colors", type === "FUNDI" ? "bg-primary-600 text-white" : "bg-surface border border-border text-text-secondary hover:bg-surface-secondary")}>Fundis</Link>
-        <Link href="/services?type=SERVICE_PROVIDER" className={cn("rounded-lg px-4 py-2 text-sm font-medium transition-colors", type === "SERVICE_PROVIDER" ? "bg-primary-600 text-white" : "bg-surface border border-border text-text-secondary hover:bg-surface-secondary")}>Service Providers</Link>
-      </div>
+        {data.totalPages > 1 && (
+          <nav aria-label="Services pages" className="mt-8 flex flex-wrap items-center justify-center gap-2 border-t border-border pt-6">
+            {Array.from({ length: data.totalPages }, (_, i) => i + 1).map((p) => {
+              const params = new URLSearchParams();
+              if (category) params.set("category", category);
+              if (city) params.set("city", city);
+              if (search) params.set("search", search);
+              if (type) params.set("type", type);
+              params.set("page", String(p));
+              return (
+                <Link
+                  key={p}
+                  href={`/services?${params}`}
+                  aria-current={p === data.page ? "page" : undefined}
+                  aria-label={`Page ${p}`}
+                  className={cn(
+                    "inline-flex min-h-touch min-w-touch items-center justify-center rounded-lg border px-4 py-2 text-sm",
+                    p === data.page
+                      ? "border-primary-600 bg-primary-600 font-bold text-white"
+                      : "border-border text-text-secondary hover:bg-surface-secondary",
+                  )}
+                >
+                  {p}
+                </Link>
+              );
+            })}
+          </nav>
+        )}
+      </section>
 
-      <div className="mb-8">
-        <form method="GET" className="flex flex-wrap gap-3">
-          <div className="relative min-w-0 flex-1 min-[360px]:min-w-[200px]">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-            <input
-              type="text"
-              name="search"
-              defaultValue={search || ""}
-              placeholder="Search services..."
-              className="w-full rounded-lg border border-border bg-surface py-3 pl-9 pr-4 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-            />
-          </div>
-          <div className="relative w-full sm:w-48">
-            <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-            <input
-              type="text"
-              name="city"
-              defaultValue={city || ""}
-              placeholder="City..."
-              className="w-full rounded-lg border border-border bg-surface py-3 pl-9 pr-4 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-            />
-          </div>
-          <button
-            type="submit"
-            className="touch-target rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white hover:bg-primary-600"
-          >
-            Search
-          </button>
-          {(search || city || category) && (
+      {/* ─── Fundi registration banner ─── */}
+      <section className="bg-primary">
+        <div className="mx-auto max-w-7xl px-4 py-10">
+          <div className="flex flex-col items-start justify-between gap-6 rounded-xl bg-primary-600 p-6 sm:p-8 lg:flex-row lg:items-center">
+            <div className="max-w-2xl">
+              <p className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-accent-200">
+                <Briefcase size={14} />
+                Kenya Artisan Network
+              </p>
+              <h2 className="font-heading text-2xl font-bold tracking-tight text-white">
+                Are You a Skilled Fundi or Service Provider in Kenya?
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-primary-100">
+                Register your profile for free and get direct phone calls and WhatsApp inquiries
+                from property owners and estate managers. No commissions taken on your labor.
+              </p>
+            </div>
             <Link
-              href="/services"
-              className="touch-target inline-flex items-center rounded-lg border border-border px-4 py-3 text-sm font-medium text-text-secondary hover:bg-surface-secondary"
+              href="/auth"
+              className="inline-flex min-h-touch shrink-0 items-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-accent-600"
             >
-              Clear
+              Register as a Fundi
+              <ArrowRight size={16} />
             </Link>
-          )}
-        </form>
-      </div>
-
-      <p className="mb-6 text-sm text-text-secondary">
-        {data.total} {data.total === 1 ? "service" : "services"} found
-      </p>
-
-      {data.services.length === 0 ? (
-        <div className="py-16 text-center">
-          <Briefcase size={48} className="mx-auto mb-4 text-muted" />
-          <p className="text-text-secondary">No services found. Try adjusting your filters.</p>
+          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-6 min-[360px]:grid-cols-2 lg:grid-cols-3">
-          {data.services.map((service: ServiceListingCard) => {
-            const rawImages = Array.isArray(service.images) ? service.images : [];
-            const imageUrlRaw = rawImages.length > 0 ? rawImages[0] : null;
-            const imageUrl = imageUrlRaw ? resolveImageUrl(imageUrlRaw) : null;
-
-            return (
-              <Link
-                key={service.id}
-                href={`/services/${service.id}`}
-                className="group overflow-hidden rounded-xl border border-border bg-surface transition-all hover:shadow-md"
-              >
-                <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
-                  {imageUrl ? (
-                    <Image
-                  unoptimized
-                      src={imageUrl}
-                      alt={service.title}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center">
-                      <Briefcase size={48} className="text-muted" />
-                    </div>
-                  )}
-                </div>
-                <div className="p-4">
-                  {service.category && (
-                    <p className="mb-1 text-xs font-medium uppercase tracking-wider text-primary-600">
-                      {service.category.name}
-                    </p>
-                  )}
-                  <h3 className="line-clamp-1 font-heading text-lg font-semibold text-text-primary">
-                    {service.title}
-                  </h3>
-                  <p className="mt-1 line-clamp-1 text-sm text-text-secondary">
-                    {service.user?.companyName ||
-                      `${service.user?.firstName || ""} ${service.user?.lastName || ""}`.trim() ||
-                      "Anonymous"}
-                  </p>
-                  {service.city && (
-                    <p className="mt-1 flex items-center gap-1 text-sm text-text-secondary">
-                      <MapPin size={14} className="shrink-0" />
-                      {service.city}
-                      {service.region && `, ${service.region}`}
-                    </p>
-                  )}
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="font-semibold text-text-primary">
-                      {service.price != null
-                        ? `KES ${Number(service.price).toLocaleString()}${service.pricePeriod !== "TOTAL" ? `/${service.pricePeriod.toLowerCase().replace("per_", "")}` : ""}`
-                        : "Price on request"}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
-
-      {data.totalPages > 1 && (
-        <div className="mt-8 flex flex-wrap justify-center gap-2">
-          {Array.from({ length: data.totalPages }, (_, i) => i + 1).map((p) => {
-            const params = new URLSearchParams();
-            if (category) params.set("category", category);
-            if (city) params.set("city", city);
-            if (search) params.set("search", search);
-            params.set("page", String(p));
-            return (
-              <Link
-                key={p}
-                href={`/services?${params}`}
-                className={`touch-target inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm ${
-                  p === data.page
-                    ? "border-primary-600 bg-primary-600 text-white"
-                    : "border-border text-text-secondary hover:bg-surface-secondary"
-                }`}
-              >
-                {p}
-              </Link>
-            );
-          })}
-        </div>
-      )}
+      </section>
     </div>
   );
 }

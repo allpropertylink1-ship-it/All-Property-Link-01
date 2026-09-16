@@ -2,7 +2,7 @@
 
 export function BrowseSkeleton({ count = 8 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4" role="status" aria-label="Loading listings">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface animate-pulse">
           <div className="aspect-[4/3] bg-surface-secondary" />

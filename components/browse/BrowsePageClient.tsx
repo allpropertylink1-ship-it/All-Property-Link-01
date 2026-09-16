@@ -5,7 +5,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { FilterPillsGroup } from "./FilterPills";
 import { BrowseResultsGrid } from "./BrowseResultsGrid";
 import { BrowseSkeleton } from "./BrowseSkeleton";
-import { Search, X } from "@/components/ui/icons";
+import { MapPin, Search, SlidersHorizontal, X } from "@/components/ui/icons";
+import { fetchCityCounts } from "@/lib/cities-client";
 
 type PropertyFilterKey = "ALL" | "FOR_SALE" | "FOR_RENT_LONG_TERM" | "FOR_RENT_SHORT_TERM" | "LAND";
 type ServiceFilterKey = "ALL" | "FUNDI" | "SERVICE_PROVIDER";
@@ -64,7 +65,7 @@ interface ApiResponse<T> {
 }
 
 const PROPERTY_FILTER_MAP: Record<PropertyFilterKey, Record<string, string>> = {
-  ALL: { limit: "20" },
+  ALL: { limit: "20", includeLand: "1" },
   FOR_SALE: { purpose: "FOR_SALE", limit: "20" },
   FOR_RENT_LONG_TERM: { purpose: "FOR_RENT_LONG_TERM", limit: "20" },
   FOR_RENT_SHORT_TERM: { purpose: "FOR_RENT_SHORT_TERM", limit: "20" },
@@ -119,6 +120,15 @@ export default function BrowsePageClient() {
   const searchParam = searchParams.get("search") ?? searchParams.get("q") ?? "";
   const [searchInput, setSearchInput] = useState(searchParam);
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const [counties, setCounties] = useState<{ city: string; count: number }[]>([]);
+
+  useEffect(() => {
+    fetchCityCounts()
+      .then((cityCounts) =>
+        setCounties((cityCounts || []).map((c) => ({ city: c.city, count: c.count })))
+      )
+      .catch(() => setCounties([]));
+  }, []);
 
   useEffect(() => {
     setSearchInput(searchParam);
@@ -402,10 +412,14 @@ export default function BrowsePageClient() {
       : "Search fundis & services by title or description…";
 
   return (
-    <div className="mx-auto max-w-content px-4 py-8">
-      <div className="mb-8 text-center">
-        <h1 className="font-heading text-3xl font-bold text-text-primary">Browse All Listings</h1>
-        <p className="mt-2 text-text-secondary">Explore everything available on All Property Link</p>
+    <div className="mx-auto max-w-content px-4 py-6">
+      <div className="mb-6">
+        <p className="text-xs font-bold uppercase tracking-wider text-success-600">
+          <span className="mr-2 inline-block h-2 w-2 rounded-full bg-success-500" aria-hidden="true" />
+          Live Feed Verified
+        </p>
+        <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">Browse All Listings</h1>
+        <p className="mt-1 text-sm text-text-secondary">Explore everything available on All Property Link</p>
       </div>
 
       <div className="mb-6 flex gap-4 border-b border-border">
@@ -441,45 +455,105 @@ export default function BrowsePageClient() {
         </button>
       </div>
 
-      {/* Search — always visible, integrates with active category filter */}
-      <form
-        onSubmit={handleSearchSubmit}
-        role="search"
-        aria-label={activeTab === "properties" ? "Search properties" : "Search services"}
-        className="mb-6"
-      >
-        <div className="relative flex items-center">
-          <Search
-            size={18}
-            className="pointer-events-none absolute left-3.5 text-muted"
-            aria-hidden="true"
-          />
-          <input
-            type="search"
-            value={searchInput}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder={searchPlaceholder}
-            className="w-full rounded-xl border border-border bg-surface py-3 pl-11 pr-14 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-            aria-label={activeTab === "properties" ? "Search properties" : "Search services"}
-            autoComplete="off"
-          />
-          {searchInput ? (
-            <button
-              type="button"
-              onClick={handleSearchClear}
-              className="absolute right-1 flex h-11 w-11 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
-              aria-label="Clear search"
+      {/* Search matrix — keyword + county + type + Update Feed, integrates with active category filter */}
+      <div className="mb-6 rounded-xl bg-surface p-2 shadow-sm">
+        <form
+          onSubmit={handleSearchSubmit}
+          role="search"
+          aria-label={activeTab === "properties" ? "Search properties" : "Search services"}
+          className={`grid grid-cols-1 items-center gap-2 ${
+            activeTab === "properties" ? "md:grid-cols-4" : "md:grid-cols-3"
+          }`}
+        >
+          <div className="relative flex min-h-[44px] items-center">
+            <Search
+              size={18}
+              className="pointer-events-none absolute left-3.5 text-text-secondary"
+              aria-hidden="true"
+            />
+            <label htmlFor="browse-keyword" className="sr-only">
+              {activeTab === "properties" ? "Search properties" : "Search services"}
+            </label>
+            <input
+              id="browse-keyword"
+              type="search"
+              value={searchInput}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder={searchPlaceholder}
+              className="w-full bg-transparent py-2 pl-11 pr-11 text-[16px] text-text-primary placeholder:text-text-secondary focus:outline-none"
+              autoComplete="off"
+            />
+            {searchInput ? (
+              <button
+                type="button"
+                onClick={handleSearchClear}
+                className="absolute right-1 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
+                aria-label="Clear search"
+              >
+                <X size={16} />
+              </button>
+            ) : null}
+          </div>
+
+          <div className="flex min-h-[44px] items-center gap-2 px-3 py-2">
+            <MapPin size={18} className="shrink-0 text-text-secondary" />
+            <label htmlFor="browse-county" className="sr-only">
+              Filter by county
+            </label>
+            <select
+              id="browse-county"
+              value={searchParams.get("city") ?? ""}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v) handleFilterChange("city", v);
+                else handleFilterRemove("city");
+              }}
+              className="w-full cursor-pointer bg-transparent text-[16px] text-text-primary focus:outline-none"
             >
-              <X size={16} />
-            </button>
-          ) : null}
-        </div>
+              <option value="">All Counties</option>
+              {counties.map((c) => (
+                <option key={c.city} value={c.city}>
+                  {c.city} ({c.count})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {activeTab === "properties" && (
+            <div className="flex min-h-[44px] items-center gap-2 px-3 py-2">
+              <SlidersHorizontal size={18} className="shrink-0 text-text-secondary" />
+              <label htmlFor="browse-type" className="sr-only">
+                Filter by category
+              </label>
+              <select
+                id="browse-type"
+                value={propertyFilter}
+                onChange={(e) => handlePropertyFilterChange(e.target.value)}
+                className="w-full cursor-pointer bg-transparent text-[16px] text-text-primary focus:outline-none"
+              >
+                <option value="ALL">All Categories</option>
+                <option value="FOR_SALE">For Sale</option>
+                <option value="FOR_RENT_LONG_TERM">For Rent</option>
+                <option value="FOR_RENT_SHORT_TERM">Short-Term</option>
+                <option value="LAND">Land &amp; Plots</option>
+              </select>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-600"
+          >
+            <SlidersHorizontal size={18} />
+            <span>Update Feed</span>
+          </button>
+        </form>
         {searchParam && !loading && (
-          <p className="mt-2 text-xs text-text-secondary" aria-live="polite">
+          <p className="px-3 pb-2 pt-1 text-xs text-text-secondary" aria-live="polite">
             Searching {activeTab} {isDefaultFilter ? "" : `in ${filterLabels[currentFilter] ?? currentFilter} `}for <span className="font-medium text-text-primary">&ldquo;{searchParam}&rdquo;</span>
           </p>
         )}
-      </form>
+      </div>
 
       {/* Only show filter pills if no filter is active from URL, or if user wants to change filter */}
       {!isFilterFromUrl && (

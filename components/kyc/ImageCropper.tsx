@@ -206,25 +206,25 @@ export default function ImageCropper({
   const hasRect = rect.width > 0 && rect.height > 0
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-      <div className="mx-4 w-full max-w-2xl rounded-xl bg-white shadow-2xl max-h-[90dvh] overflow-y-auto">
-        <div className="flex items-center justify-between border-b px-6 py-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-text-primary/70 p-4">
+      <div className="mx-4 w-full max-w-2xl rounded-xl border border-border bg-surface shadow-lg max-h-[90dvh] overflow-y-auto">
+        <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="font-heading text-lg font-semibold text-text-primary">
               Crop {sideLabel || "Image"}
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-text-secondary">
               Drag the corners or edges to crop freely. Drag inside to reposition.
             </p>
           </div>
-          <button onClick={onCancel} className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+          <button onClick={onCancel} aria-label="Cancel cropping" className="touch-target rounded-full p-2.5 text-text-secondary hover:bg-surface-secondary hover:text-text-primary">
             <X size={20} />
           </button>
         </div>
 
         <div
           ref={containerRef}
-          className="relative h-96 w-full overflow-hidden bg-gray-900 touch-none"
+          className="relative h-96 w-full overflow-hidden bg-text-primary touch-none"
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
@@ -270,13 +270,13 @@ export default function ImageCropper({
           )}
         </div>
 
-        <div className="flex flex-col gap-4 border-t px-4 py-4 sm:flex-row sm:items-center sm:px-6">
+        <div className="flex flex-col gap-4 border-t border-border px-4 py-4 sm:flex-row sm:items-center sm:px-6">
           <div className="flex items-center justify-between gap-4 sm:contents">
-            <span className="shrink-0 text-xs font-medium text-gray-500">
+            <span className="shrink-0 text-xs font-medium tabular-nums text-text-secondary" aria-live="polite">
               {Math.round(rect.width)} &times; {Math.round(rect.height)} px
             </span>
             <div className="flex items-center gap-2">
-              <ZoomOut size={18} className="shrink-0 text-gray-500" />
+              <ZoomOut size={18} className="shrink-0 text-text-secondary" />
               <input
                 type="range"
                 min={0.5}
@@ -284,16 +284,17 @@ export default function ImageCropper({
                 step={0.01}
                 value={zoom}
                 onChange={(e) => setZoom(Number(e.target.value))}
-                className="h-2 w-28 sm:w-32 cursor-pointer appearance-none rounded-full bg-gray-200 accent-primary-600"
+                aria-label="Crop zoom"
+                className="h-2 w-28 sm:w-32 cursor-pointer appearance-none rounded-full bg-border accent-primary-600"
               />
-              <ZoomIn size={18} className="shrink-0 text-gray-500" />
+              <ZoomIn size={18} className="shrink-0 text-text-secondary" />
             </div>
           </div>
 
           <div className="flex gap-3 sm:ml-auto">
             <button
               onClick={onCancel}
-              className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 sm:flex-initial touch-target"
+              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-primary hover:bg-surface-secondary sm:flex-initial touch-target"
             >
               Cancel
             </button>

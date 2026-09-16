@@ -61,26 +61,29 @@ export default function AgentReferralsPage() {
 
   return (
     <AgentGuard>
-      <div className="mb-6">
-        <h1 className="font-heading text-2xl font-bold text-text-primary">Referrals</h1>
+      <section aria-labelledby="referrals-heading" className="mb-6 rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <p className="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-secondary">
+          Commission hub
+        </p>
+        <h1 id="referrals-heading" className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">Referrals</h1>
         <p className="mt-1 text-sm text-text-secondary">{total} {tab === "DELETED" ? "deleted" : "active"} referral{total !== 1 ? "s" : ""}</p>
-      </div>
+      </section>
 
-      <div className="mb-4 flex gap-1 rounded-lg bg-surface-secondary p-1">
-        <button type="button" onClick={() => setTab("ACTIVE")}
-          className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors ${tab === "ACTIVE" ? "bg-surface text-text-primary shadow-sm" : "text-text-secondary hover:text-text-primary"}`}>
+      <div className="mb-4 flex gap-1 rounded-xl border border-border bg-surface-secondary p-1" role="group" aria-label="Referral status filter">
+        <button type="button" onClick={() => setTab("ACTIVE")} aria-pressed={tab === "ACTIVE"}
+          className={`touch-target flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors sm:flex-none ${tab === "ACTIVE" ? "bg-surface text-text-primary shadow-sm" : "text-text-secondary hover:text-text-primary"}`}>
           <Users size={16} /> Active
         </button>
-        <button type="button" onClick={() => setTab("DELETED")}
-          className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors ${tab === "DELETED" ? "bg-surface text-text-primary shadow-sm" : "text-text-secondary hover:text-text-primary"}`}>
+        <button type="button" onClick={() => setTab("DELETED")} aria-pressed={tab === "DELETED"}
+          className={`touch-target flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors sm:flex-none ${tab === "DELETED" ? "bg-surface text-text-primary shadow-sm" : "text-text-secondary hover:text-text-primary"}`}>
           <Archive size={16} /> Deleted
         </button>
       </div>
 
       <div className="relative mb-4">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-        <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or email..."
-          className="w-full rounded-lg border border-border bg-surface py-2.5 pl-9 pr-4 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15"
+        <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or email..." aria-label="Search referrals by name or email"
+          className="min-h-[44px] w-full rounded-lg border border-border bg-surface py-2.5 pl-9 pr-4 text-base text-text-primary placeholder:text-text-secondary focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15"
         />
       </div>
 
@@ -93,20 +96,21 @@ export default function AgentReferralsPage() {
           <button type="button" onClick={fetchReferrals} className="touch-target rounded-lg bg-primary-600 px-5 py-2 text-sm font-medium text-white">Retry</button>
         </div>
       ) : referrals.length === 0 ? (
-        <div className="py-20 text-center text-sm text-text-secondary">
+        <div className="rounded-xl border border-border bg-surface px-4 py-20 text-center text-sm text-text-secondary" role="status">
           {tab === "DELETED" ? "No deleted referrals" : "No referrals found"}
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
+        <section aria-label={tab === "DELETED" ? "Deleted referrals" : "Active referrals"} className="overflow-hidden rounded-xl border border-border bg-surface">
+          <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="bg-surface-secondary text-text-secondary">
               <tr>
-                <th className="px-4 py-3 font-medium">Name</th>
-                <th className="px-4 py-3 font-medium">Email</th>
-                <th className="px-4 py-3 font-medium">Phone</th>
-                <th className="px-4 py-3 font-medium">Properties</th>
-                <th className="px-4 py-3 font-medium">{tab === "DELETED" ? "Deleted" : "Joined"}</th>
-                <th className="px-4 py-3" />
+                <th scope="col" className="px-4 py-3 font-medium">Name</th>
+                <th scope="col" className="px-4 py-3 font-medium">Email</th>
+                <th scope="col" className="px-4 py-3 font-medium">Phone</th>
+                <th scope="col" className="px-4 py-3 font-medium">Properties</th>
+                <th scope="col" className="px-4 py-3 font-medium">{tab === "DELETED" ? "Deleted" : "Joined"}</th>
+                <th scope="col" className="px-4 py-3"><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -128,7 +132,8 @@ export default function AgentReferralsPage() {
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+        </section>
       )}
 
       <Pagination currentPage={page} totalPages={totalPages} onChange={setPage} />

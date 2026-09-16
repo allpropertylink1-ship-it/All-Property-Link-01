@@ -13,6 +13,7 @@ const staticPages = (base: string): MetadataRoute.Sitemap => [
   { url: `${base}/privacy`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
   { url: `${base}/terms`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
   { url: `${base}/services`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+  { url: `${base}/land`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
   { url: `${base}/aplreps`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
 ];
 
@@ -31,18 +32,34 @@ async function propertyPages(base: string): Promise<MetadataRoute.Sitemap> {
       : [];
     const pages = [first, ...rest];
 
+    // Land is excluded from default queries — harvest it explicitly.
+    const landFirst = await getProperties({ page: 1, pageSize: 50, propertyType: "LAND" });
+    const landPageCount = Math.max(1, landFirst.totalPages || 1);
+    const landRest = landPageCount > 1
+      ? await Promise.all(
+          Array.from({ length: landPageCount - 1 }, (_, i) => getProperties({ page: i + 2, pageSize: 50, propertyType: "LAND" }))
+        )
+      : [];
+    const allPages = [...pages, landFirst, ...landRest];
+
     const seen = new Set<string>();
     const entries: MetadataRoute.Sitemap = [];
     const cityDates = new Map<string, Date>();
+    const landCityDates = new Map<string, Date>();
 
-    for (const { properties } of pages) {
+    for (const { properties } of allPages) {
       for (const prop of properties) {
         if (isTestListing(prop.title)) continue;
         const city = slugifyCity(prop.city);
-        const url = `${base}/properties/${city}/${prop.slug}`;
+        // Land has its own section — keep /properties/* land-free.
+        const isLand = (prop.propertyType || "").toUpperCase() === "LAND";
+        const url = isLand
+          ? `${base}/land/${city}/${prop.slug}`
+          : `${base}/properties/${city}/${prop.slug}`;
         if (seen.has(url)) continue;
         seen.add(url);
-        cityDates.set(city, prop.createdAt);
+        if (!isLand) cityDates.set(city, prop.createdAt);
+        else landCityDates.set(city, prop.createdAt);
         entries.push({
           url,
           lastModified: prop.createdAt,
@@ -59,7 +76,14 @@ async function propertyPages(base: string): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
-    return [...cities, ...entries];
+    const landCities: MetadataRoute.Sitemap = Array.from(landCityDates.entries()).map(([city, lastModified]) => ({
+      url: `${base}/land/${city}`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    }));
+
+    return [...cities, ...landCities, ...entries];
   } catch {
     return [];
   }

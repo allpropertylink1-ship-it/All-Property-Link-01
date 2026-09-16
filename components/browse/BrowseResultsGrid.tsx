@@ -287,63 +287,80 @@ export function BrowseResultsGrid({
 
   return (
     <div className="space-y-4">
-      <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 bg-surface/80 backdrop-blur-sm px-4 py-3 rounded-xl border border-border mb-4">
-        <div className="flex items-center gap-2" role="group" aria-label="Layout">
-          <button
-            onClick={() => handleLayoutChange("grid")}
-            aria-pressed={layout === "grid"}
-            className={`p-2 rounded-lg transition-colors ${layout === "grid" ? "bg-primary-50 text-primary-700" : "text-text-secondary hover:bg-surface-secondary"}`}
-            aria-label="Grid view"
-          >
-            <GridIcon className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => handleLayoutChange("list")}
-            aria-pressed={layout === "list"}
-            className={`p-2 rounded-lg transition-colors ${layout === "list" ? "bg-primary-50 text-primary-700" : "text-text-secondary hover:bg-surface-secondary"}`}
-            aria-label="List view"
-          >
-            <ListIcon className="h-5 w-5" />
-          </button>
+      <div className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-sm md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col">
+          <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-success-600">
+            <span className="h-2 w-2 rounded-full bg-success-500" aria-hidden="true" />
+            Live Feed Verified
+          </p>
+          <p className="mt-1 font-heading text-lg font-bold text-text-primary" aria-live="polite">
+            {total} {total === 1 ? itemType : `${itemType}s`} found
+            {searchVal ? (
+              <span className="font-medium text-text-secondary">
+                {" "}
+                for <span className="font-semibold text-text-primary">&ldquo;{searchVal}&rdquo;</span>
+              </span>
+            ) : null}
+            {hasCategory ? <span className="font-medium text-text-secondary"> in {activeFilterLabel}</span> : null}
+          </p>
         </div>
 
-        <div className="flex-1" />
+        <div className="flex items-center gap-2 self-end md:self-auto">
+          <div className="flex items-center rounded-lg bg-surface-secondary p-1" role="group" aria-label="Layout">
+            <button
+              onClick={() => handleLayoutChange("grid")}
+              aria-pressed={layout === "grid"}
+              aria-label="Grid view"
+              className={`flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md transition-colors ${layout === "grid" ? "bg-primary text-white shadow-sm" : "text-text-secondary hover:text-text-primary"}`}
+            >
+              <GridIcon className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => handleLayoutChange("list")}
+              aria-pressed={layout === "list"}
+              aria-label="List view"
+              className={`flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md transition-colors ${layout === "list" ? "bg-primary text-white shadow-sm" : "text-text-secondary hover:text-text-primary"}`}
+            >
+              <ListIcon className="h-5 w-5" />
+            </button>
+          </div>
 
-        <div className="relative">
-          <button
-            onClick={() => setSortOpen(!sortOpen)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-surface text-sm text-text-primary hover:border-primary-300 transition-colors"
-            aria-haspopup="listbox"
-            aria-expanded={sortOpen}
-          >
-            <span>{SORT_OPTIONS.find(o => o.value === sort)?.label}</span>
-            <ChevronDown className={`h-4 w-4 transition-transform ${sortOpen ? "rotate-180" : ""}`} />
-          </button>
-          {sortOpen && (
-            <div className="absolute right-0 mt-1 w-48 rounded-lg border border-border bg-surface shadow-lg py-1 z-20">
-              {SORT_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => handleSortChange(opt.value)}
-                  className={`w-full px-3 py-2 text-sm text-left transition-colors ${sort === opt.value ? "bg-primary-50 text-primary-700" : "text-text-secondary hover:bg-surface-secondary"}`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="relative">
+            <button
+              onClick={() => setSortOpen(!sortOpen)}
+              className="flex min-h-[44px] items-center gap-1.5 rounded-lg bg-surface-secondary px-3 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-secondary/70"
+              aria-haspopup="listbox"
+              aria-expanded={sortOpen}
+            >
+              <span>Sort: {SORT_OPTIONS.find(o => o.value === sort)?.label}</span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${sortOpen ? "rotate-180" : ""}`} />
+            </button>
+            {sortOpen && (
+              <div className="absolute right-0 z-20 mt-1 w-48 rounded-lg border border-border bg-surface py-1 shadow-lg">
+                {SORT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => handleSortChange(opt.value)}
+                    className={`w-full px-3 py-2 text-left text-sm transition-colors ${sort === opt.value ? "bg-primary-50 font-semibold text-text-primary" : "text-text-secondary hover:bg-surface-secondary"}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {filterChips.length > 0 && (
-        <div className="sticky top-16 z-10 flex flex-wrap items-center gap-2 bg-surface/80 backdrop-blur-sm px-4 py-2 rounded-xl border border-border">
-          <span className="text-xs font-medium text-text-secondary mr-1">Filters:</span>
+        <div className="flex flex-wrap items-center gap-2 rounded-xl bg-surface px-4 py-3 shadow-sm">
+          <span className="mr-1 text-xs font-medium text-text-secondary">Filters:</span>
           {filterChips.map((chip) => (
-            <span key={chip.key} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-medium border border-primary-200">
+            <span key={chip.key} className="inline-flex min-h-[36px] items-center gap-1 rounded-full border border-primary-200 bg-primary-50 px-3 py-1 text-xs font-medium text-primary-700">
               {chip.label}
               <button
                 onClick={chip.onRemove}
-                className="ml-1 hover:text-primary-500 focus:outline-none"
+                className="ml-1 flex min-h-[36px] min-w-[36px] items-center justify-center hover:text-primary-500 focus:outline-none"
                 aria-label={`Remove ${chip.label} filter`}
               >
                 <X className="h-3 w-3" />
@@ -352,23 +369,12 @@ export function BrowseResultsGrid({
           ))}
           <button
             onClick={handleClearAllFilters}
-            className="ml-auto text-xs text-primary-600 hover:underline font-medium"
+            className="ml-auto inline-flex min-h-[44px] items-center text-xs font-medium text-primary-600 hover:underline"
           >
             Clear all
           </button>
         </div>
       )}
-
-      <p className="mb-3 text-sm text-text-secondary" aria-live="polite">
-        {total} {total === 1 ? itemType : `${itemType}s`} found
-        {searchVal ? (
-          <span>
-            {" "}
-            for <span className="font-medium text-text-primary">“{searchVal}”</span>
-          </span>
-        ) : null}
-        {hasCategory ? <span> in {activeFilterLabel}</span> : null}
-      </p>
 
       {isList ? (
         <div className="space-y-2" role="list" aria-label={`${itemType} list`}>
@@ -412,7 +418,7 @@ export function BrowseResultsGrid({
           )}
         </div>
        ) : (
-        <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4" role="list" aria-label={`${itemType} grid`}>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4" role="list" aria-label={`${itemType} grid`}>
           {activeTab === "properties" ? (
             properties.map((item) => (
               <PropertyCard

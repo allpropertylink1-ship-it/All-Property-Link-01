@@ -16,7 +16,7 @@ const KENYA_REGIONS = [
   "North-Eastern", "Nyanza", "Rift Valley", "Western",
 ] as const
 
-const inputClass = "mt-1 block w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-text-primary placeholder:text-text-secondary focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15"
+const inputClass = "mt-1 block min-h-[44px] w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-base text-text-primary placeholder:text-text-secondary focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15"
 
 export default function AgentSettingsPage() {
   const { user } = useAuth()
@@ -205,13 +205,16 @@ export default function AgentSettingsPage() {
 
   return (
     <AgentGuard>
-      <div className="w-full max-w-2xl space-y-6 sm:space-y-10">
-        <div>
-          <h1 className="font-heading text-2xl font-bold text-text-primary">Settings</h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            {user?.fullName || `${user?.firstName || ""} ${user?.lastName || ""}`} &middot; Code: {user?.agentCode}
+      <div className="w-full max-w-3xl space-y-6">
+        <section aria-labelledby="agent-settings-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+          <p className="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-secondary">
+            APL Representative
           </p>
-        </div>
+          <h1 id="agent-settings-heading" className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">Settings</h1>
+          <p className="mt-1 text-sm text-text-secondary">
+            {user?.fullName || `${user?.firstName || ""} ${user?.lastName || ""}`} &middot; Code: <span className="font-mono font-semibold uppercase text-text-primary">{user?.agentCode}</span>
+          </p>
+        </section>
 
         {referralLink && (
           <div className="rounded-xl border border-border bg-surface p-4 sm:p-6">
@@ -234,8 +237,11 @@ export default function AgentSettingsPage() {
         )}
 
         {/* ─── Photo & Region section ─── */}
-        <div className="space-y-6 rounded-xl border border-border bg-surface p-4 sm:p-6">
-          <h2 className="font-heading text-lg font-semibold text-text-primary">Profile Picture &amp; Coverage</h2>
+        <section aria-labelledby="rep-coverage-heading" className="space-y-6 rounded-xl border border-border bg-surface p-5 sm:p-6">
+          <div>
+            <h2 id="rep-coverage-heading" className="font-heading text-base font-semibold text-text-primary">Profile Picture &amp; Coverage</h2>
+            <p className="mt-0.5 text-sm text-text-secondary">Photo clients see, plus regions you cover.</p>
+          </div>
 
           {prError && <FormBanner variant="error">{prError}</FormBanner>}
           {prSuccess && <FormBanner variant="success">Profile picture &amp; coverage updated</FormBanner>}
@@ -281,13 +287,13 @@ export default function AgentSettingsPage() {
 
           {/* Regions */}
           <div>
-            <label className="mb-1.5 block text-sm font-semibold text-text-primary">
+            <span className="mb-1.5 block text-sm font-semibold text-text-primary" id="rep-regions-label">
               Regions covered
-            </label>
+            </span>
             <p className="mb-3 text-xs text-text-secondary">
               Select all areas where you onboard clients.
             </p>
-            <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
+            <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4" role="group" aria-labelledby="rep-regions-label">
               {KENYA_REGIONS.map((region) => {
                 const active = selectedRegions.includes(region)
                 return (
@@ -298,7 +304,7 @@ export default function AgentSettingsPage() {
                     aria-pressed={active}
                     className={`flex min-h-[44px] items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
                       active
-                        ? "border-primary bg-primary-50 text-accent-600"
+                        ? "border-primary-600 bg-primary-50 text-primary-700"
                         : "border-border text-text-secondary hover:border-accent-500/50"
                     }`}
                   >
@@ -326,7 +332,7 @@ export default function AgentSettingsPage() {
             />
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end border-t border-border pt-6">
             <button
               type="button"
               onClick={handleProfileRegionSave}
@@ -339,10 +345,13 @@ export default function AgentSettingsPage() {
               Save changes
             </button>
           </div>
-        </div>
+        </section>
 
-        <form onSubmit={handleProfileUpdate} className="space-y-6 rounded-xl border border-border bg-surface p-4 sm:p-6">
-          <h2 className="font-heading text-lg font-semibold text-text-primary">Profile</h2>
+        <form onSubmit={handleProfileUpdate} className="space-y-6 rounded-xl border border-border bg-surface p-5 sm:p-6" aria-label="Representative profile">
+          <div>
+            <h2 className="font-heading text-base font-semibold text-text-primary">Profile</h2>
+            <p className="mt-0.5 text-sm text-text-secondary">Name and phone clients see.</p>
+          </div>
 
           {profileError && <FormBanner variant="error">{profileError}</FormBanner>}
           {profileSuccess && <FormBanner variant="success">Profile updated</FormBanner>}
@@ -372,8 +381,11 @@ export default function AgentSettingsPage() {
           </div>
         </form>
 
-        <form onSubmit={handlePasswordChange} className="space-y-6 rounded-xl border border-border bg-surface p-4 sm:p-6">
-          <h2 className="font-heading text-lg font-semibold text-text-primary">Change Password</h2>
+        <form onSubmit={handlePasswordChange} className="space-y-6 rounded-xl border border-border bg-surface p-5 sm:p-6" aria-label="Change password">
+          <div>
+            <h2 className="font-heading text-base font-semibold text-text-primary">Change Password</h2>
+            <p className="mt-0.5 text-sm text-text-secondary">Keep your representative sign-in safe.</p>
+          </div>
 
           {pwError && <FormBanner variant="error">{pwError}</FormBanner>}
           {pwSuccess && <FormBanner variant="success">Password changed successfully</FormBanner>}

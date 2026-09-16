@@ -95,7 +95,8 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin" }: Goog
       <button
         type="button"
         disabled
-        className="touch-target flex w-full cursor-not-allowed items-center justify-center gap-3 rounded-sm border border-border bg-surface px-4 py-3 text-sm font-medium text-text-secondary opacity-50"
+        aria-label="Google sign-in unavailable"
+        className="touch-target flex w-full cursor-not-allowed items-center justify-center gap-3 rounded-xl border border-border bg-surface-secondary px-4 py-3.5 text-sm font-semibold text-text-secondary opacity-50"
       >
         <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -110,7 +111,7 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin" }: Goog
 
   if (!ready) {
     return (
-      <div className="flex w-full items-center justify-center gap-2 rounded-sm border border-border bg-surface px-4 py-3">
+      <div className="touch-target flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface-secondary px-4 py-3.5" role="status" aria-label="Loading Google sign-in">
         <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         <span className="text-sm text-text-secondary">Loading Google sign-in...</span>
       </div>
@@ -119,9 +120,9 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin" }: Goog
 
   return (
     <div ref={wrapperRef} className="w-full">
-      <div ref={btnRef} className="w-full" />
+      <div ref={btnRef} className="touch-target w-full overflow-hidden rounded-xl" />
       {oauthLoading && (
-        <div className="mt-2 flex items-center justify-center gap-2">
+        <div className="mt-2 flex items-center justify-center gap-2" role="status">
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           <span className="text-sm text-text-secondary">Verifying Google account...</span>
         </div>

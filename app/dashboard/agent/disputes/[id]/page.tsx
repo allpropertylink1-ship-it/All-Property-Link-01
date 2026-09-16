@@ -24,10 +24,10 @@ const fmt = (n: number) => new Intl.NumberFormat("en-KE", { style: "currency", c
 
 const statusLabels: Record<string, string> = { PENDING: "Pending", UNDER_REVIEW: "Under Review", RESOLVED: "Resolved", REJECTED: "Rejected" }
 const statusColors: Record<string, string> = {
-  PENDING: "bg-warning-50 text-warning-500",
-  UNDER_REVIEW: "bg-blue-50 text-blue-600",
-  RESOLVED: "bg-success/10 text-success-700",
-  REJECTED: "bg-error/10 text-error-500",
+  PENDING: "bg-warning-50 text-warning-700",
+  UNDER_REVIEW: "bg-primary-50 text-primary-700",
+  RESOLVED: "bg-success-500/10 text-success-700",
+  REJECTED: "bg-error-500/10 text-error-600",
 }
 
 export default function AgentDisputeDetailPage() {
@@ -69,23 +69,23 @@ export default function AgentDisputeDetailPage() {
   if (!dispute) return null
 
   return (
-    <div className="max-w-2xl">
-      <Link href="/dashboard/agent/disputes" className="mb-6 inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700">
+    <div className="mx-auto max-w-3xl space-y-6">
+      <Link href="/dashboard/agent/disputes" className="touch-target inline-flex min-h-[44px] items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-primary-600 hover:text-primary-700">
         <ArrowLeft size={16} /> Back to disputes
       </Link>
 
-      <div className="rounded-xl border border-border bg-surface p-6">
-        <div className="mb-4 flex items-start justify-between">
+      <section aria-labelledby="dispute-title" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <h1 className="font-heading text-2xl font-bold text-text-primary">{dispute.title}</h1>
+            <h1 id="dispute-title" className="font-heading text-2xl font-bold tracking-tight text-text-primary">{dispute.title}</h1>
             <p className="mt-1 text-sm text-text-secondary">Submitted {new Date(dispute.createdAt).toLocaleDateString()}</p>
           </div>
-          <span className={`rounded-full px-3 py-1 text-xs font-medium ${statusColors[dispute.status] || ""}`}>{statusLabels[dispute.status] || dispute.status}</span>
+          <span className={`rounded-full px-3 py-1 text-xs font-medium ${statusColors[dispute.status] || "bg-surface-secondary text-text-secondary"}`}>{statusLabels[dispute.status] || dispute.status}</span>
         </div>
 
-        <div className="mb-6 rounded-lg bg-surface-secondary p-4">
-          <p className="text-xs text-text-secondary">Disputed Amount</p>
-          <p className="text-xl font-bold text-text-primary">{fmt(dispute.amount)}</p>
+        <div className="mb-6 rounded-xl bg-surface-secondary p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">Disputed Amount</p>
+          <p className="font-heading text-xl font-bold tracking-tight text-text-primary">{fmt(dispute.amount)}</p>
         </div>
 
         <div className="mb-6">
@@ -94,14 +94,14 @@ export default function AgentDisputeDetailPage() {
         </div>
 
         {dispute.resolution && (
-          <div className="rounded-lg border border-border bg-surface p-4">
+          <div className="rounded-xl border border-border bg-surface-secondary p-4">
             <h3 className="mb-2 font-heading text-sm font-semibold text-text-primary">Resolution</h3>
             <p className="text-sm text-text-secondary whitespace-pre-wrap">{dispute.resolution}</p>
             {dispute.status === "RESOLVED" && (
               <p className="mt-2 text-xs text-success-700 font-medium">Resolved</p>
             )}
             {dispute.status === "REJECTED" && (
-              <p className="mt-2 text-xs text-error-500 font-medium">Rejected</p>
+              <p className="mt-2 text-xs text-error-600 font-medium">Rejected</p>
             )}
           </div>
         )}
@@ -110,9 +110,9 @@ export default function AgentDisputeDetailPage() {
           <p className="mt-4 text-xs text-text-secondary">This dispute is pending review by the admin team.</p>
         )}
         {dispute.status === "UNDER_REVIEW" && (
-          <p className="mt-4 text-xs text-blue-600 font-medium">This dispute is currently being reviewed.</p>
+          <p className="mt-4 text-xs text-primary-700 font-medium">This dispute is currently being reviewed.</p>
         )}
-      </div>
+      </section>
     </div>
   )
 }

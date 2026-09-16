@@ -130,19 +130,22 @@ export default function AgentReferralDetailPage() {
 
   return (
     <AgentGuard>
-      <Link href="/dashboard/agent/referrals" className="mb-6 inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700">
+      <Link href="/dashboard/agent/referrals" className="touch-target mb-2 inline-flex min-h-[44px] items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-primary-600 hover:text-primary-700">
         <ArrowLeft size={16} /> Back to referrals
       </Link>
 
-      <div className="mb-8 rounded-xl border border-border bg-surface p-6">
-        <h1 className="mb-1 font-heading text-2xl font-bold text-text-primary">{referral.firstName} {referral.lastName}</h1>
-        <p className="text-sm text-text-secondary">{referral.email}</p>
+      <section aria-labelledby="referral-name" className="mb-6 rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <p className="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-secondary">
+          Referral
+        </p>
+        <h1 id="referral-name" className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">{referral.firstName} {referral.lastName}</h1>
+        <p className="mt-1 text-sm text-text-secondary">{referral.email}</p>
         {referral.phone && <p className="text-sm text-text-secondary">{referral.phone}</p>}
         <div className="mt-4 flex flex-wrap gap-2">
           {referral.category && <span className="rounded-full bg-surface-secondary px-3 py-1 text-xs text-text-secondary">{referral.category}</span>}
           <StatusPill status={referral.kycStatus} label={`KYC: ${referral.kycStatus}`} />
         </div>
-      </div>
+      </section>
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-heading text-lg font-semibold text-text-primary">Properties ({referral.properties.length})</h2>
@@ -169,7 +172,7 @@ export default function AgentReferralDetailPage() {
             const img = (p.coverImage ?? (Array.isArray(p.images) ? p.images[0] : null)) as string | { url: string } | null
             return (
               <div key={p.id} className="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-sm">
-                <Link href={`/properties/${p.city?.toLowerCase() || "unknown"}/${p.slug}`} className="flex min-w-0 flex-1 items-center gap-4">
+                <Link href={`/${p.propertyType === "LAND" ? "land" : "properties"}/${p.city?.toLowerCase() || "unknown"}/${p.slug}`} className="flex min-w-0 flex-1 items-center gap-4">
                   {img ? (
                     <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-surface-secondary">
                       <img src={resolveImageUrl(typeof img === "string" ? img : img.url) ?? undefined} alt="" className="h-full w-full object-cover" />

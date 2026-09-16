@@ -49,9 +49,15 @@ export default async function EditServicePage({ params }: { params: { id: string
   const rootCategories: Category[] = categoriesData?.categories || []
 
   return (
-    <div>
-      <h1 className="mb-8 font-heading text-2xl font-bold text-text-primary">Edit Service</h1>
-      <div className="mx-auto max-w-2xl rounded-xl border border-border bg-surface p-6">
+    <div className="space-y-6">
+      <section aria-labelledby="edit-service-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <p className="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-secondary">
+          Service business
+        </p>
+        <h1 id="edit-service-heading" className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">Edit Service</h1>
+        <p className="mt-1 text-sm text-text-secondary">Update details, pricing, photos, then save.</p>
+      </section>
+      <div className="mx-auto max-w-3xl">
         <EditServiceForm
           service={{
             id: service.id,

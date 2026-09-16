@@ -4,7 +4,10 @@ import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { PasswordToggle } from "@/components/auth/PasswordToggle"
+import { PasswordStrength } from "@/components/auth/PasswordStrength"
+import { CenteredAuthShell } from "@/components/auth/stitch-auth"
 import { FormBanner } from "@/components/shared/FormFeedback"
+import { Lock } from "@/components/ui/icons"
 
 function ResetForm() {
   const router = useRouter()
@@ -58,14 +61,14 @@ function ResetForm() {
 
   if (success) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4">
         <FormBanner variant="success">
           Your password has been reset successfully. Redirecting to login...
         </FormBanner>
         <button
           type="button"
           onClick={() => router.push("/auth/login?tab=agent")}
-          className="touch-target w-full rounded-sm bg-primary px-4 py-3 font-medium text-white transition-colors hover:bg-primary-600"
+          className="touch-target w-full rounded-xl bg-primary px-4 py-3.5 font-semibold text-white transition-colors hover:bg-primary-600"
         >
           Go to login
         </button>
@@ -74,7 +77,7 @@ function ResetForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {!token && (
         <FormBanner variant="error">
           Invalid reset link. Please request a new one.
@@ -88,7 +91,7 @@ function ResetForm() {
       )}
 
       <div>
-        <label htmlFor="new-password" className="block text-sm font-medium text-text-primary">
+        <label htmlFor="new-password" className="block text-sm font-semibold text-text-primary">
           New Password
         </label>
         <div className="mt-1">
@@ -102,10 +105,11 @@ function ResetForm() {
             placeholder="At least 8 characters"
           />
         </div>
+        <PasswordStrength password={password} />
       </div>
 
       <div>
-        <label htmlFor="confirm-password" className="block text-sm font-medium text-text-primary">
+        <label htmlFor="confirm-password" className="block text-sm font-semibold text-text-primary">
           Confirm Password
         </label>
         <div className="mt-1">
@@ -123,7 +127,8 @@ function ResetForm() {
       <button
         type="submit"
         disabled={loading || !token}
-        className="touch-target w-full rounded-sm bg-primary px-4 py-3 font-medium text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
+        aria-busy={loading}
+        className="touch-target w-full rounded-xl bg-primary px-4 py-3.5 font-semibold text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? "Resetting..." : "Reset password"}
       </button>
@@ -133,27 +138,18 @@ function ResetForm() {
 
 export default function AgentResetPasswordPage() {
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-surface px-4">
-      <div className="w-full max-w-md">
-        <div className="mb-6 text-center">
-          <h2 className="font-heading text-xl font-bold text-text-primary">
-            All Property <span className="text-accent-600">Link</span>
-          </h2>
-        </div>
-        <div className="rounded-xl border border-border bg-surface p-6 sm:p-8">
-          <div className="mb-6 text-center">
-            <h1 className="font-heading text-3xl font-bold text-text-primary">
-              Set new password
-            </h1>
-            <p className="mt-2 text-sm text-text-secondary">
-              Enter your new APL Representative password
-            </p>
-          </div>
-          <Suspense fallback={<div className="text-center text-text-secondary">Loading...</div>}>
-            <ResetForm />
-          </Suspense>
-        </div>
-      </div>
-    </div>
+    <CenteredAuthShell
+      icon={Lock}
+      eyebrow="Representative Recovery"
+      title="Set new password"
+      subtitle="Enter your new APL Representative password."
+      assurance="Official Representative Console and 256-Bit SSL Encrypted Session"
+      backHref="/auth/login?tab=agent"
+      backLabel="Back to login"
+    >
+      <Suspense fallback={<div className="text-center text-sm text-text-secondary">Loading...</div>}>
+        <ResetForm />
+      </Suspense>
+    </CenteredAuthShell>
   )
 }

@@ -17,8 +17,8 @@ export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, 
 
   if (kycStatus === "NONE" || kycStatus === "REJECTED") {
     return (
-      <div className="px-6 pt-4 lg:px-8">
-        <div className="flex min-w-0 items-center gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-sm">
+      <div className="px-4 pt-4 sm:px-6 lg:px-8" role="alert">
+        <div className="flex min-w-0 flex-col gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-sm sm:flex-row sm:items-center">
           <ShieldAlert size={18} className="shrink-0 text-error-500" />
           <div className="min-w-0 flex-1">
             <p className="font-medium text-error-700">
@@ -32,7 +32,7 @@ export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, 
           </div>
           <Link
             href="/dashboard/kyc"
-            className="shrink-0 rounded-lg bg-error-500 px-4 py-2 text-sm font-medium text-white hover:bg-error-600"
+            className="touch-target inline-flex shrink-0 items-center justify-center rounded-lg bg-error-500 px-4 py-2 text-sm font-medium text-white hover:bg-error-600"
           >
             {kycStatus === "NONE" ? "Verify identity" : "Resubmit documents"}
           </Link>
@@ -42,9 +42,9 @@ export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, 
   }
 
   return (
-    <div className="px-6 pt-4 lg:px-8">
+    <div className="px-4 pt-4 sm:px-6 lg:px-8">
       {accountStatus === "PENDING_APPROVAL" && (
-        <div className="flex min-w-0 items-center gap-3 rounded-xl border border-warning-200 bg-warning-50 px-4 py-3 text-sm">
+        <div className="flex min-w-0 flex-col gap-3 rounded-xl border border-warning-200 bg-warning-50 px-4 py-3 text-sm sm:flex-row sm:items-center" role="status">
           <Clock size={18} className="shrink-0 text-warning-500" />
           <div className="min-w-0 flex-1">
             <p className="font-medium text-warning-700">Account pending approval</p>
@@ -57,7 +57,7 @@ export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, 
           {!onboardingComplete && (
             <Link
               href="/dashboard/onboarding"
-              className="shrink-0 rounded-lg bg-warning-500 px-4 py-2 text-sm font-medium text-white hover:bg-warning-600"
+              className="touch-target inline-flex shrink-0 items-center justify-center rounded-lg bg-warning-500 px-4 py-2 text-sm font-medium text-white hover:bg-warning-600"
             >
               Complete profile
             </Link>
@@ -66,7 +66,7 @@ export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, 
       )}
 
       {accountStatus === "REJECTED" && (
-        <div className="flex min-w-0 items-center gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-sm">
+        <div className="flex min-w-0 flex-col gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-sm sm:flex-row sm:items-center" role="alert">
           <XCircle size={18} className="shrink-0 text-error-500" />
           <div className="min-w-0 flex-1">
             <p className="font-medium text-error-700">Account not approved</p>
@@ -76,7 +76,7 @@ export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, 
           </div>
           <Link
             href="/dashboard/onboarding"
-            className="shrink-0 rounded-lg bg-error-500 px-4 py-2 text-sm font-medium text-white hover:bg-error-600"
+            className="touch-target inline-flex shrink-0 items-center justify-center rounded-lg bg-error-500 px-4 py-2 text-sm font-medium text-white hover:bg-error-600"
           >
             Update & resubmit
           </Link>

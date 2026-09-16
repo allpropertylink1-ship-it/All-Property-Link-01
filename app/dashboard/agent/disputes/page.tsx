@@ -53,20 +53,25 @@ export default function AgentDisputesPage() {
 
   return (
     <AgentGuard>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-heading text-2xl font-bold text-text-primary">Disputes</h1>
-          <p className="mt-1 text-sm text-text-secondary">{total} total dispute{total !== 1 ? "s" : ""}</p>
+      <section aria-labelledby="disputes-heading" className="mb-6 rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <p className="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-secondary">
+          Commission hub
+        </p>
+        <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 id="disputes-heading" className="font-heading text-2xl font-bold tracking-tight text-text-primary">Disputes</h1>
+            <p className="mt-1 text-sm text-text-secondary">{total} total dispute{total !== 1 ? "s" : ""}</p>
+          </div>
+          <Link href="/dashboard/agent/disputes/new" className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700">
+            <Plus size={16} /> New Dispute
+          </Link>
         </div>
-        <Link href="/dashboard/agent/disputes/new" className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700">
-          <Plus size={16} /> New Dispute
-        </Link>
-      </div>
+      </section>
 
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filter disputes by status">
         {statuses.map((s) => (
-          <button key={s} type="button" onClick={() => { setStatusFilter(s); setPage(1) }}
-            className={`touch-target rounded-lg px-4 py-2 text-sm font-medium transition-colors ${statusFilter === s ? "bg-primary-600 text-white" : "bg-surface-secondary text-text-secondary hover:bg-border"}`}
+          <button key={s} type="button" onClick={() => { setStatusFilter(s); setPage(1) }} aria-pressed={statusFilter === s}
+            className={`touch-target rounded-lg px-4 py-2 text-sm font-medium transition-colors ${statusFilter === s ? "bg-primary-600 text-white" : "bg-surface text-text-secondary hover:bg-surface-secondary border border-border"}`}
           >{statusLabels[s]}</button>
         ))}
       </div>
@@ -80,15 +85,16 @@ export default function AgentDisputesPage() {
           <button type="button" onClick={fetchDisputes} className="touch-target rounded-lg bg-primary-600 px-5 py-2 text-sm font-medium text-white">Retry</button>
         </div>
       ) : disputes.length === 0 ? (
-        <div className="py-20 text-center text-sm text-text-secondary">No disputes found</div>
+        <div className="rounded-xl border border-border bg-surface px-4 py-20 text-center text-sm text-text-secondary" role="status">No disputes found</div>
       ) : (
-        <div className="space-y-3">
+        <ul className="space-y-3" aria-label="Disputes">
           {disputes.map((d) => (
-            <Link key={d.id} href={`/dashboard/agent/disputes/${d.id}`} className="flex items-center justify-between rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-sm">
+            <li key={d.id}>
+            <Link href={`/dashboard/agent/disputes/${d.id}`} className="touch-target flex items-center justify-between gap-2 rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-sm">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-text-primary">{d.title}</p>
                 <p className="mt-0.5 line-clamp-1 text-xs text-text-secondary">{d.description}</p>
-                <div className="mt-1 flex items-center gap-3">
+                <div className="mt-1 flex flex-wrap items-center gap-3">
                   <span className="text-xs font-semibold text-text-primary">{fmtKES(d.amount)}</span>
                   <StatusPill status={d.status} />
                   <span className="text-[10px] text-text-secondary">{new Date(d.createdAt).toLocaleDateString()}</span>
@@ -96,8 +102,9 @@ export default function AgentDisputesPage() {
               </div>
               <ChevronRight size={16} className="shrink-0 text-muted" />
             </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
 
       <Pagination currentPage={page} totalPages={totalPages} onChange={setPage} />

@@ -28,11 +28,19 @@ export default async function NewListingPage() {
   }
 
   return (
-    <div>
-      <h1 className="mb-8 font-heading text-2xl font-bold text-text-primary">
-        Create listing
-      </h1>
-      <div className="mx-auto max-w-2xl rounded-xl border border-border bg-surface p-6">
+    <div className="space-y-6">
+      <section aria-labelledby="new-listing-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <p className="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-secondary">
+          List property
+        </p>
+        <h1 id="new-listing-heading" className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">
+          Create listing
+        </h1>
+        <p className="mt-1 text-sm text-text-secondary">
+          Four quick steps — category, location, photos, then publish. Free listing with direct buyer inquiries.
+        </p>
+      </section>
+      <div className="mx-auto max-w-3xl">
         <ListingForm />
       </div>
     </div>

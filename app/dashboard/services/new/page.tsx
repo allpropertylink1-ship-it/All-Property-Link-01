@@ -42,11 +42,19 @@ export default async function NewServicePage() {
   const rootCategories: Category[] = data?.categories || [];
 
   return (
-    <div>
-      <h1 className="mb-8 font-heading text-2xl font-bold text-text-primary">
-        Create Service Listing
-      </h1>
-      <div className="mx-auto max-w-2xl rounded-xl border border-border bg-surface p-6">
+    <div className="space-y-6">
+      <section aria-labelledby="new-service-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <p className="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-secondary">
+          Service business
+        </p>
+        <h1 id="new-service-heading" className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">
+          Create Service Listing
+        </h1>
+        <p className="mt-1 text-sm text-text-secondary">
+          Describe the service, set pricing, add photos, then publish.
+        </p>
+      </section>
+      <div className="mx-auto max-w-3xl">
         <NewServiceForm categories={rootCategories} />
       </div>
     </div>

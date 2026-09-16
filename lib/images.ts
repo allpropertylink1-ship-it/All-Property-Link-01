@@ -25,13 +25,22 @@ export function optimizeImageUrl(url: string, width: number): string {
 
 export function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null
+  const trimmed = url.trim()
+  if (!trimmed) return null
+  // Ghost refs: old domain or Cloudinary remnants — normalize to local
+  // e.g. "https://allpropertylink.com/uploads/..." or "https://res.cloudinary.com/..." with /uploads segment
+  if (trimmed.includes("/uploads/")) {
+    const idx = trimmed.indexOf("/uploads/")
+    return trimmed.slice(idx)
+  }
+  if (trimmed.startsWith("uploads/")) return `/${trimmed}`
   // Local uploads: keep relative so the browser loads them same-origin
   // through the /uploads middleware proxy (the cPanel origin is not
   // directly reachable from all user networks).
-  if (url.startsWith("/uploads/")) {
-    return url
+  if (trimmed.startsWith("/uploads/")) {
+    return trimmed
   }
-  return url
+  return trimmed
 }
 
 /**

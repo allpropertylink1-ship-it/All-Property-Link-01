@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import PropertyDetailClient from "@/components/property/PropertyDetailClient";
 import PropertyBreadcrumbs from "@/components/property/PropertyBreadcrumbs";
@@ -53,6 +53,10 @@ export default async function PropertyDetailPage({ params }: Props) {
   if (!property) notFound();
 
   const canonicalCity = slugifyCity(property.city);
+  // Land has its own section — consolidate old /properties land URLs there.
+  if (property.propertyType === "LAND") {
+    permanentRedirect(`/land/${canonicalCity}/${property.slug}`);
+  }
   if (params.city.toLowerCase() !== canonicalCity || slugifyCity(params.city) !== canonicalCity) {
     redirect(`/properties/${canonicalCity}/${property.slug}`);
   }

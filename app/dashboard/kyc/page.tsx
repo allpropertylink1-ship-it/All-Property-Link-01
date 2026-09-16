@@ -31,10 +31,10 @@ interface KycData {
 }
 
 const STATUS: Record<string, { label: string; icon: React.ElementType; color: string; bg: string; border: string }> = {
-  NONE: { label: "Not Verified", icon: Shield, color: "text-gray-500", bg: "bg-gray-50", border: "border-gray-200" },
-  PENDING: { label: "Pending Review", icon: Clock, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
-  VERIFIED: { label: "Verified", icon: CheckCircle, color: "text-green-600", bg: "bg-green-50", border: "border-green-200" },
-  REJECTED: { label: "Rejected", icon: XCircle, color: "text-red-600", bg: "bg-red-50", border: "border-red-200" },
+  NONE: { label: "Not Verified", icon: Shield, color: "text-text-secondary", bg: "bg-surface-secondary", border: "border-border" },
+  PENDING: { label: "Pending Review", icon: Clock, color: "text-warning-600", bg: "bg-warning-50", border: "border-warning-200" },
+  VERIFIED: { label: "Verified", icon: CheckCircle, color: "text-success-600", bg: "bg-success-50", border: "border-success-500/30" },
+  REJECTED: { label: "Rejected", icon: XCircle, color: "text-error-600", bg: "bg-error-50", border: "border-error-200" },
 }
 
 function Badge({ status }: { status: string }) {
@@ -303,24 +303,23 @@ function KycPageInner() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className={cn("rounded-xl border p-5 transition-all", statusConfig.bg, statusConfig.border)}>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <section aria-labelledby="kyc-heading" className={cn("rounded-xl border p-5 transition-all", statusConfig.bg, statusConfig.border)}>
         <div className="flex items-start gap-4">
           <statusConfig.icon size={28} className={cn("mt-0.5 shrink-0", statusConfig.color)} />
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-bold text-foreground">
+            <h1 id="kyc-heading" className="font-heading text-xl font-bold tracking-tight text-text-primary">
               Identity Verification (KYC)
               {kycStatus !== "VERIFIED" && <span className="ml-3"><Badge status={kycStatus} /></span>}
             </h1>
             <p className={cn("mt-1 text-sm", statusConfig.color)}>
               {coreRejection ? <>Your documents were not approved. Reason: <strong>{coreRejection}</strong></> : STATUS[kycStatus]?.label === "Not Verified" ? "Verify your identity to unlock all features." : kycStatus === "PENDING" ? "Your documents are being reviewed." : "Your identity has been verified."}
-            </p>
-          </div>
+            </p>          </div>
         </div>
-      </div>
+      </section>
 
       {message && (
-        <div className="mt-4">
+        <div>
           <FormBanner variant={message.type === "success" ? "success" : "error"}>
             {message.text}
           </FormBanner>
@@ -328,49 +327,50 @@ function KycPageInner() {
       )}
 
       {(kycStatus === "NONE" || kycStatus === "REJECTED") && (
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" aria-label="KYC verification form">
           <PersonalDetailsForm
             bioFirstName={bioFirstName} bioMiddleName={bioMiddleName} bioLastName={bioLastName}
             bioPhone={bioPhone} bioEmail={bioEmail} userPhone={user?.phone}
             onChange={handleBioChange}
           />
 
-          <div className="rounded-xl border border-border bg-surface p-6">
-            <h2 className="mb-4 text-lg font-semibold text-foreground">
-              APL Representative Code <span className="text-sm font-normal text-muted">(Optional — fill if an APL Representative introduced you to the platform)</span>
+          <section aria-labelledby="kyc-agent-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+            <h2 id="kyc-agent-heading" className="mb-1 font-heading text-base font-semibold text-text-primary">
+              APL Representative Code
             </h2>
+            <p className="mb-4 text-sm text-text-secondary">Optional — fill if an APL Representative introduced you to the platform.</p>
 
             {agentCodeState === "confirmed" ? (
-              <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+              <div className="rounded-xl border border-success-500/30 bg-success-50 p-4">
                 <div className="flex items-center gap-2">
-                  <CheckCircle size={18} className="text-green-600" />
-                  <p className="text-sm font-medium text-green-800">APL Representative Confirmed</p>
+                  <CheckCircle size={18} className="text-success-600" />
+                  <p className="text-sm font-medium text-success-700">APL Representative Confirmed</p>
                 </div>
-                <p className="mt-2 text-sm text-green-700"><strong>Code:</strong> <span className="font-mono uppercase">{agentCode}</span></p>
-                <p className="mt-1 text-sm text-green-700"><strong>Name:</strong> {agentName}</p>
-                <p className="text-sm text-green-700"><strong>Phone:</strong> {agentPhone}</p>
-                <p className="mt-1 text-xs text-green-500">This APL Representative will be credited with your referral.</p>
+                <p className="mt-2 text-sm text-success-700"><strong>Code:</strong> <span className="font-mono uppercase">{agentCode}</span></p>
+                <p className="mt-1 text-sm text-success-700"><strong>Name:</strong> {agentName}</p>
+                <p className="text-sm text-success-700"><strong>Phone:</strong> {agentPhone}</p>
+                <p className="mt-1 text-xs text-text-secondary">This APL Representative will be credited with your referral.</p>
                 <button type="button" onClick={resetAgentCode}
-                  className="mt-3 text-sm font-medium text-primary hover:underline">
+                  className="touch-target mt-3 rounded-lg px-2 py-1 text-sm font-medium text-primary-600 hover:underline">
                   Change APL Representative
                 </button>
               </div>
             ) : (
               <div className="flex flex-wrap items-end gap-3">
                 <div className="flex-1 min-w-[200px]">
-                  <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="agentCode">APL Representative Code</label>
+                  <label className="mb-1 block text-sm font-medium text-text-primary" htmlFor="agentCode">APL Representative Code</label>
                   <input id="agentCode" value={agentCode} onChange={e => setAgentCode(e.target.value.toUpperCase())} placeholder="e.g. APL-JOE-001-07/26"
-                    className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm uppercase font-mono focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    className="block min-h-[44px] w-full rounded-lg border border-border bg-surface px-3 py-2 text-base uppercase font-mono focus:outline-none focus:ring-2 focus:ring-primary-600/20" />
                 </div>
                 <button type="button" onClick={handleRevealAgent} disabled={agentLookupLoading || !agentCode.trim()}
-                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-50">
+                  className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50">
                   {agentLookupLoading ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
                   {agentLookupLoading ? "Revealing..." : "Reveal APL Representative"}
                 </button>
               </div>
             )}
-            {agentLookupError && <p className="mt-2 text-sm text-red-500">{agentLookupError}</p>}
-          </div>
+            {agentLookupError && <p className="mt-2 text-sm text-error-600" role="alert">{agentLookupError}</p>}
+          </section>
 
           <DocumentUpload
             docType={docType} docNumber={docNumber}
@@ -385,7 +385,7 @@ function KycPageInner() {
           />
 
           <button type="submit" disabled={submitting || !docNumber.trim() || !frontFile} aria-busy={submitting}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-base font-medium text-white shadow-lg transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed">
+            className="touch-target flex w-full items-center justify-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-base font-medium text-white shadow-sm transition-all hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed">
             {submitting ? <Loader2 size={18} className="animate-spin" /> : <Shield size={18} />}
             {submitting ? "Submitting..." : "Submit for Verification"}
           </button>

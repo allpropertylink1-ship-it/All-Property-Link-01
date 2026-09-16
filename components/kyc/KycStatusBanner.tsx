@@ -4,10 +4,10 @@ import { Shield, CheckCircle, XCircle, Clock } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
 
 const statusConfig: Record<string, { label: string; icon: React.ElementType; color: string; bg: string; border: string }> = {
-  NONE: { label: "Not Verified", icon: Shield, color: "text-muted", bg: "bg-gray-50", border: "border-muted/30" },
-  PENDING: { label: "Pending Review", icon: Clock, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
-  VERIFIED: { label: "Verified", icon: CheckCircle, color: "text-green-600", bg: "bg-green-50", border: "border-green-200" },
-  REJECTED: { label: "Rejected", icon: XCircle, color: "text-red-600", bg: "bg-red-50", border: "border-red-200" },
+  NONE: { label: "Not Verified", icon: Shield, color: "text-text-secondary", bg: "bg-surface-secondary", border: "border-border" },
+  PENDING: { label: "Pending Review", icon: Clock, color: "text-warning-600", bg: "bg-warning-50", border: "border-warning-200" },
+  VERIFIED: { label: "Verified", icon: CheckCircle, color: "text-success-600", bg: "bg-success-50", border: "border-success-500/30" },
+  REJECTED: { label: "Rejected", icon: XCircle, color: "text-error-600", bg: "bg-error-50", border: "border-error-200" },
 }
 
 const statusMessages: Record<string, string> = {
@@ -27,20 +27,20 @@ export default function KycStatusBanner({ status, rejectionReason }: KycStatusBa
   if (!cfg) return null
 
   return (
-    <div className={cn("rounded-xl border p-5 transition-all", cfg.bg, cfg.border)}>
+    <section aria-label={`KYC status: ${cfg.label}`} className={cn("rounded-xl border p-5 transition-all", cfg.bg, cfg.border)}>
       <div className="flex items-start gap-4">
-        <cfg.icon size={28} className={cn("shrink-0 mt-0.5", cfg.color)} />
+        <cfg.icon size={28} className={cn("shrink-0 mt-0.5", cfg.color)} aria-hidden="true" />
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-bold text-foreground">
+          <h1 className="font-heading text-xl font-bold tracking-tight text-text-primary">
             Identity Verification (KYC)
             <span className="ml-3">
               <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium", cfg.bg, cfg.color)}>
-                <cfg.icon size={12} />
+                <cfg.icon size={12} aria-hidden="true" />
                 {cfg.label}
               </span>
             </span>
           </h1>
-          <p className={cn("mt-1 text-sm", status === "REJECTED" ? "text-red-700" : status === "PENDING" ? "text-amber-700" : status === "VERIFIED" ? "text-green-700" : "text-muted")}>
+          <p className={cn("mt-1 text-sm", status === "REJECTED" ? "text-error-600" : status === "PENDING" ? "text-warning-700" : status === "VERIFIED" ? "text-success-700" : "text-text-secondary")}>
             {rejectionReason ? (
               <>
                 {statusMessages[status]}
@@ -52,6 +52,6 @@ export default function KycStatusBanner({ status, rejectionReason }: KycStatusBa
           </p>
         </div>
       </div>
-    </div>
+    </section>
   )
 }

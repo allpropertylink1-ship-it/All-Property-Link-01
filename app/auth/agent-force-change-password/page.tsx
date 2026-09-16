@@ -4,7 +4,10 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { PasswordToggle } from "@/components/auth/PasswordToggle"
+import { PasswordStrength } from "@/components/auth/PasswordStrength"
+import { CenteredAuthShell } from "@/components/auth/stitch-auth"
 import { FormBanner } from "@/components/shared/FormFeedback"
+import { Lock } from "@/components/ui/icons"
 
 export default function AgentForceChangePasswordPage() {
   const router = useRouter()
@@ -16,10 +19,10 @@ export default function AgentForceChangePasswordPage() {
 
   if (!user || user.authMethod !== "agent") {
     return (
-      <div className="flex min-h-[100dvh] items-center justify-center bg-surface px-4">
+      <div className="flex min-h-[100dvh] items-center justify-center bg-surface-secondary px-4">
         <div className="w-full max-w-md text-center">
           <p className="text-text-secondary">You must log in as an APL Representative to access this page.</p>
-          <a href="/auth/login" className="mt-4 inline-block text-primary-600 hover:text-primary-700">Go to login</a>
+          <a href="/auth/login" className="mt-4 inline-block font-medium text-primary-600 hover:text-primary-700">Go to login</a>
         </div>
       </div>
     )
@@ -54,81 +57,71 @@ export default function AgentForceChangePasswordPage() {
   }
 
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-surface px-4">
-      <div className="w-full max-w-md">
-        <div className="mb-6 text-center">
-          <h2 className="font-heading text-xl font-bold text-text-primary">
-            All Property <span className="text-accent-600">Link</span>
-          </h2>
-        </div>
-        <div className="rounded-xl border border-border bg-surface p-6 sm:p-8">
-          <div className="mb-6 text-center">
-            <h1 className="font-heading text-3xl font-bold text-text-primary">
-              Change your password
-            </h1>
-            <p className="mt-2 text-sm text-text-secondary">
-              You are required to set a new password before continuing.
-            </p>
+    <CenteredAuthShell
+      icon={Lock}
+      eyebrow="Mandatory Password Rotation"
+      title="Change your password"
+      subtitle="You are required to set a new password before continuing."
+      assurance="Official Representative Console and 256-Bit SSL Encrypted Session"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <FormBanner variant="error">
+            {error}
+          </FormBanner>
+        )}
+
+        <div>
+          <label htmlFor="new-password" className="block text-sm font-semibold text-text-primary">
+            New Password
+          </label>
+          <div className="mt-1">
+            <PasswordToggle
+              id="new-password"
+              name="newPassword"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={8}
+              placeholder="At least 8 characters"
+            />
           </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <FormBanner variant="error">
-                {error}
-              </FormBanner>
-            )}
-
-            <div>
-              <label htmlFor="new-password" className="block text-sm font-medium text-text-primary">
-                New Password
-              </label>
-              <div className="mt-1">
-                <PasswordToggle
-                  id="new-password"
-                  name="newPassword"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={8}
-                  placeholder="At least 8 characters"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="confirm-password" className="block text-sm font-medium text-text-primary">
-                Confirm Password
-              </label>
-              <div className="mt-1">
-                <PasswordToggle
-                  id="confirm-password"
-                  name="confirmPassword"
-                  value={confirm}
-                  onChange={(e) => setConfirm(e.target.value)}
-                  required
-                  placeholder="Re-enter your password"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="touch-target w-full rounded-sm bg-primary px-4 py-3 font-medium text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loading ? "Saving..." : "Set new password"}
-            </button>
-
-            <button
-              type="button"
-              onClick={logout}
-              className="w-full text-center text-sm text-text-secondary hover:text-text-primary transition-colors"
-            >
-              Log out
-            </button>
-          </form>
+          <PasswordStrength password={password} />
         </div>
-      </div>
-    </div>
+
+        <div>
+          <label htmlFor="confirm-password" className="block text-sm font-semibold text-text-primary">
+            Confirm Password
+          </label>
+          <div className="mt-1">
+            <PasswordToggle
+              id="confirm-password"
+              name="confirmPassword"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              required
+              placeholder="Re-enter your password"
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          aria-busy={loading}
+          className="touch-target w-full rounded-xl bg-primary px-4 py-3.5 font-semibold text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {loading ? "Saving..." : "Set new password"}
+        </button>
+
+        <button
+          type="button"
+          onClick={logout}
+          className="w-full text-center text-sm text-text-secondary transition-colors hover:text-text-primary"
+        >
+          Log out
+        </button>
+      </form>
+    </CenteredAuthShell>
   )
 }

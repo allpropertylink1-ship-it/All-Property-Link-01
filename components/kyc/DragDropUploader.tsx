@@ -52,8 +52,8 @@ export default function DragDropUploader({
         validateAndEmit(e.dataTransfer.files?.[0])
       }}
       className={cn(
-        "flex h-44 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed bg-background transition-colors",
-        dragging ? "border-primary bg-primary/10" : "border-muted/50 hover:border-primary/50 hover:bg-primary/5"
+        "touch-target flex min-h-[44px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-surface-secondary p-6 transition-colors",
+        dragging ? "border-primary-600 bg-primary-50" : "border-border hover:border-primary-500 hover:bg-primary-50/50"
       )}
       onClick={() => fileRef.current?.click()}
       role="button"
@@ -61,15 +61,15 @@ export default function DragDropUploader({
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") fileRef.current?.click() }}
       aria-label={`Upload ${label} — drag and drop or click to browse`}
     >
-      <Upload className="mb-2 h-6 w-6 text-muted" />
-      <span className="text-sm text-muted">
+      <Upload className="mb-2 h-6 w-6 text-text-secondary" />
+      <span className="text-sm font-medium text-text-primary">
         {dragging ? "Drop image here" : `Drag & drop or click to upload ${label.toLowerCase()}`}
       </span>
-      <span className="mt-1 text-xs text-muted">{hint}</span>
+      <span className="mt-1 text-xs text-text-secondary">{hint}</span>
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); cameraRef.current?.click() }}
-        className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-gray-50"
+        className="touch-target mt-2 inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-primary hover:bg-surface-secondary"
       >
         <Camera size={14} /> Use camera
       </button>

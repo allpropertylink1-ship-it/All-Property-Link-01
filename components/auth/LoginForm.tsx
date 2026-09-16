@@ -5,7 +5,9 @@ import { useAuth } from "@/lib/auth-context"
 import { PasswordToggle } from "./PasswordToggle"
 import { GoogleSignInButton } from "./GoogleSignInButton"
 import { OtpInput } from "./OtpInput"
+import { AuthAssurance, AuthDivider, AuthSubmitButton, InputLeadingIcon, stitchInputWithIconClass } from "./stitch-auth"
 import { FormBanner } from "@/components/shared/FormFeedback"
+import { Mail } from "@/components/ui/icons"
 
 export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => void }) {
   const router = useRouter()
@@ -112,98 +114,86 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
   }, [])
 
   return (
-    <>
-      <div className="mb-2">
-        <GoogleSignInButton
-          mode="signin"
-          onSuccess={async () => { await refreshUser(); router.push("/dashboard"); router.refresh() }}
-          onError={(msg) => setError(msg)}
-        />
-      </div>
-
-      <div className="relative mb-2">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-surface px-2 text-text-secondary">or continue with</span>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-2.5">
+    <div className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <FormBanner variant="error">{error}</FormBanner>
         )}
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-text-primary">
-            Email
+          <label htmlFor="email" className="block text-sm font-semibold text-text-primary">
+            Email Address
           </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-            style={{ fontSize: "16px" }}
-            placeholder="you@example.com"
-          />
+          <div className="relative">
+            <InputLeadingIcon icon={Mail} />
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              aria-label="Email Address"
+              className={stitchInputWithIconClass}
+              style={{ fontSize: "16px" }}
+              placeholder="e.g. kamau.mwangi@example.co.ke"
+            />
+          </div>
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-text-primary">
-            Password
-          </label>
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="block text-sm font-semibold text-text-primary">
+              Password
+            </label>
+            <a
+              href="/auth/forgot-password"
+              className="text-sm font-semibold text-accent-600 hover:text-accent-700"
+            >
+              Forgot Password?
+            </a>
+          </div>
           <div className="mt-1">
             <PasswordToggle
               id="password"
               name="password"
               autoComplete="current-password"
               required
-              placeholder="Enter your password"
+              placeholder="Enter your secure password"
             />
           </div>
         </div>
 
         <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 cursor-pointer">
+          <label className="flex cursor-pointer items-center gap-2" htmlFor="remember-me">
             <input
+              id="remember-me"
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="rounded-sm border border-border bg-surface text-primary-600 focus:ring-primary focus:ring-2"
+              className="h-4 w-4 rounded border border-border bg-surface text-primary-600 focus:ring-2 focus:ring-primary"
             />
-            <span className="text-sm text-text-secondary">Remember me</span>
+            <span className="text-sm text-text-secondary">Keep me logged in on this device</span>
           </label>
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={() => {
-                if (magicSent) { setMagicSent(false); setMagicEmail(""); setMagicError("") }
-                setShowMagicLink(!showMagicLink)
-              }}
-              className="text-sm font-medium text-primary-600 hover:text-primary-700"
-            >
-              {showMagicLink ? "Cancel magic link" : "Use magic link"}
-            </button>
-            <a
-              href="/auth/forgot-password"
-              className="text-sm font-medium text-primary-600 hover:text-primary-700"
-            >
-              Forgot password?
-            </a>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (magicSent) { setMagicSent(false); setMagicEmail(""); setMagicError("") }
+              setShowMagicLink(!showMagicLink)
+            }}
+            className="text-sm font-semibold text-primary-600 hover:text-primary-700"
+          >
+            {showMagicLink ? "Cancel magic link" : "Use magic link"}
+          </button>
         </div>
 
         {showMagicLink && (
           magicSent ? (
-<div className="space-y-3">
-                <FormBanner variant="success">
-                  Magic link sent! Check your email inbox.
-                </FormBanner>
+            <div className="space-y-3">
+              <FormBanner variant="success">
+                Magic link sent! Check your email inbox.
+              </FormBanner>
               <button
                 type="button"
                 onClick={() => { setMagicSent(false); setMagicEmail(""); setMagicError("") }}
-                className="touch-target w-full rounded-sm border border-primary px-4 py-2.5 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-50"
+                className="touch-target w-full rounded-xl border border-primary px-4 py-2.5 text-sm font-semibold text-primary-600 transition-colors hover:bg-primary-50"
               >
                 Send again
               </button>
@@ -216,32 +206,39 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
                   value={magicEmail}
                   onChange={(e) => setMagicEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="block min-w-0 flex-1 rounded-sm border border-border bg-surface px-4 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  aria-label="Email for magic link"
+                  style={{ fontSize: "16px" }}
+                  className="block min-w-0 flex-1 rounded-xl border border-border bg-surface-secondary px-4 py-2.5 text-text-primary placeholder:text-text-secondary focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
                 <button
                   type="button"
                   onClick={handleMagicLink}
                   disabled={!magicEmail}
-                  className="touch-target rounded-sm border border-primary px-4 py-2.5 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-50 disabled:opacity-50"
+                  className="touch-target rounded-xl border border-primary px-4 py-2.5 text-sm font-semibold text-primary-600 transition-colors hover:bg-primary-50 disabled:opacity-50"
                 >
                   Send
                 </button>
               </div>
               {magicError && (
-                <p className="text-xs text-error-500">{magicError}</p>
+                <p className="text-xs text-error-500" role="alert">{magicError}</p>
               )}
             </div>
           )
         )}
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-surface px-2 text-text-secondary">or sign in with phone</span>
-          </div>
-        </div>
+        <AuthSubmitButton loading={loading} label="Sign In to Account" loadingLabel="Verifying Credentials..." />
+      </form>
+
+      <AuthDivider />
+
+      <GoogleSignInButton
+        mode="signin"
+        onSuccess={async () => { await refreshUser(); router.push("/dashboard"); router.refresh() }}
+        onError={(msg) => setError(msg)}
+      />
+
+      <div className="space-y-4">
+        <AuthDivider label="or sign in with phone" />
 
         {phoneStep === "phone" ? (
           <div className="space-y-3">
@@ -249,38 +246,32 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
               <FormBanner variant="error">{phoneError}</FormBanner>
             )}
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1">Phone number</label>
-              <div className="flex">
-                <span className="inline-flex items-center rounded-sm rounded-r-none border border-r-0 border-border bg-surface-secondary px-3 text-sm text-text-secondary">
+              <label htmlFor="login-phone" className="block text-sm font-semibold text-text-primary">Phone number</label>
+              <div className="mt-1 flex">
+                <span className="inline-flex items-center rounded-xl rounded-r-none border border-r-0 border-border bg-surface-secondary px-3 text-sm text-text-secondary">
                   +254
                 </span>
                 <input
+                  id="login-phone"
                   type="tel"
                   inputMode="numeric"
                   maxLength={9}
                   value={phone}
                   onChange={(e) => { setPhone(e.target.value); setPhoneError("") }}
                   placeholder="712 345 678"
-                  className="block w-full rounded-sm rounded-l-none border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  aria-label="Phone number, last 9 digits"
+                  className="block w-full rounded-xl rounded-l-none border border-border bg-surface-secondary px-4 py-3.5 text-text-primary placeholder:text-text-secondary focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
                   style={{ fontSize: "16px" }}
                 />
               </div>
               <p className="mt-1 text-xs text-text-secondary">Enter the last 9 digits of your Kenyan phone number</p>
             </div>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="rounded-sm border border-border bg-surface text-primary-600 focus:ring-primary focus:ring-2"
-              />
-              <span className="text-sm text-text-secondary">Remember me</span>
-            </label>
             <button
               type="button"
               onClick={handlePhoneSendCode}
               disabled={phoneLoading}
-                className="touch-target w-full rounded-sm border border-primary px-4 py-2.5 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-50 disabled:opacity-50"
+              aria-busy={phoneLoading}
+              className="touch-target w-full rounded-xl border border-primary px-4 py-2.5 text-sm font-semibold text-primary-600 transition-colors hover:bg-primary-50 disabled:opacity-50"
             >
               {phoneLoading ? "Sending code..." : "Send login code"}
             </button>
@@ -290,7 +281,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
             {phoneError && (
               <FormBanner variant="error">{phoneError}</FormBanner>
             )}
-            <p className="text-sm text-text-secondary text-center">
+            <p className="text-center text-sm text-text-secondary">
               We sent a code to <strong className="text-text-primary">+254{phone.replace(/\D/g, "")}</strong>
             </p>
             <OtpInput
@@ -306,7 +297,8 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
               type="button"
               onClick={handlePhoneVerify}
               disabled={otpLoading || otpValues.join("").length !== 6}
-              className="touch-target w-full rounded-sm bg-primary px-4 py-2.5 font-medium text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
+              aria-busy={otpLoading}
+              className="touch-target w-full rounded-xl bg-primary px-4 py-2.5 font-semibold text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {otpLoading ? "Verifying..." : "Verify code"}
             </button>
@@ -317,7 +309,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
                 <button
                   type="button"
                   onClick={() => { setPhoneStep("phone"); setOtpValues(["", "", "", "", "", ""]); setPhoneError("") }}
-                  className="text-xs font-medium text-primary-600 hover:text-primary-700"
+                  className="text-xs font-semibold text-primary-600 hover:text-primary-700"
                 >
                   Change phone number
                 </button>
@@ -325,27 +317,24 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
             </div>
           </div>
         )}
+      </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="touch-target w-full rounded-sm bg-primary px-4 py-2.5 font-medium text-white transition-colors hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {loading ? "Signing in..." : "Sign in"}
-        </button>
-        <p className="text-center text-sm text-text-secondary">
-          Don&apos;t have an account?{" "}
-          {onSwitchToRegister ? (
-            <button type="button" onClick={onSwitchToRegister} className="font-medium text-primary-600 hover:text-primary-700">
-              Register
-            </button>
-          ) : (
-            <a href="/auth/register" className="font-medium text-primary-600 hover:text-primary-700">
-              Register
-            </a>
-          )}
-        </p>
-      </form>
-    </>
+      <p className="pt-1 text-center text-sm text-text-secondary">
+        Don&apos;t have an active account?{" "}
+        {onSwitchToRegister ? (
+          <button type="button" onClick={onSwitchToRegister} className="font-semibold text-accent-600 hover:text-accent-700">
+            Apply for Registration
+          </button>
+        ) : (
+          <a href="/auth/register" className="font-semibold text-accent-600 hover:text-accent-700">
+            Apply for Registration
+          </a>
+        )}
+      </p>
+
+      <AuthAssurance>
+        256-Bit SSL Encryption and Kenya Data Protection Act 2019 Compliant
+      </AuthAssurance>
+    </div>
   )
 }

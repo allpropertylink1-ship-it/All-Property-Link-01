@@ -37,11 +37,17 @@ export default async function ProfilePage() {
   };
 
   return (
-    <div>
-      <h1 className="mb-8 font-heading text-2xl font-bold text-text-primary">
-        Profile
-      </h1>
-      <div className="mx-auto max-w-2xl rounded-xl border border-border bg-surface p-6">
+    <div className="space-y-6">
+      <section aria-labelledby="profile-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <p className="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-secondary">
+          Account
+        </p>
+        <h1 id="profile-heading" className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">
+          Personal Profile
+        </h1>
+        <p className="mt-1 text-sm text-text-secondary">Identity, contact details, and sign-in security.</p>
+      </section>
+      <div className="mx-auto max-w-3xl">
         <ProfileForm user={profileUser} />
       </div>
     </div>

@@ -65,7 +65,7 @@ const categories = [
   { href: "/properties?purpose=FOR_SALE", label: "Properties for Sale", icon: SaleIcon },
   { href: "/properties?purpose=FOR_RENT_LONG_TERM", label: "Long-Term Rentals", icon: RentIcon },
   { href: "/properties?purpose=FOR_RENT_SHORT_TERM", label: "Short-Term Stays", icon: StayIcon },
-  { href: "/properties?type=LAND", label: "Plots & Land", icon: LandIcon },
+  { href: "/land", label: "Plots & Land", icon: LandIcon },
   { href: "/services?type=FUNDI", label: "Fundis", icon: FundiIcon },
   { href: "/services?type=SERVICE_PROVIDER", label: "Service Providers", icon: ServiceIcon },
 ];

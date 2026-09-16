@@ -12,6 +12,9 @@ export default function AgentsPage() {
     <main className="min-h-[100dvh] bg-surface">
       <section className="bg-primary-600 py-16 text-center text-text-on-primary sm:py-24">
         <div className="mx-auto max-w-7xl px-4">
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-accent-200">
+            Verified Network / Directory Desk
+          </p>
           <h1 className="mb-4 font-heading text-4xl font-bold tracking-tight sm:text-5xl">Our APL Representatives</h1>
           <p className="mx-auto max-w-2xl text-balance text-lg text-primary-100 sm:text-xl">
             Verified representatives ready to help you find the perfect property

@@ -1,7 +1,7 @@
 ﻿"use client"
 
 import Link from "next/link"
-import { Building2, Home, Tent, Trees, Wrench, ConciergeBell } from "@/components/ui/icons"
+import { Building2, Home, Tent, Trees, Wrench, ConciergeBell, LayoutDashboard } from "@/components/ui/icons"
 
 interface Category {
   readonly title: string
@@ -56,78 +56,66 @@ const categories: readonly Category[] = [
   },
 ]
 
-function CategoryPill({ category, isService = false }: { category: Category; isService?: boolean }) {
-  const baseHref = isService ? "/services" : "/browse"
-  const param = category.filterType === "purpose" ? "purpose" : category.filterType === "type" ? "type" : "serviceType"
+function hrefFor(category: Category): string {
+  const baseHref = category.filterType === "serviceType" ? "/services" : "/browse"
+  const param =
+    category.filterType === "purpose"
+      ? "purpose"
+      : category.filterType === "type"
+        ? "type"
+        : "serviceType"
+  return `${baseHref}?${param}=${category.filterKey}`
+}
 
+function CategoryPill({
+  href,
+  icon: Icon,
+  title,
+  desc,
+  active = false,
+}: {
+  href: string
+  icon: typeof Building2
+  title: string
+  desc: string
+  active?: boolean
+}) {
   return (
     <Link
-      href={`${baseHref}?${param}=${category.filterKey}`}
-      className="flex h-[36px] items-center gap-2 rounded-full border border-border bg-surface px-4 text-sm font-medium text-text-secondary transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary hover:shadow-sm"
-      aria-label={`${category.title}: ${category.desc}`}
+      href={href}
+      aria-label={`${title}: ${desc}`}
+      aria-current={active ? "page" : undefined}
+      className={`flex min-h-touch shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium shadow-sm transition-colors ${
+        active
+          ? "bg-primary text-text-onPrimary"
+          : "bg-surface text-text-primary hover:bg-surface-secondary"
+      }`}
     >
-      <category.icon size={14} className="shrink-0" />
-      <span>{category.title}</span>
+      <Icon size={16} className={active ? "" : "text-primary"} aria-hidden="true" />
+      <span>{title}</span>
     </Link>
   )
 }
 
 export function CategoryGrid() {
-  const propertyCategories = categories.filter(c => c.filterType === "purpose" || c.filterType === "type")
-  const serviceCategories = categories.filter(c => c.filterType === "serviceType")
-
   return (
-    <section className="py-10 sm:py-14">
+    <section aria-label="Browse categories" className="bg-surface pb-2 pt-8 sm:pt-10">
       <div className="container mx-auto max-w-7xl px-4">
-        <div className="mb-6">
-          <h2 className="mb-2 text-2xl font-bold text-text-primary sm:text-3xl">
-            Browse by Category
-          </h2>
-          <p className="text-sm text-text-secondary">
-            Find exactly what you&apos;re looking for
-          </p>
-        </div>
-
-        {/* Mobile: 2-column vertical stacks */}
-        <div className="grid grid-cols-2 gap-6 lg:hidden">
-          <div className="space-y-3">
-            <h3 className="font-heading text-lg font-semibold text-text-primary">Properties</h3>
-            <div className="flex flex-col gap-2" role="list" aria-label="Property categories">
-              {propertyCategories.map((cat) => (
-                <CategoryPill key={cat.title} category={cat} />
-              ))}
-            </div>
+        <h2 className="sr-only">Browse by category</h2>
+        {/* Mobile: horizontal snap rail (Stitch) — Desktop: wrapping row */}
+        <div
+          className="flex items-center gap-2 overflow-x-auto py-1 scrollbar-hide lg:flex-wrap lg:overflow-visible"
+          role="list"
+          aria-label="Property and service categories"
+        >
+          <div role="listitem">
+            <CategoryPill href="/browse" icon={LayoutDashboard} title="All" desc="Everything on All Property Link" active />
           </div>
-
-          <div className="space-y-3">
-            <h3 className="font-heading text-lg font-semibold text-text-primary">Services</h3>
-            <div className="flex flex-col gap-2" role="list" aria-label="Service categories">
-              {serviceCategories.map((cat) => (
-                <CategoryPill key={cat.title} category={cat} isService />
-              ))}
+          {categories.map((cat) => (
+            <div key={cat.title} role="listitem">
+              <CategoryPill href={hrefFor(cat)} icon={cat.icon} title={cat.title} desc={cat.desc} />
             </div>
-          </div>
-        </div>
-
-        {/* Desktop: horizontal wrapping pills like "Popular cities" in QuickSearch */}
-        <div className="hidden lg:block space-y-6">
-          <div>
-            <h3 className="mb-3 font-heading text-lg font-semibold text-text-primary">Properties</h3>
-            <div className="flex flex-wrap gap-2" role="list" aria-label="Property categories">
-              {propertyCategories.map((cat) => (
-                <CategoryPill key={cat.title} category={cat} />
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h3 className="mb-3 font-heading text-lg font-semibold text-text-primary">Services</h3>
-            <div className="flex flex-wrap gap-2" role="list" aria-label="Service categories">
-              {serviceCategories.map((cat) => (
-                <CategoryPill key={cat.title} category={cat} isService />
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>

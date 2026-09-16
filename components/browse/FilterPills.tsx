@@ -13,9 +13,9 @@ export function FilterPill({ label, value, isActive, onClick, icon }: FilterPill
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-[36px] items-center gap-2 rounded-full px-4 text-sm font-medium transition-all ${
+      className={`inline-flex min-h-[44px] shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 text-sm font-medium transition-all ${
         isActive
-          ? "bg-primary-500 text-white shadow-sm"
+          ? "bg-primary text-white shadow-sm"
           : "border border-border bg-surface text-text-secondary hover:border-primary/30 hover:bg-primary/5 hover:text-primary hover:shadow-sm"
       }`}
       aria-pressed={isActive}
@@ -58,7 +58,7 @@ export function FilterPillsGroup({
 }: FilterPillsGroupProps) {
   if (activeTab === "properties") {
     return (
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Property filters">
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1" role="group" aria-label="Property filters">
         {PROPERTY_PILLS.map((pill) => (
           <FilterPill
             key={pill.key}
@@ -73,7 +73,7 @@ export function FilterPillsGroup({
   }
 
   return (
-    <div className="flex flex-wrap gap-2" role="group" aria-label="Service filters">
+    <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1" role="group" aria-label="Service filters">
       {SERVICE_PILLS.map((pill) => (
         <FilterPill
           key={pill.key}

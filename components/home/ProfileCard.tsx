@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link"
-import { MapPin, Wrench, Briefcase } from "@/components/ui/icons"
+import { MapPin, Wrench, Briefcase, BadgeCheck, ArrowUpRight } from "@/components/ui/icons"
 import { AVATAR_POOL } from "@/lib/placeholders"
 import { optimizeImageUrl } from "@/lib/images"
 
@@ -77,19 +77,22 @@ export function ProfileCard({
   const subtitle = getSubtitle(item.user)
   const location = [item.city, item.user.city].filter(Boolean).join(", ")
   const Icon = variant === "fundi" ? Wrench : Briefcase
+  const priceNum = item.price == null ? null : Number(item.price)
+  const showPrice = priceNum != null && !Number.isNaN(priceNum) && priceNum > 0
 
   return (
     <Link
       href={`/services/${item.id}`}
-      className="group relative flex flex-col items-center rounded-2xl border border-border bg-surface px-4 py-6 text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1 sm:px-6 sm:py-8"
+      aria-label={`View ${displayName}${item.category ? ` — ${item.category.name}` : ""}`}
+      className="group flex flex-col items-center rounded-lg border border-border bg-surface px-4 py-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:px-5"
     >
-      {/* Photo */}
-      <div className="relative mb-4">
-        <div className="h-24 w-24 overflow-hidden rounded-full border-[3px] border-primary bg-surface-secondary shadow-sm transition-shadow duration-300 group-hover:shadow-md sm:h-28 sm:w-28 md:h-32 md:w-32">
+      {/* Photo with verified badge */}
+      <div className="relative mb-3">
+        <div className="h-20 w-20 overflow-hidden rounded-full border-2 border-primary/20 bg-surface-secondary shadow-sm sm:h-24 sm:w-24">
           {photoSrc ? (
             <img
               src={photoSrc}
-              alt={displayName}
+              alt=""
               className="h-full w-full object-cover"
               loading="lazy"
               decoding="async"
@@ -100,41 +103,59 @@ export function ProfileCard({
           ) : (
             <img
               src={fallbackAvatar}
-              alt={displayName}
+              alt=""
               className="h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
               onError={(e) => {
                 ;(e.target as HTMLImageElement).style.display = "none"
               }}
             />
           )}
         </div>
-        {/* Online-style accent dot */}
-        <div className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-surface bg-primary-400 sm:h-5 sm:w-5" />
+        <span className="absolute -bottom-0.5 -right-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-text-onPrimary" title="Verified">
+          <BadgeCheck size={14} aria-hidden="true" />
+        </span>
       </div>
 
+      {/* Trade pill */}
+      {item.category && (
+        <span className="mb-1.5 inline-flex items-center gap-1 rounded-full bg-primary/5 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-primary">
+          <Icon size={12} className="shrink-0" aria-hidden="true" />
+          <span className="max-w-[140px] truncate">{item.category.name}</span>
+        </span>
+      )}
+
       {/* Name */}
-      <h3 className="font-heading text-sm font-bold leading-tight text-text-primary sm:text-base">
+      <h3 className="font-heading text-sm font-bold leading-tight text-text-primary transition-colors group-hover:text-accent-600 sm:text-base">
         {displayName}
       </h3>
 
       {/* Subtitle (company owner name) */}
-      {subtitle && <p className="mt-0.5 text-xs text-text-secondary">{subtitle}</p>}
-
-      {/* Category pill */}
-      {item.category && (
-        <span className="mt-2.5 inline-flex items-center gap-1 rounded-full bg-accent-50 px-3 py-1 text-[11px] font-semibold text-accent-600 sm:text-xs">
-          <Icon size={12} className="shrink-0" />
-          {item.category.name}
-        </span>
+      {subtitle && (
+        <p className="mt-0.5 max-w-full truncate text-xs text-text-secondary">{subtitle}</p>
       )}
 
       {/* Location */}
       {location && (
-        <div className="mt-2.5 flex items-center gap-1 text-xs text-text-secondary">
-          <MapPin size={12} className="shrink-0 text-accent-500" />
-          <span className="truncate max-w-[140px]">{location}</span>
-        </div>
+        <p className="mt-1.5 flex items-center gap-1 text-xs text-text-secondary">
+          <MapPin size={12} className="shrink-0 text-accent-500" aria-hidden="true" />
+          <span className="max-w-[150px] truncate">{location}</span>
+        </p>
       )}
+
+      {/* Rate */}
+      {showPrice && (
+        <p className="mt-1.5 text-sm font-bold text-accent-600">
+          From KES {priceNum.toLocaleString("en-KE")}
+        </p>
+      )}
+
+      {/* Profile CTA */}
+      <span className="mt-4 inline-flex min-h-touch w-full items-center justify-center gap-1 rounded-lg bg-surface-secondary px-3 py-2 text-xs font-semibold text-text-primary transition-colors group-hover:bg-primary group-hover:text-text-onPrimary">
+        View Profile
+        <ArrowUpRight size={13} aria-hidden="true" />
+      </span>
     </Link>
   )
 }

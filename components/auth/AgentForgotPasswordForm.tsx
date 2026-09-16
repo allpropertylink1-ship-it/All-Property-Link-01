@@ -2,7 +2,9 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
+import { AuthSubmitButton, InputLeadingIcon, stitchInputWithIconClass } from "./stitch-auth"
 import { FormBanner } from "@/components/shared/FormFeedback"
+import { BadgeCheck } from "@/components/ui/icons"
 
 export function AgentForgotPasswordForm() {
   const router = useRouter()
@@ -32,7 +34,7 @@ export function AgentForgotPasswordForm() {
 
   if (sent) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4">
         <FormBanner variant="success">
           If an account with that information exists, a password reset link has been sent to the registered email address.
           If you don&apos;t receive an email within 5 minutes, check your spam folder or contact support.
@@ -40,7 +42,8 @@ export function AgentForgotPasswordForm() {
         <button
           type="button"
           onClick={backToLogin}
-          className="touch-target w-full rounded-sm bg-primary px-4 py-2.5 font-medium text-white transition-colors hover:bg-primary-600"
+          aria-busy={false}
+          className="touch-target w-full rounded-xl bg-primary px-4 py-3.5 font-semibold text-white transition-colors hover:bg-primary-600"
         >
           Back to login
         </button>
@@ -49,9 +52,9 @@ export function AgentForgotPasswordForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2.5">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <p className="text-sm text-text-secondary">
-        Enter your APL Representative Code or registered email address and we'll send you a reset link.
+        Enter your APL Representative Code or registered email address and we&apos;ll send you a reset link.
       </p>
 
       {error && (
@@ -59,32 +62,31 @@ export function AgentForgotPasswordForm() {
       )}
 
       <div>
-        <label htmlFor="agent-identifier" className="block text-sm font-medium text-text-primary">
+        <label htmlFor="agent-identifier" className="block text-sm font-semibold text-text-primary">
           APL Representative Code or Email
         </label>
-        <input
-          id="agent-identifier"
-          type="text"
-          required
-          value={identifier}
-          onChange={(e) => setIdentifier(e.target.value)}
-          className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-          placeholder="APL-XXX-000-00/00 or agent@example.com"
-        />
+        <div className="relative">
+          <InputLeadingIcon icon={BadgeCheck} />
+          <input
+            id="agent-identifier"
+            type="text"
+            required
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            aria-label="APL Representative Code or Email"
+            className={stitchInputWithIconClass}
+            style={{ fontSize: "16px" }}
+            placeholder="APL-XXX-000-00/00 or agent@example.com"
+          />
+        </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="touch-target w-full rounded-sm bg-primary px-4 py-2.5 font-medium text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {loading ? "Sending..." : "Send reset link"}
-      </button>
+      <AuthSubmitButton loading={loading} label="Send reset link" loadingLabel="Sending..." />
 
       <button
         type="button"
         onClick={backToLogin}
-        className="w-full text-center text-sm text-text-secondary hover:text-text-primary transition-colors"
+        className="w-full text-center text-sm text-text-secondary transition-colors hover:text-text-primary"
       >
         Back to login
       </button>
