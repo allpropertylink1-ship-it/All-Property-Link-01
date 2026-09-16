@@ -134,7 +134,9 @@ function OnboardingPageInner() {
     }));
   }
 
-  const selectedSpecialties = form.category === "FUNDI" || form.category === "AGENT"
+  // Agents list properties on behalf of owners (like Property Owners) — no specialties.
+  // Only Fundis (trade skills) and Service Providers (services) select specialties.
+  const selectedSpecialties = form.category === "FUNDI"
     ? specialtiesAgent
     : form.category === "SERVICE_PROVIDER"
       ? specialtiesService
@@ -146,11 +148,16 @@ function OnboardingPageInner() {
     setError("");
 
     try {
+      // AGENT and PROPERTY_OWNER have no specialties — never submit stale values.
+      const payload =
+        form.category === "AGENT" || form.category === "PROPERTY_OWNER"
+          ? { ...form, specialties: [] as string[] }
+          : form;
       const res = await fetch("/api/user/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...form,
+          ...payload,
           onboardingComplete: true,
         }),
       });
