@@ -578,55 +578,6 @@ export function HeroSection() {
           )}
         </div>
 
-        {/* Mobile region context + For Sale / To Let segmented (Stitch mobile hero) */}
-        <div className="mb-3 rounded-xl border border-border bg-surface p-3 shadow-sm md:hidden">
-          <div className="mb-2.5 flex items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-secondary text-primary">
-                <MapPin size={16} aria-hidden="true" />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary">
-                  Search Region
-                </span>
-                <span className="block truncate text-sm font-bold text-text-primary">
-                  Nairobi &amp; Kiambu, KE
-                </span>
-              </span>
-            </div>
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-accent-100 px-2.5 py-1 text-[11px] font-bold text-accent-700">
-              <BadgeCheck size={14} aria-hidden="true" />
-              Vetted Hub
-            </span>
-          </div>
-          <div className="flex items-center rounded-xl bg-surface-secondary p-1" role="group" aria-label="Listing type">
-            <button
-              type="button"
-              aria-pressed={persona.id === "sale"}
-              onClick={() => switchPersona(PERSONAS[0])}
-              className={`min-h-touch flex-1 rounded-lg py-2 text-center text-sm font-semibold transition-all ${
-                persona.id === "sale"
-                  ? "bg-primary text-text-onPrimary shadow-sm"
-                  : "text-text-secondary hover:text-primary"
-              }`}
-            >
-              For Sale
-            </button>
-            <button
-              type="button"
-              aria-pressed={persona.id === "rent"}
-              onClick={() => switchPersona(PERSONAS[1])}
-              className={`min-h-touch flex-1 rounded-lg py-2 text-center text-sm font-semibold transition-all ${
-                persona.id === "rent"
-                  ? "bg-primary text-text-onPrimary shadow-sm"
-                  : "text-text-secondary hover:text-primary"
-              }`}
-            >
-              To Let (Rent)
-            </button>
-          </div>
-        </div>
-
         {/* Integrated multi-tab quick search console (overlaps carousel on desktop, stacks on mobile) */}
         <div className="relative z-20 mx-auto w-full max-w-5xl rounded-xl border border-border bg-surface p-3 shadow-lg sm:p-4 md:-mt-12">
           <div
