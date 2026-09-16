@@ -51,7 +51,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const status = await getSiteStatus();
-  const inMaintenance = status?.maintenanceMode === true;
+  const inMaintenance = status?.maintenanceMode === true && status?.preview !== true;
   return (
     <html lang="en">
       <head>
