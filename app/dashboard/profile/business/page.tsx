@@ -272,9 +272,15 @@ function BusinessProfilePageInner() {
     setError("")
     setSuccess(false)
     try {
-      const res = await api.patch("/api/user/profile", form)
+      // AGENT and PROPERTY_OWNER have no specialties — clear any stale values.
+      const payload =
+        form.category === "AGENT" || form.category === "PROPERTY_OWNER"
+          ? { ...form, specialties: [] as string[] }
+          : form
+      const res = await api.patch("/api/user/profile", payload)
       if (res.error) throw new Error(res.error)
-      setInitialForm({ ...form })
+      setForm(payload)
+      setInitialForm({ ...payload })
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
