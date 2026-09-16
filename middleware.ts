@@ -34,6 +34,9 @@ async function readMaintenanceState(origin: string): Promise<{ on: boolean } | n
 
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  // Make pathname available to RootLayout for maintenance gating (so /auth stays reachable)
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set("x-pathname", pathname)
 
   if (pathname.startsWith("/uploads/")) {
     // Images live on the cPanel origin, which is unreachable from some
@@ -44,7 +47,9 @@ export default async function middleware(request: NextRequest) {
     url.host = new URL(API_BACKEND).host
     url.protocol = "https"
     url.port = ""
-    return NextResponse.rewrite(url.toString())
+    const res = NextResponse.rewrite(url.toString())
+    res.headers.set("x-pathname", pathname)
+    return res
   }
 
   // NOTE: /api/* is intentionally NOT rewritten here. All API traffic is
@@ -54,10 +59,12 @@ export default async function middleware(request: NextRequest) {
   // on Vercel edge → origin, while serverless → origin succeeds (different
   // IP pool). See Session 22 incident.
 
-  // Never gate API traffic or the maintenance route itself (avoids loops and
-  // keeps status checks / mutations reachable during maintenance).
-  if (pathname.startsWith("/api/") || pathname.startsWith("/maintenance")) {
-    return NextResponse.next()
+  // Never gate API/auth traffic or the maintenance route itself (avoids loops and
+  // keeps status checks / mutations / login reachable during maintenance).
+  // Auth must stay reachable for *all* user types even when site is in maintenance,
+  // otherwise "Failed to fetch" on login is mistaken for backend outage.
+  if (pathname.startsWith("/api/") || pathname.startsWith("/maintenance") || pathname.startsWith("/auth")) {
+    return NextResponse.next({ request: { headers: requestHeaders } })
   }
 
   // SEO-safe 503 gate. Contract: only the EXISTENCE of the `apl_bypass`
@@ -83,7 +90,7 @@ export default async function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next()
+  return NextResponse.next({ request: { headers: requestHeaders } })
 }
 
 export const config = {

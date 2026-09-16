@@ -8,6 +8,7 @@ import { AuthProvider } from "@/lib/auth-context";
 import { siteUrl } from "@/lib/seo";
 import { getSiteStatus } from "@/lib/services/status";
 import MaintenanceNotice from "@/components/shared/MaintenanceNotice";
+import { headers } from "next/headers";
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 import "./globals.css";
 
@@ -51,7 +52,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const status = await getSiteStatus();
-  const inMaintenance = status?.maintenanceMode === true && status?.preview !== true;
+  const pathname = headers().get("x-pathname") || ""
+  const isAuthRoute = pathname.startsWith("/auth")
+  const inMaintenance = status?.maintenanceMode === true && status?.preview !== true && !isAuthRoute;
   return (
     <html lang="en">
       <head>
