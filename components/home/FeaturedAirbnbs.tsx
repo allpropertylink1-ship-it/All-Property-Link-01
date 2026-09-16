@@ -76,7 +76,7 @@ export function FeaturedAirbnbs({ initialData }: { initialData?: ApiProperty[] }
           </Link>
         </div>
         {loading ? (
-          <div className="flex snap-x gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-3 md:overflow-visible" aria-busy="true" aria-label="Loading featured airbnbs">
+          <div className="flex snap-x gap-4 overflow-x-auto pb-2 scrollbar-hide md:grid md:grid-cols-3 md:overflow-visible" aria-busy="true" aria-label="Loading featured airbnbs">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="w-[270px] shrink-0 animate-pulse snap-start overflow-hidden rounded-xl border border-border bg-surface min-[480px]:w-[300px] md:w-auto">
                 <div className="aspect-[4/3] bg-surface-secondary" />
@@ -94,7 +94,7 @@ export function FeaturedAirbnbs({ initialData }: { initialData?: ApiProperty[] }
             No short-term rentals listed yet.
           </p>
         ) : (
-          <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
+          <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scrollbar-hide md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
             {properties.map((p, i) => (
               <div key={p.slug} className="w-[270px] shrink-0 snap-start min-[480px]:w-[300px] md:w-auto">
                 <PropertyCard {...cardProps(p, i === 0)} />
