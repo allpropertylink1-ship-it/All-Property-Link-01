@@ -55,9 +55,9 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
             </Link>
           </div>
         </div>
-        <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:grid sm:mx-0 sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
+        <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0 lg:pb-0">
           {initialData.map((p, i) => (
-            <div key={p.slug} className="w-[78%] shrink-0 snap-start sm:w-auto">
+            <div key={p.slug} className="w-[78%] shrink-0 snap-start sm:w-[45%] lg:w-auto">
             <PropertyCard
               slug={p.slug}
               title={p.title}
