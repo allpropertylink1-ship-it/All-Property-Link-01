@@ -9,7 +9,7 @@ export default async function AuthPage({ searchParams }: { searchParams: Promise
   return (
     <div className={`flex min-h-[100dvh] items-center justify-center bg-surface px-4 ${isDev ? 'py-10' : ''}`}>
       {isDev && (
-        <div className="fixed left-0 top-0 z-50 w-full bg-accent-300 px-4 py-1.5 text-center text-xs font-medium text-white">
+        <div className="fixed left-0 top-0 z-50 w-full bg-primary px-4 py-1.5 text-center text-xs font-medium text-white">
           Test accounts available &mdash; use password <strong>Test@123</strong>
         </div>
       )}
@@ -20,7 +20,7 @@ export default async function AuthPage({ searchParams }: { searchParams: Promise
               <LinkIcon size={18} />
             </span>
             <span className="font-heading text-xl font-bold text-text-primary">
-              All Property <span className="text-accent-300">Link</span>
+              All Property <span className="text-accent-600">Link</span>
             </span>
           </Link>
         </div>

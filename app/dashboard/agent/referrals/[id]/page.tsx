@@ -1,4 +1,4 @@
-﻿/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element */
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
@@ -130,7 +130,7 @@ export default function AgentReferralDetailPage() {
 
   return (
     <AgentGuard>
-      <Link href="/dashboard/agent/referrals" className="mb-6 inline-flex items-center gap-1 text-sm text-accent-300 hover:text-accent-400">
+      <Link href="/dashboard/agent/referrals" className="mb-6 inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700">
         <ArrowLeft size={16} /> Back to referrals
       </Link>
 

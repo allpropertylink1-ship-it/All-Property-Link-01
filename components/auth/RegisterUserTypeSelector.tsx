@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { Home, Handshake, Wrench, Briefcase, User } from "@/components/ui/icons"
 import { FormBanner } from "@/components/shared/FormFeedback"
@@ -13,7 +13,7 @@ const userTypeOptions = [
 const customerOption = {
   value: "CUSTOMER",
   label: "Customer",
-  description: "I want to find properties, rentals & services — and leave reviews",
+  description: "I want to find properties, rentals & services â€” and leave reviews",
   icon: User,
 }
 
@@ -37,7 +37,7 @@ export function RegisterUserTypeSelector({ userType, onChange, onNext, error, lo
       <p className="text-sm text-text-secondary">
         {lockValue ? "Confirm the account type to continue." : "Select the type of account that best describes you."}
       </p>
-      <p className="mt-2 text-xs text-error-600">⚠ This choice is permanent and cannot be changed.</p>
+      <p className="mt-2 text-xs text-error-600">âš  This choice is permanent and cannot be changed.</p>
 
       {error && (
         <FormBanner variant="error">{error}</FormBanner>
@@ -51,11 +51,11 @@ export function RegisterUserTypeSelector({ userType, onChange, onNext, error, lo
             onClick={() => onChange(opt.value)}
             className={`flex items-center gap-4 rounded-xl border-2 p-3 text-left transition-all ${
               userType === opt.value
-                ? "border-accent-300 bg-accent-300/10"
-                : "border-border hover:border-accent-300"
+                ? "border-primary bg-primary-50"
+                : "border-border hover:border-primary"
             }`}
           >
-            <opt.icon size={20} className={userType === opt.value ? "text-accent-300" : "text-text-secondary"} />
+            <opt.icon size={20} className={userType === opt.value ? "text-primary-600" : "text-text-secondary"} />
             <div>
               <p className="font-medium text-text-primary">{opt.label}</p>
               <p className="text-sm text-text-secondary">{opt.description}</p>
@@ -67,7 +67,7 @@ export function RegisterUserTypeSelector({ userType, onChange, onNext, error, lo
       <button
         onClick={onNext}
         disabled={!userType}
-        className="touch-target w-full rounded-sm bg-accent-300 px-4 py-2.5 font-medium text-white transition-colors hover:bg-accent-400 disabled:cursor-not-allowed disabled:opacity-50"
+        className="touch-target w-full rounded-sm bg-primary px-4 py-2.5 font-medium text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
       >
         Continue
       </button>

@@ -52,10 +52,13 @@ export function PropertiesPageClient({ searchParams }: Props) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <h1 className="mb-8 font-heading text-3xl font-bold text-text-primary">
+      <p className="font-heading text-xs font-semibold uppercase tracking-wider text-accent-600">
+        Catalog
+      </p>
+      <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-text-primary">
         Properties for sale & rent in Kenya
       </h1>
-      <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
+      <div className="mt-4 grid gap-8 lg:grid-cols-[280px_1fr]">
         <FilterPanel>
           <PropertyFilters
             cities={cities}
@@ -68,7 +71,7 @@ export function PropertiesPageClient({ searchParams }: Props) {
           />
         </FilterPanel>
         <div>
-          <p className="mb-4 text-sm text-text-secondary">
+          <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-surface-secondary px-3 py-1 text-sm font-medium text-text-secondary">
             {data.total} {data.total === 1 ? "property" : "properties"} found
           </p>
           <PropertyGrid properties={data.properties} />

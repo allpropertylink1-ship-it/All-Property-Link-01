@@ -33,7 +33,7 @@ const COMMENT_MIN = 10;
 /** Deterministic avatar tint per reviewer so repeat reviewers feel consistent. */
 const AVATAR_TINTS = [
   "bg-primary-100 text-primary-700",
-  "bg-accent-300/20 text-accent-600",
+  "bg-accent-500/20 text-accent-600",
   "bg-primary-50 text-primary-600",
 ];
 function tintFor(name: string): string {
@@ -49,7 +49,7 @@ function Stars({ value, size = "h-4 w-4" }: { value: number; size?: string }) {
         <Star
           key={star}
           className={`${size} ${
-            star <= value ? "fill-accent-300 text-accent-300" : "fill-none text-text-secondary/40"
+            star <= value ? "fill-accent-500 text-accent-500" : "fill-none text-text-secondary/40"
           }`}
         />
       ))}
@@ -226,7 +226,7 @@ export function ReviewSection({
               return (
                 <div key={level} className="flex items-center gap-3">
                   <span className="w-3 text-right text-xs font-medium tabular-nums text-text-secondary">{level}</span>
-                  <Star className="h-3 w-3 shrink-0 fill-accent-300 text-accent-300" />
+                  <Star className="h-3 w-3 shrink-0 fill-accent-500 text-accent-500" />
                   <div
                     className="h-2.5 flex-1 overflow-hidden rounded-full bg-primary-50"
                     role="meter"
@@ -313,7 +313,7 @@ export function ReviewSection({
                   >
                     <Star
                       className={`h-8 w-8 transition-colors ${
-                        active ? "fill-accent-300 text-accent-300" : "fill-none text-text-secondary/40"
+                        active ? "fill-accent-500 text-accent-500" : "fill-none text-text-secondary/40"
                       }`}
                     />
                   </button>
@@ -332,7 +332,7 @@ export function ReviewSection({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder={`What was your experience like? Minimum ${COMMENT_MIN} characters.`}
-              className="w-full resize-none rounded-lg border border-border bg-surface-secondary px-4 py-3 text-sm leading-relaxed text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-1 focus:ring-accent-300"
+              className="w-full resize-none rounded-lg border border-border bg-surface-secondary px-4 py-3 text-sm leading-relaxed text-text-primary placeholder:text-text-secondary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
             <p
               className={`mt-1 text-right text-xs tabular-nums ${
@@ -388,7 +388,7 @@ export function ReviewSection({
               <article
                 key={review.id}
                 className={`group rounded-xl border bg-surface p-5 transition-colors sm:p-6 ${
-                  isOwn ? "border-accent-300/60" : "border-border hover:shadow-[0_2px_8px_rgba(21,47,41,0.07)]"
+                  isOwn ? "border-accent-500/60" : "border-border hover:shadow-[0_2px_8px_rgba(21,47,41,0.07)]"
                 }`}
               >
                 <div className="flex items-start justify-between gap-4">

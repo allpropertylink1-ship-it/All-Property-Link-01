@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
@@ -144,7 +144,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
             type="email"
             autoComplete="email"
             required
-            className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+            className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
             style={{ fontSize: "16px" }}
             placeholder="you@example.com"
           />
@@ -170,7 +170,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="rounded-sm border border-border bg-surface text-accent-300 focus:ring-accent-300 focus:ring-2"
+              className="rounded-sm border border-border bg-surface text-primary-600 focus:ring-primary focus:ring-2"
             />
             <span className="text-sm text-text-secondary">Remember me</span>
           </label>
@@ -181,13 +181,13 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
                 if (magicSent) { setMagicSent(false); setMagicEmail(""); setMagicError("") }
                 setShowMagicLink(!showMagicLink)
               }}
-              className="text-sm font-medium text-accent-300 hover:text-accent-400"
+              className="text-sm font-medium text-primary-600 hover:text-primary-700"
             >
               {showMagicLink ? "Cancel magic link" : "Use magic link"}
             </button>
             <a
               href="/auth/forgot-password"
-              className="text-sm font-medium text-accent-300 hover:text-accent-400"
+              className="text-sm font-medium text-primary-600 hover:text-primary-700"
             >
               Forgot password?
             </a>
@@ -203,7 +203,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
               <button
                 type="button"
                 onClick={() => { setMagicSent(false); setMagicEmail(""); setMagicError("") }}
-                className="touch-target w-full rounded-sm border border-accent-300 px-4 py-2.5 text-sm font-medium text-accent-300 transition-colors hover:bg-accent-300/10"
+                className="touch-target w-full rounded-sm border border-primary px-4 py-2.5 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-50"
               >
                 Send again
               </button>
@@ -216,13 +216,13 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
                   value={magicEmail}
                   onChange={(e) => setMagicEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="block min-w-0 flex-1 rounded-sm border border-border bg-surface px-4 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+                  className="block min-w-0 flex-1 rounded-sm border border-border bg-surface px-4 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
                 <button
                   type="button"
                   onClick={handleMagicLink}
                   disabled={!magicEmail}
-                  className="touch-target rounded-sm border border-accent-300 px-4 py-2.5 text-sm font-medium text-accent-300 transition-colors hover:bg-accent-300/10 disabled:opacity-50"
+                  className="touch-target rounded-sm border border-primary px-4 py-2.5 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-50 disabled:opacity-50"
                 >
                   Send
                 </button>
@@ -261,7 +261,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
                   value={phone}
                   onChange={(e) => { setPhone(e.target.value); setPhoneError("") }}
                   placeholder="712 345 678"
-                  className="block w-full rounded-sm rounded-l-none border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+                  className="block w-full rounded-sm rounded-l-none border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                   style={{ fontSize: "16px" }}
                 />
               </div>
@@ -272,7 +272,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="rounded-sm border border-border bg-surface text-accent-300 focus:ring-accent-300 focus:ring-2"
+                className="rounded-sm border border-border bg-surface text-primary-600 focus:ring-primary focus:ring-2"
               />
               <span className="text-sm text-text-secondary">Remember me</span>
             </label>
@@ -280,7 +280,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
               type="button"
               onClick={handlePhoneSendCode}
               disabled={phoneLoading}
-                className="touch-target w-full rounded-sm border border-accent-300 px-4 py-2.5 text-sm font-medium text-accent-300 transition-colors hover:bg-accent-300/10 disabled:opacity-50"
+                className="touch-target w-full rounded-sm border border-primary px-4 py-2.5 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-50 disabled:opacity-50"
             >
               {phoneLoading ? "Sending code..." : "Send login code"}
             </button>
@@ -306,7 +306,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
               type="button"
               onClick={handlePhoneVerify}
               disabled={otpLoading || otpValues.join("").length !== 6}
-              className="touch-target w-full rounded-sm bg-accent-300 px-4 py-2.5 font-medium text-white transition-colors hover:bg-accent-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="touch-target w-full rounded-sm bg-primary px-4 py-2.5 font-medium text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {otpLoading ? "Verifying..." : "Verify code"}
             </button>
@@ -317,7 +317,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
                 <button
                   type="button"
                   onClick={() => { setPhoneStep("phone"); setOtpValues(["", "", "", "", "", ""]); setPhoneError("") }}
-                  className="text-xs font-medium text-accent-300 hover:text-accent-400"
+                  className="text-xs font-medium text-primary-600 hover:text-primary-700"
                 >
                   Change phone number
                 </button>
@@ -329,18 +329,18 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
         <button
           type="submit"
           disabled={loading}
-          className="touch-target w-full rounded-sm bg-accent-300 px-4 py-2.5 font-medium text-white transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-300/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="touch-target w-full rounded-sm bg-primary px-4 py-2.5 font-medium text-white transition-colors hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? "Signing in..." : "Sign in"}
         </button>
         <p className="text-center text-sm text-text-secondary">
           Don&apos;t have an account?{" "}
           {onSwitchToRegister ? (
-            <button type="button" onClick={onSwitchToRegister} className="font-medium text-accent-300 hover:text-accent-400">
+            <button type="button" onClick={onSwitchToRegister} className="font-medium text-primary-600 hover:text-primary-700">
               Register
             </button>
           ) : (
-            <a href="/auth/register" className="font-medium text-accent-300 hover:text-accent-400">
+            <a href="/auth/register" className="font-medium text-primary-600 hover:text-primary-700">
               Register
             </a>
           )}

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
@@ -203,7 +203,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
           <button
             type="button"
             onClick={() => { setStep("form"); setOtpValues(["", "", "", "", "", ""]) }}
-            className="ml-2 inline-flex items-center gap-1 text-xs font-medium text-accent-300 hover:text-accent-400"
+            className="ml-2 inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-700"
           >
             Edit
           </button>
@@ -222,7 +222,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
         <button
           onClick={handleOtpVerify}
           disabled={otpLoading || otpValues.join("").length !== 6}
-          className="touch-target w-full rounded-sm bg-accent-300 px-4 py-2.5 font-medium text-white transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-300/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="touch-target w-full rounded-sm bg-primary px-4 py-2.5 font-medium text-white transition-colors hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {otpLoading ? "Verifying..." : "Verify code"}
         </button>
@@ -237,7 +237,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
             {cooldown > 0 ? (
               <span className="text-xs text-text-secondary">Resend code in {formatTime(cooldown)}</span>
             ) : (
-              <button onClick={handleResendOtp} className="text-xs font-medium text-accent-300 hover:text-accent-400">Resend code</button>
+              <button onClick={handleResendOtp} className="text-xs font-medium text-primary-600 hover:text-primary-700">Resend code</button>
             )}
           </div>
         </div>

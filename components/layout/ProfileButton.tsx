@@ -32,7 +32,7 @@ export function ProfileButton() {
         </Link>
         <Link
           href="/auth/register"
-          className="touch-target inline-flex items-center justify-center rounded-lg bg-accent-300 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+          className="touch-target inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
         >
           Register
         </Link>
@@ -54,7 +54,7 @@ export function ProfileButton() {
         aria-expanded={open}
         aria-haspopup="true"
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent-300 text-xs font-bold text-white sm:h-8 sm:w-8">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-white sm:h-8 sm:w-8">
           {initial}
         </span>
         <span className="hidden sm:block truncate max-w-[160px]">{displayName}</span>
@@ -88,7 +88,7 @@ export function ProfileButton() {
                   onClick={() => setOpen(false)}
                   className="touch-target flex items-center gap-3 px-4 py-2.5 text-sm text-text-primary transition-colors hover:bg-surface-secondary"
                 >
-                  <svg className="h-4 w-4 text-accent-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <svg className="h-4 w-4 text-primary-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path
                       fillRule="evenodd"
                       d="M1.22 5.222a.75.75 0 011.06 0L7 9.942l3.22-3.22a.75.75 0 111.06 1.06l-3.75 3.75a.75.75 0 01-1.06 0L1.22 6.28a.75.75 0 010-1.06z"
@@ -103,7 +103,7 @@ export function ProfileButton() {
                   onClick={() => setOpen(false)}
                   className="touch-target flex items-center gap-3 px-4 py-2.5 text-sm text-text-primary transition-colors hover:bg-surface-secondary"
                 >
-                  <svg className="h-4 w-4 text-accent-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <svg className="h-4 w-4 text-primary-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path
                       fillRule="evenodd"
                       d="M11.49 3.17c-.38-.38-.9-.38-1.28 0l-1.47 1.47a.75.75 0 000 1.06l5.25 5.25a.75.75 0 001.06 0l1.47-1.47a.75.75 0 000-1.06l-5.25-5.25zM10 2a.75.75 0 01.75.75v10.5a.75.75 0 01-1.5 0v-10.5A.75.75 0 0110 2z"
@@ -120,7 +120,7 @@ export function ProfileButton() {
                   onClick={() => setOpen(false)}
                   className="touch-target flex items-center gap-3 px-4 py-2.5 text-sm text-text-primary transition-colors hover:bg-surface-secondary"
                 >
-                  <svg className="h-4 w-4 text-accent-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <svg className="h-4 w-4 text-primary-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path
                       fillRule="evenodd"
                       d="M1.22 5.222a.75.75 0 011.06 0L7 9.942l3.22-3.22a.75.75 0 111.06 1.06l-3.75 3.75a.75.75 0 01-1.06 0L1.22 6.28a.75.75 0 010-1.06z"
@@ -136,7 +136,7 @@ export function ProfileButton() {
                   onClick={() => setOpen(false)}
                   className="touch-target flex items-center gap-3 px-4 py-2.5 text-sm text-text-primary transition-colors hover:bg-surface-secondary"
                 >
-                  <svg className="h-4 w-4 text-accent-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <svg className="h-4 w-4 text-primary-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
                   </svg>
                   Personal Profile

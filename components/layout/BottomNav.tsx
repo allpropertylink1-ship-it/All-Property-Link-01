@@ -6,7 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 
-const GOLD = "#D49A44";
+const GOLD = "#E27A23";
 
 const SaleIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
@@ -102,10 +102,10 @@ export function BottomNav() {
             className="touch-target flex flex-col items-center gap-0.5 py-3 flex-1"
             aria-current={homeActive ? "page" : undefined}
           >
-            <div className={`flex h-7 w-7 items-center justify-center ${homeActive ? "text-accent-300" : "text-text-secondary"}`}>
+            <div className={`flex h-7 w-7 items-center justify-center ${homeActive ? "text-primary-600" : "text-text-secondary"}`}>
               <HomeIcon />
             </div>
-            <span className={`text-[10px] font-medium ${homeActive ? "text-accent-300" : "text-text-secondary"}`}>
+            <span className={`text-[10px] font-medium ${homeActive ? "text-primary-600" : "text-text-secondary"}`}>
               Home
             </span>
           </Link>
@@ -136,10 +136,10 @@ export function BottomNav() {
             href={user ? "/dashboard" : "/auth/login"}
             className="touch-target flex flex-col items-center gap-0.5 py-3 flex-1"
           >
-            <div className={`flex h-7 w-7 items-center justify-center ${user && pathname.startsWith("/dashboard") ? "text-accent-300" : "text-text-secondary"}`}>
+            <div className={`flex h-7 w-7 items-center justify-center ${user && pathname.startsWith("/dashboard") ? "text-primary-600" : "text-text-secondary"}`}>
               <UserIcon />
             </div>
-            <span className={`text-[10px] font-medium ${user && pathname.startsWith("/dashboard") ? "text-accent-300" : "text-text-secondary"}`}>
+            <span className={`text-[10px] font-medium ${user && pathname.startsWith("/dashboard") ? "text-primary-600" : "text-text-secondary"}`}>
               {user ? (user.firstName || "Profile") : "Sign In"}
             </span>
           </Link>
@@ -170,7 +170,7 @@ export function BottomNav() {
                   key={cat.href}
                   href={cat.href}
                   onClick={() => setBrowseOpen(false)}
-                  className="touch-target flex flex-col items-center gap-2 rounded-xl border border-border bg-surface-secondary p-4 text-sm font-medium text-text-primary transition-colors hover:border-accent-300 hover:bg-accent-50"
+                  className="touch-target flex flex-col items-center gap-2 rounded-xl border border-border bg-surface-secondary p-4 text-sm font-medium text-text-primary transition-colors hover:border-accent-500 hover:bg-accent-50"
                 >
                   <cat.icon />
                   <span className="text-center text-xs">{cat.label}</span>

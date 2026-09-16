@@ -10,7 +10,7 @@ export function Footer() {
             className="font-heading text-lg font-bold tracking-tight text-primary sm:text-xl"
           >
             All Property{" "}
-            <span className="text-accent-300">Link</span>
+            <span className="text-accent-600">Link</span>
           </Link>
           <p className="mt-2 max-w-md text-sm text-secondary">
             Kenya&apos;s marketplace for properties, stays, fundis, and service

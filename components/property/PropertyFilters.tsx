@@ -18,7 +18,7 @@ export function PropertyFilters({
   bedrooms,
 }: PropertyFiltersProps) {
   return (
-    <form method="GET" className="space-y-6 rounded-md border border-border bg-surface p-6">
+    <form method="GET" className="space-y-6 rounded-xl border border-border bg-surface p-6 shadow-sm">
       <div>
         <label htmlFor="city" className="mb-1 block text-sm font-medium text-text-primary">
           City
@@ -122,7 +122,7 @@ export function PropertyFilters({
 
       <button
         type="submit"
-        className="touch-target w-full rounded-lg bg-accent-400 px-4 py-3 text-sm font-medium text-white hover:bg-accent-500"
+        className="touch-target w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-600"
       >
         Apply filters
       </button>

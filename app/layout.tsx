@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Sora, DM_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { CookieConsent } from "@/components/shared/CookieConsent";
@@ -11,13 +11,13 @@ import MaintenanceNotice from "@/components/shared/MaintenanceNotice";
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 import "./globals.css";
 
-const sora = Sora({
+const sora = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["500", "600", "700", "800"],
   variable: "--font-heading",
 });
 
-const dmSans = DM_Sans({
+const dmSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-body",
@@ -56,7 +56,7 @@ export default async function RootLayout({
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#286255" />
+        <meta name="theme-color" content="#1E3A40" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="All Property Link" />

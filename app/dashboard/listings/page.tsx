@@ -1,4 +1,4 @@
-﻿/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { requireAuth, serverFetch } from "@/lib/auth-utils";
 import { personaRedirectTarget, canListProperties } from "@/lib/persona";
@@ -33,7 +33,7 @@ export default async function ListingsPage() {
         <p className="text-text-secondary mb-6 text-center max-w-md">
           Only Property Owners and Agents can manage property listings.
         </p>
-        <Link href="/dashboard/notifications" className="text-sm text-accent-300 hover:text-accent-400">
+        <Link href="/dashboard/notifications" className="text-sm text-primary-600 hover:text-primary-700">
           Back to Dashboard
         </Link>
       </div>

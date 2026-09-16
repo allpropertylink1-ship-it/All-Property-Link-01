@@ -81,7 +81,7 @@ export default async function AgentDetailPage({ params }: Props) {
       <section className="profile-hero py-14 text-center sm:py-20">
         <div className="mx-auto max-w-7xl px-4">
           <div className="relative mx-auto mb-4 h-22 w-22">
-            <div className="absolute -inset-1.5 rounded-full bg-accent-300/25 blur-md" aria-hidden />
+            <div className="absolute -inset-1.5 rounded-full bg-accent-500/25 blur-md" aria-hidden />
             <div className="relative h-full w-full overflow-hidden rounded-full ring-2 ring-accent-200/80">
               {avatarUrl ? (
                 <Image src={avatarUrl} alt={agent.fullName} fill className="object-cover" sizes="88px" />
@@ -137,7 +137,7 @@ export default async function AgentDetailPage({ params }: Props) {
                     href={`https://wa.me/${formatPhoneForWhatsApp(agent.phone)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="touch-target inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+                    className="touch-target inline-flex items-center gap-2 rounded-lg bg-whatsapp px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-whatsapp-dark"
                   >
                     <ChatIcon /> WhatsApp
                   </a>

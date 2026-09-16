@@ -238,11 +238,11 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                   {sellerReviews && sellerReviews.total > 0 && (
                     <Link
                       href={`/profiles/${property.agent.id}`}
-                      className="group/badge mb-1 block rounded-xl border border-border bg-surface-secondary/60 px-3 py-2.5 transition-all hover:border-accent-300 hover:bg-surface"
+                      className="group/badge mb-1 block rounded-xl border border-border bg-surface-secondary/60 px-3 py-2.5 transition-all hover:border-accent-500 hover:bg-surface"
                     >
                       <div className="flex items-center justify-between">
                         <span className="inline-flex items-center gap-1.5">
-                          <Star className="h-4 w-4 fill-accent-300 text-accent-300" />
+                          <Star className="h-4 w-4 fill-accent-500 text-accent-500" />
                           <span className="font-heading text-sm font-bold tabular-nums text-text-primary">
                             {sellerReviews.avgRating != null ? sellerReviews.avgRating.toFixed(1) : "--"}
                           </span>
@@ -310,7 +310,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {property.listingPurpose && (
-                  <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold text-white ${property.listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-400" : property.listingPurpose === "FOR_RENT_LONG_TERM" ? "bg-primary-600" : "bg-primary-500"}`}>
+                  <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold text-white ${property.listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-500" : property.listingPurpose === "FOR_RENT_LONG_TERM" ? "bg-primary-600" : "bg-primary-500"}`}>
                     {property.listingPurpose === "FOR_RENT_SHORT_TERM" ? "Short-term / Airbnb" : property.listingPurpose === "FOR_RENT_LONG_TERM" ? "Long-term rent" : "For Sale"}
                   </span>
                 )}
@@ -326,32 +326,26 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
             </div>
 
             {(property.bedrooms || property.bathrooms || property.area) && (
-              <div className="flex gap-5 sm:gap-8 border-y border-border py-3">
+              <div className="grid grid-cols-3 gap-2">
                 {property.bedrooms && (
-                  <div className="flex items-center gap-2">
-                    <Bed size={18} className="shrink-0 text-text-secondary" />
-                    <div>
-                      <p className="text-sm font-semibold text-text-primary">{property.bedrooms}</p>
-                      <p className="text-[11px] text-text-secondary leading-none">Beds</p>
-                    </div>
+                  <div className="flex flex-col items-center justify-center rounded-xl bg-surface-secondary p-3 text-center">
+                    <Bed size={20} className="mb-1 shrink-0 text-primary" />
+                    <p className="font-heading text-base font-bold text-primary">{property.bedrooms}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Beds</p>
                   </div>
                 )}
                 {property.bathrooms && (
-                  <div className="flex items-center gap-2">
-                    <Bath size={18} className="shrink-0 text-text-secondary" />
-                    <div>
-                      <p className="text-sm font-semibold text-text-primary">{property.bathrooms}</p>
-                      <p className="text-[11px] text-text-secondary leading-none">Baths</p>
-                    </div>
+                  <div className="flex flex-col items-center justify-center rounded-xl bg-surface-secondary p-3 text-center">
+                    <Bath size={20} className="mb-1 shrink-0 text-primary" />
+                    <p className="font-heading text-base font-bold text-primary">{property.bathrooms}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Baths</p>
                   </div>
                 )}
                 {property.area && (
-                  <div className="flex items-center gap-2">
-                    <Maximize2 size={16} className="shrink-0 text-text-secondary" />
-                    <div>
-                      <p className="text-sm font-semibold text-text-primary">{property.area}</p>
-                      <p className="text-[11px] text-text-secondary leading-none">Sqft</p>
-                    </div>
+                  <div className="flex flex-col items-center justify-center rounded-xl bg-surface-secondary p-3 text-center">
+                    <Maximize2 size={18} className="mb-1 shrink-0 text-primary" />
+                    <p className="font-heading text-base font-bold text-primary">{property.area}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Sqft</p>
                   </div>
                 )}
               </div>
@@ -359,7 +353,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
 
             {property.description && (
               <div>
-                <h2 className="mb-2 text-sm font-semibold text-text-primary">Description</h2>
+                <h2 className="mb-2 font-heading text-lg font-bold text-primary">Description</h2>
                 <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
                   {property.description}
                 </p>
@@ -443,7 +437,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                       Customer feedback
                     </p>
                     <div className="mt-1.5 flex items-center gap-2">
-                      <Star className="h-5 w-5 fill-accent-300 text-accent-300" />
+                      <Star className="h-5 w-5 fill-accent-500 text-accent-500" />
                       <span className="font-heading text-xl font-bold tabular-nums text-text-primary">
                         {sellerReviews.avgRating != null ? sellerReviews.avgRating.toFixed(1) : "--"}
                       </span>
@@ -481,7 +475,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
 
             {property.features.length > 0 && (
               <div>
-                <h2 className="mb-2.5 text-sm font-semibold text-text-primary">Features</h2>
+                <h2 className="mb-2.5 font-heading text-lg font-bold text-primary">Features</h2>
                 <div className="flex flex-wrap gap-1.5">
                   {property.features.map((f: string, i: number) => (
                     <span key={i} className="rounded-md bg-surface-secondary px-2.5 py-1 text-xs font-medium text-text-secondary">

@@ -42,7 +42,7 @@ function formatPhoneForWhatsApp(phone: string): string {
 function AgentPhoto({ agent, sizeClass }: { agent: Agent; sizeClass: string }) {
   const photoUrl = resolveImageUrl(agent.avatar)
   return (
-    <div className={`shrink-0 rounded-full border-2 border-accent-300/70 p-[3px] ${sizeClass}`}>
+    <div className={`shrink-0 rounded-full border-2 border-accent-500/70 p-[3px] ${sizeClass}`}>
       <div className="relative h-full w-full overflow-hidden rounded-full">
         {photoUrl ? (
           <Image src={photoUrl} alt={agent.fullName} fill className="object-cover" sizes="160px" />
@@ -117,7 +117,7 @@ export function AgentsDirectory() {
           {filtered.map((agent) => {
             const cities = agent.specificArea ? [...agent.regions, agent.specificArea] : agent.regions
             return (
-              <div key={agent.id} className="flex flex-col rounded-3xl border-2 border-accent-300/60 bg-surface p-5 sm:p-6">
+              <div key={agent.id} className="flex flex-col rounded-3xl border-2 border-accent-500/60 bg-surface p-5 sm:p-6">
                 {/* ===== Mobile layout ===== */}
                 <div className="lg:hidden">
                   <AgentPhoto agent={agent} sizeClass="mx-auto h-[130px] w-[130px]" />
@@ -146,7 +146,7 @@ export function AgentsDirectory() {
                     )}
                     {agent.phone && (
                       <a href={`https://wa.me/${formatPhoneForWhatsApp(agent.phone)}`} target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-600"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-whatsapp px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-whatsapp-dark"
                       ><WhatsAppIcon size={14} />WhatsApp</a>
                     )}
 {agent.email && (
@@ -159,7 +159,7 @@ export function AgentsDirectory() {
                   </div>
                   {cities.length > 0 && (
                     <>
-                      <div className="mt-4 border-t border-accent-300/60" />
+                      <div className="mt-4 border-t border-accent-500/60" />
                       <div className="mt-4 flex items-center gap-4">
                         <div className="flex shrink-0 flex-col items-center gap-1">
                           <CitiesCovered size={40} className="text-text-primary" />
@@ -197,7 +197,7 @@ export function AgentsDirectory() {
                       </Link>
                       {agent.phone && (
                         <a href={`https://wa.me/${formatPhoneForWhatsApp(agent.phone)}`} target="_blank" rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-600"
+                          className="inline-flex items-center justify-center gap-2 rounded-full bg-whatsapp px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-whatsapp-dark"
                         ><WhatsAppIcon />WhatsApp</a>
                       )}
                       {agent.phone && (
@@ -211,7 +211,7 @@ export function AgentsDirectory() {
                         ><Mail size={15} className="text-red-600" />E-Mail</a>
                       )}
                     </div>
-                    {cities.length > 0 && <div className="mt-auto pt-5"><div className="border-t border-accent-300/60" /></div>}
+                    {cities.length > 0 && <div className="mt-auto pt-5"><div className="border-t border-accent-500/60" /></div>}
                   </div>
                 </div>
                 {cities.length > 0 && (

@@ -33,7 +33,7 @@ export function ServiceCard({ item, icon }: { item: ServiceRow; icon: typeof Wre
         )}
       </div>
       <div className="flex flex-1 flex-col p-3.5">
-        <h3 className="line-clamp-1 font-heading text-sm font-semibold text-text-primary">{item.title}</h3>
+        <h3 className="line-clamp-1 font-heading text-sm font-semibold text-text-primary transition-colors group-hover:text-accent-600">{item.title}</h3>
         <div className="mt-1 flex items-center gap-2 text-sm">
           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-50 text-[10px] font-bold text-primary-600 uppercase">
             {item.user.firstName[0]}{item.user.lastName[0]}

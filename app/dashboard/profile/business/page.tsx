@@ -1,4 +1,4 @@
-﻿/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element */
 "use client"
 
 import { useState, useEffect } from "react"
@@ -462,14 +462,14 @@ function BusinessProfilePageInner() {
                     className={cn(
                       "relative flex items-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all",
                       isSelected
-                        ? "border-accent-400 bg-accent-50 text-accent-700 shadow-sm"
-                        : "border-border bg-surface text-text-secondary hover:border-accent-300 hover:bg-accent-50/50"
+                        ? "border-accent-500 bg-accent-50 text-accent-700 shadow-sm"
+                        : "border-border bg-surface text-text-secondary hover:border-accent-500 hover:bg-accent-50/50"
                     )}
                   >
                     <div className={cn(
                       "flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors",
                       isSelected
-                        ? "border-accent-400 bg-accent-400 text-white"
+                        ? "border-accent-500 bg-accent-500 text-white"
                         : "border-border bg-surface"
                     )}>
                       {isSelected && <Check className="h-3.5 w-3.5" />}

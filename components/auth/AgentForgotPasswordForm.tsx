@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
@@ -40,7 +40,7 @@ export function AgentForgotPasswordForm() {
         <button
           type="button"
           onClick={backToLogin}
-          className="touch-target w-full rounded-sm bg-accent-300 px-4 py-2.5 font-medium text-white transition-colors hover:bg-accent-400"
+          className="touch-target w-full rounded-sm bg-primary px-4 py-2.5 font-medium text-white transition-colors hover:bg-primary-600"
         >
           Back to login
         </button>
@@ -68,7 +68,7 @@ export function AgentForgotPasswordForm() {
           required
           value={identifier}
           onChange={(e) => setIdentifier(e.target.value)}
-          className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+          className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
           placeholder="APL-XXX-000-00/00 or agent@example.com"
         />
       </div>
@@ -76,7 +76,7 @@ export function AgentForgotPasswordForm() {
       <button
         type="submit"
         disabled={loading}
-        className="touch-target w-full rounded-sm bg-accent-300 px-4 py-2.5 font-medium text-white transition-colors hover:bg-accent-400 disabled:cursor-not-allowed disabled:opacity-50"
+        className="touch-target w-full rounded-sm bg-primary px-4 py-2.5 font-medium text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? "Sending..." : "Send reset link"}
       </button>

@@ -1,4 +1,4 @@
-﻿/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link"
 import { MapPin, Wrench, Briefcase } from "@/components/ui/icons"
 import { AVATAR_POOL } from "@/lib/placeholders"
@@ -85,7 +85,7 @@ export function ProfileCard({
     >
       {/* Photo */}
       <div className="relative mb-4">
-        <div className="h-24 w-24 overflow-hidden rounded-full border-[3px] border-accent-300 bg-surface-secondary shadow-sm transition-shadow duration-300 group-hover:shadow-md sm:h-28 sm:w-28 md:h-32 md:w-32">
+        <div className="h-24 w-24 overflow-hidden rounded-full border-[3px] border-primary bg-surface-secondary shadow-sm transition-shadow duration-300 group-hover:shadow-md sm:h-28 sm:w-28 md:h-32 md:w-32">
           {photoSrc ? (
             <img
               src={photoSrc}
@@ -131,7 +131,7 @@ export function ProfileCard({
       {/* Location */}
       {location && (
         <div className="mt-2.5 flex items-center gap-1 text-xs text-text-secondary">
-          <MapPin size={12} className="shrink-0 text-accent-400" />
+          <MapPin size={12} className="shrink-0 text-accent-500" />
           <span className="truncate max-w-[140px]">{location}</span>
         </div>
       )}

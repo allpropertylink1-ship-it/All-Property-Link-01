@@ -120,7 +120,7 @@ export default function AgentReferralsPage() {
                     {r.deletedAt ? new Date(r.deletedAt).toLocaleDateString() : new Date(r.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">
-                    <Link href={`/dashboard/agent/referrals/${r.id}`} className="touch-target inline-flex items-center gap-1 text-sm font-medium text-accent-300 hover:text-accent-400">
+                    <Link href={`/dashboard/agent/referrals/${r.id}`} className="touch-target inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700">
                       View <ChevronRight size={14} />
                     </Link>
                   </td>

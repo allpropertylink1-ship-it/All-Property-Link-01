@@ -124,7 +124,7 @@ export default async function ProfilePage({ params }: Props) {
           <div className="flex flex-col items-center gap-7 text-center lg:flex-row lg:items-end lg:justify-between lg:text-left">
             <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:gap-6">
               <div className="relative h-24 w-24 shrink-0">
-                <div className="absolute -inset-1.5 rounded-full bg-accent-300/25 blur-md" aria-hidden />
+                <div className="absolute -inset-1.5 rounded-full bg-accent-500/25 blur-md" aria-hidden />
                 <div className="relative h-full w-full overflow-hidden rounded-full ring-2 ring-accent-200/80">
                   {avatarUrl ? (
                     <Image src={avatarUrl} alt={name} fill className="object-cover" sizes="88px" unoptimized />

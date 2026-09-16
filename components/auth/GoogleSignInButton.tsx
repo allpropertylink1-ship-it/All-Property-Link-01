@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import { useState, useEffect, useRef, useCallback } from "react"
 import { api } from "@/lib/api-client"
 
@@ -111,7 +111,7 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin" }: Goog
   if (!ready) {
     return (
       <div className="flex w-full items-center justify-center gap-2 rounded-sm border border-border bg-surface px-4 py-3">
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-accent-300 border-t-transparent" />
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         <span className="text-sm text-text-secondary">Loading Google sign-in...</span>
       </div>
     )
@@ -122,7 +122,7 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin" }: Goog
       <div ref={btnRef} className="w-full" />
       {oauthLoading && (
         <div className="mt-2 flex items-center justify-center gap-2">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-accent-300 border-t-transparent" />
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           <span className="text-sm text-text-secondary">Verifying Google account...</span>
         </div>
       )}

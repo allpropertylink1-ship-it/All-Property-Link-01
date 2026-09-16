@@ -30,7 +30,7 @@ export default async function NewServicePage() {
         <p className="text-text-secondary mb-6 text-center max-w-md">
           Only Fundis and Service Providers can manage service listings.
         </p>
-        <Link href="/dashboard" className="text-sm text-accent-300 hover:text-accent-400">
+        <Link href="/dashboard" className="text-sm text-primary-600 hover:text-primary-700">
           Back to Dashboard
         </Link>
       </div>

@@ -95,7 +95,7 @@ export default async function ServicesPage({ searchParams }: Props) {
           </div>
           <button
             type="submit"
-            className="touch-target rounded-lg bg-accent-300 px-6 py-3 text-sm font-medium text-white hover:bg-accent-400"
+            className="touch-target rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white hover:bg-primary-600"
           >
             Search
           </button>

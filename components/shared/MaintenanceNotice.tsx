@@ -19,7 +19,7 @@ export default function MaintenanceNotice({
   return (
     <div className="mx-auto flex min-h-[50vh] max-w-lg flex-col items-center justify-center px-4 text-center">
       <p className="font-heading text-lg font-bold tracking-tight text-primary">
-        All Property <span className="text-accent-300">Link</span>
+        All Property <span className="text-accent-600">Link</span>
       </p>
       <div className="mt-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50 text-primary-600">
         <Wrench size={28} />

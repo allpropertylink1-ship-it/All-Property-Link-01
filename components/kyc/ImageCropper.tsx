@@ -284,7 +284,7 @@ export default function ImageCropper({
                 step={0.01}
                 value={zoom}
                 onChange={(e) => setZoom(Number(e.target.value))}
-                className="h-2 w-28 sm:w-32 cursor-pointer appearance-none rounded-full bg-gray-200 accent-teal-600"
+                className="h-2 w-28 sm:w-32 cursor-pointer appearance-none rounded-full bg-gray-200 accent-primary-600"
               />
               <ZoomIn size={18} className="shrink-0 text-gray-500" />
             </div>
@@ -300,7 +300,7 @@ export default function ImageCropper({
             <button
               onClick={handleSave}
               disabled={saving || !hasRect}
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-50 sm:flex-initial touch-target"
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50 sm:flex-initial touch-target"
             >
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
               {saving ? "Saving..." : "Apply Crop"}
@@ -315,7 +315,7 @@ export default function ImageCropper({
 function Handle({ onPointerDown, className }: { onPointerDown: (e: React.PointerEvent) => void; className: string }) {
   return (
     <div
-      className={`absolute z-10 h-3 w-3 rounded-full border-2 border-white bg-teal-600 shadow-sm ${className}`}
+      className={`absolute z-10 h-3 w-3 rounded-full border-2 border-white bg-primary-600 shadow-sm ${className}`}
       onPointerDown={onPointerDown}
     />
   )

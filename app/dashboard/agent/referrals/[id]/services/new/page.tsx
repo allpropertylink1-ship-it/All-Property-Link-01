@@ -66,7 +66,7 @@ export default function AgentPostReferralServicePage() {
 
   return (
     <div>
-      <Link href={`/dashboard/agent/referrals/${referralId}`} className="mb-6 inline-flex items-center gap-1 text-sm text-accent-300 hover:text-accent-400">
+      <Link href={`/dashboard/agent/referrals/${referralId}`} className="mb-6 inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700">
         <ArrowLeft size={16} /> Back to referral
       </Link>
 

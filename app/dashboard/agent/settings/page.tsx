@@ -218,7 +218,7 @@ export default function AgentSettingsPage() {
             <h2 className="mb-1 font-heading text-lg font-semibold text-text-primary">Your Referral Link</h2>
             <p className="mb-4 text-sm text-text-secondary">Share this link to earn commissions on referred clients</p>
             <div className="flex min-w-0 items-center gap-2 rounded-lg border border-border bg-surface-secondary px-3 py-2.5 sm:px-4">
-              <LinkIcon size={16} className="shrink-0 text-accent-300" />
+              <LinkIcon size={16} className="shrink-0 text-primary-600" />
               <code className="min-w-0 flex-1 break-all text-xs sm:text-sm text-text-primary">{referralLink}</code>
               <button
                 onClick={copyReferralLink}
@@ -298,8 +298,8 @@ export default function AgentSettingsPage() {
                     aria-pressed={active}
                     className={`flex min-h-[44px] items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
                       active
-                        ? "border-accent-300 bg-accent-300/10 text-accent-600"
-                        : "border-border text-text-secondary hover:border-accent-300/50"
+                        ? "border-primary bg-primary-50 text-accent-600"
+                        : "border-border text-text-secondary hover:border-accent-500/50"
                     }`}
                   >
                     <MapPin size={12} className={active ? "text-accent-500" : "text-text-secondary"} />

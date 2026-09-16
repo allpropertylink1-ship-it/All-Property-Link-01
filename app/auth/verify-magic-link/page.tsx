@@ -41,7 +41,7 @@ export default function VerifyMagicLinkPage() {
       <div className="w-full max-w-sm text-center">
           {status === "verifying" && (
             <div className="space-y-4">
-              <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-accent-300 border-t-transparent" />
+              <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               <p className="font-heading text-lg font-semibold text-text-primary">Verifying your link...</p>
             </div>
           )}
@@ -57,7 +57,7 @@ export default function VerifyMagicLinkPage() {
             <p className="text-sm text-text-secondary">{error}</p>
             <a
               href="/auth/login"
-              className="inline-block rounded-sm bg-accent-300 px-6 py-2 text-sm font-medium text-white hover:bg-accent-400"
+              className="inline-block rounded-sm bg-primary px-6 py-2 text-sm font-medium text-white hover:bg-primary-600"
             >
               Back to login
             </a>

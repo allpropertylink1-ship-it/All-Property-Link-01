@@ -424,7 +424,7 @@ export function HeroSection() {
               <div className="flex items-center justify-center gap-2 ml-0 mt-1 flex-shrink-0 min-[480px]:ml-2 min-[480px]:mt-0 min-[480px]:justify-start">
                 <Link
                   href="/dashboard/listings/new"
-                  className="rounded-xl bg-white px-4 py-1.5 text-sm font-semibold text-primary transition-all hover:bg-teal-50"
+                  className="rounded-xl bg-white px-4 py-1.5 text-sm font-semibold text-primary transition-all hover:bg-primary-50"
                 >
                   Create a listing
                 </Link>
@@ -474,7 +474,7 @@ export function HeroSection() {
                 <div className="flex shrink-0 items-center gap-2">
                   <Link
                     href={`/properties/${slugifyCity(slide.city || "kenya")}/${slide.slug}`}
-                    className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-teal-50"
+                    className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary-50"
                   >
                     View Listing
                     <ArrowUpRight />

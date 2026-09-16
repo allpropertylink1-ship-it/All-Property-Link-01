@@ -23,6 +23,7 @@ const navLinks = [
 export function Navbar() {
   const { user } = useAuth()
   const pathname = usePathname()
+  const isActive = (href: string) => !href.includes("?") && pathname === href
   const isHome = pathname === "/"
   const isAgent = user?.authMethod === "agent"
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -33,8 +34,8 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 border-b border-border bg-surface backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-content items-center justify-between gap-2 px-3 sm:gap-4 sm:px-4">
+      <nav className="sticky top-0 z-50 border-b border-border bg-surface/95 shadow-sm backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-content items-center justify-between gap-2 px-3 sm:gap-4 sm:px-4 lg:h-20 lg:px-6">
           <Link href="/" className="flex min-w-0 shrink-0 items-center justify-center gap-2 leading-none">
             <Image
               src="/logos/logo-mark.png"
@@ -56,15 +57,21 @@ export function Navbar() {
 
           {/* Desktop navigation */}
           <div className="hidden items-center gap-6 md:flex">
-            {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="text-sm font-medium text-secondary transition-colors hover:text-primary"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const active = isActive(link.href);
+              return (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  aria-current={active ? "page" : undefined}
+                  className={active
+                    ? "border-b-2 border-primary py-1 text-sm font-bold text-primary transition-colors"
+                    : "py-1 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
             {isAgent && (
               <Link
                 href="/dashboard/agent"
@@ -110,16 +117,22 @@ export function Navbar() {
               </button>
             </div>
             <nav className="p-3 space-y-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-semibold text-foreground transition-colors hover:bg-surface-secondary active:bg-primary-50"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const active = isActive(link.href);
+                return (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    aria-current={active ? "page" : undefined}
+                    className={active
+                      ? "flex items-center gap-3 rounded-xl bg-primary-50 px-3 py-3 text-[15px] font-bold text-primary transition-colors"
+                      : "flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-semibold text-foreground transition-colors hover:bg-surface-secondary active:bg-primary-50"}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
               {isAgent && (
                 <Link
                   href="/dashboard/agent"

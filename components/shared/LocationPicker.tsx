@@ -243,7 +243,7 @@ export function LocationPicker({ initialAddress, initialLat, initialLng, onLocat
             }
           }}
           placeholder="Search for a location or paste coordinates..."
-          className="w-full rounded-lg border border-border bg-surface pl-9 pr-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+          className="w-full rounded-lg border border-border bg-surface pl-9 pr-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </div>
 

@@ -57,7 +57,7 @@ export function FaqSearch({ categories }: { categories: FAQCategory[] }) {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search questions..."
-            className="w-full rounded-lg border border-border bg-surface px-4 py-3 pl-12 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+            className="w-full rounded-lg border border-border bg-surface px-4 py-3 pl-12 text-text-primary placeholder:text-text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
             autoComplete="off"
           />
           <svg

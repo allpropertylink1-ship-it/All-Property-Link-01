@@ -41,7 +41,7 @@ export function PersonalDetailsForm({ bioFirstName, bioMiddleName, bioLastName, 
           <label className="mb-1 block text-sm font-medium text-foreground">
             Phone Number <span className="text-red-500">*</span>
             {userPhone && (
-              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-teal-50 px-2 py-0.5 text-[11px] font-medium text-teal-700">
+              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-primary-50 px-2 py-0.5 text-[11px] font-medium text-primary-700">
                 <Lock size={10} /> Verified from account
               </span>
             )}
@@ -51,7 +51,7 @@ export function PersonalDetailsForm({ bioFirstName, bioMiddleName, bioLastName, 
             className={cn(
               "block w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors",
               userPhone && bioPhone === userPhone
-                ? "border-teal-200 bg-teal-50/50 text-teal-800 cursor-not-allowed"
+                ? "border-primary-200 bg-primary-50/50 text-primary-800 cursor-not-allowed"
                 : "border-input bg-background focus:ring-2 focus:ring-primary/50"
             )} />
         </div>

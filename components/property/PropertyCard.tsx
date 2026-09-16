@@ -39,7 +39,7 @@ function FlashIcon() {
 function VerifiedIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <circle cx="9" cy="9" r="9" fill="#286255" />
+      <circle cx="9" cy="9" r="9" fill="#1E3A40" />
       <path d="M5 9l2.5 2.5L13 6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -101,7 +101,7 @@ export function PropertyCard({
           />
           <span
             className={`absolute left-1.5 top-1.5 z-10 rounded-md px-2 py-0.5 text-[10px] font-semibold text-white ${
-              listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-400" : listingPurpose === "FOR_RENT_LONG_TERM" ? "bg-primary-600" : "bg-primary-500"
+              listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-500" : listingPurpose === "FOR_RENT_LONG_TERM" ? "bg-primary-600" : "bg-primary-500"
             }`}
           >
             {listingPurpose === "FOR_RENT_SHORT_TERM" ? "Airbnb" : listingPurpose === "FOR_RENT_LONG_TERM" ? "Rent" : "Sale"}
@@ -159,8 +159,8 @@ export function PropertyCard({
             }}
           />
           <span
-            className={`absolute left-2 top-2 z-10 rounded-md px-2.5 py-1 text-xs font-semibold text-white ${
-              listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-400" : listingPurpose === "FOR_RENT_LONG_TERM" ? "bg-primary-600" : "bg-primary-500"
+            className={`absolute left-2 top-2 z-10 rounded-md px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white ${
+              listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-500" : listingPurpose === "FOR_RENT_LONG_TERM" ? "bg-primary-600" : "bg-primary-500"
             }`}
           >
             {listingPurpose === "FOR_RENT_SHORT_TERM" ? "Airbnb" : listingPurpose === "FOR_RENT_LONG_TERM" ? "Rent" : "Sale"}
@@ -176,27 +176,45 @@ export function PropertyCard({
               <VerifiedIcon />
             </span>
           )}
+          <span className="absolute bottom-2 left-2 z-10 flex max-w-[70%] items-center gap-1 truncate rounded-md bg-white/90 px-2 py-0.5 text-xs font-semibold text-text-primary shadow-sm backdrop-blur-sm">
+            <MapPinIcon className="h-3 w-3 shrink-0 text-primary" />
+            <span className="truncate">
+              {region}, {city}
+            </span>
+          </span>
         </div>
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-4 min-[375px]:p-5">
-        <h3 className="line-clamp-2 min-w-0 break-words font-heading text-base font-semibold leading-tight text-text-primary md:text-lg">
-          {title}
-        </h3>
-        <div className="flex min-w-0 items-center gap-1 text-xs text-text-secondary md:text-sm">
-          <MapPinIcon />
-          <span className="min-w-0 truncate">
-            {region}, {city}
-          </span>
-        </div>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-secondary">
-          {bedrooms != null && bedrooms > 0 && <span>{bedrooms} beds</span>}
-          {bathrooms != null && bathrooms > 0 && <span>{bathrooms} baths</span>}
-          {area != null && area > 0 && <span>{area} sqft</span>}
-          <span className="capitalize">{propertyType.toLowerCase()}</span>
-        </div>
-        <p className="mt-1.5 break-words font-heading text-lg font-semibold text-accent-400 min-[375px]:text-xl">
+        <p className="break-words font-heading text-lg font-extrabold tracking-tight text-text-primary min-[375px]:text-xl">
           {formatPrice(price, listingPurpose ?? undefined)}
         </p>
+        <h3 className="line-clamp-2 min-w-0 break-words font-heading text-base font-semibold leading-tight text-text-primary transition-colors group-hover:text-accent-600 md:text-lg">
+          {title}
+        </h3>
+        <div className="grid grid-cols-3 gap-1 rounded-lg bg-surface-secondary py-1.5 text-center text-xs text-text-secondary">
+          {bedrooms != null && bedrooms > 0 && (
+            <div>
+              <span className="block text-[10px] font-semibold uppercase tracking-wide">Beds</span>
+              <span className="font-heading text-sm font-bold text-text-primary">{bedrooms}</span>
+            </div>
+          )}
+          {bathrooms != null && bathrooms > 0 && (
+            <div>
+              <span className="block text-[10px] font-semibold uppercase tracking-wide">Baths</span>
+              <span className="font-heading text-sm font-bold text-text-primary">{bathrooms}</span>
+            </div>
+          )}
+          {area != null && area > 0 && (
+            <div>
+              <span className="block text-[10px] font-semibold uppercase tracking-wide">Area</span>
+              <span className="font-heading text-sm font-bold text-text-primary">{area.toLocaleString()} <span className="text-[10px] font-semibold">sqft</span></span>
+            </div>
+          )}
+          <div>
+            <span className="block text-[10px] font-semibold uppercase tracking-wide">Type</span>
+            <span className="font-heading text-sm font-bold capitalize text-text-primary">{propertyType.toLowerCase()}</span>
+          </div>
+        </div>
       </div>
     </Link>
   );

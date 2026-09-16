@@ -20,7 +20,7 @@ export default async function EditListingPage({ params }: { params: { id: string
         <p className="text-text-secondary mb-6 text-center max-w-md">
           Only Property Owners and Agents can manage property listings.
         </p>
-        <Link href="/dashboard/notifications" className="text-sm text-accent-300 hover:text-accent-400">
+        <Link href="/dashboard/notifications" className="text-sm text-primary-600 hover:text-primary-700">
           Back to Dashboard
         </Link>
       </div>

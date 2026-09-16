@@ -1,0 +1,136 @@
+
+> allpropertylink@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+./app/api/gantt/xlsx/route.ts
+8:10  Warning: 'colLetter' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/dashboard/agent/layout.tsx
+4:10  Warning: 'KycGate' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/gantt/GanttClient.tsx
+24:43  Warning: 'wbs' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
+24:48  Warning: 'workstream' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
+24:60  Warning: 'owner' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
+24:67  Warning: 'priority' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
+24:77  Warning: 'status' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
+24:85  Warning: 'deliverable' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
+24:98  Warning: 'riskId' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
+
+./app/HomePageClient.tsx
+3:10  Warning: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/pwa-splash-demo/page.tsx
+3:8  Warning: 'Image' is defined but never used.  @typescript-eslint/no-unused-vars
+48:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/browse/BrowseResultsGrid.tsx
+121:9  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/browse/FilterPills.tsx
+11:37  Warning: 'value' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
+
+./components/browse/ServiceCardCompact.tsx
+39:9  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/dashboard/DashboardNav.tsx
+5:8  Warning: 'Image' is defined but never used.  @typescript-eslint/no-unused-vars
+14:3  Warning: 'ArrowLeft' is defined but never used.  @typescript-eslint/no-unused-vars
+15:3  Warning: 'LogOut' is defined but never used.  @typescript-eslint/no-unused-vars
+102:17  Warning: 'logout' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+104:9  Warning: 'router' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./lib/images.ts
+56:13  Warning: 'thumbBase' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/50) ...
+   Generating static pages (12/50) 
+   Generating static pages (24/50) 
+   Generating static pages (37/50) 
+ ✓ Generating static pages (50/50)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                                       Size     First Load JS
+┌ ○ /                                                             7.08 kB         119 kB
+├ ○ /_not-found                                                   274 B          88.1 kB
+├ ○ /about                                                        197 B          96.8 kB
+├ ƒ /admin                                                        197 B          96.8 kB
+├ ƒ /admin/listings                                               3.63 kB         114 kB
+├ ƒ /admin/settings                                               274 B          88.1 kB
+├ ƒ /admin/users                                                  5.73 kB         142 kB
+├ ƒ /api/[...path]                                                0 B                0 B
+├ ƒ /api/gantt/xlsx                                               0 B                0 B
+├ ○ /aplreps                                                      4.74 kB         110 kB
+├ ƒ /aplreps/[id]                                                 477 B           114 kB
+├ ƒ /auth                                                         404 kB          513 kB
+├ ○ /auth/agent-activate                                          3.92 kB        95.3 kB
+├ ○ /auth/agent-force-change-password                             4.84 kB        96.2 kB
+├ ○ /auth/agent-reset-password                                    4.89 kB        96.2 kB
+├ ○ /auth/forgot-password                                         2.89 kB        94.2 kB
+├ ƒ /auth/login                                                   274 B          88.1 kB
+├ ƒ /auth/register                                                274 B          88.1 kB
+├ ƒ /auth/reset-password                                          3.65 kB          95 kB
+├ ○ /auth/verify-magic-link                                       2.69 kB        90.6 kB
+├ ○ /browse                                                       6.95 kB         119 kB
+├ ○ /contact                                                      2.87 kB         139 kB
+├ ƒ /dashboard                                                    197 B          96.8 kB
+├ ƒ /dashboard/agent                                              2.02 kB         115 kB
+├ ƒ /dashboard/agent/claims                                       4.53 kB         140 kB
+├ ƒ /dashboard/agent/disputes                                     1.93 kB         115 kB
+├ ƒ /dashboard/agent/disputes/[id]                                4.4 kB          104 kB
+├ ƒ /dashboard/agent/disputes/new                                 4.61 kB         105 kB
+├ ƒ /dashboard/agent/payouts                                      274 B          88.1 kB
+├ ƒ /dashboard/agent/referrals                                    5.26 kB         105 kB
+├ ƒ /dashboard/agent/referrals/[id]                               2.49 kB         115 kB
+├ ƒ /dashboard/agent/referrals/[id]/properties/[propertyId]/edit  3.44 kB         149 kB
+├ ƒ /dashboard/agent/referrals/[id]/properties/new                3.41 kB         149 kB
+├ ƒ /dashboard/agent/referrals/[id]/services/[serviceId]/edit     2.42 kB         108 kB
+├ ƒ /dashboard/agent/referrals/[id]/services/new                  2.35 kB         108 kB
+├ ƒ /dashboard/agent/settings                                     4.24 kB         108 kB
+├ ƒ /dashboard/kyc                                                7.17 kB         114 kB
+├ ƒ /dashboard/listings                                           197 B          96.8 kB
+├ ƒ /dashboard/listings/[id]/edit                                 204 B           146 kB
+├ ƒ /dashboard/listings/new                                       205 B           145 kB
+├ ƒ /dashboard/notifications                                      4.21 kB         113 kB
+├ ƒ /dashboard/onboarding                                         7.55 kB         107 kB
+├ ƒ /dashboard/profile                                            5.54 kB         138 kB
+├ ƒ /dashboard/profile/business                                   9.79 kB         110 kB
+├ ƒ /dashboard/services                                           197 B          96.8 kB
+├ ƒ /dashboard/services/[id]/edit                                 192 B           106 kB
+├ ƒ /dashboard/services/new                                       192 B           106 kB
+├ ○ /faq                                                          1.63 kB        98.2 kB
+├ ○ /gantt                                                        8.97 kB        96.8 kB
+├ ○ /privacy                                                      274 B          88.1 kB
+├ ƒ /profiles/[id]                                                488 B           124 kB
+├ ƒ /properties                                                   2.46 kB         115 kB
+├ ƒ /properties/[city]                                            2.79 kB         115 kB
+├ ƒ /properties/[city]/[slug]                                     5.23 kB         155 kB
+├ ƒ /properties/search                                            2.02 kB         114 kB
+├ ○ /pwa-splash-demo                                              999 B          88.9 kB
+├ ○ /robots.txt                                                   0 B                0 B
+├ ƒ /services                                                     188 B           102 kB
+├ ƒ /services/[id]                                                224 B           150 kB
+├ ○ /sitemap.xml                                                  0 B                0 B
+├ ○ /splash                                                       1.29 kB        92.6 kB
+└ ○ /terms                                                        197 B          96.8 kB
++ First Load JS shared by all                                     87.9 kB
+  ├ chunks/2117-74a72ef526b4701b.js                               31.7 kB
+  ├ chunks/fd9d1056-6e24c1f2006feee7.js                           53.6 kB
+  └ other shared chunks (total)                                   2.49 kB
+
+
+ƒ Middleware                                                      26.7 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

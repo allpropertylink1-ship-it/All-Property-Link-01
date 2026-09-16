@@ -25,29 +25,29 @@
   }
 
   :root {
-    --font-heading: "Sora", system-ui, sans-serif;
-    --font-body: "DM Sans", system-ui, sans-serif;
+    --font-heading: "Plus Jakarta Sans", system-ui, sans-serif;
+    --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
 
-    --color-bg: #F6F4EF;
+    --color-bg: #FAFAFA;
     --color-surface: #FFFFFF;
-    --color-primary: #286255;
-    --color-primary-dark: #1C4A40;
-    --color-primary-light: #E5F0ED;
-    --color-accent: #D49A44;
-    --color-accent-dark: #C18830;
-    --color-accent-light: #F4ECDD;
-    --color-text: #1A1A1A;
-    --color-muted: #75716B;
-    --color-line: #E2DDD3;
+    --color-primary: #1E3A40;
+    --color-primary-dark: #162C31;
+    --color-primary-light: #E8F0F1;
+    --color-accent: #E27A23;
+    --color-accent-dark: #B85E12;
+    --color-accent-light: #FCEBD3;
+    --color-text: #111827;
+    --color-muted: #64748B;
+    --color-line: #E5E7EB;
 
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 18px;
     --radius-xl: 24px;
 
-    --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
-    --shadow-md: 0 2px 12px rgba(0,0,0,.06);
-    --shadow-lg: 0 6px 24px rgba(0,0,0,.08);
+    --shadow-sm: 0 1px 3px 0 rgba(30,58,64,.04), 0 1px 2px -1px rgba(30,58,64,.02);
+    --shadow-md: 0 1px 3px 0 rgba(30,58,64,.05), 0 4px 8px -2px rgba(30,58,64,.04);
+    --shadow-lg: 0 12px 24px -4px rgba(30,58,64,.08), 0 4px 8px -2px rgba(30,58,64,.03);
 
     --ease: cubic-bezier(.25,.1,.25,1);
     --nav-h: 64px;
@@ -60,7 +60,7 @@
   img { max-width: 100%; height: auto; display: block; image-orientation: from-image; }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -86,7 +86,7 @@
 
   .wrap {
     width: 100%;
-    max-width: 1240px;
+    max-width: 1440px;
     margin: 0 auto;
     padding: 0 16px;
   }
@@ -156,12 +156,12 @@
   overflow: hidden;
   background:
     repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.022) 0 2px, transparent 2px 16px),
-    radial-gradient(120% 90% at 82% -5%, rgba(212, 154, 68, 0.22), transparent 55%),
+    radial-gradient(120% 90% at 82% -5%, rgba(226, 122, 35, 0.22), transparent 55%),
     radial-gradient(90% 80% at 5% 105%, rgba(10, 25, 21, 0.55), transparent 60%),
-    linear-gradient(165deg, #152F29 0%, #1A3D35 45%, #286255 100%);
+    linear-gradient(165deg, #0E1E23 0%, #162C31 45%, #1E3A40 100%);
   box-shadow:
-    -12px 0 24px -18px rgba(15, 32, 28, 0.45),
-    12px 0 24px -18px rgba(15, 32, 28, 0.45);
+    -12px 0 24px -18px rgba(14, 30, 35, 0.45),
+    12px 0 24px -18px rgba(14, 30, 35, 0.45);
   transform: translateX(0);
   transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
   will-change: transform;
@@ -200,8 +200,8 @@
 
 .auth-strip {
   background:
-    radial-gradient(120% 90% at 85% -10%, rgba(212, 154, 68, 0.25), transparent 55%),
-    linear-gradient(165deg, #152F29 0%, #1A3D35 45%, #286255 100%);
+    radial-gradient(120% 90% at 85% -10%, rgba(226, 122, 35, 0.25), transparent 55%),
+    linear-gradient(165deg, #0E1E23 0%, #162C31 45%, #1E3A40 100%);
 }
 
 @keyframes fadeUp {
@@ -240,8 +240,8 @@
   overflow: hidden;
   color: #fff;
   background:
-    radial-gradient(120% 90% at 85% -10%, rgba(212, 154, 68, 0.28), transparent 55%),
-    linear-gradient(165deg, #152F29 0%, #1A3D35 45%, #286255 100%);
+    radial-gradient(120% 90% at 85% -10%, rgba(226, 122, 35, 0.28), transparent 55%),
+    linear-gradient(165deg, #0E1E23 0%, #162C31 45%, #1E3A40 100%);
 }
 
 .profile-hero::after {

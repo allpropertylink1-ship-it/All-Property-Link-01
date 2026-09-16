@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import { useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { api } from "@/lib/api-client"
@@ -57,7 +57,7 @@ export function ResetPasswordForm() {
         </p>
         <a
           href="/auth/login"
-          className="touch-target inline-block rounded-sm bg-accent-300 px-6 py-3 text-sm font-medium text-white"
+          className="touch-target inline-block rounded-sm bg-primary px-6 py-3 text-sm font-medium text-white"
         >
           Sign in
         </a>
@@ -105,12 +105,12 @@ export function ResetPasswordForm() {
       <button
         type="submit"
         disabled={loading}
-        className="touch-target w-full rounded-sm bg-accent-300 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-300/20 disabled:cursor-not-allowed disabled:opacity-50"
+        className="touch-target w-full rounded-sm bg-primary px-4 py-3 font-medium text-white transition-colors hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? "Resetting..." : "Reset password"}
       </button>
       <p className="text-center text-sm text-text-secondary">
-        <a href="/auth/login" className="font-medium text-accent-300 hover:text-accent-400">
+        <a href="/auth/login" className="font-medium text-primary-600 hover:text-primary-700">
           Back to sign in
         </a>
       </p>

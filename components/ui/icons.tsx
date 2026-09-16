@@ -1,6 +1,6 @@
 import React from "react";
 
-const GOLD = "#D49A44";
+const GOLD = "#E27A23";
 
 type IconProps = { className?: string; size?: number };
 

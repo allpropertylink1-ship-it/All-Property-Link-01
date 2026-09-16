@@ -10,7 +10,7 @@ export function CTASection() {
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link href="/auth/register"
-            className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-primary shadow-lg transition-all hover:bg-teal-50">
+            className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-primary shadow-lg transition-all hover:bg-primary-50">
             Get Started Free
           </Link>
           <Link href="/contact"

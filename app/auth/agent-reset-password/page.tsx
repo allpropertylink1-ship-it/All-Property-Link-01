@@ -65,7 +65,7 @@ function ResetForm() {
         <button
           type="button"
           onClick={() => router.push("/auth/login?tab=agent")}
-          className="touch-target w-full rounded-sm bg-accent-300 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-400"
+          className="touch-target w-full rounded-sm bg-primary px-4 py-3 font-medium text-white transition-colors hover:bg-primary-600"
         >
           Go to login
         </button>
@@ -123,7 +123,7 @@ function ResetForm() {
       <button
         type="submit"
         disabled={loading || !token}
-        className="touch-target w-full rounded-sm bg-accent-300 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-400 disabled:cursor-not-allowed disabled:opacity-50"
+        className="touch-target w-full rounded-sm bg-primary px-4 py-3 font-medium text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? "Resetting..." : "Reset password"}
       </button>
@@ -137,7 +137,7 @@ export default function AgentResetPasswordPage() {
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
           <h2 className="font-heading text-xl font-bold text-text-primary">
-            All Property <span className="text-accent-300">Link</span>
+            All Property <span className="text-accent-600">Link</span>
           </h2>
         </div>
         <div className="rounded-xl border border-border bg-surface p-6 sm:p-8">

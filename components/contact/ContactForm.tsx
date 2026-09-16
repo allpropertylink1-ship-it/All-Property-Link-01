@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
@@ -69,7 +69,7 @@ export default function ContactForm() {
             {...register('name')}
             className={errors.name
               ? "border-error-500 focus:border-error-500 focus:ring-error-500/20"
-              : "border-border focus:border-accent-300 focus:ring-accent-300/20"}
+              : "border-border focus:border-primary focus:ring-primary/30"}
           />
           {errors.name && (
             <p className="mt-1 text-sm text-error-500">{errors.name.message}</p>
@@ -84,7 +84,7 @@ export default function ContactForm() {
             {...register('email')}
             className={errors.email
               ? "border-error-500 focus:border-error-500 focus:ring-error-500/20"
-              : "border-border focus:border-accent-300 focus:ring-accent-300/20"}
+              : "border-border focus:border-primary focus:ring-primary/30"}
           />
           {errors.email && (
             <p className="mt-1 text-sm text-error-500">{errors.email.message}</p>
@@ -99,7 +99,7 @@ export default function ContactForm() {
           type="tel"
           placeholder="Your phone number"
           {...register('phone')}
-          className="border-border focus:border-accent-300 focus:ring-accent-300/20"
+          className="border-border focus:border-primary focus:ring-primary/30"
         />
       </div>
 
@@ -109,7 +109,7 @@ export default function ContactForm() {
           id="subject"
           placeholder="How can we help you?"
           {...register('subject')}
-          className="border-border focus:border-accent-300 focus:ring-accent-300/20"
+          className="border-border focus:border-primary focus:ring-primary/30"
         />
       </div>
 
@@ -121,7 +121,7 @@ export default function ContactForm() {
           {...register('message')}
           className={errors.message
             ? "border-error-500 focus:border-error-500 focus:ring-error-500/20"
-            : "border-border focus:border-accent-300 focus:ring-accent-300/20"}
+            : "border-border focus:border-primary focus:ring-primary/30"}
           minRows={5}
         />
         {errors.message && (

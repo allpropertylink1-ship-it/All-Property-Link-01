@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
@@ -57,7 +57,7 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
           type="text"
           required
           autoComplete="off"
-          className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-300/20"
+          className="mt-1 block w-full rounded-sm border border-border bg-surface px-4 py-2 text-text-primary placeholder:text-text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
           style={{ fontSize: "16px" }}
           placeholder="APL-XXX-000-00/00"
         />
@@ -83,7 +83,7 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
             type="checkbox"
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
-            className="rounded-sm border border-border bg-surface text-accent-300 focus:ring-accent-300 focus:ring-2"
+            className="rounded-sm border border-border bg-surface text-primary-600 focus:ring-primary focus:ring-2"
           />
           <span className="text-sm text-text-secondary">Remember me</span>
         </label>
@@ -91,7 +91,7 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
           <button
             type="button"
             onClick={onForgotPassword}
-            className="text-sm text-accent-300 hover:text-accent-400 transition-colors"
+            className="text-sm text-primary-600 hover:text-primary-700 transition-colors"
           >
             Forgot password?
           </button>
@@ -101,7 +101,7 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
       <button
         type="submit"
         disabled={loading}
-        className="touch-target w-full rounded-sm bg-accent-300 px-4 py-2.5 font-medium text-white transition-colors hover:bg-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-300/20 disabled:cursor-not-allowed disabled:opacity-50"
+        className="touch-target w-full rounded-sm bg-primary px-4 py-2.5 font-medium text-white transition-colors hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? "Signing in..." : "Sign in"}
       </button>
