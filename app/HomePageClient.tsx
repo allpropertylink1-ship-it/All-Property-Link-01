@@ -55,10 +55,10 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
             </Link>
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:grid sm:mx-0 sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
           {initialData.map((p, i) => (
+            <div key={p.slug} className="w-[78%] shrink-0 snap-start sm:w-auto">
             <PropertyCard
-              key={p.slug}
               slug={p.slug}
               title={p.title}
               price={p.price == null ? null : Number(p.price)}
@@ -75,6 +75,7 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
               area={p.area}
               priority={i === 0}
             />
+            </div>
           ))}
         </div>
       </div>
@@ -101,9 +102,9 @@ export function HomePageClient({
       <CategoryGrid />
       <QuickSearch />
       <FeaturedProperties initialData={saleRent} />
+      <FeaturedLand initialData={land} />
       <FeaturedAirbnbs initialData={airbnbs} />
       <FeaturedFundis initialData={fundis} servicePills={providers.slice(0, 2)} />
-      <FeaturedLand initialData={land} />
       <FeaturedProviders initialData={providers} />
       <CTASection />
     </>
