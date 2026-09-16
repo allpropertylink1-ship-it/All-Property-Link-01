@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { uploadImage } from "@/lib/image-client";
+import { uploadImage, IMAGE_PRESETS, HEIC_HINT, isHeicFile } from "@/lib/image-client";
 import { Check, Loader2, Save, Camera, User, Building2, RotateCw } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
@@ -169,12 +169,14 @@ function BusinessProfilePageInner() {
   }, [])
 
   async function uploadFile(file: File, folder: string): Promise<string> {
-    return uploadImage(file, folder)
+    const preset = folder.includes("logo") ? IMAGE_PRESETS.logo : IMAGE_PRESETS.avatar;
+    return uploadImage(file, folder, preset)
   }
 
   async function handleBusinessProfilePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    if (isHeicFile(file)) { setError(HEIC_HINT); return }
     if (!file.type.startsWith("image/")) { setError("Only image files are allowed"); return }
     if (file.size > 10 * 1024 * 1024) { setError("File must be under 10MB"); return }
     setAvatarUploading(true)
@@ -227,6 +229,7 @@ function BusinessProfilePageInner() {
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    if (isHeicFile(file)) { setError(HEIC_HINT); return }
     if (!file.type.startsWith("image/")) { setError("Only image files are allowed"); return }
     if (file.size > 10 * 1024 * 1024) { setError("File must be under 10MB"); return }
     setLogoUploading(true)

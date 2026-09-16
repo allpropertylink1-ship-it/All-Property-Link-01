@@ -4,10 +4,31 @@
  * image lib, so compression happens here before the bytes ever leave the device.
  */
 
-const MAX_DIMENSION = 1600;
-const JPEG_QUALITY = 0.82;
+export const MAX_DIMENSION = 1600;
+export const JPEG_QUALITY = 0.82;
 
-/** Downscale to fit maxW/maxH and re-encode. Keeps PNG when small/transparent-ish, else JPEG. */
+export const IMAGE_PRESETS = {
+  listing: { maxDimension: 1600, quality: 0.82 },
+  doc: { maxDimension: 1200, quality: 0.80 },
+  avatar: { maxDimension: 400, quality: 0.85 },
+  logo: { maxDimension: 800, quality: 0.85 },
+} as const;
+
+export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+export const HEIC_HINT = "iPhone photo detected (HEIC). On iPhone: Settings → Camera → Formats → Most Compatible, or screenshot the photo and upload the JPG.";
+export function isHeicFile(file: File): boolean {
+  const t = (file.type || "").toLowerCase();
+  const n = (file.name || "").toLowerCase();
+  return t === "image/heic" || t === "image/heif" || n.endsWith(".heic") || n.endsWith(".heif");
+}
+
+function hasAlphaChannel(imageData: ImageData): boolean {
+  const d = imageData.data;
+  for (let i = 3; i < d.length; i += 4) if (d[i] < 250) return true;
+  return false;
+}
+
+/** Downscale to fit maxW/maxH and re-encode. Converts opaque PNG → JPEG to save bytes. */
 export async function downscaleImage(
   input: File | Blob,
   maxDimension = MAX_DIMENSION,
@@ -38,13 +59,24 @@ export async function downscaleImage(
     ctx.drawImage(bitmap, 0, 0, w, h);
     bitmap.close?.();
 
-    const outType = type === "image/png" ? "image/png" : "image/jpeg";
+    // Decide output format: keep PNG only when it actually has transparency
+    let outType: string;
+    if (type === "image/png") {
+      try {
+        const sample = ctx.getImageData(0, 0, Math.min(w, 200), Math.min(h, 200));
+        outType = hasAlphaChannel(sample) ? "image/png" : "image/jpeg";
+      } catch { outType = "image/png"; }
+    } else if (type === "image/webp") {
+      outType = "image/webp";
+    } else {
+      outType = "image/jpeg";
+    }
     const blob = await new Promise<Blob | null>((resolve) =>
       canvas.toBlob(resolve, outType, quality)
     );
     if (!blob) throw new Error("toBlob failed");
 
-    const ext = outType === "image/png" ? ".png" : ".jpg";
+    const ext = outType === "image/png" ? ".png" : outType === "image/webp" ? ".webp" : ".jpg";
     const base = sourceName.replace(/\.[^.]+$/, "") || "image";
     return new File([blob], `${base}${ext}`, { type: outType });
   } catch {

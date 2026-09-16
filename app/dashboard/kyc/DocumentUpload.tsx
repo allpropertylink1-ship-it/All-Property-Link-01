@@ -8,6 +8,7 @@ import PdfViewer from "@/components/kyc/PdfViewer"
 import ImageCropper from "@/components/kyc/ImageCropper"
 import DragDropUploader from "@/components/kyc/DragDropUploader"
 import { FormBanner } from "@/components/shared/FormFeedback"
+import { HEIC_HINT, isHeicFile } from "@/lib/image-client"
 
 interface Props {
   docType: string
@@ -66,8 +67,9 @@ export function DocumentUpload(props: Props) {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
-      setLocalMsg({ type: "error", text: "Only JPG and PNG files are allowed" })
+    if (isHeicFile(file)) { setLocalMsg({ type: "error", text: HEIC_HINT }); e.target.value = ""; return }
+    if (!["image/jpeg", "image/png", "image/webp", "image/jpg"].includes(file.type)) {
+      setLocalMsg({ type: "error", text: "Only JPEG, PNG and WebP are allowed" })
       e.target.value = ""
       return
     }
@@ -150,7 +152,7 @@ export function DocumentUpload(props: Props) {
             ) : (
               <DragDropUploader
                 label="front image"
-                hint="JPG or PNG, max 10MB — drag & drop, click, or camera"
+                hint="JPG, PNG or WebP, max 10MB — drag & drop, click, or camera"
                 onFile={(f) => {
                   if (props.onFileDirect) props.onFileDirect(f, "front")
                   else {
@@ -185,7 +187,7 @@ export function DocumentUpload(props: Props) {
             ) : (
               <DragDropUploader
                 label="back image"
-                hint="JPG or PNG — drag & drop, click, or camera"
+                hint="JPG, PNG or WebP — drag & drop, click, or camera"
                 onFile={(f) => {
                   if (props.onFileDirect) props.onFileDirect(f, "back")
                   else {

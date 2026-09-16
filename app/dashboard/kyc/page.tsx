@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { uploadImage, uploadPdf } from "@/lib/image-client";
+import { uploadImage, uploadPdf, IMAGE_PRESETS, HEIC_HINT, isHeicFile } from "@/lib/image-client";
 import { Shield, CheckCircle, Clock, XCircle, Loader2 } from "@/components/ui/icons"
 import { api } from "@/lib/api-client"
 import { cn } from "@/lib/utils"
@@ -119,7 +119,7 @@ function KycPageInner() {
         const url = await uploadPdf(file)
         return { url }
       }
-            const url = await uploadImage(file, "kyc")
+            const url = await uploadImage(file, "kyc", IMAGE_PRESETS.doc)
       return { url }
     }))
   }
@@ -179,8 +179,9 @@ function KycPageInner() {
   }
 
   const handleFileDirect = (file: File, side: "front" | "back") => {
-    if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
-      setMessage({ type: "error", text: "Only JPG and PNG files are allowed" }); return
+    if (isHeicFile(file)) { setMessage({ type: "error", text: HEIC_HINT }); return }
+    if (!["image/jpeg", "image/png", "image/webp", "image/jpg"].includes(file.type)) {
+      setMessage({ type: "error", text: "Only JPEG, PNG and WebP are allowed" }); return
     }
     if (file.size > 10 * 1024 * 1024) {
       setMessage({ type: "error", text: "File must be under 10MB" }); return

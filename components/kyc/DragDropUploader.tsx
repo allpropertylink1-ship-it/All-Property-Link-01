@@ -4,6 +4,7 @@
 import { useRef, useState } from "react"
 import { Upload, Camera } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
+import { HEIC_HINT, isHeicFile } from "@/lib/image-client"
 
 interface DragDropUploaderProps {
   label: string
@@ -13,13 +14,13 @@ interface DragDropUploaderProps {
   onError?: (msg: string) => void
 }
 
-const ALLOWED = ["image/jpeg", "image/png", "image/jpg"]
+const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/jpg"]
 const MAX_BYTES = 10 * 1024 * 1024
 
 export default function DragDropUploader({
   label,
-  hint = "JPG or PNG, max 10MB",
-  accept = "image/jpeg,image/png,image/jpg",
+  hint = "JPG, PNG or WebP, max 10MB",
+  accept = "image/jpeg,image/png,image/webp,image/jpg",
   onFile,
   onError,
 }: DragDropUploaderProps) {
@@ -29,8 +30,9 @@ export default function DragDropUploader({
 
   const validateAndEmit = (file: File | undefined | null) => {
     if (!file) return
+    if (isHeicFile(file)) { onError?.(HEIC_HINT); return }
     if (!ALLOWED.includes(file.type)) {
-      onError?.("Only JPG and PNG files are allowed")
+      onError?.("Only JPEG, PNG and WebP are allowed")
       return
     }
     if (file.size > MAX_BYTES) {

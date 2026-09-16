@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
-import { uploadImage } from "@/lib/image-client"
+import { uploadImage, IMAGE_PRESETS, HEIC_HINT, isHeicFile } from "@/lib/image-client"
 import { Loader2, Link as LinkIcon, Copy, Check, MapPin } from "@/components/ui/icons"
 import ImageCropper from "@/components/kyc/ImageCropper"
 import { FormBanner } from "@/components/shared/FormFeedback"
@@ -134,6 +134,7 @@ export default function AgentSettingsPage() {
   async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    if (isHeicFile(file)) { setPrError(HEIC_HINT); e.target.value = ""; return }
     e.target.value = ""
     setPrError("")
     const url = URL.createObjectURL(file)
@@ -146,7 +147,7 @@ export default function AgentSettingsPage() {
     setAvatarUploading(true)
     setPrError("")
     try {
-      const url = await uploadImage(new File([croppedBlob], "avatar.jpg", { type: "image/jpeg" }), "avatars", { maxDimension: 400, quality: 0.85 })
+      const url = await uploadImage(new File([croppedBlob], "avatar.jpg", { type: "image/jpeg" }), "avatars", IMAGE_PRESETS.avatar)
       const { error } = await api.patch("/api/apl-agents/profile", { avatar: url })
       if (error) throw new Error(error)
       setAvatarUrl(url)

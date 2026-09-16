@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { uploadImage } from "@/lib/image-client";
+import { uploadImage, IMAGE_PRESETS, HEIC_HINT, isHeicFile } from "@/lib/image-client";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
   function handlePassportSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (isHeicFile(file)) { setMessage({ type: "error", text: HEIC_HINT }); return; }
     if (!file.type.startsWith("image/")) {
       setMessage({ type: "error", text: "Only image files are allowed" }); return;
     }
@@ -67,7 +68,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
     setCropping(false);
     setPassportUploading(true);
     try {
-      const url = await uploadImage(new File([blob], "passport.jpg", { type: "image/jpeg" }), "profiles");
+      const url = await uploadImage(new File([blob], "passport.jpg", { type: "image/jpeg" }), "profiles", IMAGE_PRESETS.avatar);
       setPassportPhotoUrl(url);
       setPassportFile(null);
       const patchRes = await fetch("/api/user/profile", {

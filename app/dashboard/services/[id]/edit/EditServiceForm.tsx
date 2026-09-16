@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useId } from "react";
-import { uploadImage } from "@/lib/image-client";
+import { uploadImage, HEIC_HINT, isHeicFile } from "@/lib/image-client";
 import { useRouter } from "next/navigation";
 import { Upload, Loader2, X } from "@/components/ui/icons";
 import { api } from "@/lib/api-client";
@@ -71,6 +71,7 @@ export function EditServiceForm({
       }
 
       for (const file of files) {
+        if (isHeicFile(file)) { setError(`${file.name}: ${HEIC_HINT}`); return; }
         if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
           setError(`Invalid type: ${file.name}. Only JPEG, PNG, WebP.`);
           return;
