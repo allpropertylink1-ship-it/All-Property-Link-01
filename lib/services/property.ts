@@ -19,7 +19,7 @@ export interface PropertyCard {
   id: string; slug: string; title: string; price: number | null; currency: string;
   propertyType: string; listingPurpose: string | null;
   city: string; region: string; bedrooms: number | null; bathrooms: number | null;
-  area: number | null; images: unknown; isFeatured: boolean; createdAt: Date;
+  area: number | null; images: unknown; coverImage?: string | null; isFeatured: boolean; createdAt: Date;
 }
 
 interface PropertyDetailAgent {
@@ -34,14 +34,14 @@ export interface PropertyDetail {
   propertyType: string; listingPurpose: string | null; status: string;
   city: string; region: string; country: string;
   bedrooms: number | null; bathrooms: number | null; area: number | null;
-  latitude: unknown; longitude: unknown; images: unknown; features: string[];
+  latitude: unknown; longitude: unknown; images: unknown; coverImage?: string | null; features: string[];
   isFeatured: boolean; createdAt: Date;
   agent: PropertyDetailAgent | null;
 }
 
 interface OtherProperty {
   id: string; title: string; slug: string; price: number | null; city: string;
-  currency: string; images: unknown; listingPurpose: string | null;
+  currency: string; images: unknown; coverImage?: string | null; listingPurpose: string | null;
 }
 
 const fetchApi = cache(async <T>(path: string): Promise<T | null> => {

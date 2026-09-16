@@ -38,8 +38,13 @@ export const propertySchema = z.object({
   subType: z.string().optional(),
   features: z.array(z.string()).optional(),
   images: z.array(z.string()).optional(),
+  coverImage: z.string().min(1, "Cover photo is required").optional().nullable(),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.coverImage && data.images && data.images.length > 0 && !data.images.includes(data.coverImage)) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Cover photo must be one of the images", path: ["coverImage"] });
+  }
 });
 
 export type PropertyInput = z.infer<typeof propertySchema>;

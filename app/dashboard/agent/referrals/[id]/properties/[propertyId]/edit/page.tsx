@@ -24,6 +24,7 @@ interface EditableProperty {
   area?: number
   features?: string[]
   images?: string[]
+  coverImage?: string | null
   latitude?: number | null
   longitude?: number | null
 }
@@ -103,6 +104,7 @@ export default function AgentEditReferralPropertyPage() {
             area: property.area ?? undefined,
             features: (property.features as string[]) ?? undefined,
             images: (property.images as string[]) ?? undefined,
+            coverImage: (property.coverImage as string | null) ?? (property.images?.[0] as string | null) ?? null,
             latitude: property.latitude ?? undefined,
             longitude: property.longitude ?? undefined,
           }}

@@ -46,6 +46,7 @@ interface BrowseProperty {
   bathrooms: number | null;
   area: number | null;
   images: unknown;
+  coverImage?: string | null;
   isFeatured: boolean;
   createdAt: string;
 }
@@ -387,6 +388,7 @@ export function BrowseResultsGrid({
                 bathrooms={item.bathrooms}
                 area={item.area}
                 images={item.images}
+                coverImage={item.coverImage ?? null}
                 isFeatured={item.isFeatured}
                 variant="compact"
               />
@@ -409,7 +411,7 @@ export function BrowseResultsGrid({
             ))
           )}
         </div>
-      ) : (
+       ) : (
         <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4" role="list" aria-label={`${itemType} grid`}>
           {activeTab === "properties" ? (
             properties.map((item) => (
@@ -427,6 +429,7 @@ export function BrowseResultsGrid({
                 bathrooms={item.bathrooms}
                 area={item.area}
                 images={item.images}
+                coverImage={item.coverImage ?? null}
                 isFeatured={item.isFeatured}
               />
             ))

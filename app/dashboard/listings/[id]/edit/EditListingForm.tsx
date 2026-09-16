@@ -35,6 +35,7 @@ interface PropertyData {
   area?: number;
   features?: string[];
   images?: string[];
+  coverImage?: string | null;
   latitude?: number | null;
   longitude?: number | null;
 }
@@ -63,7 +64,13 @@ const listingSchema = z.object({
 export default function EditListingForm({ propertyId, property, redirectTo, submitOverride }: { propertyId: string; property: PropertyData; redirectTo?: string; submitOverride?: ListingSubmitOverride }) {
   const router = useRouter();
   const [error, setError] = useState("");
-  const [imageUrls, setImageUrls] = useState<string[]>(property.images || []);
+  const initialCover = property.coverImage ?? property.images?.[0] ?? null;
+  const [coverUrl, setCoverUrl] = useState<string | null>(initialCover);
+  const [imageUrls, setImageUrls] = useState<string[]>(() => {
+    const imgs = property.images || [];
+    if (!initialCover) return imgs;
+    return imgs.filter((u) => u !== initialCover);
+  });
 
   const [imagesDirty, setImagesDirty] = useState(false)
   const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting, isDirty } } = useForm<z.infer<typeof listingSchema>>({
@@ -95,8 +102,18 @@ export default function EditListingForm({ propertyId, property, redirectTo, subm
     setValue("longitude", loc.lng, { shouldDirty: true })
   }, [setValue])
 
+  const buildImagesPayload = useCallback(() => {
+    if (!coverUrl) return imageUrls;
+    return [coverUrl, ...imageUrls.filter((u) => u !== coverUrl)];
+  }, [coverUrl, imageUrls]);
+
   async function onSubmit(data: z.infer<typeof listingSchema>) {
     setError("");
+    if (!coverUrl) {
+      setError("Please add a cover photo");
+      return;
+    }
+    const images = buildImagesPayload();
     if (submitOverride) {
       try {
         const payload: Record<string, unknown> = {};
@@ -106,7 +123,8 @@ export default function EditListingForm({ propertyId, property, redirectTo, subm
         if (typeof payload.features === "string") {
           payload.features = payload.features.split(",").map((s: string) => s.trim()).filter(Boolean);
         }
-        payload.images = imageUrls;
+        payload.images = images;
+        payload.coverImage = coverUrl;
         const result = await submitOverride(payload);
         if (!result.success) { setError(result.error || "Update failed"); return }
       } catch (err) {
@@ -120,7 +138,8 @@ export default function EditListingForm({ propertyId, property, redirectTo, subm
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) formData.append(key, String(value));
     });
-    formData.append("images", JSON.stringify(imageUrls));
+    formData.append("images", JSON.stringify(images));
+    formData.append("coverImage", coverUrl);
     try {
       const result = await updateProperty(propertyId, formData);
       if (result && !result.success) { setError(result.error || "Update failed"); return }
@@ -142,6 +161,11 @@ export default function EditListingForm({ propertyId, property, redirectTo, subm
 
   const handleRemoveImage = (url: string) => {
     setImageUrls((prev) => prev.filter((u) => u !== url));
+    setImagesDirty(true);
+  };
+
+  const handleCoverChange = (url: string | null) => {
+    setCoverUrl(url);
     setImagesDirty(true);
   };
 
@@ -227,16 +251,18 @@ export default function EditListingForm({ propertyId, property, redirectTo, subm
       </div>
       <div className="space-y-6">
         <h2 className="font-semibold text-text-primary">Property Images</h2>
-        <PropertyImageUploader 
+        <PropertyImageUploader
           onUploadComplete={handleImageUploadComplete}
           onUploadError={handleImageUploadError}
           onRemoveImage={handleRemoveImage}
+          coverUrl={coverUrl}
+          onCoverChange={handleCoverChange}
           maxFiles={10}
-          initialUrls={property.images}
+          initialUrls={imageUrls}
         />
       </div>
       <div className="flex flex-wrap items-center gap-4 pt-2">
-        <Button type="submit" disabled={isSubmitting || (!isDirty && !imagesDirty)} aria-busy={isSubmitting} title={!isDirty && !imagesDirty ? "No changes to save" : undefined}>
+        <Button type="submit" disabled={isSubmitting || (!isDirty && !imagesDirty) || !coverUrl} aria-busy={isSubmitting} title={!coverUrl ? "Add a cover photo" : !isDirty && !imagesDirty ? "No changes to save" : undefined}>
           {isSubmitting ? "Updating..." : "Update listing"}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>

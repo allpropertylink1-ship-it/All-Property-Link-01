@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react"
 import { Search } from "@/components/ui/icons"
 import { formatPrice } from "@/lib/utils"
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders"
-import { optimizeImageUrl } from "@/lib/images"
+import { getCoverImage, optimizeImageUrl } from "@/lib/images"
 import { slugifyCity } from "@/lib/seo"
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -120,6 +120,7 @@ interface ApiProperty {
   bathrooms?: number | null
   area?: number | null
   listingPurpose?: string | null
+  coverImage?: string | null
   images: unknown
 }
 
@@ -150,17 +151,15 @@ function ArrowUpRight() {
 function toSlides(rows: ApiProperty[]): Slide[] {
   const slides: Slide[] = []
   for (const p of rows) {
-    const imgs = Array.isArray(p.images)
-      ? p.images.filter((u): u is string => typeof u === "string" && u.trim().length > 0)
-      : []
-    if (imgs.length === 0) continue
+    const cover = getCoverImage(p as { coverImage?: string | null; images?: unknown })
+    if (!cover) continue
     slides.push({
       slug: p.slug,
       title: p.title,
       price: p.price == null ? null : Number(p.price),
       city: p.city ?? "",
       listingPurpose: p.listingPurpose ?? null,
-      image: imgs[0],
+      image: cover,
     })
   }
   return slides

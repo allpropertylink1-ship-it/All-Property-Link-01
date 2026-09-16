@@ -21,6 +21,7 @@ interface Property {
   city: string
   status: string
   moderationStatus: string
+  coverImage?: string | null
   images: string | { url: string }[] | null
   createdAt: string
 }
@@ -165,7 +166,7 @@ export default function AgentReferralDetailPage() {
       ) : (
         <div className="space-y-3">
           {referral.properties.map((p) => {
-            const img = Array.isArray(p.images) ? p.images[0] : null
+            const img = (p.coverImage ?? (Array.isArray(p.images) ? p.images[0] : null)) as string | { url: string } | null
             return (
               <div key={p.id} className="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-sm">
                 <Link href={`/properties/${p.city?.toLowerCase() || "unknown"}/${p.slug}`} className="flex min-w-0 flex-1 items-center gap-4">

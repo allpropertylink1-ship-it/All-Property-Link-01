@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders";
-import { toThumbUrl } from "@/lib/images";
+import { getCoverImage, toThumbUrl } from "@/lib/images";
 import { slugifyCity } from "@/lib/seo";
 
 type PropertyCardVariant = "default" | "compact";
@@ -20,6 +20,7 @@ interface PropertyCardProps {
   bathrooms: number | null;
   area: number | null;
   images: unknown;
+  coverImage?: string | null;
   isFeatured: boolean;
   urgencyText?: "Trending" | "Just listed" | "Popular";
   isVerified?: boolean;
@@ -63,6 +64,7 @@ export function PropertyCard({
   bathrooms,
   area,
   images,
+  coverImage,
   isFeatured: _isFeatured,
   listingPurpose,
   urgencyText,
@@ -70,8 +72,7 @@ export function PropertyCard({
   priority = false,
   variant = "default",
 }: PropertyCardProps) {
-  const imageUrls = Array.isArray(images) ? images : [];
-  const rawImage = imageUrls.length > 0 ? String(imageUrls[0]) : ""
+  const rawImage = getCoverImage({ coverImage, images }) ?? ""
   const imageUrl = rawImage ? toThumbUrl(rawImage, 400) : PLACEHOLDER_PROPERTY;
   const lcpAttrs = priority ? ({ fetchpriority: "high" } as Record<string, string>) : {};
 

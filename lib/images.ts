@@ -34,6 +34,34 @@ export function resolveImageUrl(url: string | null | undefined): string | null {
   return url
 }
 
+/**
+ * CONTRACT: cover = coverImage ?? images[0] ?? null
+ * Helpers are the single source of truth for every consumer.
+ */
+export function getCoverImage(p: { coverImage?: string | null; images?: unknown }): string | null {
+  const cover = typeof p.coverImage === "string" ? p.coverImage.trim() : ""
+  if (cover) return p.coverImage!.trim()
+  if (Array.isArray(p.images)) {
+    for (const v of p.images) {
+      if (typeof v === "string" && v.trim()) return v
+    }
+  }
+  return null
+}
+
+/**
+ * Cover-first deduped gallery: [cover, ...images.filter(≠cover)]
+ */
+export function getGalleryImages(p: { coverImage?: string | null; images?: unknown }): string[] {
+  const cover = getCoverImage(p)
+  const raw: string[] = Array.isArray(p.images)
+    ? (p.images as unknown[]).filter((u): u is string => typeof u === "string" && u.trim().length > 0).map((s) => s.trim())
+    : []
+  if (!cover) return Array.from(new Set(raw))
+  const deduped = raw.filter((u) => u !== cover)
+  return [cover, ...deduped.filter((v, i, a) => a.indexOf(v) === i)]
+}
+
 export function toThumbUrl(url: string, fallbackWidth = 400): string {
   if (!url) return url
   if (url.startsWith("/uploads/properties/") || url.startsWith("/uploads/services/")) {

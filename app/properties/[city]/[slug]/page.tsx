@@ -5,14 +5,14 @@ import PropertyBreadcrumbs from "@/components/property/PropertyBreadcrumbs";
 import { getPropertyBySlug } from "@/lib/services/property";
 import { getUserReviews } from "@/lib/services/review";
 import { siteUrl, slugifyCity } from "@/lib/seo";
+import { getCoverImage } from "@/lib/images";
 
 interface Props {
   params: { city: string; slug: string };
 }
 
-function firstImage(images: unknown): string | null {
-  const arr = Array.isArray(images) ? images : [];
-  return arr.find((u): u is string => typeof u === "string") ?? null;
+function firstImage(p: { coverImage?: string | null; images?: unknown }): string | null {
+  return getCoverImage(p);
 }
 
 function excerpt(text: string): string {
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const canonical = `${siteUrl()}/properties/${slugifyCity(property.city)}/${property.slug}`;
   const description = excerpt(property.description || "");
-  const image = firstImage(property.images);
+  const image = firstImage(property as { coverImage?: string | null; images?: unknown });
 
   return {
     title: property.title,
@@ -58,9 +58,7 @@ export default async function PropertyDetailPage({ params }: Props) {
   }
 
   const canonical = `${siteUrl()}/properties/${canonicalCity}/${property.slug}`;
-  const images = Array.isArray(property.images)
-    ? property.images.filter((u): u is string => typeof u === "string")
-    : [];
+  const coverForLd = getCoverImage(property as { coverImage?: string | null; images?: unknown });
 
   // Seller review summary (ISR-cached) for sidebar badge + top-3 block
   const sellerReviews = property.agent?.id ? await getUserReviews(property.agent.id) : undefined;
@@ -71,7 +69,7 @@ export default async function PropertyDetailPage({ params }: Props) {
     name: property.title,
     description: property.description,
     url: canonical,
-    image: images[0] || undefined,
+    image: coverForLd || undefined,
     datePosted: property.createdAt instanceof Date ? property.createdAt.toISOString() : undefined,
     offers: {
       "@type": "Offer",

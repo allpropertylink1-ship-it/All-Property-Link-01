@@ -55,6 +55,7 @@ export function ListingForm({ submitOverride, redirectTo }: {
   const router = useRouter();
   const [error, setError] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [imagesDirty, setImagesDirty] = useState(false);
   const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting, isDirty } } = useForm<ListingFormData>({
     resolver: zodResolver(listingSchema),
@@ -70,12 +71,19 @@ export function ListingForm({ submitOverride, redirectTo }: {
     setValue("longitude", loc.lng, { shouldDirty: true })
   }, [setValue])
 
+  const buildImagesPayload = useCallback(() => {
+    if (!coverUrl) return imageUrls;
+    const deduped = [coverUrl, ...imageUrls.filter((u) => u !== coverUrl)];
+    return deduped;
+  }, [coverUrl, imageUrls]);
+
   async function onSubmit(data: ListingFormData) {
     setError("");
-    if (imageUrls.length === 0) {
-      setError("Please upload at least one image");
+    if (!coverUrl) {
+      setError("Please add a cover photo");
       return;
     }
+    const images = buildImagesPayload();
     if (submitOverride) {
       try {
         const payload: Record<string, unknown> = {};
@@ -85,7 +93,8 @@ export function ListingForm({ submitOverride, redirectTo }: {
         if (typeof payload.features === "string") {
           payload.features = payload.features.split(",").map((s: string) => s.trim()).filter(Boolean);
         }
-        payload.images = imageUrls;
+        payload.images = images;
+        payload.coverImage = coverUrl;
         const result = await submitOverride(payload);
         if (!result.success) { setError(result.error || "Failed to create listing"); return }
       } catch (err) {
@@ -99,7 +108,8 @@ export function ListingForm({ submitOverride, redirectTo }: {
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) formData.append(key, String(value));
     });
-    formData.append("images", JSON.stringify(imageUrls));
+    formData.append("images", JSON.stringify(images));
+    formData.append("coverImage", coverUrl);
     try {
       const result = await createProperty(formData);
       if (result && !result.success) { setError(result.error); return }
@@ -121,6 +131,11 @@ export function ListingForm({ submitOverride, redirectTo }: {
 
   const handleRemoveImage = (url: string) => {
     setImageUrls((prev) => prev.filter((u) => u !== url));
+    setImagesDirty(true);
+  };
+
+  const handleCoverChange = (url: string | null) => {
+    setCoverUrl(url);
     setImagesDirty(true);
   };
 
@@ -200,15 +215,17 @@ export function ListingForm({ submitOverride, redirectTo }: {
         <Input id="features" placeholder="Parking, Pool, Garden" {...register("features")} />
       </div>
       <div className="space-y-6">
-        <PropertyImageUploader 
+        <PropertyImageUploader
           onUploadComplete={handleImageUploadComplete}
           onUploadError={handleImageUploadError}
           onRemoveImage={handleRemoveImage}
+          coverUrl={coverUrl}
+          onCoverChange={handleCoverChange}
           maxFiles={10}
         />
       </div>
       <div className="flex flex-wrap items-center gap-4 pt-2">
-        <Button type="submit" disabled={isSubmitting || (!isDirty && !imagesDirty) || imageUrls.length === 0} aria-busy={isSubmitting} title={!isDirty && !imagesDirty ? "Make changes to create listing" : imageUrls.length === 0 ? "Upload at least one image" : undefined}>
+        <Button type="submit" disabled={isSubmitting || (!isDirty && !imagesDirty) || !coverUrl} aria-busy={isSubmitting} title={!coverUrl ? "Add a cover photo" : !isDirty && !imagesDirty ? "Make changes to create listing" : undefined}>
           {isSubmitting ? "Creating..." : "Create listing"}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>

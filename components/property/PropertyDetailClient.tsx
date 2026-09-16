@@ -9,7 +9,7 @@ import dynamic from "next/dynamic";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
 import { Building2, Bed, Bath, Maximize2, Phone, Mail, Globe, Sparkles, MessageCircle, Loader2, Star, ArrowRight } from "@/components/ui/icons";
-import { optimizeImageUrl } from "@/lib/images";
+import { getCoverImage, getGalleryImages, optimizeImageUrl } from "@/lib/images";
 import { slugifyCity } from "@/lib/seo";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import type { ReviewItem } from "@/lib/services/review";
@@ -64,6 +64,7 @@ interface PropertyData {
   longitude?: unknown;
   features: string[];
   images: unknown;
+  coverImage?: string | null;
   agent?: AgentInfo | null;
 }
 
@@ -75,6 +76,7 @@ interface OtherProperty {
   currency: string;
   city: string;
   images: unknown;
+  coverImage?: string | null;
   listingPurpose?: string | null;
 }
 
@@ -158,10 +160,12 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
     );
   }
 
-  const rawImages = Array.isArray(property.images) ? property.images : [];
-  const imageUrls = rawImages
-    .filter((u): u is string => typeof u === "string")
-    .map((u) => optimizeImageUrl(u, 1600));
+  // Cover-first deduped gallery per CONTRACT
+  const cover = getCoverImage(property as { coverImage?: string | null; images?: unknown });
+  const rawGallery = getGalleryImages(property as { coverImage?: string | null; images?: unknown });
+  // rawGallery already is [cover, ...filtered]; use it as canonical source
+  void cover;
+  const imageUrls = rawGallery.map((u) => optimizeImageUrl(u, 1600));
 
   const otherFiltered = otherProperties.filter((op) => op.id !== property.id);
 
@@ -542,8 +546,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                     </h3>
                     <div className="space-y-3">
                       {otherFiltered.map((op) => {
-                        const opImages = Array.isArray(op.images) ? op.images : [];
-                        const thumbUrlRaw = opImages.find((u): u is string => typeof u === "string");
+                        const thumbUrlRaw = getCoverImage(op as { coverImage?: string | null; images?: unknown });
                         const thumbUrl = thumbUrlRaw ? optimizeImageUrl(thumbUrlRaw, 400) : null;
                         return (
                           <Link
