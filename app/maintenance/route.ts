@@ -1,7 +1,4 @@
-import { createElement } from "react";
 import { NextRequest, NextResponse } from "next/server";
-import { renderToStaticMarkup } from "react-dom/server";
-import MaintenanceNotice from "@/components/shared/MaintenanceNotice";
 
 // Must run on NODEJS serverless (NOT edge): edge -> cPanel origin fetches
 // time out due to host-level IP filtering (Session 22), while
@@ -15,6 +12,9 @@ const API_BACKEND =
 // --color-bg from app/globals.css (inline so the 503 shell never flashes white)
 const BEIGE_BG = "#F6F4EF";
 const FALLBACK_TITLE = "We'll be back shortly";
+const FALLBACK_MESSAGE =
+  "Our site is currently undergoing scheduled maintenance. Thank you for your patience and understanding.";
+const THANKS_LINE = "Thank you for your patience and understanding.";
 
 function escapeHtml(value: string): string {
   return value
@@ -60,23 +60,20 @@ export async function GET(req: NextRequest) {
 
   const rawTitle = status?.maintenanceTitle;
   const rawMessage = status?.maintenanceMessage;
-  const title = rawTitle && rawTitle.trim() ? rawTitle : null;
-  const message = rawMessage && rawMessage.trim() ? rawMessage : null;
+  // Mirror MaintenanceNotice fallbacks + always-thank-you logic (kept in sync
+  // by hand: route handlers cannot import react-dom/server in Next 14 builds).
+  const heading =
+    rawTitle && rawTitle.trim() ? rawTitle.trim() : FALLBACK_TITLE;
+  const body =
+    rawMessage && rawMessage.trim()
+      ? rawMessage.trim()
+      : FALLBACK_MESSAGE;
+  const showThanks = !body.toLowerCase().includes("thank you");
+  const docTitle = escapeHtml(`${heading} | All Property Link`);
 
-  // MaintenanceNotice is server-renderable (no "use client", no hooks; its
-  // Wrench import from @/components/ui/icons is pure SVG). renderToStaticMarkup
-  // auto-escapes title/message from the backend.
-  const body = renderToStaticMarkup(
-    createElement(MaintenanceNotice, { title, message })
-  );
-  const docTitle = escapeHtml(
-    `${title ?? FALLBACK_TITLE} | All Property Link`
-  );
-
-  // Self-contained shell: Tailwind classes in the component markup have no
-  // stylesheet here, so minimal element-scoped CSS + inline body background
-  // (beige token) keep it readable with zero external requests.
-  const html = `<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="robots" content="noindex" /><title>${docTitle}</title><style>body{margin:0;background:${BEIGE_BG};color:#1A1A1A;font-family:"DM Sans",system-ui,sans-serif}.mwrap{max-width:32rem;margin:0 auto;min-height:50vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;text-align:center}.mwrap>p:first-child{font-family:Sora,system-ui,sans-serif;font-size:1.125rem;font-weight:700;color:#286255;margin:0}.mwrap>div:first-of-type{width:3.5rem;height:3.5rem;border-radius:9999px;background:#E5F0ED;color:#286255;display:flex;align-items:center;justify-content:center;margin-top:1.5rem}.mwrap>div:first-of-type svg{width:28px;height:28px}.mwrap h1{font-family:Sora,system-ui,sans-serif;font-size:1.875rem;font-weight:700;margin:1.5rem 0 .5rem}.mwrap p{color:#75716B;margin:0 0 .5rem;line-height:1.5}.mwrap p:last-child{font-size:.875rem;font-weight:500;margin-bottom:0}</style></head><body style="background:${BEIGE_BG}"><main class="mwrap">${body}</main></body></html>`;
+  // Self-contained shell (no Tailwind stylesheet applies to route output):
+  // design tokens inlined from app/globals.css + components/ui/icons.tsx.
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="robots" content="noindex" /><title>${docTitle}</title><style>body{margin:0;background:${BEIGE_BG};color:#1A1A1A;font-family:"DM Sans",system-ui,sans-serif}.mwrap{max-width:32rem;margin:0 auto;min-height:50vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;text-align:center}.brand{font-family:Sora,system-ui,sans-serif;font-size:1.125rem;font-weight:700;color:#286255;margin:0}.brand span{color:#D49A44}.badge{width:3.5rem;height:3.5rem;border-radius:9999px;background:#E5F0ED;color:#286255;display:flex;align-items:center;justify-content:center;margin-top:1.5rem}.mwrap h1{font-family:Sora,system-ui,sans-serif;font-size:1.875rem;font-weight:700;margin:1.5rem 0 .5rem}.msg{color:#75716B;margin:0 0 .5rem;line-height:1.5}.thanks{color:#75716B;font-size:.875rem;margin:0 0 2rem}.foot{font-size:.875rem;font-weight:500;color:#75716B;margin:0}</style></head><body style="background:${BEIGE_BG}"><main class="mwrap"><p class="brand">All Property <span>Link</span></p><div class="badge"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" /><rect x="14" y="14" width="3" height="2" fill="#D49A44" stroke="none" rx="0.5" /></svg></div><h1>${escapeHtml(heading)}</h1><p class="msg">${escapeHtml(body)}</p>${showThanks ? `<p class="thanks">${escapeHtml(THANKS_LINE)}</p>` : ""}<p class="foot">All Property Link</p></main></body></html>`;
 
   return new Response(html, {
     status: 503,
