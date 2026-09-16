@@ -627,8 +627,8 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Integrated multi-tab quick search console (overlapping card) */}
-        <div className="relative z-20 mx-auto -mt-12 w-full max-w-5xl rounded-xl border border-border bg-surface p-3 shadow-lg sm:p-4">
+        {/* Integrated multi-tab quick search console (overlaps carousel on desktop, stacks on mobile) */}
+        <div className="relative z-20 mx-auto w-full max-w-5xl rounded-xl border border-border bg-surface p-3 shadow-lg sm:p-4 md:-mt-12">
           <div
             className="mb-3 flex items-center gap-1.5 overflow-x-auto border-b border-border pb-3 scrollbar-hide"
             role="group"

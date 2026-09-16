@@ -99,7 +99,7 @@ function CategoryPill({
 
 export function CategoryGrid() {
   return (
-    <section aria-label="Browse categories" className="bg-surface pb-2 pt-8 sm:pt-10">
+    <section aria-label="Browse categories" className="hidden bg-surface pb-2 pt-8 sm:pt-10 md:block">
       <div className="container mx-auto max-w-7xl px-4">
         <h2 className="sr-only">Browse by category</h2>
         {/* Mobile: horizontal snap rail (Stitch) — Desktop: wrapping row */}

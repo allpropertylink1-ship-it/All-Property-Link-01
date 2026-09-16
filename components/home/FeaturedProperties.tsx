@@ -51,18 +51,6 @@ function FullSkeleton() {
   )
 }
 
-function MiniSkeleton() {
-  return (
-    <div className="animate-pulse overflow-hidden rounded-xl border border-border bg-surface">
-      <div className="aspect-[4/3] bg-surface-secondary" />
-      <div className="space-y-2 p-3">
-        <div className="h-3 w-3/4 rounded bg-surface-secondary" />
-        <div className="h-3 w-1/2 rounded bg-surface-secondary" />
-      </div>
-    </div>
-  )
-}
-
 export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[] }) {
   const [properties, setProperties] = useState<ApiProperty[]>(
     (initialData || []).filter(isSaleOrRent)
@@ -107,15 +95,12 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
         </div>
         {loading ? (
           <>
-            <div className="flex flex-col gap-4 lg:hidden" aria-busy="true" aria-label="Loading featured properties">
+            <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scrollbar-hide lg:hidden" aria-busy="true" aria-label="Loading featured properties">
               {Array.from({ length: 3 }).map((_, i) => (
-                <FullSkeleton key={i} />
+                <div key={i} className="w-[78%] shrink-0 snap-start sm:w-[45%]">
+                  <FullSkeleton />
+                </div>
               ))}
-              <div className="grid grid-cols-2 gap-4">
-                {Array.from({ length: 2 }).map((_, i) => (
-                  <MiniSkeleton key={i} />
-                ))}
-              </div>
             </div>
             <div className="hidden gap-4 lg:grid lg:grid-cols-4" aria-busy="true" aria-label="Loading featured properties">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -131,18 +116,13 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
           </p>
         ) : (
           <>
-            {/* Mobile feed: full cards first, then a 2-up compact grid (Stitch mobile home) */}
-            <div className="flex flex-col gap-4 lg:hidden">
-              {properties.slice(0, 3).map((p, i) => (
-                <PropertyCard key={p.slug} {...cardProps(p, i === 0)} />
-              ))}
-              {properties.length > 3 && (
-                <div className="grid grid-cols-2 gap-4">
-                  {properties.slice(3, 5).map((p) => (
-                    <PropertyCard key={p.slug} {...cardProps(p, false)} />
-                  ))}
+            {/* Mobile rail: horizontal snap scroll (Stitch mobile home) */}
+            <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide lg:hidden">
+              {properties.map((p, i) => (
+                <div key={p.slug} className="w-[78%] shrink-0 snap-start sm:w-[45%]">
+                  <PropertyCard {...cardProps(p, i === 0)} />
                 </div>
-              )}
+              ))}
             </div>
             {/* Desktop: 4-column matrix (Stitch desktop home) */}
             <div className="hidden gap-4 lg:grid lg:grid-cols-4">

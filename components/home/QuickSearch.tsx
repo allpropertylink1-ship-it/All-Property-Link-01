@@ -54,7 +54,7 @@ export function QuickSearch() {
   if (cities.length === 0) return null
 
   return (
-    <section ref={sectionRef} aria-label="Popular cities" className="border-y border-border bg-surface-secondary py-6">
+    <section ref={sectionRef} aria-label="Popular cities" className="hidden border-y border-border bg-surface-secondary py-6 md:block">
       <div className="container mx-auto max-w-7xl px-4">
         <div className="mb-3 flex items-center justify-between gap-4">
           <h2 className="flex items-center gap-1.5 text-sm font-semibold text-text-primary">
