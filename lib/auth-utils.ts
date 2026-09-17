@@ -15,6 +15,9 @@ interface SessionUser {
   primaryUserType?: string | null
   onboardingComplete?: boolean
   authMethod?: "user" | "agent" | "admin"
+  acceptedTermsAt?: string | null
+  termsVersion?: string | null
+  ageConfirmed?: boolean
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.allpropertylink.co.ke"

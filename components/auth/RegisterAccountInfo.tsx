@@ -19,6 +19,8 @@ interface Props {
   phone: string
   error: string
   loading: boolean
+  acceptedTerms: boolean
+  onAcceptedChange: (v: boolean) => void
   onContactMethodChange: (m: ContactMethod) => void
   onPasswordChange: (v: string) => void
   onReferralCodeChange: (v: string) => void
@@ -33,7 +35,7 @@ interface Props {
 }
 
 export function RegisterAccountInfo({
-  contactMethod, password, referralCode, firstName, lastName, email, phone, error, loading,
+  contactMethod, password, referralCode, firstName, lastName, email, phone, error, loading, acceptedTerms, onAcceptedChange,
   onContactMethodChange, onPasswordChange, onReferralCodeChange,
   onBack, onFirstNameChange, onLastNameChange, onEmailChange, onPhoneChange,
   onGoogleSuccess, onGoogleError, onSwitchToLogin,
@@ -42,6 +44,7 @@ export function RegisterAccountInfo({
     <div className="space-y-4">
       <GoogleSignInButton
         mode="signup"
+        termsAccepted={acceptedTerms}
         onSuccess={onGoogleSuccess}
         onError={onGoogleError}
       />
@@ -149,6 +152,26 @@ export function RegisterAccountInfo({
             style={{ fontSize: "16px" }} />
           <p className="mt-1 text-xs text-text-secondary">Enter the code provided by your APL Property Link agent, if any.</p>
         </div>
+
+        <label htmlFor="acceptedTerms" className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-surface-secondary/50 p-3.5">
+          <input
+            id="acceptedTerms"
+            name="acceptedTerms"
+            type="checkbox"
+            required
+            aria-required="true"
+            checked={acceptedTerms}
+            onChange={(e) => onAcceptedChange(e.target.checked)}
+            className="mt-0.5 h-5 w-5 shrink-0 rounded border-border text-primary focus:ring-2 focus:ring-primary/30"
+          />
+          <span className="text-sm leading-5 text-text-secondary">
+            I agree to the{" "}
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary underline-offset-2 hover:underline">Terms of Service</a>{" "}
+            and{" "}
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary underline-offset-2 hover:underline">Privacy Policy</a>.
+            {" "}I confirm I am 18+ years old.
+          </span>
+        </label>
 
         <button type="submit" disabled={loading} aria-busy={loading}
           className="touch-target flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3.5 font-semibold text-white transition-all hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary/30 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50">

@@ -35,6 +35,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
   const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
 
   useEffect(() => {
     return () => {
@@ -112,6 +113,12 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
       return
     }
 
+    if (!acceptedTerms) {
+      setError("Please agree to the Terms of Service and Privacy Policy and confirm you are 18+ years old.")
+      setLoading(false)
+      return
+    }
+
     let result: { error?: string; otp?: OtpResponse }
 
     if (otpIdentifier) {
@@ -122,7 +129,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
         firstName: firstNameValue, lastName: lastNameValue,
       })
     } else {
-      result = await signup({ firstName: firstNameValue, lastName: lastNameValue, password, email: emailValue, phone: phoneValue, referralCode: referralCode || undefined })
+      result = await signup({ firstName: firstNameValue, lastName: lastNameValue, password, email: emailValue, phone: phoneValue, referralCode: referralCode || undefined, acceptedTerms: true, ageConfirmed: true })
     }
 
     if (result.error) {
@@ -259,7 +266,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
       <RegisterAccountInfo
         contactMethod={contactMethod} password={password} referralCode={referralCode}
         firstName={firstName} lastName={lastName} email={email} phone={phone}
-        error={error} loading={loading}
+        error={error} loading={loading} acceptedTerms={acceptedTerms} onAcceptedChange={setAcceptedTerms}
         onContactMethodChange={setContactMethod} onPasswordChange={setPassword}
         onReferralCodeChange={setReferralCode} onBack={onSwitchToLogin ? () => onSwitchToLogin() : undefined}
         onFirstNameChange={handleFirstNameChange} onLastNameChange={handleLastNameChange}

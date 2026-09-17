@@ -2,10 +2,13 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { api } from "@/lib/api-client"
 
+import { CURRENT_TERMS_VERSION } from "@/lib/auth-context"
+
 interface GoogleSignInButtonProps {
   onSuccess: () => void
   onError: (error: string) => void
   mode?: "signin" | "signup"
+  termsAccepted?: boolean
 }
 
 function loadGoogleScript(): Promise<void> {
@@ -28,24 +31,35 @@ function loadGoogleScript(): Promise<void> {
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "103540540209-89aqffdkc4f7mk2q19v1kk5k5a8liu4v.apps.googleusercontent.com"
 
-export function GoogleSignInButton({ onSuccess, onError, mode = "signin" }: GoogleSignInButtonProps) {
+export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsAccepted }: GoogleSignInButtonProps) {
   const [ready, setReady] = useState(false)
   const [scriptError, setScriptError] = useState(false)
   const [oauthLoading, setOauthLoading] = useState(false)
   const btnRef = useRef<HTMLDivElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const renderedRef = useRef(false)
+  const needsConsentGate = mode === "signup" && termsAccepted === false
 
   const handleCredential = useCallback(async (credential: string) => {
+    if (needsConsentGate) {
+      onError("Please agree to the Terms of Service and Privacy Policy and confirm you are 18+ years old to continue with Google.")
+      return
+    }
     setOauthLoading(true)
-    const { data, error } = await api.post<{ user: { firstName: string } }>("/api/auth/oauth/google", { credential })
+    const payload: Record<string, unknown> = { credential }
+    if (mode === "signup" || termsAccepted) {
+      payload.acceptedTerms = true
+      payload.ageConfirmed = true
+      payload.termsVersion = CURRENT_TERMS_VERSION
+    }
+    const { data, error } = await api.post<{ user: { firstName: string } }>("/api/auth/oauth/google", payload)
     setOauthLoading(false)
     if (error) {
       onError(error)
       return
     }
     if (data?.user) onSuccess()
-  }, [onSuccess, onError])
+  }, [onSuccess, onError, mode, termsAccepted, needsConsentGate])
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) return
@@ -119,8 +133,24 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin" }: Goog
   }
 
   return (
-    <div ref={wrapperRef} className="w-full">
-      <div ref={btnRef} className="touch-target w-full overflow-hidden rounded-xl" />
+    <div ref={wrapperRef} className="relative w-full">
+      <div
+        ref={btnRef}
+        className={`touch-target w-full overflow-hidden rounded-xl ${needsConsentGate ? "pointer-events-none opacity-60" : ""}`}
+        aria-disabled={needsConsentGate}
+        title={needsConsentGate ? "Please accept the Terms and confirm you are 18+ to continue with Google" : undefined}
+      />
+      {needsConsentGate && (
+        <button
+          type="button"
+          aria-label="Accept Terms to enable Google sign-up"
+          onClick={() => onError("Please agree to the Terms of Service and Privacy Policy and confirm you are 18+ years old to continue with Google.")}
+          className="absolute inset-0 z-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30"
+        />
+      )}
+      {needsConsentGate && (
+        <p className="mt-1.5 text-xs text-text-secondary">Please tick the agreement below to enable Google sign-up.</p>
+      )}
       {oauthLoading && (
         <div className="mt-2 flex items-center justify-center gap-2" role="status">
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />

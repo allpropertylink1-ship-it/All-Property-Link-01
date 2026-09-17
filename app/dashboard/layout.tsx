@@ -1,8 +1,11 @@
 import { requireAuth } from "@/lib/auth-utils";
+import { redirect } from "next/navigation";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { DashboardBanner } from "@/components/dashboard/DashboardBanner";
 import { KycGate } from "@/components/dashboard/KycGate";
 import { RequireAuthMethod } from "@/lib/auth-guard";
+
+const CURRENT_TERMS_VERSION = "2026-09-17";
 
 export default async function DashboardLayout({
   children,
@@ -18,7 +21,14 @@ export default async function DashboardLayout({
     authMethod?: string;
     primaryUserType?: string | null;
     userTypes?: string[];
+    acceptedTermsAt?: string | null;
+    termsVersion?: string | null;
+    ageConfirmed?: boolean;
   };
+
+  if (!user.acceptedTermsAt || user.termsVersion !== CURRENT_TERMS_VERSION) {
+    redirect("/auth/consent");
+  }
 
   return (
     <RequireAuthMethod allowedMethods={["user", "agent"]}>

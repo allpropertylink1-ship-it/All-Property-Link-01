@@ -3,6 +3,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react"
 import { api } from "./api-client"
 
+export const CURRENT_TERMS_VERSION = "2026-09-17"
+
 interface User {
   id: string
   email: string
@@ -23,6 +25,9 @@ interface User {
   authMethod?: "user" | "agent"
   mustChangePassword?: boolean
   userTypes?: string[]
+  acceptedTermsAt?: string | null
+  termsVersion?: string | null
+  ageConfirmed?: boolean
 }
 
 export interface OtpResponse {
@@ -40,7 +45,7 @@ interface AuthContextType {
   login: (emailOrPhone: string, password: string, rememberMe?: boolean) => Promise<{ error?: string }>
   logout: () => Promise<void>
   phoneLogin: (phone: string) => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
-  signup: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
+  signup: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string }) => Promise<{ error?: string; code?: string; otp?: OtpResponse }>
   sendOtp: (identifier: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
   verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION", rememberMe?: boolean) => Promise<{ error?: string }>
   updateRegistration: (data: { oldIdentifier: string; email?: string; phone?: string; firstName?: string; lastName?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
@@ -50,6 +55,7 @@ interface AuthContextType {
   agentForgotPassword: (identifier: string) => Promise<{ error?: string }>
   agentResetPassword: (token: string, password: string) => Promise<{ error?: string }>
   firstPasswordChange: (newPassword: string) => Promise<{ error?: string }>
+  acceptConsent: () => Promise<{ error?: string }>
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -68,6 +74,7 @@ const AuthContext = createContext<AuthContextType>({
   agentResetPassword: async () => ({}),
   firstPasswordChange: async () => ({}),
   updateRegistration: async () => ({}),
+  acceptConsent: async () => ({}),
 })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -134,9 +141,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }, [])
 
-  const signup = useCallback(async (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string }) => {
-    const { data: result, error } = await api.post<OtpResponse>("/api/auth/register", data)
-    if (error) return { error }
+  const signup = useCallback(async (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string }) => {
+    const payload = { ...data, termsVersion: data.termsVersion || CURRENT_TERMS_VERSION }
+    const { data: result, error } = await api.post<OtpResponse & { code?: string }>("/api/auth/register", payload)
+    if (error) return { error, code: (result as unknown as { code?: string })?.code }
     return { otp: result }
   }, [])
 
@@ -199,8 +207,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { otp: result }
   }, [])
 
+  const acceptConsent = useCallback(async () => {
+    const { error } = await api.post("/api/auth/consent", { acceptedTerms: true, ageConfirmed: true, termsVersion: CURRENT_TERMS_VERSION })
+    if (error) return { error }
+    await fetchUser()
+    return {}
+  }, [fetchUser])
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, phoneLogin, signup, sendOtp, verifyOtp, refreshUser: fetchUser, sendMagicLink, agentLogin, agentForgotPassword, agentResetPassword, firstPasswordChange, updateRegistration }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, phoneLogin, signup, sendOtp, verifyOtp, refreshUser: fetchUser, sendMagicLink, agentLogin, agentForgotPassword, agentResetPassword, firstPasswordChange, updateRegistration, acceptConsent }}>
       {children}
     </AuthContext.Provider>
   )
