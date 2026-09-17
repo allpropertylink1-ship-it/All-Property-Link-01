@@ -140,14 +140,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (data?.user) {
       // Login responses omit primaryUserType/userTypes; hydrate from /me so
       // callers can route by persona (customer → /) without a misclassify.
-      // If hydration fails the session is unusable to this client (stale
-      // cookies, split-brain tab, backend blip) — report it instead of
-      // navigating, which would ping-pong with the server guards.
+      // If hydration fails (slow proxy, blip), return undefined and let the
+      // caller navigate optimistically — the server (retries, no 8s proxy
+      // cap) is the source of truth and routes/corrects from there. Never
+      // dead-end on a transient /me failure.
       const hydrated = await fetchUser()
-      if (!hydrated) {
-        return { error: "Signed in, but your session could not be confirmed. Please check your connection and try again." }
-      }
-      return { user: hydrated }
+      return { user: hydrated ?? undefined }
     }
     return { error: error || "Login failed" }
   }, [fetchUser])
@@ -175,12 +173,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) return { error }
     if (data?.user) {
       // Verify responses omit primaryUserType; hydrate from /me for persona
-      // routing. Unconfirmed session → error, never navigate (see login()).
+      // routing. Same graceful rule as login(): undefined on failure,
+      // caller navigates optimistically, server corrects.
       const hydrated = await fetchUser()
-      if (!hydrated) {
-        return { error: "Verified, but your session could not be confirmed. Please check your connection and try again." }
-      }
-      return { user: hydrated }
+      return { user: hydrated ?? undefined }
     }
     return {}
   }, [fetchUser])

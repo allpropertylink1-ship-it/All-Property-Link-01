@@ -165,14 +165,14 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
     setError("")
 
     const { error: verifyError, user: verifiedUser } = await verifyOtp(otpIdentifier, code, otpType)
-    if (verifyError || !verifiedUser) {
-      setError(verifyError || "Verified, but your session could not be confirmed. Please sign in to continue.")
+    if (verifyError) {
+      setError(verifyError)
       setOtpLoading(false)
       return
     }
 
     setOtpLoading(false)
-    router.push(resolvePostAuthTarget(verifiedUser, returnUrl))
+    router.push(resolvePostAuthTarget(verifiedUser ?? null, returnUrl))
   }
 
   async function handleResendOtp() {
@@ -193,11 +193,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
 
   async function handleGoogleSuccess() {
     const u = await refreshUser()
-    if (!u) {
-      setError("Signed in with Google, but your session could not be confirmed. Please sign in to continue.")
-      return
-    }
-    router.push(resolvePostAuthTarget(u, returnUrl))
+    router.push(resolvePostAuthTarget(u ?? null, returnUrl))
   }
 
   function handleGoogleError(msg: string) {

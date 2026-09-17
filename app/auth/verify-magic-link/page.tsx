@@ -33,15 +33,10 @@ export default function VerifyMagicLinkPage() {
     setStatus("done");
     // Hydrate client auth state (/me carries primaryUserType) before routing
     // by persona — otherwise the nav flashes "Sign In". Unconfirmed session
-    // → error instead of navigating (would bounce with server guards).
+    // falls back to /dashboard where the server routes by persona.
     const returnParam = searchParams.get("return");
     const user = await refreshUser().catch(() => null);
-    if (!user) {
-      setError("Signed in, but your session could not be confirmed. Please try again.");
-      setStatus("error");
-      return;
-    }
-    const target = resolvePostAuthTarget(user, returnParam);
+    const target = resolvePostAuthTarget(user ?? null, returnParam);
     setTimeout(() => {
       router.push(target);
       router.refresh();

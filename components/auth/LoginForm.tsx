@@ -40,13 +40,15 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
 
     const result = await login(email, password, rememberMe)
 
-    if (result?.error || !result?.user) {
-      setError(result?.error || "Signed in, but your session could not be confirmed. Please try again.")
+    if (result?.error) {
+      setError(result.error)
       setLoading(false)
       return
     }
 
-    router.push(resolvePostAuthTarget(result.user, returnUrl))
+    // Optimistic: hydrated user routes by persona; undefined falls back to
+    // /dashboard where the server (source of truth) forwards by persona.
+    router.push(resolvePostAuthTarget(result?.user ?? null, returnUrl))
     router.refresh()
   }
 
@@ -99,12 +101,12 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
     const digits = phone.replace(/\D/g, "")
     const fullPhone = `+254${digits}`
     const result = await verifyOtp(fullPhone, code, "PHONE_VERIFICATION", rememberMe)
-    if (result?.error || !result?.user) {
-      setPhoneError(result?.error || "Verified, but your session could not be confirmed. Please try again.")
+    if (result?.error) {
+      setPhoneError(result.error)
       setOtpLoading(false)
       return
     }
-    router.push(resolvePostAuthTarget(result.user, returnUrl))
+    router.push(resolvePostAuthTarget(result?.user ?? null, returnUrl))
     router.refresh()
   }
 
@@ -236,11 +238,7 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
         mode="signin"
         onSuccess={async () => {
           const u = await refreshUser()
-          if (!u) {
-            setError("Signed in with Google, but your session could not be confirmed. Please try again.")
-            return
-          }
-          router.push(resolvePostAuthTarget(u, returnUrl))
+          router.push(resolvePostAuthTarget(u ?? null, returnUrl))
           router.refresh()
         }}
         onError={(msg) => setError(msg)}
