@@ -138,11 +138,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       : { email: emailOrPhone, password, rememberMe }
     const { data, error } = await api.post<{ user: User }>("/api/auth/login", payload)
     if (data?.user) {
-      setUser({ ...data.user, authMethod: "user" })
       // Login responses omit primaryUserType/userTypes; hydrate from /me so
       // callers can route by persona (customer → /) without a misclassify.
+      // If hydration fails the session is unusable to this client (stale
+      // cookies, split-brain tab, backend blip) — report it instead of
+      // navigating, which would ping-pong with the server guards.
       const hydrated = await fetchUser()
-      return { user: (hydrated ?? { ...data.user, authMethod: "user" }) as User }
+      if (!hydrated) {
+        return { error: "Signed in, but your session could not be confirmed. Please check your connection and try again." }
+      }
+      return { user: hydrated }
     }
     return { error: error || "Login failed" }
   }, [fetchUser])
@@ -169,10 +174,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data, error } = await api.post<{ user: User }>("/api/auth/verify-otp", { identifier, token, type, rememberMe })
     if (error) return { error }
     if (data?.user) {
-      setUser({ ...data.user, authMethod: "user" })
-      // Verify responses omit primaryUserType; hydrate from /me for persona routing.
+      // Verify responses omit primaryUserType; hydrate from /me for persona
+      // routing. Unconfirmed session → error, never navigate (see login()).
       const hydrated = await fetchUser()
-      return { user: (hydrated ?? { ...data.user, authMethod: "user" }) as User }
+      if (!hydrated) {
+        return { error: "Verified, but your session could not be confirmed. Please check your connection and try again." }
+      }
+      return { user: hydrated }
     }
     return {}
   }, [fetchUser])

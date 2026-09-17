@@ -40,13 +40,13 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
 
     const result = await login(email, password, rememberMe)
 
-    if (result?.error) {
-      setError(result.error)
+    if (result?.error || !result?.user) {
+      setError(result?.error || "Signed in, but your session could not be confirmed. Please try again.")
       setLoading(false)
       return
     }
 
-    router.push(resolvePostAuthTarget(result?.user ?? null, returnUrl))
+    router.push(resolvePostAuthTarget(result.user, returnUrl))
     router.refresh()
   }
 
@@ -99,12 +99,12 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
     const digits = phone.replace(/\D/g, "")
     const fullPhone = `+254${digits}`
     const result = await verifyOtp(fullPhone, code, "PHONE_VERIFICATION", rememberMe)
-    if (result?.error) {
-      setPhoneError(result.error)
+    if (result?.error || !result?.user) {
+      setPhoneError(result?.error || "Verified, but your session could not be confirmed. Please try again.")
       setOtpLoading(false)
       return
     }
-    router.push(resolvePostAuthTarget(result?.user ?? null, returnUrl))
+    router.push(resolvePostAuthTarget(result.user, returnUrl))
     router.refresh()
   }
 
@@ -234,7 +234,15 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
 
       <GoogleSignInButton
         mode="signin"
-        onSuccess={async () => { const u = await refreshUser(); router.push(resolvePostAuthTarget(u ?? null, returnUrl)); router.refresh() }}
+        onSuccess={async () => {
+          const u = await refreshUser()
+          if (!u) {
+            setError("Signed in with Google, but your session could not be confirmed. Please try again.")
+            return
+          }
+          router.push(resolvePostAuthTarget(u, returnUrl))
+          router.refresh()
+        }}
         onError={(msg) => setError(msg)}
       />
 

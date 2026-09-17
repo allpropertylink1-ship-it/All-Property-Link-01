@@ -167,18 +167,44 @@ function WelcomeContent({
 export function AuthCard({ referralCode }: Props) {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { user, loading } = useAuth()
+  const { user, loading, refreshUser } = useAuth()
   const returnParam = searchParams.get("return")
   const returnUrl = isSafeReturnUrl(returnParam) ? (returnParam as string) : undefined
   // Client-side net for in-app navigation to /auth while signed in (server
   // guard in app/auth/page.tsx covers hard loads). Sends each persona home.
   // NOTE: no early return here — hooks below must run unconditionally.
+  // The session is verified against the server before redirecting: client
+  // state can disagree with the server (stale tab, pruned refresh token,
+  // transient blips), and redirecting on unverified state ping-pongs with
+  // requireAuth. On failure refreshUser() already cleared the user, so the
+  // form renders instead of looping. A 6s cap keeps a hung /me from
+  // blank-screening the page (falls back to legacy unverified redirect).
   const signedIn = !loading && !!user
+  const [sessionChecked, setSessionChecked] = useState(false)
   useEffect(() => {
-    if (signedIn && user) {
+    if (!signedIn || sessionChecked) return
+    let cancelled = false
+    const timeout = setTimeout(() => {
+      if (!cancelled) setSessionChecked(true)
+    }, 6000)
+    refreshUser()
+      .catch(() => null)
+      .then(() => {
+        if (!cancelled) {
+          clearTimeout(timeout)
+          setSessionChecked(true)
+        }
+      })
+    return () => {
+      cancelled = true
+      clearTimeout(timeout)
+    }
+  }, [signedIn, sessionChecked, refreshUser])
+  useEffect(() => {
+    if (signedIn && sessionChecked && user) {
       router.replace(resolvePostAuthTarget(user, returnUrl))
     }
-  }, [signedIn, user, router, returnUrl])
+  }, [signedIn, sessionChecked, user, router, returnUrl])
 
   const [view, setView] = useState<"login" | "register">(
     referralCode ? "register" : "login"
