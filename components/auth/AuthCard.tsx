@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ArrowRight, BadgeCheck, Handshake, ShieldCheck, Star } from "@/components/ui/icons"
+import { ArrowRight, BadgeCheck, Handshake, ShieldCheck } from "@/components/ui/icons"
 import { useAuth } from "@/lib/auth-context"
 import { isSafeReturnUrl, resolvePostAuthTarget } from "@/lib/persona"
 import { LoginForm } from "./LoginForm"
@@ -19,18 +19,13 @@ const tabs = [
 const sidePoints = [
   {
     icon: Handshake,
-    title: "Direct Engagement, Zero Escrow Friction",
-    body: "Negotiate transparently with verified titleholders across all 47 counties.",
+    title: "Direct Engagement",
+    body: "Negotiate directly with verified Property Owners and Agents across Kenya.",
   },
   {
     icon: ShieldCheck,
     title: "ID-Audited Fundis & Technicians",
-    body: "Trade professionals vetted against NCA compliance before they reach you.",
-  },
-  {
-    icon: BadgeCheck,
-    title: "Accredited Field Representative Network",
-    body: "On-ground site verification, boundary validation, and client liaison.",
+    body: "Trade professionals vetted against their identification documents before they reach you.",
   },
 ]
 
@@ -121,7 +116,7 @@ function WelcomeContent({
     <div className="flex w-full flex-col items-center px-6 text-center lg:items-start lg:px-10 lg:text-left">
       <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-accent-200 ring-1 ring-white/15">
         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-400" aria-hidden="true" />
-        {view === "login" ? "Institutional Infrastructure" : "Registration Portal"}
+        {view === "login" ? "APL Portal Log In" : "Registration Portal"}
       </span>
       <h1 className="mt-4 font-heading text-2xl font-bold leading-tight tracking-tight text-white lg:text-[1.75rem]">
         {view === "login" ? (
@@ -132,8 +127,8 @@ function WelcomeContent({
       </h1>
       <p className="mt-2 max-w-sm text-sm leading-relaxed text-white/80">
         {view === "login"
-          ? "Securing seamless transactions across Nairobi, Kiambu, and coastal prime parcels through verifiable oversight."
-          : "Create your account — you'll verify your identity and choose your account type afterwards."}
+          ? "Sign in to continue to your dashboard."
+          : "Create your account — you'll verify your identity to continue."}
       </p>
 
       {!compact && (
@@ -149,33 +144,6 @@ function WelcomeContent({
               </span>
             </div>
           ))}
-        </div>
-      )}
-
-      {!compact && (
-        <div className="mt-5 w-full rounded-xl bg-white/10 p-4 text-left ring-1 ring-white/15">
-          <div className="flex items-center justify-between">
-            <span className="flex items-center gap-0.5 text-accent-200" aria-label="Rated 5 out of 5">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <Star key={i} size={14} />
-              ))}
-            </span>
-            <span className="rounded bg-white/15 px-2 py-0.5 text-[11px] font-semibold text-white">
-              Verified Runda Landlord
-            </span>
-          </div>
-          <p className="mt-2 text-xs italic leading-relaxed text-white/85">
-            &ldquo;Listing our estate properties through All Property Link stripped out weeks of speculative inquiries.&rdquo;
-          </p>
-          <p className="mt-2 flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-500/30 text-xs font-bold text-accent-200">
-              KM
-            </span>
-            <span>
-              <span className="block text-xs font-bold text-white">Dr. Karanja M.</span>
-              <span className="block text-[11px] text-white/70">Prime Assets Portfolio, Nairobi</span>
-            </span>
-          </p>
         </div>
       )}
 

@@ -38,7 +38,7 @@ export function KycGate({ children, kycStatus, isAgent, authMethod, primaryUserT
           <ShieldX size={64} className="mb-4 text-text-secondary" />
           <h2 className="mb-2 font-heading text-xl font-bold tracking-tight text-text-primary">Verify Your Identity First</h2>
           <p className="mb-6 max-w-md text-sm text-text-secondary">
-            Please complete identity verification (KYC) before choosing your account type. Your account type is selected after verification.
+            Please complete identity verification (KYC) to continue.
           </p>
           <Link
             href="/dashboard/kyc"
@@ -96,7 +96,7 @@ export function KycGate({ children, kycStatus, isAgent, authMethod, primaryUserT
           <Clock size={56} className="mb-4 text-warning-500" />
           <h2 className="mb-2 font-heading text-xl font-bold tracking-tight text-text-primary">KYC Under Review</h2>
           <p className="mb-6 max-w-md text-sm text-text-secondary">
-            Your identity documents are being reviewed. You'll be able to choose your account type once verification is complete.
+            Your identity documents are being reviewed.
           </p>
           <Link
             href="/dashboard/kyc"

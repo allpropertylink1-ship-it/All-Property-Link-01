@@ -29,7 +29,7 @@ export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, 
             <p className="text-error-600">
               {kycStatus === "NONE"
                 ? isTypeless
-                  ? "Complete identity verification. You'll choose your account type afterwards."
+                  ? "Complete identity verification to continue."
                   : "Complete identity verification first before setting up your business profile."
                 : "Your identity documents were not approved. Please resubmit."}
             </p>
