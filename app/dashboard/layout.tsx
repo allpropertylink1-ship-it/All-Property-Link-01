@@ -38,6 +38,7 @@ export default async function DashboardLayout({
             isAgent={user.isAgent}
             authMethod={user.authMethod}
             primaryUserType={user.primaryUserType}
+            userTypes={user.userTypes}
           >
             <div className="p-4 sm:p-6 lg:p-8">
               <div className="mx-auto max-w-7xl min-w-0">{children}</div>

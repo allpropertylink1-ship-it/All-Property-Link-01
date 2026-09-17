@@ -4,19 +4,17 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth, type OtpResponse } from "@/lib/auth-context"
 import { OtpInput } from "./OtpInput"
-import { RegisterUserTypeSelector } from "./RegisterUserTypeSelector"
 import { RegisterAccountInfo } from "./RegisterAccountInfo"
 import { formatTime } from "./RegisterForm.utils"
 import { FormBanner } from "@/components/shared/FormFeedback"
 
 type ContactMethod = "email" | "phone"
-type Step = "userType" | "form" | "otp"
+type Step = "form" | "otp"
 
-export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogin, lockUserType, returnUrl }: { referralCode?: string; onSwitchToLogin?: () => void; lockUserType?: string; returnUrl?: string }) {
+export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogin, returnUrl }: { referralCode?: string; onSwitchToLogin?: () => void; returnUrl?: string }) {
   const router = useRouter()
   const { signup, sendOtp, verifyOtp, refreshUser, updateRegistration } = useAuth()
-  const [step, setStep] = useState<Step>(lockUserType ? "form" : "userType")
-  const [userType, setUserType] = useState(lockUserType || "")
+  const [step, setStep] = useState<Step>("form")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [contactMethod, setContactMethod] = useState<ContactMethod>("email")
@@ -124,7 +122,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
         firstName: firstNameValue, lastName: lastNameValue,
       })
     } else {
-      result = await signup({ firstName: firstNameValue, lastName: lastNameValue, password, email: emailValue, phone: phoneValue, referralCode: referralCode || undefined, userType: userType || undefined })
+      result = await signup({ firstName: firstNameValue, lastName: lastNameValue, password, email: emailValue, phone: phoneValue, referralCode: referralCode || undefined })
     }
 
     if (result.error) {
@@ -250,10 +248,6 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
     )
   }
 
-  if (step === "userType") {
-    return <RegisterUserTypeSelector userType={userType} onChange={setUserType} onNext={() => setStep("form")} error={error} />
-  }
-
   // Wrapper functions to convert ChangeEvent to string for setState
   const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)
   const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)
@@ -267,7 +261,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
         firstName={firstName} lastName={lastName} email={email} phone={phone}
         error={error} loading={loading}
         onContactMethodChange={setContactMethod} onPasswordChange={setPassword}
-        onReferralCodeChange={setReferralCode} onBack={() => setStep("userType")}
+        onReferralCodeChange={setReferralCode} onBack={onSwitchToLogin ? () => onSwitchToLogin() : undefined}
         onFirstNameChange={handleFirstNameChange} onLastNameChange={handleLastNameChange}
         onEmailChange={handleEmailChange} onPhoneChange={handlePhoneChange}
         onGoogleSuccess={handleGoogleSuccess} onGoogleError={handleGoogleError}

@@ -11,10 +11,11 @@ import { FormBanner } from "@/components/shared/FormFeedback"
 import { PersonaGate } from "@/components/dashboard/PersonaGate"
 
 const categories = [
+  { value: "CUSTOMER", label: "Customer" },
+  { value: "PROPERTY_OWNER", label: "Property Owner" },
   { value: "AGENT", label: "Agent" },
   { value: "FUNDI", label: "Fundi" },
   { value: "SERVICE_PROVIDER", label: "Service Provider" },
-  { value: "PROPERTY_OWNER", label: "Property Owner" },
 ]
 
 const specialtiesAgent = [
@@ -255,8 +256,8 @@ function BusinessProfilePageInner() {
     }))
   }
 
-  // Agents list properties on behalf of owners (like Property Owners) — no specialties.
   // Only Fundis (trade skills) and Service Providers (services) select specialties.
+  // AGENT, PROPERTY_OWNER, CUSTOMER never select specialties.
   const selectedSpecialties =
     form.category === "FUNDI"
       ? specialtiesAgent

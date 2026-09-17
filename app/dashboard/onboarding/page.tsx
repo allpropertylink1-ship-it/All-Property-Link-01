@@ -8,10 +8,11 @@ import { FormBanner } from "@/components/shared/FormFeedback";
 import { PersonaGate } from "@/components/dashboard/PersonaGate";
 
 const categories = [
+  { value: "CUSTOMER", label: "Customer" },
+  { value: "PROPERTY_OWNER", label: "Property Owner" },
   { value: "AGENT", label: "Agent" },
   { value: "FUNDI", label: "Fundi" },
   { value: "SERVICE_PROVIDER", label: "Service Provider" },
-  { value: "PROPERTY_OWNER", label: "Property Owner" },
 ];
 
 const specialtiesAgent: { value: string; group: string }[] = [
@@ -134,8 +135,8 @@ function OnboardingPageInner() {
     }));
   }
 
-  // Agents list properties on behalf of owners (like Property Owners) — no specialties.
   // Only Fundis (trade skills) and Service Providers (services) select specialties.
+  // AGENT, PROPERTY_OWNER, and CUSTOMER never select specialties.
   const selectedSpecialties = form.category === "FUNDI"
     ? specialtiesAgent
     : form.category === "SERVICE_PROVIDER"
@@ -147,10 +148,17 @@ function OnboardingPageInner() {
     setLoading(true);
     setError("");
 
+    // Validate specialties per type
+    if ((form.category === "FUNDI" || form.category === "SERVICE_PROVIDER") && form.specialties.length === 0) {
+      setError("Please select at least one specialty for your category")
+      setLoading(false)
+      return
+    }
+
     try {
-      // AGENT and PROPERTY_OWNER have no specialties — never submit stale values.
+      // AGENT, PROPERTY_OWNER, CUSTOMER have no specialties — never submit stale values.
       const payload =
-        form.category === "AGENT" || form.category === "PROPERTY_OWNER"
+        form.category === "AGENT" || form.category === "PROPERTY_OWNER" || form.category === "CUSTOMER"
           ? { ...form, specialties: [] as string[] }
           : form;
       const res = await fetch("/api/user/onboarding", {
@@ -198,9 +206,9 @@ function OnboardingPageInner() {
         <p className="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-secondary">
           Get started
         </p>
-        <h1 id="onboarding-heading" className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">Complete Your Business Profile</h1>
+          <h1 id="onboarding-heading" className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">Choose Your Account Type</h1>
         <p className="mt-1 text-sm text-text-secondary">
-          Tell us about your business or profession. Approval required.
+          Select how you'll use All Property Link. {form.category === "CUSTOMER" ? "Customers can browse and review — no business setup needed." : "Business profiles require approval."}
         </p>
       </section>
 
@@ -370,7 +378,7 @@ function OnboardingPageInner() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <label className="block text-sm font-medium text-text-primary" htmlFor="obLocation">
-              Location <span className="text-error-500">*</span>
+              Location {form.category !== "CUSTOMER" && <span className="text-error-500">*</span>}
             </label>
             <input
               id="obLocation"
@@ -379,12 +387,12 @@ function OnboardingPageInner() {
               onChange={(e) => updateField("location", e.target.value)}
               placeholder="e.g., Nairobi"
               className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-              required
+              required={form.category !== "CUSTOMER"}
             />
           </div>
           <div className="space-y-2">
             <label className="block text-sm font-medium text-text-primary" htmlFor="obEstate">
-              Estate / Sub-location <span className="text-error-500">*</span>
+              Estate / Sub-location {form.category !== "CUSTOMER" && <span className="text-error-500">*</span>}
             </label>
             <input
               id="obEstate"
@@ -393,7 +401,7 @@ function OnboardingPageInner() {
               onChange={(e) => updateField("estateSubLocation", e.target.value)}
               placeholder="e.g., Westlands"
               className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-              required
+              required={form.category !== "CUSTOMER"}
             />
           </div>
         </div>
@@ -402,11 +410,11 @@ function OnboardingPageInner() {
         <div className="flex justify-end border-t border-border pt-6">
           <button
             type="submit"
-            disabled={loading || !form.contactPerson || !form.phone || !form.email || !form.category}
+            disabled={loading || !form.contactPerson || !form.phone || !form.email || !form.category || ((form.category === "FUNDI" || form.category === "SERVICE_PROVIDER") && form.specialties.length === 0)}
             aria-busy={loading}
             className="touch-target min-h-[44px] rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? "Submitting..." : "Submit for Approval"}
+            {loading ? "Submitting..." : form.category === "CUSTOMER" ? "Continue as Customer" : "Submit for Approval"}
           </button>
         </div>
         </section>

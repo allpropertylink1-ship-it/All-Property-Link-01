@@ -12,7 +12,22 @@ export default async function NewListingPage() {
   if (personaTarget) {
     redirect(personaTarget);
   }
+  const isTypeless = !me.primaryUserType && (!me.userTypes || me.userTypes.length === 0)
   if (!canListProperties(me)) {
+    if (isTypeless) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <Building2 size={48} className="text-muted mb-4" />
+          <h2 className="font-heading text-xl font-bold text-text-primary mb-2">Complete Your Setup</h2>
+          <p className="text-text-secondary mb-6 max-w-md">
+            Please complete identity verification and choose your account type to create property listings.
+          </p>
+          <Link href="/dashboard/kyc" className="touch-target inline-flex min-h-[44px] items-center rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white hover:bg-primary-700">
+            Continue Setup
+          </Link>
+        </div>
+      )
+    }
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <Building2 size={48} className="text-muted mb-4" />

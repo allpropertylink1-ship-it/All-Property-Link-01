@@ -22,7 +22,7 @@ interface Props {
   onContactMethodChange: (m: ContactMethod) => void
   onPasswordChange: (v: string) => void
   onReferralCodeChange: (v: string) => void
-  onBack: () => void
+  onBack?: () => void
   onFirstNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onLastNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void
@@ -48,9 +48,11 @@ export function RegisterAccountInfo({
 
       <AuthDivider label="or register with credentials" />
 
-      <button type="button" onClick={onBack} className="flex touch-target items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700">
-        <ArrowLeft size={16} /> Back
-      </button>
+      {onBack && (
+        <button type="button" onClick={onBack} className="flex touch-target items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700">
+          <ArrowLeft size={16} /> Back to Sign In
+        </button>
+      )}
 
       <div className="space-y-4">
         {error && (

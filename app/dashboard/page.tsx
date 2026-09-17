@@ -48,12 +48,22 @@ export default async function DashboardPage() {
     redirect(personaTarget)
   }
 
-  if (user.kycStatus === "NONE" || user.kycStatus === "REJECTED") {
-    redirect("/dashboard/kyc")
-  }
-
-  if (user.onboardingComplete === false) {
-    redirect("/dashboard/onboarding")
+  // New flow: KYC before account type. Typeless users must verify first, then choose type.
+  const isTypeless = !user.primaryUserType && (!user.userTypes || user.userTypes.length === 0)
+  if (isTypeless) {
+    if (user.kycStatus === "NONE" || user.kycStatus === "REJECTED" || user.kycStatus === "PENDING") {
+      redirect("/dashboard/kyc")
+    }
+    if (user.onboardingComplete === false || user.onboardingComplete === null || user.onboardingComplete === undefined) {
+      redirect("/dashboard/onboarding")
+    }
+  } else {
+    if (user.kycStatus === "NONE" || user.kycStatus === "REJECTED") {
+      redirect("/dashboard/kyc")
+    }
+    if (user.onboardingComplete === false) {
+      redirect("/dashboard/onboarding")
+    }
   }
 
   const stats = await getStats()

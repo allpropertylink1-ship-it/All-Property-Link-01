@@ -13,9 +13,11 @@ interface DashboardBannerProps {
 export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, isAgent, authMethod, primaryUserType }: DashboardBannerProps) {
   if (isAgent || authMethod === "agent") return null;
   if (primaryUserType === "CUSTOMER") return null;
-  if (accountStatus === "ACTIVE" && (kycStatus === "VERIFIED" || kycStatus === "PENDING")) return null;
+  if (kycStatus === "VERIFIED" && accountStatus === "ACTIVE" && onboardingComplete) return null;
+  if (kycStatus === "PENDING" && !primaryUserType) return null; // typeless pending shows KycGate status instead
 
   if (kycStatus === "NONE" || kycStatus === "REJECTED") {
+    const isTypeless = !primaryUserType
     return (
       <div className="px-4 pt-4 sm:px-6 lg:px-8" role="alert">
         <div className="flex min-w-0 flex-col gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-sm sm:flex-row sm:items-center">
@@ -26,7 +28,9 @@ export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, 
             </p>
             <p className="text-error-600">
               {kycStatus === "NONE"
-                ? "Complete identity verification first before setting up your business profile."
+                ? isTypeless
+                  ? "Complete identity verification. You'll choose your account type afterwards."
+                  : "Complete identity verification first before setting up your business profile."
                 : "Your identity documents were not approved. Please resubmit."}
             </p>
           </div>

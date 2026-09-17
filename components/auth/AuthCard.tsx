@@ -129,7 +129,7 @@ function WelcomeContent({
       <p className="mt-2 max-w-sm text-sm leading-relaxed text-white/80">
         {view === "login"
           ? "Securing seamless transactions across Nairobi, Kiambu, and coastal prime parcels through verifiable oversight."
-          : "Select your account profile to configure custom analytics, legal frameworks, and lead routing."}
+          : "Create your account — you'll verify your identity and choose your account type afterwards."}
       </p>
 
       {!compact && (
@@ -194,15 +194,13 @@ function WelcomeContent({
 
 export function AuthCard({ referralCode }: Props) {
   const searchParams = useSearchParams()
-  // "Leave a Review" deep-link: /auth?type=customer&return=<path>
-  const customerReturnParam = searchParams.get("return")
-  const customerMode = searchParams.get("type") === "customer" && !!customerReturnParam
-  const returnUrl = customerMode && customerReturnParam.startsWith("/") ? customerReturnParam : undefined
+  const returnParam = searchParams.get("return")
+  const returnUrl = returnParam && returnParam.startsWith("/") ? returnParam : undefined
   const [view, setView] = useState<"login" | "register">(
-    referralCode || customerMode ? "register" : "login"
+    referralCode ? "register" : "login"
   )
   const [settledView, setSettledView] = useState<"login" | "register">(
-    referralCode || customerMode ? "register" : "login"
+    referralCode ? "register" : "login"
   )
   const sweepTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const loginPaneRef = useRef<HTMLDivElement>(null)
@@ -313,7 +311,6 @@ export function AuthCard({ referralCode }: Props) {
             <RegisterForm
               referralCode={referralCode}
               onSwitchToLogin={() => toggleView("login")}
-              lockUserType={customerMode ? "CUSTOMER" : undefined}
               returnUrl={returnUrl}
             />
           </div>
