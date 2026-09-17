@@ -49,7 +49,8 @@ interface AuthContextType {
   sendOtp: (identifier: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
   verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION", rememberMe?: boolean) => Promise<{ error?: string; user?: User }>
   updateRegistration: (data: { oldIdentifier: string; email?: string; phone?: string; firstName?: string; lastName?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
-  refreshUser: () => Promise<User | null>
+  refreshUser: () => Promise<User | null | undefined>
+  clearSession: () => void
   sendMagicLink: (email: string) => Promise<{ error?: string }>
   agentLogin: (agentCode: string, password: string, rememberMe?: boolean) => Promise<{ error?: string; requiresPasswordChange?: boolean }>
   agentForgotPassword: (identifier: string) => Promise<{ error?: string }>
@@ -68,6 +69,7 @@ const AuthContext = createContext<AuthContextType>({
   sendOtp: async () => ({}),
   verifyOtp: async () => ({}),
   refreshUser: async () => null,
+  clearSession: () => {},
   sendMagicLink: async () => ({}),
   agentLogin: async () => ({}),
   agentForgotPassword: async () => ({}),
@@ -81,12 +83,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const fetchUser = useCallback(async () => {
-    // Retry idempotent session reads through transient origin 502/503/504s
-    // and timeouts (shared-hosting blips). A retriable failure must NOT clear
-    // a known session: only a definitive 401/403/404 (or a 200 with no user)
-    // signs the user out. Returns the hydrated user (GET /me carries
-    // primaryUserType/userTypes, which login/verify responses omit).
+  const fetchUser = useCallback(async (): Promise<User | null | undefined> => {
+    // Tri-state session read (incident 2026-09-17 — redirect ping-pong):
+    // - User object  = CONFIRMED session (server agrees).
+    // - null         = DENIED (definitive 401/403/404, or 200 with no user).
+    //                  Clears client state; caller stays on the form.
+    // - undefined    = UNKNOWN (all attempts threw/timed out, or a
+    //                  non-denied error status). Caller must NEVER navigate
+    //                  on unknown — redirecting without server agreement is
+    //                  what ping-ponged with requireAuth. Caller defers to
+    //                  the server (whose verdicts always terminate).
+    // UNKNOWN never touches client state: a transient blip must not sign
+    // a healthy session out (nor keep a dead one alive for redirect).
     let res: Response | null = null
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
@@ -105,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (attempt < 3) await new Promise((r) => setTimeout(r, 300 * attempt))
     }
     try {
-      if (!res) return null
+      if (!res) return undefined
       if (res.ok) {
         const data = await res.json()
         if (data?.user) {
@@ -118,13 +126,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null)
         return null
       }
-      return null
+      return undefined
     } catch {
       // Unparseable body on an ok response: leave session untouched.
-      return null
+      return undefined
     } finally {
       setLoading(false)
     }
+  }, [])
+
+  const clearSession = useCallback(() => {
+    setUser(null)
   }, [])
 
   useEffect(() => {
@@ -233,7 +245,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchUser])
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, phoneLogin, signup, sendOtp, verifyOtp, refreshUser: fetchUser, sendMagicLink, agentLogin, agentForgotPassword, agentResetPassword, firstPasswordChange, updateRegistration, acceptConsent }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, phoneLogin, signup, sendOtp, verifyOtp, refreshUser: fetchUser, clearSession, sendMagicLink, agentLogin, agentForgotPassword, agentResetPassword, firstPasswordChange, updateRegistration, acceptConsent }}>
       {children}
     </AuthContext.Provider>
   )

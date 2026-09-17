@@ -167,33 +167,37 @@ function WelcomeContent({
 export function AuthCard({ referralCode }: Props) {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { user, loading, refreshUser } = useAuth()
+  const { user, loading, refreshUser, clearSession } = useAuth()
   const returnParam = searchParams.get("return")
   const returnUrl = isSafeReturnUrl(returnParam) ? (returnParam as string) : undefined
   // Client-side net for in-app navigation to /auth while signed in (server
   // guard in app/auth/page.tsx covers hard loads). Sends each persona home.
   // NOTE: no early return here — hooks below must run unconditionally.
-  // The session is verified against the server before redirecting: client
-  // state can disagree with the server (stale tab, pruned refresh token,
-  // transient blips), and redirecting on unverified state ping-pongs with
-  // requireAuth. On failure refreshUser() already cleared the user, so the
-  // form renders instead of looping. A 6s cap keeps a hung /me from
-  // blank-screening the page (falls back to legacy unverified redirect).
+  // Tri-state verdict (incident 2026-09-17 — redirect ping-pong):
+  // - CONFIRMED (server returned a user) → redirect to persona home.
+  // - DENIED (server said no session; refreshUser already cleared state) →
+  //   stay on the form.
+  // - UNKNOWN (server unreachable; refreshUser returns undefined) → clear
+  //   the stale client state and defer to the server by navigating to the
+  //   safe default. The server's verdicts always terminate (dashboard/KYC/
+  //   onboarding/consent, or back here with clean state), so no cycle is
+  //   possible. Redirecting on "unknown" was the ping-pong mechanism.
+  // A 6s cap keeps a hung /me from blank-screening the page: on timeout we
+  // take the UNKNOWN branch, never an unverified redirect.
   const signedIn = !loading && !!user
-  const [sessionChecked, setSessionChecked] = useState(false)
+  const [sessionChecked, setSessionChecked] = useState<null | "confirmed" | "denied" | "unknown">(null)
   useEffect(() => {
     if (!signedIn || sessionChecked) return
     let cancelled = false
     const timeout = setTimeout(() => {
-      if (!cancelled) setSessionChecked(true)
+      if (!cancelled) setSessionChecked("unknown")
     }, 6000)
     refreshUser()
-      .catch(() => null)
-      .then(() => {
-        if (!cancelled) {
-          clearTimeout(timeout)
-          setSessionChecked(true)
-        }
+      .catch(() => undefined)
+      .then((result) => {
+        if (cancelled) return
+        clearTimeout(timeout)
+        setSessionChecked(result ? "confirmed" : result === null ? "denied" : "unknown")
       })
     return () => {
       cancelled = true
@@ -201,10 +205,17 @@ export function AuthCard({ referralCode }: Props) {
     }
   }, [signedIn, sessionChecked, refreshUser])
   useEffect(() => {
-    if (signedIn && sessionChecked && user) {
+    if (!signedIn || !sessionChecked) return
+    if (sessionChecked === "confirmed" && user) {
       router.replace(resolvePostAuthTarget(user, returnUrl))
+    } else if (sessionChecked === "unknown") {
+      // Server unreachable: drop the stale client state (it may disagree
+      // with the server) and let the server decide the destination.
+      clearSession()
+      router.replace(returnUrl ?? "/dashboard")
     }
-  }, [signedIn, sessionChecked, user, router, returnUrl])
+    // "denied": refreshUser already cleared the user; render the form.
+  }, [signedIn, sessionChecked, user, router, returnUrl, clearSession])
 
   const [view, setView] = useState<"login" | "register">(
     referralCode ? "register" : "login"
