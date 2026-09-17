@@ -47,8 +47,14 @@ export const serverFetch = cache(async (path: string, init?: RequestInit) => {
   for (;;) {
     attempt += 1;
     try {
+      // Authenticated reads must NEVER be served from the Next.js Data
+      // Cache (incident 2026-09-17 — consent bounce loop): the default
+      // force-cache persists across requests keyed by URL, so a pre-consent
+      // /me (or another user's response) kept being replayed after consent
+      // was recorded. Response Cache-Control headers do not opt out.
       const res = await fetch(`${API_URL}${path}`, {
         ...init,
+        cache: "no-store",
         headers: { ...headers, ...(init?.headers as Record<string, string> | undefined) },
       });
       if ((res.status === 502 || res.status === 503 || res.status === 504) && attempt < maxAttempts) {
@@ -77,8 +83,12 @@ export const getSession = cache(async () => {
     let res: Response | null = null;
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
+        // no-store: session reads must always hit the origin (see above —
+        // a cached pre-consent /me bounced users between /dashboard and
+        // /auth/consent after they accepted the Terms).
         res = await fetch(`${API_URL}/api/auth/me`, {
           headers: { Cookie: cookieHeader },
+          cache: "no-store",
         });
         if (res.status !== 502 && res.status !== 503 && res.status !== 504) break;
         res = null;
