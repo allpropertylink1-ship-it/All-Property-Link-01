@@ -138,17 +138,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       : { email: emailOrPhone, password, rememberMe }
     const { data, error } = await api.post<{ user: User }>("/api/auth/login", payload)
     if (data?.user) {
-      // Login responses omit primaryUserType/userTypes; hydrate from /me so
-      // callers can route by persona (customer → /) without a misclassify.
-      // If hydration fails (slow proxy, blip), return undefined and let the
-      // caller navigate optimistically — the server (retries, no 8s proxy
-      // cap) is the source of truth and routes/corrects from there. Never
-      // dead-end on a transient /me failure.
-      const hydrated = await fetchUser()
-      return { user: hydrated ?? undefined }
+      // NOTE (incident 2026-09-17): no post-login hydration here by design.
+      // The submit path must stay byte-identical to the pre-redirect-work
+      // sequence (POST → setUser → navigate). Persona routing happens via
+      // resolvePostAuthTarget fallbacks + the server dashboard router, which
+      // is the source of truth. An extra /me here added latency/failure
+      // surface with zero routing benefit on failure.
+      setUser({ ...data.user, authMethod: "user" })
+      return {}
     }
     return { error: error || "Login failed" }
-  }, [fetchUser])
+  }, [])
 
   const logout = useCallback(async () => {
     await api.post("/api/auth/logout")
@@ -172,14 +172,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data, error } = await api.post<{ user: User }>("/api/auth/verify-otp", { identifier, token, type, rememberMe })
     if (error) return { error }
     if (data?.user) {
-      // Verify responses omit primaryUserType; hydrate from /me for persona
-      // routing. Same graceful rule as login(): undefined on failure,
-      // caller navigates optimistically, server corrects.
-      const hydrated = await fetchUser()
-      return { user: hydrated ?? undefined }
+      // Same rule as login(): no hydration on the submit path (see above).
+      setUser({ ...data.user, authMethod: "user" })
+      return {}
     }
     return {}
-  }, [fetchUser])
+  }, [])
 
   const phoneLogin = useCallback(async (phone: string) => {
     const { data, error } = await api.post<{ expiresIn: number; retryAfter: number }>("/api/auth/phone-login", { phone })
