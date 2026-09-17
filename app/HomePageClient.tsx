@@ -3,8 +3,6 @@
 import Link from "next/link"
 import { ArrowRight } from "@/components/ui/icons"
 import { HeroSection } from "@/components/home/HeroSection"
-import { CategoryGrid } from "@/components/home/CategoryGrid"
-import { QuickSearch } from "@/components/home/QuickSearch"
 import { FeaturedProperties } from "@/components/home/FeaturedProperties"
 import { FeaturedAirbnbs } from "@/components/home/FeaturedAirbnbs"
 import { FeaturedFundis } from "@/components/home/FeaturedFundis"
@@ -25,33 +23,43 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
               Prime Land &amp; Development Plots
             </h2>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-text-secondary">Filter by:</span>
-            <Link
-              href="/land"
-              className="flex min-h-touch items-center rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-text-onPrimary"
-            >
-              Ready Titles
-            </Link>
-            <Link
-              href="/land?search=gated"
-              className="flex min-h-touch items-center rounded-lg bg-surface-secondary px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:bg-primary/5 hover:text-primary"
-            >
-              Gated Plots
-            </Link>
-            <Link
-              href="/land"
-              className="inline-flex min-h-touch items-center gap-1.5 px-1 text-sm font-bold text-primary transition-colors hover:text-accent-600"
-            >
-              View All Plots
-              <ArrowRight size={18} aria-hidden="true" />
-            </Link>
-          </div>
+          <Link
+            href="/land"
+            className="inline-flex min-h-touch shrink-0 items-center gap-1.5 text-sm font-bold text-primary transition-colors hover:text-accent-600"
+          >
+            View All Plots
+            <ArrowRight size={18} aria-hidden="true" />
+          </Link>
         </div>
-        <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0 lg:pb-0">
+        {/* Mobile rail: horizontal snap scroll */}
+        <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide lg:hidden">
           {initialData.map((p, i) => (
-            <div key={p.slug} className="w-[78%] shrink-0 snap-start sm:w-[45%] lg:w-auto">
+            <div key={p.slug} className="w-[78%] shrink-0 snap-start sm:w-[45%]">
+              <PropertyCard
+                slug={p.slug}
+                title={p.title}
+                price={p.price == null ? null : Number(p.price)}
+                currency={p.currency}
+                propertyType={p.propertyType}
+                listingPurpose={p.listingPurpose}
+                city={p.city}
+                region={p.region}
+                images={p.images}
+                coverImage={p.coverImage ?? null}
+                isFeatured={p.isFeatured}
+                bedrooms={p.bedrooms}
+                bathrooms={p.bathrooms}
+                area={p.area}
+                priority={i === 0}
+              />
+            </div>
+          ))}
+        </div>
+        {/* Desktop: 4-column matrix (matches Featured Kenyan Properties) */}
+        <div className="hidden gap-4 lg:grid lg:grid-cols-4">
+          {initialData.map((p, i) => (
             <PropertyCard
+              key={p.slug}
               slug={p.slug}
               title={p.title}
               price={p.price == null ? null : Number(p.price)}
@@ -68,7 +76,6 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
               area={p.area}
               priority={i === 0}
             />
-            </div>
           ))}
         </div>
       </div>
@@ -92,8 +99,6 @@ export function HomePageClient({
   return (
     <>
       <HeroSection />
-      <CategoryGrid />
-      <QuickSearch />
       <FeaturedProperties initialData={saleRent} />
       <FeaturedLand initialData={land} />
       <FeaturedAirbnbs initialData={airbnbs} />

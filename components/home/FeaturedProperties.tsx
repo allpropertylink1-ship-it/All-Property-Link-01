@@ -60,7 +60,7 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
 
   useEffect(() => {
     if (initialData) return
-    fetch("/api/properties?limit=6")
+    fetch("/api/properties?limit=8")
       .then((r) => { if (!r.ok) throw new Error(`Status ${r.status}`); return r.json() })
       .then((data: { properties: ApiProperty[] }) => {
         setProperties((data.properties || []).filter(isSaleOrRent))
@@ -96,7 +96,7 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
               ))}
             </div>
             <div className="hidden gap-4 lg:grid lg:grid-cols-4" aria-busy="true" aria-label="Loading featured properties">
-              {Array.from({ length: 4 }).map((_, i) => (
+              {Array.from({ length: 8 }).map((_, i) => (
                 <FullSkeleton key={i} />
               ))}
             </div>

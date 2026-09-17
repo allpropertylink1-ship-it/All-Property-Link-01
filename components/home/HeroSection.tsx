@@ -17,7 +17,6 @@ import {
   BedDouble,
   Bath,
   Maximize2,
-  BadgeCheck,
   SlidersHorizontal,
   Phone,
   MessageCircle,
@@ -390,14 +389,10 @@ export function HeroSection() {
 
   return (
     <section aria-label="Featured listings and search" className="bg-surface">
-      <div className="mx-auto w-full max-w-7xl px-4 pt-6 sm:pt-8">
+      <div className="mx-auto w-full max-w-7xl px-4 pb-6 pt-6 sm:pt-8 md:pb-8">
         {/* Title & value statement header — desktop only (mobile goes straight to search) */}
         <div className="mb-6 hidden flex-col justify-between gap-4 md:flex md:flex-row md:items-end">
           <div>
-            <p className="mb-2 inline-flex items-center gap-1.5 rounded-lg bg-surface-secondary px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-text-secondary">
-              <BadgeCheck size={14} className="text-primary" aria-hidden="true" />
-              Direct Deal Infrastructure • Kenya
-            </p>
             <h1
               key={`${persona.id}-headline`}
               className="max-w-3xl animate-[fadeUp_0.5s_ease-out] font-heading text-3xl font-extrabold tracking-tight text-text-primary sm:text-4xl"
@@ -578,8 +573,8 @@ export function HeroSection() {
           )}
         </div>
 
-        {/* Integrated multi-tab quick search console (overlaps carousel on desktop, stacks on mobile) */}
-        <div className="relative z-20 mx-auto w-full max-w-5xl rounded-xl border border-border bg-surface p-3 shadow-lg sm:p-4 md:-mt-12">
+        {/* Integrated multi-tab quick search console (stacked below carousel) */}
+        <div className="relative z-20 mx-auto mt-6 w-full max-w-5xl rounded-xl border border-border bg-surface p-3 shadow-lg sm:p-4 md:mt-8">
           <div
             className="mb-3 flex items-center gap-1.5 overflow-x-auto border-b border-border pb-3 scrollbar-hide"
             role="group"

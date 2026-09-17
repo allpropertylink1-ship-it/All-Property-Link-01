@@ -14,6 +14,18 @@ interface ApiProperty {
   isFeatured: boolean; createdAt: string | Date;
 }
 
+function FullSkeleton() {
+  return (
+    <div className="animate-pulse overflow-hidden rounded-xl border border-border bg-surface">
+      <div className="aspect-[4/3] bg-surface-secondary" />
+      <div className="space-y-2 p-4">
+        <div className="h-4 w-2/3 rounded bg-surface-secondary" />
+        <div className="h-3 w-1/2 rounded bg-surface-secondary" />
+      </div>
+    </div>
+  )
+}
+
 function cardProps(p: ApiProperty, priority: boolean) {
   return {
     slug: p.slug,
@@ -42,7 +54,7 @@ export function FeaturedAirbnbs({ initialData }: { initialData?: ApiProperty[] }
 
   useEffect(() => {
     if (initialData) return
-    fetch("/api/properties?purpose=FOR_RENT_SHORT_TERM&limit=6")
+    fetch("/api/properties?purpose=FOR_RENT_SHORT_TERM&limit=8")
       .then((r) => { if (!r.ok) throw new Error(`Status ${r.status}`); return r.json() })
       .then((data: { properties: ApiProperty[] }) => {
         setProperties(data.properties || [])
@@ -69,17 +81,20 @@ export function FeaturedAirbnbs({ initialData }: { initialData?: ApiProperty[] }
           </Link>
         </div>
         {loading ? (
-          <div className="flex snap-x gap-4 overflow-x-auto pb-2 scrollbar-hide md:grid md:grid-cols-3 md:overflow-visible" aria-busy="true" aria-label="Loading featured airbnbs">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="w-[270px] shrink-0 animate-pulse snap-start overflow-hidden rounded-xl border border-border bg-surface min-[480px]:w-[300px] md:w-auto">
-                <div className="aspect-[4/3] bg-surface-secondary" />
-                <div className="space-y-2 p-4">
-                  <div className="h-4 w-2/3 rounded bg-surface-secondary" />
-                  <div className="h-3 w-1/2 rounded bg-surface-secondary" />
+          <>
+            <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scrollbar-hide lg:hidden" aria-busy="true" aria-label="Loading featured airbnbs">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="w-[78%] shrink-0 snap-start sm:w-[45%]">
+                  <FullSkeleton />
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+            <div className="hidden gap-4 lg:grid lg:grid-cols-4" aria-busy="true" aria-label="Loading featured airbnbs">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <FullSkeleton key={i} />
+              ))}
+            </div>
+          </>
         ) : error ? (
           <FormBanner variant="error">Could not load featured stays: {error}</FormBanner>
         ) : properties.length === 0 ? (
@@ -87,13 +102,22 @@ export function FeaturedAirbnbs({ initialData }: { initialData?: ApiProperty[] }
             No short-term rentals listed yet.
           </p>
         ) : (
-          <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scrollbar-hide md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
-            {properties.map((p, i) => (
-              <div key={p.slug} className="w-[270px] shrink-0 snap-start min-[480px]:w-[300px] md:w-auto">
-                <PropertyCard {...cardProps(p, i === 0)} />
-              </div>
-            ))}
-          </div>
+          <>
+            {/* Mobile rail: horizontal snap scroll */}
+            <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide lg:hidden">
+              {properties.map((p, i) => (
+                <div key={p.slug} className="w-[78%] shrink-0 snap-start sm:w-[45%]">
+                  <PropertyCard {...cardProps(p, i === 0)} />
+                </div>
+              ))}
+            </div>
+            {/* Desktop: 4-column matrix (matches Featured Kenyan Properties) */}
+            <div className="hidden gap-4 lg:grid lg:grid-cols-4">
+              {properties.map((p, i) => (
+                <PropertyCard key={p.slug} {...cardProps(p, i === 0)} />
+              ))}
+            </div>
+          </>
         )}
       </div>
     </section>
