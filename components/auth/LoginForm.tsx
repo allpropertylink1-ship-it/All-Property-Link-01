@@ -8,8 +8,9 @@ import { OtpInput } from "./OtpInput"
 import { AuthAssurance, AuthDivider, AuthSubmitButton, InputLeadingIcon, stitchInputWithIconClass } from "./stitch-auth"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { Mail } from "@/components/ui/icons"
+import { resolvePostAuthTarget } from "@/lib/persona"
 
-export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => void }) {
+export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegister?: () => void; returnUrl?: string }) {
   const router = useRouter()
   const { login, sendMagicLink, phoneLogin, verifyOtp, refreshUser } = useAuth()
   const [error, setError] = useState("")
@@ -45,7 +46,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
       return
     }
 
-    router.push("/dashboard")
+    router.push(resolvePostAuthTarget(result?.user ?? null, returnUrl))
     router.refresh()
   }
 
@@ -103,7 +104,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
       setOtpLoading(false)
       return
     }
-    router.push("/dashboard")
+    router.push(resolvePostAuthTarget(result?.user ?? null, returnUrl))
     router.refresh()
   }
 
@@ -233,7 +234,7 @@ export function LoginForm({ onSwitchToRegister }: { onSwitchToRegister?: () => v
 
       <GoogleSignInButton
         mode="signin"
-        onSuccess={async () => { await refreshUser(); router.push("/dashboard"); router.refresh() }}
+        onSuccess={async () => { const u = await refreshUser(); router.push(resolvePostAuthTarget(u ?? null, returnUrl)); router.refresh() }}
         onError={(msg) => setError(msg)}
       />
 

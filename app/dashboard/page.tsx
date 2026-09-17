@@ -42,7 +42,7 @@ export default async function DashboardPage() {
   // Reps and customers never see the Business Summary dashboard.
   const personaTarget = personaRedirectTarget(
     { authMethod: user.authMethod, primaryUserType: user.primaryUserType, userTypes: user.userTypes },
-    { customerTo: "/dashboard/notifications" }
+    { customerTo: "/" }
   )
   if (personaTarget) {
     redirect(personaTarget)

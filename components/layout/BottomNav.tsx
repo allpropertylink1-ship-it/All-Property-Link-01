@@ -92,6 +92,17 @@ export function BottomNav() {
   const [browseOpen, setBrowseOpen] = useState(false);
 
   const homeActive = pathname === "/";
+  // Profile tab stays distinct from Home: reps → agent console, customers →
+  // notifications inbox (their hub), businesses → dashboard. (Login landing
+  // for customers is still "/" per personaHomeTarget.)
+  const profileHref: string = !user
+    ? "/auth"
+    : user.authMethod === "agent"
+      ? "/dashboard/agent"
+      : user.primaryUserType === "CUSTOMER"
+        ? "/dashboard/notifications"
+        : "/dashboard";
+  const profileActive = pathname === profileHref || (profileHref !== "/" && pathname.startsWith(`${profileHref}/`));
 
   return (
     <>
@@ -133,13 +144,13 @@ export function BottomNav() {
           </button>
 
           <Link
-            href={user ? "/dashboard" : "/auth/login"}
+            href={profileHref}
             className="touch-target flex flex-col items-center gap-0.5 py-3 flex-1"
           >
-            <div className={`flex h-7 w-7 items-center justify-center ${user && pathname.startsWith("/dashboard") ? "text-primary-600" : "text-text-secondary"}`}>
+            <div className={`flex h-7 w-7 items-center justify-center ${user && profileActive ? "text-primary-600" : "text-text-secondary"}`}>
               <UserIcon />
             </div>
-            <span className={`text-[10px] font-medium ${user && pathname.startsWith("/dashboard") ? "text-primary-600" : "text-text-secondary"}`}>
+            <span className={`text-[10px] font-medium ${user && profileActive ? "text-primary-600" : "text-text-secondary"}`}>
               {user ? (user.firstName || "Profile") : "Sign In"}
             </span>
           </Link>

@@ -104,6 +104,17 @@ function NavSections({ onNavigate }: { onNavigate?: () => void }) {
   if (user?.authMethod === "agent") {
     return <NavGroup links={agentPrimary} section="agent" onNavigate={onNavigate} />
   }
+  // Customers have no business console (/dashboard bounces them home); show
+  // only the pages they can actually use instead of dead-end business links.
+  // (Reps returned above, so primaryUserType alone discriminates here.)
+  if (user?.primaryUserType === "CUSTOMER") {
+    return (
+      <>
+        <NavGroup links={[{ href: "/dashboard/notifications", label: "Notifications", icon: Bell }]} section="secondary" onNavigate={onNavigate} />
+        <NavGroup links={[{ href: "/dashboard/profile", label: "Personal Profile", icon: User }]} section="tertiary" onNavigate={onNavigate} />
+      </>
+    )
+  }
   return (
     <>
       <NavGroup links={primary} section="primary" onNavigate={onNavigate} />

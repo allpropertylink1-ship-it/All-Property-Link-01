@@ -101,7 +101,7 @@ export async function requireAuth(): Promise<{ user: SessionUser }> {
   const session = await getSession();
   if (!session) {
     const { redirect } = await import("next/navigation");
-    redirect("/auth/login");
+    redirect("/auth");
     throw new Error("unreachable")
   }
   return session

@@ -41,6 +41,7 @@ export function ProfileButton() {
   }
 
   const isAgent = user.authMethod === "agent"
+  const isCustomer = !isAgent && user.primaryUserType === "CUSTOMER"
   const displayName = isAgent ? (user.fullName || [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email) : ([user.firstName, user.lastName].filter(Boolean).join(" ") || user.email)
   const initial = (isAgent ? (user.fullName || user.email) : (user.firstName || user.email)).charAt(0).toUpperCase()
 
@@ -115,21 +116,39 @@ export function ProfileButton() {
               </>
             ) : (
               <>
-                <Link
-                  href="/dashboard"
-                  onClick={() => setOpen(false)}
-                  className="touch-target flex items-center gap-3 px-4 py-2.5 text-sm text-text-primary transition-colors hover:bg-surface-secondary"
-                >
-                  <svg className="h-4 w-4 text-primary-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path
-                      fillRule="evenodd"
-                      d="M1.22 5.222a.75.75 0 011.06 0L7 9.942l3.22-3.22a.75.75 0 111.06 1.06l-3.75 3.75a.75.75 0 01-1.06 0L1.22 6.28a.75.75 0 010-1.06z"
-                      clipRule="evenodd"
-                    />
-                    <path d="M3.5 11.5l1.25 1.25a.75.75 0 001.06 0l5.69-5.69a.75.75 0 010 1.06l-5.69 5.69a.75.75 0 01-1.06 0L3.5 12.56V15a.5.5 0 00.5.5h9a.5.5 0 00.5-.5V8a.75.75 0 011.5 0v7a2 2 0 01-2 2H4a2 2 0 01-2-2v-2.5z" />
-                  </svg>
-                  Business Profile
-                </Link>
+                {isCustomer ? (
+                  <Link
+                    href="/"
+                    onClick={() => setOpen(false)}
+                    className="touch-target flex items-center gap-3 px-4 py-2.5 text-sm text-text-primary transition-colors hover:bg-surface-secondary"
+                  >
+                    <svg className="h-4 w-4 text-primary-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path
+                        fillRule="evenodd"
+                        d="M1.22 5.222a.75.75 0 011.06 0L7 9.942l3.22-3.22a.75.75 0 111.06 1.06l-3.75 3.75a.75.75 0 01-1.06 0L1.22 6.28a.75.75 0 010-1.06z"
+                        clipRule="evenodd"
+                      />
+                      <path d="M3.5 11.5l1.25 1.25a.75.75 0 001.06 0l5.69-5.69a.75.75 0 010 1.06l-5.69 5.69a.75.75 0 01-1.06 0L3.5 12.56V15a.5.5 0 00.5.5h9a.5.5 0 00.5-.5V8a.75.75 0 011.5 0v7a2 2 0 01-2 2H4a2 2 0 01-2-2v-2.5z" />
+                    </svg>
+                    Home
+                  </Link>
+                ) : (
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setOpen(false)}
+                    className="touch-target flex items-center gap-3 px-4 py-2.5 text-sm text-text-primary transition-colors hover:bg-surface-secondary"
+                  >
+                    <svg className="h-4 w-4 text-primary-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path
+                        fillRule="evenodd"
+                        d="M1.22 5.222a.75.75 0 011.06 0L7 9.942l3.22-3.22a.75.75 0 111.06 1.06l-3.75 3.75a.75.75 0 01-1.06 0L1.22 6.28a.75.75 0 010-1.06z"
+                        clipRule="evenodd"
+                      />
+                      <path d="M3.5 11.5l1.25 1.25a.75.75 0 001.06 0l5.69-5.69a.75.75 0 010 1.06l-5.69 5.69a.75.75 0 01-1.06 0L3.5 12.56V15a.5.5 0 00.5.5h9a.5.5 0 00.5-.5V8a.75.75 0 011.5 0v7a2 2 0 01-2 2H4a2 2 0 01-2-2v-2.5z" />
+                    </svg>
+                    Business Profile
+                  </Link>
+                )}
 
                 <Link
                   href="/dashboard/profile"

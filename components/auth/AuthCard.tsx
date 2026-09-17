@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { ArrowRight, BadgeCheck, Handshake, ShieldCheck, Star } from "@/components/ui/icons"
+import { useAuth } from "@/lib/auth-context"
+import { isSafeReturnUrl, resolvePostAuthTarget } from "@/lib/persona"
 import { LoginForm } from "./LoginForm"
 import { AgentLoginForm } from "./AgentLoginForm"
 import { AgentForgotPasswordForm } from "./AgentForgotPasswordForm"
@@ -44,12 +46,14 @@ function LoginContent({
   onTabChange,
   onShowAgentForgot,
   onSwitchToRegister,
+  returnUrl,
 }: {
   activeTab: "user" | "agent"
   showAgentForgot: boolean
   onTabChange: (tab: "user" | "agent") => void
   onShowAgentForgot: () => void
   onSwitchToRegister: () => void
+  returnUrl?: string
 }) {
   return (
     <>
@@ -94,7 +98,7 @@ function LoginContent({
       )}
 
       {activeTab === "user" ? (
-        <LoginForm onSwitchToRegister={onSwitchToRegister} />
+        <LoginForm onSwitchToRegister={onSwitchToRegister} returnUrl={returnUrl} />
       ) : showAgentForgot ? (
         <AgentForgotPasswordForm />
       ) : (
@@ -194,8 +198,20 @@ function WelcomeContent({
 
 export function AuthCard({ referralCode }: Props) {
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const { user, loading } = useAuth()
   const returnParam = searchParams.get("return")
-  const returnUrl = returnParam && returnParam.startsWith("/") ? returnParam : undefined
+  const returnUrl = isSafeReturnUrl(returnParam) ? (returnParam as string) : undefined
+  // Client-side net for in-app navigation to /auth while signed in (server
+  // guard in app/auth/page.tsx covers hard loads). Sends each persona home.
+  // NOTE: no early return here — hooks below must run unconditionally.
+  const signedIn = !loading && !!user
+  useEffect(() => {
+    if (signedIn && user) {
+      router.replace(resolvePostAuthTarget(user, returnUrl))
+    }
+  }, [signedIn, user, router, returnUrl])
+
   const [view, setView] = useState<"login" | "register">(
     referralCode ? "register" : "login"
   )
@@ -254,6 +270,12 @@ export function AuthCard({ referralCode }: Props) {
     setShowAgentForgot(false)
   }
 
+  // Render nothing while the signed-in redirect above fires (avoids flashing
+  // login/signup to authed users who navigate here in-app).
+  if (signedIn) {
+    return null
+  }
+
   return (
     <div className="relative overflow-hidden rounded-xl border border-border bg-surface shadow-lg">
       {/* Mobile welcome strip */}
@@ -288,6 +310,7 @@ export function AuthCard({ referralCode }: Props) {
               onTabChange={handleTabChange}
               onShowAgentForgot={() => setShowAgentForgot(true)}
               onSwitchToRegister={() => toggleView("register")}
+              returnUrl={returnUrl}
             />
           </div>
         </div>

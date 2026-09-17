@@ -1,9 +1,19 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthAssurance } from "@/components/auth/stitch-auth";
+import { getSession } from "@/lib/auth-utils";
+import { resolvePostAuthTarget } from "@/lib/persona";
 
-export default async function AuthPage({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
-  const { ref } = await searchParams
+export default async function AuthPage({ searchParams }: { searchParams: Promise<{ ref?: string; return?: string }> }) {
+  const { ref, return: returnParam } = await searchParams
+  // Signed-in users never see login/signup: bounce to persona home (or a
+  // safe ?return= deep link). Token flows (activate/reset/magic-link/consent)
+  // live under their own /auth/* routes and are intentionally NOT guarded.
+  const session = await getSession()
+  if (session?.user) {
+    redirect(resolvePostAuthTarget(session.user, returnParam))
+  }
   const isDev = process.env.VERCEL_ENV !== 'production'
 
   return (

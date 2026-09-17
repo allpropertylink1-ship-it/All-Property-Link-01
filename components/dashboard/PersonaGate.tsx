@@ -12,7 +12,7 @@ import { personaRedirectTarget } from "@/lib/persona"
  */
 export function PersonaGate({
   children,
-  customerTo = "/dashboard/notifications",
+  customerTo = "/",
 }: {
   children: ReactNode
   customerTo?: string

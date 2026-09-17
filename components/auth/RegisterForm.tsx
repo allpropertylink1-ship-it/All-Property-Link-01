@@ -7,6 +7,7 @@ import { OtpInput } from "./OtpInput"
 import { RegisterAccountInfo } from "./RegisterAccountInfo"
 import { formatTime } from "./RegisterForm.utils"
 import { FormBanner } from "@/components/shared/FormFeedback"
+import { resolvePostAuthTarget } from "@/lib/persona"
 
 type ContactMethod = "email" | "phone"
 type Step = "form" | "otp"
@@ -163,7 +164,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
     setOtpLoading(true)
     setError("")
 
-    const { error: verifyError } = await verifyOtp(otpIdentifier, code, otpType)
+    const { error: verifyError, user: verifiedUser } = await verifyOtp(otpIdentifier, code, otpType)
     if (verifyError) {
       setError(verifyError)
       setOtpLoading(false)
@@ -171,7 +172,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
     }
 
     setOtpLoading(false)
-    router.push(returnUrl || "/dashboard")
+    router.push(resolvePostAuthTarget(verifiedUser ?? null, returnUrl))
   }
 
   async function handleResendOtp() {
@@ -191,8 +192,8 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
   }
 
   async function handleGoogleSuccess() {
-    await refreshUser()
-    router.push(returnUrl || "/dashboard")
+    const u = await refreshUser()
+    router.push(resolvePostAuthTarget(u ?? null, returnUrl))
   }
 
   function handleGoogleError(msg: string) {

@@ -84,8 +84,8 @@ export default async function middleware(request: NextRequest) {
     const access = request.cookies.get("access_token")?.value
     const refresh = request.cookies.get("refresh_token")?.value
     if (!access && !refresh) {
-      const loginUrl = new URL("/auth/login", request.url)
-      loginUrl.searchParams.set("redirect", pathname)
+      const loginUrl = new URL("/auth", request.url)
+      loginUrl.searchParams.set("return", pathname)
       return NextResponse.redirect(loginUrl)
     }
   }

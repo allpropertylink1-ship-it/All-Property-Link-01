@@ -6,6 +6,8 @@ import { Loader2, Check } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { FormBanner } from "@/components/shared/FormFeedback";
 import { PersonaGate } from "@/components/dashboard/PersonaGate";
+import { useAuth } from "@/lib/auth-context";
+import { personaHomeTarget } from "@/lib/persona";
 
 const categories = [
   { value: "CUSTOMER", label: "Customer" },
@@ -110,6 +112,7 @@ const specialtiesService: { value: string; group: string }[] = [
 
 function OnboardingPageInner() {
   const router = useRouter();
+  const { refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -176,7 +179,10 @@ function OnboardingPageInner() {
       }
 
       setSuccess(true);
-      setTimeout(() => router.push("/dashboard"), 2000);
+      // Hydrate (onboarding sets primaryUserType) then route by persona —
+      // customers land on home, businesses on the dashboard.
+      const u = await refreshUser().catch(() => null);
+      setTimeout(() => router.push(personaHomeTarget(u ?? null)), 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {

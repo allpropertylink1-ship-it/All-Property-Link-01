@@ -42,14 +42,14 @@ export interface OtpResponse {
 interface AuthContextType {
   user: User | null
   loading: boolean
-  login: (emailOrPhone: string, password: string, rememberMe?: boolean) => Promise<{ error?: string }>
+  login: (emailOrPhone: string, password: string, rememberMe?: boolean) => Promise<{ error?: string; user?: User }>
   logout: () => Promise<void>
   phoneLogin: (phone: string) => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
   signup: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string }) => Promise<{ error?: string; code?: string; otp?: OtpResponse }>
   sendOtp: (identifier: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
-  verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION", rememberMe?: boolean) => Promise<{ error?: string }>
+  verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION", rememberMe?: boolean) => Promise<{ error?: string; user?: User }>
   updateRegistration: (data: { oldIdentifier: string; email?: string; phone?: string; firstName?: string; lastName?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
-  refreshUser: () => Promise<void>
+  refreshUser: () => Promise<User | null>
   sendMagicLink: (email: string) => Promise<{ error?: string }>
   agentLogin: (agentCode: string, password: string, rememberMe?: boolean) => Promise<{ error?: string; requiresPasswordChange?: boolean }>
   agentForgotPassword: (identifier: string) => Promise<{ error?: string }>
@@ -67,7 +67,7 @@ const AuthContext = createContext<AuthContextType>({
   signup: async () => ({}),
   sendOtp: async () => ({}),
   verifyOtp: async () => ({}),
-  refreshUser: async () => {},
+  refreshUser: async () => null,
   sendMagicLink: async () => ({}),
   agentLogin: async () => ({}),
   agentForgotPassword: async () => ({}),
@@ -85,7 +85,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Retry idempotent session reads through transient origin 502/503/504s
     // and timeouts (shared-hosting blips). A retriable failure must NOT clear
     // a known session: only a definitive 401/403/404 (or a 200 with no user)
-    // signs the user out.
+    // signs the user out. Returns the hydrated user (GET /me carries
+    // primaryUserType/userTypes, which login/verify responses omit).
     let res: Response | null = null
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
@@ -104,16 +105,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (attempt < 3) await new Promise((r) => setTimeout(r, 300 * attempt))
     }
     try {
-      if (!res) return
+      if (!res) return null
       if (res.ok) {
         const data = await res.json()
-        if (data?.user) setUser(data.user)
-        else setUser(null)
+        if (data?.user) {
+          setUser(data.user)
+          return data.user as User
+        }
+        setUser(null)
+        return null
       } else if (res.status === 401 || res.status === 403 || res.status === 404) {
         setUser(null)
+        return null
       }
+      return null
     } catch {
       // Unparseable body on an ok response: leave session untouched.
+      return null
     } finally {
       setLoading(false)
     }
@@ -131,10 +139,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data, error } = await api.post<{ user: User }>("/api/auth/login", payload)
     if (data?.user) {
       setUser({ ...data.user, authMethod: "user" })
-      return {}
+      // Login responses omit primaryUserType/userTypes; hydrate from /me so
+      // callers can route by persona (customer → /) without a misclassify.
+      const hydrated = await fetchUser()
+      return { user: (hydrated ?? { ...data.user, authMethod: "user" }) as User }
     }
     return { error: error || "Login failed" }
-  }, [])
+  }, [fetchUser])
 
   const logout = useCallback(async () => {
     await api.post("/api/auth/logout")
@@ -157,9 +168,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const verifyOtp = useCallback(async (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION", rememberMe = true) => {
     const { data, error } = await api.post<{ user: User }>("/api/auth/verify-otp", { identifier, token, type, rememberMe })
     if (error) return { error }
-    if (data?.user) setUser({ ...data.user, authMethod: "user" })
+    if (data?.user) {
+      setUser({ ...data.user, authMethod: "user" })
+      // Verify responses omit primaryUserType; hydrate from /me for persona routing.
+      const hydrated = await fetchUser()
+      return { user: (hydrated ?? { ...data.user, authMethod: "user" }) as User }
+    }
     return {}
-  }, [])
+  }, [fetchUser])
 
   const phoneLogin = useCallback(async (phone: string) => {
     const { data, error } = await api.post<{ expiresIn: number; retryAfter: number }>("/api/auth/phone-login", { phone })

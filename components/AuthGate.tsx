@@ -1,21 +1,25 @@
 "use client"
 
 import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 
 export function AuthGate({ children, requiredRole }: { children: React.ReactNode; requiredRole?: string }) {
   const { user, loading } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     if (!loading && !user) {
-      router.replace("/auth/login")
+      const qs = searchParams?.toString()
+      const here = `${pathname}${qs ? `?${qs}` : ""}`
+      router.replace(`/auth?return=${encodeURIComponent(here)}`)
     }
     if (!loading && user && requiredRole && user.role !== requiredRole) {
       router.replace("/")
     }
-  }, [loading, user, router, requiredRole])
+  }, [loading, user, router, requiredRole, pathname, searchParams])
 
   if (loading) {
     return (

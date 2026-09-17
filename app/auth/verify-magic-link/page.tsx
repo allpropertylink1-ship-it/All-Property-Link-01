@@ -3,12 +3,15 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api-client";
+import { useAuth } from "@/lib/auth-context";
+import { resolvePostAuthTarget } from "@/lib/persona";
 import { CenteredAuthShell } from "@/components/auth/stitch-auth";
 import { Key } from "@/components/ui/icons";
 
 export default function VerifyMagicLinkPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { refreshUser } = useAuth();
   const [status, setStatus] = useState<"verifying" | "error" | "done">("verifying");
   const [error, setError] = useState("");
 
@@ -28,11 +31,16 @@ export default function VerifyMagicLinkPage() {
     }
 
     setStatus("done");
+    // Hydrate client auth state (/me carries primaryUserType) before routing
+    // by persona — otherwise the nav flashes "Sign in".
+    const returnParam = searchParams.get("return");
+    const user = await refreshUser().catch(() => null);
+    const target = resolvePostAuthTarget(user ?? null, returnParam);
     setTimeout(() => {
-      router.push("/dashboard");
+      router.push(target);
       router.refresh();
     }, 1000);
-  }, [searchParams, router]);
+  }, [searchParams, router, refreshUser]);
 
   useEffect(() => {
     handleVerification();
@@ -47,7 +55,7 @@ export default function VerifyMagicLinkPage() {
         status === "verifying"
           ? "Checking your secure sign-in token."
           : status === "done"
-            ? "Redirecting to dashboard..."
+            ? "Redirecting..."
             : error
       }
       assurance="256-Bit SSL Encrypted session"

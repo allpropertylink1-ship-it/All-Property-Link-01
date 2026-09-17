@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useAuth, CURRENT_TERMS_VERSION } from "@/lib/auth-context"
+import { personaHomeTarget } from "@/lib/persona"
 import { FormBanner } from "@/components/shared/FormFeedback"
 
 export default function ConsentPage() {
@@ -17,7 +18,7 @@ export default function ConsentPage() {
 
   useEffect(() => {
     if (!loading && user && !needsConsent) {
-      router.replace("/dashboard")
+      router.replace(personaHomeTarget(user))
     }
   }, [loading, user, needsConsent, router])
 
@@ -35,8 +36,8 @@ export default function ConsentPage() {
       setSubmitting(false)
       return
     }
-    await refreshUser()
-    router.replace("/dashboard")
+    const u = await refreshUser().catch(() => null)
+    router.replace(personaHomeTarget(u ?? user))
   }
 
   if (loading) {

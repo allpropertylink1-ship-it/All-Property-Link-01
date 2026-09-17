@@ -35,6 +35,41 @@ export function personaRedirectTarget(
   opts?: { customerTo?: string }
 ): string | null {
   if (isRep(user)) return "/dashboard/agent"
-  if (isCustomer(user)) return opts?.customerTo ?? "/dashboard/notifications"
+  if (isCustomer(user)) return opts?.customerTo ?? "/"
   return null
+}
+
+/**
+ * Post-sign-in home per persona. Single source of truth for every login
+ * form, OAuth/magic-link callback, consent/onboarding completion, and the
+ * signed-in guard on /auth entry points.
+ * - APL Rep (authMethod "agent") → /dashboard/agent
+ * - Customer (primaryUserType CUSTOMER) → / (marketplace home)
+ * - Everyone else (owners, intermediary agents, fundis, providers,
+ *   typeless/new) → /dashboard (KYC/onboarding gates forward as needed)
+ */
+export function personaHomeTarget(user: PersonaUser | null | undefined): string {
+  if (isRep(user)) return "/dashboard/agent"
+  if (isCustomer(user)) return "/"
+  return "/dashboard"
+}
+
+/**
+ * Validate a ?return= deep link. Must be a same-origin path: starts with
+ * a single "/" (reject "//" protocol-relative), and must not point back
+ * into /auth* (would loop with the signed-in guard) or /api/*.
+ */
+export function isSafeReturnUrl(value: string | null | undefined): boolean {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return false
+  if (value === "/auth" || value.startsWith("/auth/") || value.startsWith("/api/")) return false
+  return true
+}
+
+/** Resolve final post-auth destination: safe return URL wins, else persona home. */
+export function resolvePostAuthTarget(
+  user: PersonaUser | null | undefined,
+  returnUrl?: string | null
+): string {
+  if (isSafeReturnUrl(returnUrl)) return returnUrl as string
+  return personaHomeTarget(user)
 }
