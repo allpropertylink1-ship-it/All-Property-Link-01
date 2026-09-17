@@ -5,6 +5,7 @@ import { useState, useCallback, useRef, useId } from "react";
 import { uploadImage, HEIC_HINT, isHeicFile } from "@/lib/image-client";
 import { Upload, Loader2, X } from "@/components/ui/icons";
 import { FormBanner } from "@/components/shared/FormFeedback";
+import ImageCropQueue from "@/components/shared/ImageCropQueue";
 
 interface PropertyImageUploaderProps {
   onUploadComplete: (urls: string[]) => void;
@@ -35,6 +36,12 @@ export default function PropertyImageUploader({
   const [uploading, setUploading] = useState(false);
   const [coverUploading, setCoverUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Optional pre-upload crop step: files wait here until the user applies a
+  // crop or keeps the original for each photo. Uploads start on queue done.
+  const [queue, setQueue] = useState<{
+    files: File[];
+    target: "cover" | "gallery";
+  } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
@@ -52,18 +59,11 @@ export default function PropertyImageUploader({
     return null;
   };
 
-  const handleCoverFileChange = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files || []);
-      if (files.length === 0) return;
-      const file = files[0];
-      const validation = validateFiles([file]);
-      if (validation) { setError(validation); if (coverInputRef.current) coverInputRef.current.value = ""; return; }
+  const uploadCoverFile = useCallback(
+    async (file: File) => {
       setError(null);
       setCoverUploading(true);
       try {
-        const preview = URL.createObjectURL(file);
-        void preview;
         const url = await uploadImage(file, "properties");
         onCoverChange?.(url);
       } catch (err) {
@@ -78,20 +78,22 @@ export default function PropertyImageUploader({
     [onCoverChange, onUploadError]
   );
 
-  const handleFileChange = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoverFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(e.target.files || []);
       if (files.length === 0) return;
-      if (totalCount + files.length > maxFiles) {
-        setError(`Maximum ${maxFiles} images allowed (1 cover + ${GALLERY_MAX} gallery)`);
-        return;
-      }
-      if (galleryCount + files.length > GALLERY_MAX) {
-        setError(`Gallery max ${GALLERY_MAX} images. Remove some to add more.`);
-        return;
-      }
-      const validation = validateFiles(files);
-      if (validation) { setError(validation); return; }
+      const file = files[0];
+      const validation = validateFiles([file]);
+      if (validation) { setError(validation); if (coverInputRef.current) coverInputRef.current.value = ""; return; }
+      setError(null);
+      // Optional crop first — upload starts when the queue resolves.
+      setQueue({ files: [file], target: "cover" });
+    },
+    []
+  );
+
+  const uploadGalleryFiles = useCallback(
+    async (files: File[]) => {
       setError(null);
       setUploading(true);
       const urls: string[] = [];
@@ -114,8 +116,46 @@ export default function PropertyImageUploader({
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
     },
-    [maxFiles, totalCount, galleryCount, onUploadComplete, onUploadError]
+    [onUploadComplete, onUploadError]
   );
+
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
+      if (totalCount + files.length > maxFiles) {
+        setError(`Maximum ${maxFiles} images allowed (1 cover + ${GALLERY_MAX} gallery)`);
+        return;
+      }
+      if (galleryCount + files.length > GALLERY_MAX) {
+        setError(`Gallery max ${GALLERY_MAX} images. Remove some to add more.`);
+        return;
+      }
+      const validation = validateFiles(files);
+      if (validation) { setError(validation); return; }
+      setError(null);
+      // Optional crop first — upload starts when the queue resolves.
+      setQueue({ files, target: "gallery" });
+    },
+    [maxFiles, totalCount, galleryCount]
+  );
+
+  const handleQueueDone = useCallback(
+    (files: File[]) => {
+      const target = queue?.target ?? "gallery";
+      setQueue(null);
+      if (files.length === 0) return;
+      if (target === "cover") void uploadCoverFile(files[0]);
+      else void uploadGalleryFiles(files);
+    },
+    [queue, uploadCoverFile, uploadGalleryFiles]
+  );
+
+  const handleQueueCancel = useCallback(() => {
+    setQueue(null);
+    if (inputRef.current) inputRef.current.value = "";
+    if (coverInputRef.current) coverInputRef.current.value = "";
+  }, []);
 
   const handleRemove = useCallback(
     (url: string) => {
@@ -172,6 +212,23 @@ export default function PropertyImageUploader({
 
       {error && (
         <div role="alert"><FormBanner variant="error">{error}</FormBanner></div>
+      )}
+
+      {queue && (
+        <ImageCropQueue
+          files={queue.files}
+          label={(i, n) =>
+            queue.target === "cover" ? "Cover photo" : `Photo ${i + 1} of ${n}`
+          }
+          guidance={
+            queue.target === "cover"
+              ? "This is the first image buyers see — make the property fill the frame."
+              : "Straighten and frame each shot. Cropping is optional — keep the original if it already looks right."
+          }
+          context={queue.target === "cover" ? "property-cover" : "property-gallery"}
+          onDone={handleQueueDone}
+          onCancel={handleQueueCancel}
+        />
       )}
 
       {/* Cover photo — the image buyers see first */}

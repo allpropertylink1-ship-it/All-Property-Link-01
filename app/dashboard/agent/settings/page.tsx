@@ -6,7 +6,7 @@ import { api } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
 import { uploadImage, IMAGE_PRESETS, HEIC_HINT, isHeicFile } from "@/lib/image-client"
 import { Loader2, Link as LinkIcon, Copy, Check, MapPin } from "@/components/ui/icons"
-import ImageCropper from "@/components/kyc/ImageCropper"
+import ImageCropDialog from "@/components/shared/ImageCropDialog"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { AgentGuard } from "@/components/dashboard/AgentGuard"
 import { resolveImageUrl } from "@/lib/images"
@@ -47,7 +47,7 @@ export default function AgentSettingsPage() {
   const [initialRegions, setInitialRegions] = useState<string[]>([])
   const [initialArea, setInitialArea] = useState("")
   const [cropping, setCropping] = useState(false)
-  const [cropImageUrl, setCropImageUrl] = useState<string | null>(null)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const avatarInputRef = useRef<HTMLInputElement>(null)
 
   const isRegionDirty = JSON.stringify([...selectedRegions].sort()) !== JSON.stringify([...initialRegions].sort()) || specificArea.trim() !== initialArea.trim()
@@ -137,17 +137,16 @@ export default function AgentSettingsPage() {
     if (isHeicFile(file)) { setPrError(HEIC_HINT); e.target.value = ""; return }
     e.target.value = ""
     setPrError("")
-    const url = URL.createObjectURL(file)
-    setCropImageUrl(url)
+    setAvatarFile(file)
     setCropping(true)
   }
 
-  async function handleCropComplete(croppedBlob: Blob) {
+  async function uploadAvatarFile(file: File) {
     setCropping(false)
     setAvatarUploading(true)
     setPrError("")
     try {
-      const url = await uploadImage(new File([croppedBlob], "avatar.jpg", { type: "image/jpeg" }), "avatars", IMAGE_PRESETS.avatar)
+      const url = await uploadImage(file, "avatars", IMAGE_PRESETS.avatar)
       const { error } = await api.patch("/api/apl-agents/profile", { avatar: url })
       if (error) throw new Error(error)
       setAvatarUrl(url)
@@ -155,13 +154,23 @@ export default function AgentSettingsPage() {
       setPrError(err instanceof Error ? err.message : "Photo upload failed")
     } finally {
       setAvatarUploading(false)
+      setAvatarFile(null)
     }
+  }
+
+  async function handleCropComplete(croppedBlob: Blob) {
+    await uploadAvatarFile(new File([croppedBlob], "avatar.jpg", { type: "image/jpeg" }))
+  }
+
+  async function handleSkipCrop() {
+    // "Use original" — upload the selected file as-is, no crop.
+    if (!avatarFile) { setCropping(false); return }
+    await uploadAvatarFile(avatarFile)
   }
 
   function handleCropCancel() {
     setCropping(false)
-    if (cropImageUrl) URL.revokeObjectURL(cropImageUrl)
-    setCropImageUrl(null)
+    setAvatarFile(null)
   }
 
   async function handleAvatarRemove() {
@@ -422,12 +431,15 @@ export default function AgentSettingsPage() {
           </div>
         </form>
 
-      {cropping && cropImageUrl && (
-        <ImageCropper
-          imageUrl={cropImageUrl}
-          onCropComplete={handleCropComplete}
+      {cropping && avatarFile && (
+        <ImageCropDialog
+          sourceFile={avatarFile}
+          label="Profile picture"
+          guidance="Center your face — clients see this photo next to your name."
+          context="agent-avatar"
+          onComplete={handleCropComplete}
+          onSkip={handleSkipCrop}
           onCancel={handleCropCancel}
-          sideLabel="Profile Picture"
         />
       )}
       </div>

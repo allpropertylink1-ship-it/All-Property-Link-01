@@ -12,7 +12,7 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Camera, Save, Key, Trash2, Shield, CheckCircle, Clock, XCircle, Loader2 } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { resolveImageUrl } from "@/lib/images";
-import ImageCropper from "@/components/kyc/ImageCropper";
+import ImageCropDialog from "@/components/shared/ImageCropDialog";
 import { FormBanner } from "@/components/shared/FormFeedback";
 
 interface ProfileFormProps {
@@ -64,11 +64,11 @@ export function ProfileForm({ user }: ProfileFormProps) {
     setCropping(true);
   }
 
-  async function handleCropComplete(blob: Blob) {
+  async function uploadPassportPhoto(file: File) {
     setCropping(false);
     setPassportUploading(true);
     try {
-      const url = await uploadImage(new File([blob], "passport.jpg", { type: "image/jpeg" }), "profiles", IMAGE_PRESETS.avatar);
+      const url = await uploadImage(file, "profiles", IMAGE_PRESETS.avatar);
       setPassportPhotoUrl(url);
       setPassportFile(null);
       const patchRes = await fetch("/api/user/profile", {
@@ -86,6 +86,21 @@ export function ProfileForm({ user }: ProfileFormProps) {
     } finally {
       setPassportUploading(false);
     }
+  }
+
+  async function handleCropComplete(blob: Blob) {
+    await uploadPassportPhoto(
+      new File([blob], "passport.jpg", { type: "image/jpeg" })
+    );
+  }
+
+  async function handleSkipCrop() {
+    // "Use original" — upload the selected file as-is, no crop.
+    if (!passportFile) {
+      setCropping(false);
+      return;
+    }
+    await uploadPassportPhoto(passportFile);
   }
 
   async function handleProfileSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -255,11 +270,14 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
         {cropping && passportFile && (
           <div className="mt-4">
-            <ImageCropper
-              imageUrl={URL.createObjectURL(passportFile)}
-              onCropComplete={handleCropComplete}
+            <ImageCropDialog
+              sourceFile={passportFile}
+              label="Profile picture"
+              guidance="Center your face — this photo appears across your profile and listings."
+              context="profile-avatar"
+              onComplete={handleCropComplete}
+              onSkip={handleSkipCrop}
               onCancel={() => { setCropping(false); setPassportFile(null); }}
-              sideLabel="Passport Photo"
             />
           </div>
         )}

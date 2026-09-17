@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "validate:build": "npm run build || (node ../../scripts/log-error.js && exit 1)",
-    "validate:lint": "npm run lint || (node ../../scripts/log-error.js && exit 1)"
+    "validate:build": "npm run build || (node ../scripts/log-error.js && exit 1)",
+    "validate:lint": "npm run lint || (node ../scripts/log-error.js && exit 1)"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -35,6 +35,7 @@
     "react-dom": "^18",
     "react-easy-crop": "^6.1.0",
     "react-hook-form": "^7.54.0",
+    "react-image-crop": "^11.1.2",
     "resend": "^4.1.0",
     "tailwind-merge": "^3.6.0",
     "zod": "^3.24.0",

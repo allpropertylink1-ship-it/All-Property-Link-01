@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Upload, Loader2, X } from "@/components/ui/icons";
 import { api } from "@/lib/api-client";
 import { FormBanner } from "@/components/shared/FormFeedback";
+import ImageCropQueue from "@/components/shared/ImageCropQueue";
 
 interface Category {
   id: string;
@@ -35,28 +36,11 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
   const [isDirty, setIsDirty] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
+  // Optional pre-upload crop step (see PropertyImageUploader for the pattern).
+  const [queue, setQueue] = useState<File[] | null>(null);
 
-  const handleFileChange = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files || []);
-      if (files.length === 0) return;
-      if (imageUrls.length + files.length > 10) {
-        setError("Maximum 10 images allowed");
-        return;
-      }
-
-      for (const file of files) {
-        if (isHeicFile(file)) { setError(`${file.name}: ${HEIC_HINT}`); return; }
-        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-          setError(`Invalid type: ${file.name}. Only JPEG, PNG, WebP.`);
-          return;
-        }
-        if (file.size > 10 * 1024 * 1024) {
-          setError(`${file.name} is too large. Max 10MB.`);
-          return;
-        }
-      }
-
+  const uploadQueuedFiles = useCallback(
+    async (files: File[]) => {
       setError("");
       setUploading(true);
       setIsDirty(true);
@@ -83,8 +67,49 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
     },
+    []
+  );
+
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
+      if (imageUrls.length + files.length > 10) {
+        setError("Maximum 10 images allowed");
+        return;
+      }
+
+      for (const file of files) {
+        if (isHeicFile(file)) { setError(`${file.name}: ${HEIC_HINT}`); return; }
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+          setError(`Invalid type: ${file.name}. Only JPEG, PNG, WebP.`);
+          return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+          setError(`${file.name} is too large. Max 10MB.`);
+          return;
+        }
+      }
+
+      setError("");
+      setQueue(files);
+    },
     [imageUrls.length]
   );
+
+  const handleQueueDone = useCallback(
+    (files: File[]) => {
+      setQueue(null);
+      if (files.length > 0) void uploadQueuedFiles(files);
+      else if (inputRef.current) inputRef.current.value = "";
+    },
+    [uploadQueuedFiles]
+  );
+
+  const handleQueueCancel = useCallback(() => {
+    setQueue(null);
+    if (inputRef.current) inputRef.current.value = "";
+  }, []);
 
   const handleRemoveImage = useCallback((index: number) => {
     setImageUrls((prev) => prev.filter((_, i) => i !== index));
@@ -134,6 +159,16 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
     <form onSubmit={handleSubmit} onChange={() => setIsDirty(true)} className="space-y-6" aria-label="Create service listing">
 {error && (
         <FormBanner variant="error">{error}</FormBanner>
+      )}
+      {queue && (
+        <ImageCropQueue
+          files={queue}
+          label={(i, n) => `Photo ${i + 1} of ${n}`}
+          guidance="Frame each shot. Cropping is optional — keep the original if it already looks right."
+          context="service-images"
+          onDone={handleQueueDone}
+          onCancel={handleQueueCancel}
+        />
       )}
 
       {/* Section 1 — Service details */}

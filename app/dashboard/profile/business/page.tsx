@@ -3,10 +3,12 @@
 
 import { useState, useEffect } from "react"
 import { uploadImage, IMAGE_PRESETS, HEIC_HINT, isHeicFile } from "@/lib/image-client";
-import { Check, Loader2, Save, Camera, User, Building2, RotateCw } from "@/components/ui/icons"
+import { Check, Loader2, Save, Camera, User, Building2 } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
 import { resolveImageUrl } from "@/lib/images";
+import { cropBlobToFile } from "@/lib/crop-utils";
+import ImageCropDialog from "@/components/shared/ImageCropDialog"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { PersonaGate } from "@/components/dashboard/PersonaGate"
 
@@ -132,6 +134,8 @@ function BusinessProfilePageInner() {
   const [businessLogoUrl, setBusinessLogoUrl] = useState("")
   const [avatarUploading, setAvatarUploading] = useState(false)
   const [logoUploading, setLogoUploading] = useState(false)
+  const [pendingPhoto, setPendingPhoto] = useState<File | null>(null)
+  const [pendingLogo, setPendingLogo] = useState<File | null>(null)
 
   useEffect(() => {
     ;(async () => {
@@ -177,9 +181,17 @@ function BusinessProfilePageInner() {
   async function handleBusinessProfilePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    if (isHeicFile(file)) { setError(HEIC_HINT); return }
-    if (!file.type.startsWith("image/")) { setError("Only image files are allowed"); return }
-    if (file.size > 10 * 1024 * 1024) { setError("File must be under 10MB"); return }
+    if (isHeicFile(file)) { setError(HEIC_HINT); e.target.value = ""; return }
+    if (!file.type.startsWith("image/")) { setError("Only image files are allowed"); e.target.value = ""; return }
+    if (file.size > 10 * 1024 * 1024) { setError("File must be under 10MB"); e.target.value = ""; return }
+    e.target.value = ""
+    setError("")
+    // Crop step is optional — dialog offers Apply crop / Use original.
+    setPendingPhoto(file)
+  }
+
+  async function finishPhotoUpload(file: File) {
+    setPendingPhoto(null)
     setAvatarUploading(true)
     setError("")
     try {
@@ -194,45 +206,20 @@ function BusinessProfilePageInner() {
     }
   }
 
-  async function handleRotatePhoto() {
-    if (!businessProfilePhotoUrl) return
-    const src = resolveImageUrl(businessProfilePhotoUrl)
-    if (!src) return
-    setAvatarUploading(true)
-    setError("")
-    try {
-      const res = await fetch(src)
-      if (!res.ok) throw new Error("Failed to fetch image")
-      const blob = await res.blob()
-      const bitmap = await createImageBitmap(blob)
-      const canvas = document.createElement("canvas")
-      canvas.width = bitmap.height
-      canvas.height = bitmap.width
-      const ctx = canvas.getContext("2d")
-      if (!ctx) throw new Error("Canvas unavailable")
-      ctx.translate(canvas.width / 2, canvas.height / 2)
-      ctx.rotate((90 * Math.PI) / 180)
-      ctx.drawImage(bitmap, -bitmap.width / 2, -bitmap.height / 2)
-      const outBlob = await new Promise<Blob | null>((r) => canvas.toBlob((b) => r(b), "image/jpeg", 0.92))
-      if (!outBlob) throw new Error("Rotate failed")
-      const file = new File([outBlob], "rotated.jpg", { type: "image/jpeg" })
-      const url = await uploadFile(file, "business-profiles")
-      setBusinessProfilePhotoUrl(url)
-      const patch = await api.patch("/api/user/profile", { businessProfilePhoto: url })
-      if (patch.error) throw new Error(patch.error)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Rotate failed")
-    } finally {
-      setAvatarUploading(false)
-    }
-  }
-
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    if (isHeicFile(file)) { setError(HEIC_HINT); return }
-    if (!file.type.startsWith("image/")) { setError("Only image files are allowed"); return }
-    if (file.size > 10 * 1024 * 1024) { setError("File must be under 10MB"); return }
+    if (isHeicFile(file)) { setError(HEIC_HINT); e.target.value = ""; return }
+    if (!file.type.startsWith("image/")) { setError("Only image files are allowed"); e.target.value = ""; return }
+    if (file.size > 10 * 1024 * 1024) { setError("File must be under 10MB"); e.target.value = ""; return }
+    e.target.value = ""
+    setError("")
+    // Crop step is optional — dialog offers Apply crop / Use original.
+    setPendingLogo(file)
+  }
+
+  async function finishLogoUpload(file: File) {
+    setPendingLogo(null)
     setLogoUploading(true)
     setError("")
     try {
@@ -405,17 +392,6 @@ function BusinessProfilePageInner() {
                     )}
                     <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handleBusinessProfilePhotoUpload} className="hidden" disabled={avatarUploading} aria-label="Upload profile photo" />
                   </label>
-                  {businessProfilePhotoUrl && (
-                    <button
-                      type="button"
-                      onClick={handleRotatePhoto}
-                      disabled={avatarUploading}
-                      className="touch-target inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary disabled:opacity-50"
-                      title="Rotate 90° clockwise"
-                    >
-                      <RotateCw size={14} /> Rotate
-                    </button>
-                  )}
                 </div>
               </div>
             </div>
@@ -577,6 +553,29 @@ function BusinessProfilePageInner() {
           </div>
         </section>
       </form>
+
+      {pendingPhoto && (
+        <ImageCropDialog
+          sourceFile={pendingPhoto}
+          label="Profile photo"
+          guidance="This photo appears on your public profile — center yourself clearly."
+          context="business-photo"
+          onComplete={(blob) => finishPhotoUpload(cropBlobToFile(blob, pendingPhoto.name))}
+          onSkip={() => finishPhotoUpload(pendingPhoto)}
+          onCancel={() => setPendingPhoto(null)}
+        />
+      )}
+      {pendingLogo && (
+        <ImageCropDialog
+          sourceFile={pendingLogo}
+          label="Business logo"
+          guidance="Keep all brand text inside the crop — this logo appears on your listings and services."
+          context="business-logo"
+          onComplete={(blob) => finishLogoUpload(cropBlobToFile(blob, pendingLogo.name))}
+          onSkip={() => finishLogoUpload(pendingLogo)}
+          onCancel={() => setPendingLogo(null)}
+        />
+      )}
     </div>
   )
 }

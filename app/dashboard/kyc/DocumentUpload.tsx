@@ -1,11 +1,11 @@
 ﻿/* eslint-disable @next/next/no-img-element */
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { resolveImageUrl } from "@/lib/images";
 import { XCircle, FileText, Trash2 } from "@/components/ui/icons"
 import PdfViewer from "@/components/kyc/PdfViewer"
-import ImageCropper from "@/components/kyc/ImageCropper"
+import ImageCropDialog from "@/components/shared/ImageCropDialog"
 import DragDropUploader from "@/components/kyc/DragDropUploader"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { HEIC_HINT, isHeicFile } from "@/lib/image-client"
@@ -58,11 +58,25 @@ function FilePreview({ url, onRemove }: { url: string; onRemove?: () => void }) 
   )
 }
 
-const previewUrl = (f: File | null) => f ? URL.createObjectURL(f) : null
 const isPdf = (url: string) => /\.pdf$/i.test(url)
+
+const usePreviewUrl = (file: File | null) => {
+  // Memoized so render churn never mints spare object URLs (the old
+  // previewUrl() helper created a new URL per call — and revoking a *second*
+  // fresh URL on remove leaked the first). Revoked exactly once on swap/unmount.
+  const url = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
+  useEffect(() => {
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [url]);
+  return url;
+};
 
 export function DocumentUpload(props: Props) {
   const [localMsg, setLocalMsg] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const frontPreviewUrl = usePreviewUrl(props.frontFile)
+  const backPreviewUrl = usePreviewUrl(props.backFile)
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") => {
     const file = e.target.files?.[0]
@@ -138,10 +152,22 @@ export function DocumentUpload(props: Props) {
             {props.frontFile ? (
               <div className="space-y-2" role="group" aria-labelledby="kyc-front-label">
                 {props.cropping === "front" && props.frontFile ? (
-                  <ImageCropper imageUrl={previewUrl(props.frontFile)!} onCropComplete={props.onCropComplete} onCancel={props.onCancelCrop} sideLabel="Front" />
+                  <ImageCropDialog
+                    sourceFile={props.frontFile}
+                    label="Front"
+                    guidance="Position the document so all four corners, the photo and the number are clearly visible."
+                    docGuard
+                    warnOnSkip
+                    context="kyc-front"
+                    onComplete={props.onCropComplete}
+                    onSkip={props.onCancelCrop}
+                    onCancel={props.onCancelCrop}
+                  />
                 ) : (
                   <>
-                    <FilePreview url={previewUrl(props.frontFile)!} onRemove={() => { props.onRemoveFile("front"); URL.revokeObjectURL(previewUrl(props.frontFile)!) }} />
+                    {frontPreviewUrl && (
+                      <FilePreview url={frontPreviewUrl} onRemove={() => props.onRemoveFile("front")} />
+                    )}
                     <button type="button" onClick={() => props.onStartCrop("front")} className="touch-target rounded-lg px-2 py-1 text-xs font-medium text-primary-600 hover:underline">Re-crop</button>
                   </>
                 )}
@@ -173,10 +199,22 @@ export function DocumentUpload(props: Props) {
             {props.backFile ? (
               <div className="space-y-2" role="group" aria-labelledby="kyc-back-label">
                 {props.cropping === "back" && props.backFile ? (
-                  <ImageCropper imageUrl={previewUrl(props.backFile)!} onCropComplete={props.onCropComplete} onCancel={props.onCancelCrop} sideLabel="Back" />
+                  <ImageCropDialog
+                    sourceFile={props.backFile}
+                    label="Back"
+                    guidance="Position the document so all four corners are clearly visible."
+                    docGuard
+                    warnOnSkip
+                    context="kyc-back"
+                    onComplete={props.onCropComplete}
+                    onSkip={props.onCancelCrop}
+                    onCancel={props.onCancelCrop}
+                  />
                 ) : (
                   <>
-                    <FilePreview url={previewUrl(props.backFile)!} onRemove={() => { props.onRemoveFile("back"); URL.revokeObjectURL(previewUrl(props.backFile)!) }} />
+                    {backPreviewUrl && (
+                      <FilePreview url={backPreviewUrl} onRemove={() => props.onRemoveFile("back")} />
+                    )}
                     <button type="button" onClick={() => props.onStartCrop("back")} className="touch-target rounded-lg px-2 py-1 text-xs font-medium text-primary-600 hover:underline">Re-crop</button>
                   </>
                 )}
