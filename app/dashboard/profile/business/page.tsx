@@ -253,6 +253,8 @@ function BusinessProfilePageInner() {
         : []
 
   const isDirty = initialForm ? JSON.stringify(form) !== JSON.stringify(initialForm) : false
+  // Account type is locked after onboarding — the API rejects changes with a 403.
+  const isCategoryLocked = !!initialForm?.category
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -260,15 +262,20 @@ function BusinessProfilePageInner() {
     setError("")
     setSuccess(false)
     try {
-      // AGENT and PROPERTY_OWNER have no specialties — clear any stale values.
-      const payload =
-        form.category === "AGENT" || form.category === "PROPERTY_OWNER"
+      // AGENT, PROPERTY_OWNER and CUSTOMER have no specialties — clear any stale values.
+      const normalized =
+        form.category === "AGENT" || form.category === "PROPERTY_OWNER" || form.category === "CUSTOMER"
           ? { ...form, specialties: [] as string[] }
           : form
+      // Account type is locked after onboarding — never resend an unchanged
+      // category or the API rejects the whole save with a 403.
+      const categoryChanged = initialForm ? normalized.category !== initialForm.category : true
+      const payload: Record<string, unknown> = { ...normalized }
+      if (!categoryChanged) delete payload.category
       const res = await api.patch("/api/user/profile", payload)
       if (res.error) throw new Error(res.error)
-      setForm(payload)
-      setInitialForm({ ...payload })
+      setForm(normalized)
+      setInitialForm({ ...normalized })
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
@@ -435,6 +442,9 @@ function BusinessProfilePageInner() {
           <div className="mt-6 space-y-2">
             <span className="block text-sm font-medium text-text-primary" id="bizCategoryLabel">
               Category <span className="text-error-500">*</span>
+              {isCategoryLocked && (
+                <span className="ml-2 text-xs font-normal text-text-secondary">(locked after onboarding — contact support to change)</span>
+              )}
             </span>
             <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2" role="group" aria-labelledby="bizCategoryLabel">
               {categories.map((cat) => (
@@ -442,6 +452,8 @@ function BusinessProfilePageInner() {
                   key={cat.value}
                   type="button"
                   aria-pressed={form.category === cat.value}
+                  disabled={isCategoryLocked}
+                  title={isCategoryLocked ? "Account type is locked after onboarding — contact support to change" : undefined}
                   onClick={() => {
                     updateField("category", cat.value)
                     setForm((prev) => ({ ...prev, specialties: [] }))
@@ -450,7 +462,8 @@ function BusinessProfilePageInner() {
                     "touch-target rounded-lg border px-4 py-3 text-sm font-medium transition-colors",
                     form.category === cat.value
                       ? "border-primary-500 bg-primary-50 text-primary-600"
-                      : "border-border text-text-secondary hover:border-primary-300"
+                      : "border-border text-text-secondary hover:border-primary-300",
+                    isCategoryLocked && "cursor-not-allowed opacity-60 hover:border-border"
                   )}
                 >
                   {cat.label}
