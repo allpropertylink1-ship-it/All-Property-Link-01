@@ -100,8 +100,41 @@ export default function AgentReferralsPage() {
           {tab === "DELETED" ? "No deleted referrals" : "No referrals found"}
         </div>
       ) : (
-        <section aria-label={tab === "DELETED" ? "Deleted referrals" : "Active referrals"} className="overflow-hidden rounded-xl border border-border bg-surface">
-          <div className="overflow-x-auto">
+        <>
+          {/* Mobile: stacked cards — no horizontal scroll, actions always visible */}
+          <section aria-label={tab === "DELETED" ? "Deleted referrals" : "Active referrals"} className="space-y-3 sm:hidden">
+            {referrals.map((r) => (
+              <article key={r.id} className={`rounded-xl border border-border bg-surface p-4 ${r.deletedAt ? "opacity-70" : ""}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="truncate text-sm font-semibold text-text-primary">{r.firstName} {r.lastName}</h2>
+                    <p className="truncate text-sm text-text-secondary">{r.email}</p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-surface-secondary px-2.5 py-1 text-xs font-medium text-text-secondary">
+                    {r._count.properties} {r._count.properties === 1 ? "property" : "properties"}
+                  </span>
+                </div>
+                <dl className="mt-3 space-y-1 text-xs text-text-secondary">
+                  <div className="flex justify-between gap-3">
+                    <dt>Phone</dt>
+                    <dd className="min-w-0 truncate text-text-primary">{r.phone || "-"}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt>{tab === "DELETED" ? "Deleted" : "Joined"}</dt>
+                    <dd className="text-text-primary">
+                      {r.deletedAt ? new Date(r.deletedAt).toLocaleDateString() : new Date(r.createdAt).toLocaleDateString()}
+                    </dd>
+                  </div>
+                </dl>
+                <Link href={`/dashboard/agent/referrals/${r.id}`} className="touch-target mt-3 inline-flex min-h-[44px] w-full items-center justify-center gap-1 rounded-lg border border-border text-sm font-medium text-primary-600 hover:bg-surface-secondary hover:text-primary-700">
+                  View <ChevronRight size={14} />
+                </Link>
+              </article>
+            ))}
+          </section>
+          {/* Desktop: table */}
+          <section aria-label={tab === "DELETED" ? "Deleted referrals" : "Active referrals"} className="hidden overflow-hidden rounded-xl border border-border bg-surface sm:block">
+          <div className="max-w-full overflow-x-auto">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="bg-surface-secondary text-text-secondary">
               <tr>
@@ -134,6 +167,7 @@ export default function AgentReferralsPage() {
           </table>
           </div>
         </section>
+        </>
       )}
 
       <Pagination currentPage={page} totalPages={totalPages} onChange={setPage} />

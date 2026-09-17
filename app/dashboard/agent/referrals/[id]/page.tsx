@@ -171,7 +171,7 @@ export default function AgentReferralDetailPage() {
           {referral.properties.map((p) => {
             const img = (p.coverImage ?? (Array.isArray(p.images) ? p.images[0] : null)) as string | { url: string } | null
             return (
-              <div key={p.id} className="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-sm">
+              <div key={p.id} className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-sm sm:flex-row sm:items-center sm:gap-4">
                 <Link href={`/${p.propertyType === "LAND" ? "land" : "properties"}/${p.city?.toLowerCase() || "unknown"}/${p.slug}`} className="flex min-w-0 flex-1 items-center gap-4">
                   {img ? (
                     <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-surface-secondary">
@@ -188,17 +188,17 @@ export default function AgentReferralDetailPage() {
                     <p className="text-sm font-semibold text-text-primary">{fmtKES(p.price)}</p>
                   </div>
                 </Link>
-                <div className="flex shrink-0 flex-col items-end gap-2">
+                <div className="flex w-full shrink-0 flex-row flex-wrap items-center justify-between gap-2 border-t border-border pt-3 sm:w-auto sm:flex-col sm:items-end sm:border-t-0 sm:pt-0">
                   <StatusPill status={p.moderationStatus} label={p.status} />
-                  <div className="flex items-center gap-2">
-                    <Link href={`/dashboard/agent/referrals/${referral.id}/properties/${p.id}/edit`} className="rounded-lg border border-accent-200 bg-accent-50 px-3 py-1.5 text-xs font-medium text-accent-700 transition-colors hover:bg-accent-100">
+                  <div className="flex flex-1 items-center justify-end gap-2 sm:flex-none">
+                    <Link href={`/dashboard/agent/referrals/${referral.id}/properties/${p.id}/edit`} className="touch-target inline-flex min-h-[44px] items-center rounded-lg border border-accent-200 bg-accent-50 px-3 py-1.5 text-xs font-medium text-accent-700 transition-colors hover:bg-accent-100">
                       Edit
                     </Link>
                     <button
                       type="button"
                       disabled={deleting}
                       onClick={() => handleDelete(p.id)}
-                      className={`inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
+                      className={`touch-target inline-flex min-h-[44px] items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
                         confirmDeleteId === p.id
                           ? "border-error-500 bg-error-500 text-white hover:bg-error-700"
                           : "border-border text-text-secondary hover:bg-surface-secondary hover:text-error-600"
@@ -233,7 +233,7 @@ export default function AgentReferralDetailPage() {
           ) : (
             <div className="space-y-3">
               {services.map((s) => (
-                <div key={s.id} className="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-sm">
+                <div key={s.id} className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-sm sm:flex-row sm:items-center sm:gap-4">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-text-primary">{s.title}</p>
                     <p className="text-xs text-text-secondary">
@@ -243,17 +243,17 @@ export default function AgentReferralDetailPage() {
                       <p className="text-sm font-semibold text-text-primary">{fmtKES(s.price)}</p>
                     )}
                   </div>
-                  <div className="flex shrink-0 flex-col items-end gap-2">
+                  <div className="flex w-full shrink-0 flex-row flex-wrap items-center justify-between gap-2 border-t border-border pt-3 sm:w-auto sm:flex-col sm:items-end sm:border-t-0 sm:pt-0">
                     <StatusPill status={s.moderationStatus} label={s.status} />
-                    <div className="flex items-center gap-2">
-                      <Link href={`/dashboard/agent/referrals/${referral.id}/services/${s.id}/edit`} className="rounded-lg border border-accent-200 bg-accent-50 px-3 py-1.5 text-xs font-medium text-accent-700 transition-colors hover:bg-accent-100">
+                    <div className="flex flex-1 items-center justify-end gap-2 sm:flex-none">
+                      <Link href={`/dashboard/agent/referrals/${referral.id}/services/${s.id}/edit`} className="touch-target inline-flex min-h-[44px] items-center rounded-lg border border-accent-200 bg-accent-50 px-3 py-1.5 text-xs font-medium text-accent-700 transition-colors hover:bg-accent-100">
                         Edit
                       </Link>
                       <button
                         type="button"
                         disabled={deleting}
                         onClick={() => handleServiceDelete(s.id)}
-                        className={`inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
+                        className={`touch-target inline-flex min-h-[44px] items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
                           confirmDeleteId === s.id
                             ? "border-error-500 bg-error-500 text-white hover:bg-error-700"
                             : "border-border text-text-secondary hover:bg-surface-secondary hover:text-error-600"
