@@ -5,6 +5,12 @@ import { api } from "./api-client"
 
 export const CURRENT_TERMS_VERSION = "2026-09-17"
 
+// Shown when login succeeds but the session cookies were rejected by the
+// browser (third-party-cookie blocking). Retrying usually goes through the
+// same-origin proxy and sticks; the message says so.
+export const COOKIES_BLOCKED_ERROR =
+  "Sign-in didn't stick — your browser blocked our login cookies. Please allow third-party cookies for this site (or open it in Chrome), then sign in again."
+
 interface User {
   id: string
   email: string
@@ -42,12 +48,12 @@ export interface OtpResponse {
 interface AuthContextType {
   user: User | null
   loading: boolean
-  login: (emailOrPhone: string, password: string, rememberMe?: boolean) => Promise<{ error?: string; user?: User }>
+  login: (emailOrPhone: string, password: string, rememberMe?: boolean) => Promise<{ error?: string; code?: string; user?: User }>
   logout: () => Promise<void>
   phoneLogin: (phone: string) => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
   signup: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string }) => Promise<{ error?: string; code?: string; otp?: OtpResponse }>
   sendOtp: (identifier: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
-  verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION", rememberMe?: boolean) => Promise<{ error?: string; user?: User }>
+  verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION", rememberMe?: boolean) => Promise<{ error?: string; code?: string; user?: User }>
   updateRegistration: (data: { oldIdentifier: string; email?: string; phone?: string; firstName?: string; lastName?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
   refreshUser: () => Promise<User | null | undefined>
   clearSession: () => void
@@ -150,17 +156,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       : { email: emailOrPhone, password, rememberMe }
     const { data, error } = await api.post<{ user: User }>("/api/auth/login", payload)
     if (data?.user) {
-      // NOTE (incident 2026-09-17): no post-login hydration here by design.
-      // The submit path must stay byte-identical to the pre-redirect-work
-      // sequence (POST → setUser → navigate). Persona routing happens via
-      // resolvePostAuthTarget fallbacks + the server dashboard router, which
-      // is the source of truth. An extra /me here added latency/failure
-      // surface with zero routing benefit on failure.
-      setUser({ ...data.user, authMethod: "user" })
-      return {}
+      // Confirm the session cookies actually stuck before navigating.
+      // Incident 2026-09-17 ("logged in then immediately logged out"): when
+      // the login POST is served via the direct-origin fallback (proxy 502
+      // during a backend slow spell), browsers that block third-party
+      // cookies — Safari, Firefox-strict, WhatsApp/IG/TikTok in-app browsers
+      // — reject the Set-Cookie and the session is dead on arrival. A
+      // definitive DENIED here means exactly that: stop with an actionable
+      // message instead of navigating into a phantom logout. UNKNOWN
+      // (unreachable server) falls through to setUser + optimistic
+      // navigation; the server remains the source of truth.
+      const probe = await fetchUser()
+      if (probe === null) {
+        return { error: COOKIES_BLOCKED_ERROR, code: "COOKIES_BLOCKED" }
+      }
+      setUser({ ...(probe ?? data.user), authMethod: "user" })
+      return { user: (probe ?? data.user) as User }
     }
     return { error: error || "Login failed" }
-  }, [])
+  }, [fetchUser])
 
   const logout = useCallback(async () => {
     await api.post("/api/auth/logout")
@@ -184,12 +198,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data, error } = await api.post<{ user: User }>("/api/auth/verify-otp", { identifier, token, type, rememberMe })
     if (error) return { error }
     if (data?.user) {
-      // Same rule as login(): no hydration on the submit path (see above).
-      setUser({ ...data.user, authMethod: "user" })
-      return {}
+      // Same rule as login(): a definitive DENIED right after a successful
+      // verify means the cookies didn't stick — actionable message, no
+      // navigation. UNKNOWN navigates optimistically (server decides).
+      const probe = await fetchUser()
+      if (probe === null) {
+        return { error: COOKIES_BLOCKED_ERROR, code: "COOKIES_BLOCKED" }
+      }
+      setUser({ ...(probe ?? data.user), authMethod: "user" })
+      return { user: (probe ?? data.user) as User }
     }
     return {}
-  }, [])
+  }, [fetchUser])
 
   const phoneLogin = useCallback(async (phone: string) => {
     const { data, error } = await api.post<{ expiresIn: number; retryAfter: number }>("/api/auth/phone-login", { phone })
