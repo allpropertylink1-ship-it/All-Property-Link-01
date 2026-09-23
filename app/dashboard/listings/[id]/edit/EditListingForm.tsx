@@ -17,6 +17,7 @@ const LocationPicker = dynamic(
   { ssr: false, loading: () => <p className="text-sm text-text-secondary">Loading map…</p> }
 );
 import { FormBanner } from "@/components/shared/FormFeedback";
+import { SuggestSeoPanel } from "@/components/property/SuggestSeoPanel";
 import type { ListingSubmitOverride } from "@/components/dashboard/ListingForm";
 import { subTypeOptionsFor } from "@/lib/property-subtypes";
 
@@ -234,6 +235,23 @@ export default function EditListingForm({ propertyId, property, redirectTo, subm
             <Label htmlFor="description">Description</Label>
             <textarea id="description" rows={4} className="flex w-full rounded-lg border border-border bg-surface px-4 py-3 text-base text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" {...register("description")} />
             {errors.description && <p className="text-xs text-error-500">{errors.description.message}</p>}
+          </div>
+          <div className="sm:col-span-2">
+            <SuggestSeoPanel
+              propertyId={propertyId}
+              getInput={() => {
+                const v = watch()
+                return {
+                  title: v.title || "",
+                  propertyType: v.propertyType,
+                  listingPurpose: v.listingPurpose || undefined,
+                  city: v.city || "",
+                  area: v.area != null ? `${v.area} sq ft` : "",
+                  price: typeof v.price === "number" ? v.price : null,
+                  description: v.description || "",
+                }
+              }}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="price">Price</Label>

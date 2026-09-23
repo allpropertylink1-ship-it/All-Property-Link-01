@@ -14,6 +14,20 @@ async function getStats() {
   return data?.stats || { totalListings: 0, totalServices: 0, unreadNotifications: 0 }
 }
 
+interface DashboardIssue {
+  code: string
+  label: string
+  fixHref: string
+}
+
+// Phase 2 (2026-09): account + listing flags for the dashboard banner.
+async function getIssues(): Promise<{ issues: DashboardIssue[]; listings: { kind: string; id: string; title: string; issues: DashboardIssue[] }[]; total: number }> {
+  const res = await serverFetch(`/api/user/issues`)
+  if (!res.ok) return { issues: [], listings: [], total: 0 }
+  const data = await res.json().catch(() => null)
+  return { issues: data?.issues || [], listings: data?.listings || [], total: data?.total || 0 }
+}
+
 const statCards = [
   { key: "totalListings", label: "Total Listings", hint: "Across sale and rent", icon: Building2, href: "/dashboard/listings" },
   { key: "totalServices", label: "Services", hint: "Active offerings", icon: Wrench, href: "/dashboard/services" },
@@ -67,6 +81,8 @@ export default async function DashboardPage() {
   }
 
   const stats = await getStats()
+  const issueFeed = await getIssues()
+  const bannerIssues = [...issueFeed.issues, ...issueFeed.listings.flatMap((l) => l.issues.map((i) => ({ ...i, label: `${l.title}: ${i.label}` })))].slice(0, 4)
 
   return (
     <div className="space-y-6">
@@ -82,6 +98,31 @@ export default async function DashboardPage() {
           Here&apos;s an overview of your business activity
         </p>
       </section>
+
+      {/* Phase 2 (2026-09): account + listing issues needing attention */}
+      {issueFeed.total > 0 && (
+        <section aria-labelledby="attention-heading" className="rounded-xl border border-accent-500/40 bg-surface p-5 sm:p-6">
+          <p className="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-secondary">
+            Needs attention
+          </p>
+          <h2 id="attention-heading" className="mt-1 font-heading text-lg font-bold tracking-tight text-text-primary">
+            {issueFeed.total} thing{issueFeed.total === 1 ? "" : "s"} to fix
+          </h2>
+          <ul className="mt-3 space-y-2">
+            {bannerIssues.map((issue, idx) => (
+              <li key={`${issue.code}-${idx}`}>
+                <Link href={issue.fixHref} className="group flex items-start gap-2 text-sm text-text-secondary hover:text-primary-600">
+                  <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-500" />
+                  <span className="group-hover:underline">{issue.label}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          {issueFeed.total > bannerIssues.length && (
+            <p className="mt-2 text-xs text-text-secondary">+{issueFeed.total - bannerIssues.length} more across your profile and listings</p>
+          )}
+        </section>
+      )}
 
       {/* Stitch stat-card row */}
       <section aria-labelledby="metrics-heading">

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { api } from "@/lib/api-client"
-import { Loader2, AlertCircle, Search, ChevronRight, Users, Archive } from "@/components/ui/icons"
+import { Loader2, AlertCircle, Search, ChevronRight, Users, Archive, TriangleAlert } from "@/components/ui/icons"
 import { AgentGuard } from "@/components/dashboard/AgentGuard"
 import { Pagination } from "@/components/shared/Pagination"
 
@@ -20,11 +20,38 @@ interface Referral {
   _count: { properties: number }
 }
 
-type Tab = "ACTIVE" | "DELETED"
+type Tab = "ACTIVE" | "DELETED" | "ISSUES"
+
+// Phase 2 (2026-09): the rep issues queue — referred users with account or
+// listing problems (blank contacts, pending reset, incomplete KYC, missing
+// location/photos/pin, legacy photos).
+interface QueueIssue {
+  code: string
+  label: string
+  fixHref: string
+}
+
+interface QueueListing {
+  kind: string
+  id: string
+  title: string
+  issues: QueueIssue[]
+}
+
+interface QueueRow {
+  id: string
+  firstName: string
+  lastName: string
+  email: string | null
+  phone: string | null
+  issues: QueueIssue[]
+  listings: QueueListing[]
+}
 
 export default function AgentReferralsPage() {
   const [tab, setTab] = useState<Tab>("ACTIVE")
   const [referrals, setReferrals] = useState<Referral[]>([])
+  const [queue, setQueue] = useState<QueueRow[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -41,6 +68,17 @@ export default function AgentReferralsPage() {
   const fetchReferrals = useCallback(async () => {
     setLoading(true)
     setError("")
+    if (tab === "ISSUES") {
+      const { data, error } = await api.get<{ issues: QueueRow[]; total: number }>(`/api/referral-partner/issues?limit=200`)
+      if (data) {
+        setQueue(data.issues)
+        setTotal(data.total)
+      } else {
+        setError(error || "Failed to load")
+      }
+      setLoading(false)
+      return
+    }
     const status = tab === "DELETED" ? "DELETED" : "ACTIVE"
     const params = new URLSearchParams({ page: String(page), limit: "20", status })
     if (debouncedSearch) params.set("search", debouncedSearch)
@@ -66,7 +104,7 @@ export default function AgentReferralsPage() {
           Commission hub
         </p>
         <h1 id="referrals-heading" className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">Referrals</h1>
-        <p className="mt-1 text-sm text-text-secondary">{total} {tab === "DELETED" ? "deleted" : "active"} referral{total !== 1 ? "s" : ""}</p>
+        <p className="mt-1 text-sm text-text-secondary">{total} {tab === "DELETED" ? "deleted" : tab === "ISSUES" ? "needing attention" : "active"} referral{total !== 1 ? "s" : ""}</p>
       </section>
 
       <div className="mb-4 flex gap-1 rounded-xl border border-border bg-surface-secondary p-1" role="group" aria-label="Referral status filter">
@@ -78,14 +116,20 @@ export default function AgentReferralsPage() {
           className={`touch-target flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors sm:flex-none ${tab === "DELETED" ? "bg-surface text-text-primary shadow-sm" : "text-text-secondary hover:text-text-primary"}`}>
           <Archive size={16} /> Deleted
         </button>
+        <button type="button" onClick={() => setTab("ISSUES")} aria-pressed={tab === "ISSUES"}
+          className={`touch-target flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors sm:flex-none ${tab === "ISSUES" ? "bg-surface text-text-primary shadow-sm" : "text-text-secondary hover:text-text-primary"}`}>
+          <TriangleAlert size={16} /> Needs attention
+        </button>
       </div>
 
+      {tab !== "ISSUES" && (
       <div className="relative mb-4">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
         <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or email..." aria-label="Search referrals by name or email"
           className="min-h-[44px] w-full rounded-lg border border-border bg-surface py-2.5 pl-9 pr-4 text-base text-text-primary placeholder:text-text-secondary focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15"
         />
       </div>
+      )}
 
       {loading ? (
         <div className="flex items-center justify-center py-20"><Loader2 size={24} className="animate-spin text-muted" /></div>
@@ -95,6 +139,47 @@ export default function AgentReferralsPage() {
           <p className="text-sm text-text-secondary">{error}</p>
           <button type="button" onClick={fetchReferrals} className="touch-target rounded-lg bg-primary-600 px-5 py-2 text-sm font-medium text-white">Retry</button>
         </div>
+      ) : tab === "ISSUES" ? (
+        queue.length === 0 ? (
+          <div className="rounded-xl border border-border bg-surface px-4 py-20 text-center text-sm text-text-secondary" role="status">
+            Nothing needs attention — all referrals and their listings are clean
+          </div>
+        ) : (
+          <section aria-label="Referrals needing attention" className="space-y-3">
+            {queue.map((q) => {
+              const allIssues = [...q.issues, ...q.listings.flatMap((l) => l.issues.map((i) => ({ ...i, label: `${l.title}: ${i.label}` })))]
+              return (
+                <article key={q.id} className="rounded-xl border border-accent-500/40 bg-surface p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h2 className="truncate text-sm font-semibold text-text-primary">{q.firstName} {q.lastName}</h2>
+                      <p className="truncate text-sm text-text-secondary">{q.email || "No email"} · {q.phone || "No phone"}</p>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-accent-50 px-2.5 py-1 text-xs font-medium text-accent-600">
+                      {allIssues.length} issue{allIssues.length === 1 ? "" : "s"}
+                    </span>
+                  </div>
+                  <ul className="mt-3 space-y-1.5">
+                    {allIssues.slice(0, 5).map((i, idx) => (
+                      <li key={`${i.code}-${idx}`}>
+                        <Link href={i.fixHref} className="group flex items-start gap-2 text-xs text-text-secondary hover:text-primary-600">
+                          <TriangleAlert size={14} className="mt-0.5 shrink-0 text-accent-500" />
+                          <span className="group-hover:underline">{i.label}</span>
+                        </Link>
+                      </li>
+                    ))}
+                    {allIssues.length > 5 && (
+                      <li className="text-xs text-text-secondary">+{allIssues.length - 5} more — open the referral to see all</li>
+                    )}
+                  </ul>
+                  <Link href={`/dashboard/agent/referrals/${q.id}`} className="touch-target mt-3 inline-flex min-h-[44px] w-full items-center justify-center gap-1 rounded-lg border border-border text-sm font-medium text-primary-600 hover:bg-surface-secondary hover:text-primary-700">
+                    Open referral <ChevronRight size={14} />
+                  </Link>
+                </article>
+              )
+            })}
+          </section>
+        )
       ) : referrals.length === 0 ? (
         <div className="rounded-xl border border-border bg-surface px-4 py-20 text-center text-sm text-text-secondary" role="status">
           {tab === "DELETED" ? "No deleted referrals" : "No referrals found"}
@@ -170,7 +255,9 @@ export default function AgentReferralsPage() {
         </>
       )}
 
-      <Pagination currentPage={page} totalPages={totalPages} onChange={setPage} />
+      {tab !== "ISSUES" && (
+        <Pagination currentPage={page} totalPages={totalPages} onChange={setPage} />
+      )}
     </AgentGuard>
   )
 }

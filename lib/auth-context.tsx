@@ -30,6 +30,7 @@ interface User {
   fullName?: string
   authMethod?: "user" | "agent"
   mustChangePassword?: boolean
+  requiresPasswordChange?: boolean
   userTypes?: string[]
   acceptedTermsAt?: string | null
   termsVersion?: string | null
@@ -62,6 +63,7 @@ interface AuthContextType {
   agentForgotPassword: (identifier: string) => Promise<{ error?: string }>
   agentResetPassword: (token: string, password: string) => Promise<{ error?: string }>
   firstPasswordChange: (newPassword: string) => Promise<{ error?: string }>
+  changePassword: (newPassword: string, currentPassword?: string) => Promise<{ error?: string }>
   acceptConsent: () => Promise<{ error?: string }>
 }
 
@@ -81,6 +83,7 @@ const AuthContext = createContext<AuthContextType>({
   agentForgotPassword: async () => ({}),
   agentResetPassword: async () => ({}),
   firstPasswordChange: async () => ({}),
+  changePassword: async () => ({}),
   updateRegistration: async () => ({}),
   acceptConsent: async () => ({}),
 })
@@ -154,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const payload = isPhone
       ? { phone: emailOrPhone.replace(/\s/g, "").replace(/^0/, "+254"), password, rememberMe }
       : { email: emailOrPhone, password, rememberMe }
-    const { data, error } = await api.post<{ user: User }>("/api/auth/login", payload)
+    const { data, error, code } = await api.post<{ user: User }>("/api/auth/login", payload)
     if (data?.user) {
       // Confirm the session cookies actually stuck before navigating.
       // Incident 2026-09-17 ("logged in then immediately logged out"): when
@@ -173,7 +176,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser({ ...(probe ?? data.user), authMethod: "user" })
       return { user: (probe ?? data.user) as User }
     }
-    return { error: error || "Login failed" }
+    // Phase 2 (2026-09): surface machine-readable verdicts (e.g.
+    // PASSWORD_RESET_REQUIRED) so the form can offer recovery.
+    return { error: error || "Login failed", code }
   }, [fetchUser])
 
   const logout = useCallback(async () => {
@@ -195,8 +200,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const verifyOtp = useCallback(async (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION", rememberMe = true) => {
-    const { data, error } = await api.post<{ user: User }>("/api/auth/verify-otp", { identifier, token, type, rememberMe })
-    if (error) return { error }
+    const { data, error, code } = await api.post<{ user: User }>("/api/auth/verify-otp", { identifier, token, type, rememberMe })
+    if (error) return { error, code }
     if (data?.user) {
       // Same rule as login(): a definitive DENIED right after a successful
       // verify means the cookies didn't stick — actionable message, no
@@ -251,6 +256,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {}
   }, [])
 
+  // Phase 2 (2026-09): personal reset for flagged sessions (no current
+  // password needed) and regular changes (current required). Clears the
+  // mustChangePassword flag and revokes all sessions server-side.
+  const changePassword = useCallback(async (newPassword: string, currentPassword?: string) => {
+    const { error } = await api.post("/api/auth/change-password", { newPassword, currentPassword })
+    if (error) return { error }
+    await fetchUser()
+    return {}
+  }, [fetchUser])
+
   const updateRegistration = useCallback(async (data: { oldIdentifier: string; email?: string; phone?: string; firstName?: string; lastName?: string }) => {
     const { data: result, error } = await api.post<OtpResponse>("/api/auth/update-registration", data)
     if (error) return { error }
@@ -265,7 +280,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchUser])
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, phoneLogin, signup, sendOtp, verifyOtp, refreshUser: fetchUser, clearSession, sendMagicLink, agentLogin, agentForgotPassword, agentResetPassword, firstPasswordChange, updateRegistration, acceptConsent }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, phoneLogin, signup, sendOtp, verifyOtp, refreshUser: fetchUser, clearSession, sendMagicLink, agentLogin, agentForgotPassword, agentResetPassword, firstPasswordChange, changePassword, updateRegistration, acceptConsent }}>
       {children}
     </AuthContext.Provider>
   )

@@ -472,8 +472,15 @@ export const TreePine = ({ className, size = 24 }: IconProps) => (
   </svg>
 );
 
-export const Trash2 = ({ className, size = 24 }: IconProps) => (
+export const TriangleAlert = ({ className, size = 24 }: IconProps) => (
   <svg {...s(size)} className={className}>
+    <path d="M12 3L2 20h20L12 3z" />
+    <line x1="12" y1="9" x2="12" y2="13" />
+    <circle cx="12" cy="16.5" r="1" fill={GOLD} stroke="none" />
+  </svg>
+);
+
+export const Trash2 = ({ className, size = 24 }: IconProps) => (  <svg {...s(size)} className={className}>
     <polyline points="3,6 5,6 21,6" />
     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
     <line x1="10" y1="11" x2="10" y2="17" />

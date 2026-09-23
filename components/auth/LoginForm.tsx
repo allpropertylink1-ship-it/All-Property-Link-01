@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context"
 import { PasswordToggle } from "./PasswordToggle"
 import { GoogleSignInButton } from "./GoogleSignInButton"
 import { OtpInput } from "./OtpInput"
+import { SetPasswordForm } from "./SetPasswordForm"
 import { AuthAssurance, AuthDivider, AuthSubmitButton, InputLeadingIcon, stitchInputWithIconClass } from "./stitch-auth"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { Mail } from "@/components/ui/icons"
@@ -28,6 +29,10 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
   const [otpLoading, setOtpLoading] = useState(false)
   const [otpCooldown, setOtpCooldown] = useState(0)
   const cooldownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  // Phase 2 (2026-09): flagged accounts are blocked at password login and
+  // must recover via SMS code or email link, then set a personal password.
+  const [resetRequired, setResetRequired] = useState(false)
+  const [forceSetPassword, setForceSetPassword] = useState(false)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -41,6 +46,9 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
     const result = await login(email, password, rememberMe)
 
     if (result?.error) {
+      if (result?.code === "PASSWORD_RESET_REQUIRED") {
+        setResetRequired(true)
+      }
       setError(result.error)
       setLoading(false)
       return
@@ -106,6 +114,12 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
       setOtpLoading(false)
       return
     }
+    // Flagged sessions (migrated cohort) must set a personal password first.
+    if ((result?.user as { requiresPasswordChange?: boolean } | undefined)?.requiresPasswordChange) {
+      setForceSetPassword(true)
+      setOtpLoading(false)
+      return
+    }
     router.push(resolvePostAuthTarget(result?.user ?? null, returnUrl))
     router.refresh()
   }
@@ -116,11 +130,35 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
     }
   }, [])
 
+  // Flagged session (verified via SMS code): set a personal password first.
+  if (forceSetPassword) {
+    return (
+      <SetPasswordForm
+        onDone={() => {
+          router.push(returnUrl || "/dashboard")
+          router.refresh()
+        }}
+      />
+    )
+  }
+
   return (
     <div className="space-y-4">
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <FormBanner variant="error">{error}</FormBanner>
+        )}
+        {resetRequired && (
+          <div className="rounded-xl border border-accent-500/40 bg-accent-50 p-4 text-sm text-text-primary" role="status">
+            <p className="font-semibold">Your account needs a personal password first.</p>
+            <p className="mt-1 text-text-secondary">
+              Sign in below with an SMS code, or{" "}
+              <a href="/auth/forgot-password" className="font-semibold text-accent-600 hover:text-accent-700">
+                reset via email link
+              </a>
+              , then choose your new password.
+            </p>
+          </div>
         )}
         <div>
           <label htmlFor="email" className="block text-sm font-semibold text-text-primary">
