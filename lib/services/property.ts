@@ -34,6 +34,7 @@ export interface PropertyDetail {
   propertyType: string; listingPurpose: string | null; status: string;
   city: string; region: string; country: string;
   bedrooms: number | null; bathrooms: number | null; area: number | null;
+  plotSize: number | string | null; plotSizeUnit: string | null;
   latitude: unknown; longitude: unknown; images: unknown; coverImage?: string | null; features: string[];
   isFeatured: boolean; createdAt: Date;
   agent: PropertyDetailAgent | null;

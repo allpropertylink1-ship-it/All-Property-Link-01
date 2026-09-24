@@ -26,6 +26,11 @@ export const propertySchema = z.object({
     (v) => (v === "" || v === undefined ? undefined : Number(v)),
     z.number().int().optional()
   ),
+  plotSize: z.preprocess(
+    (v) => (v === "" || v === undefined ? undefined : Number(v)),
+    z.number().positive("Plot size must be positive").optional()
+  ).nullable(),
+  plotSizeUnit: z.enum(["SQFT", "SQM", "ACRE", "HECTARE"]).optional(),
   latitude: z.preprocess(
     (v) => (v === "" || v === undefined ? undefined : Number(v)),
     z.number().optional()

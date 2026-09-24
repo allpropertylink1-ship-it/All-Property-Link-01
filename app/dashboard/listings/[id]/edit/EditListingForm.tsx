@@ -34,6 +34,8 @@ interface PropertyData {
   bedrooms?: number;
   bathrooms?: number;
   area?: number;
+  plotSize?: number | null;
+  plotSizeUnit?: "SQFT" | "SQM" | "ACRE" | "HECTARE" | null;
   features?: string[];
   images?: string[];
   coverImage?: string | null;
@@ -57,6 +59,11 @@ const listingSchema = z.object({
   bedrooms: z.coerce.number().int().min(0).optional(),
   bathrooms: z.coerce.number().int().min(0).optional(),
   area: z.coerce.number().int().min(0).optional(),
+  plotSize: z.preprocess(
+    (v) => (v === "" || v === undefined ? undefined : Number(v)),
+    z.number().positive("Plot size must be positive").optional()
+  ).nullable(),
+  plotSizeUnit: z.enum(["SQFT", "SQM", "ACRE", "HECTARE"]).optional(),
   features: z.string().optional(),
   latitude: z.coerce.number().optional(),
   longitude: z.coerce.number().optional(),
@@ -89,6 +96,10 @@ export default function EditListingForm({ propertyId, property, redirectTo, subm
       bedrooms: property.bedrooms ?? undefined,
       bathrooms: property.bathrooms ?? undefined,
       area: property.area ?? undefined,
+      plotSize: property.plotSize ?? undefined,
+      plotSizeUnit: (["SQFT", "SQM", "ACRE", "HECTARE"] as const).includes(property.plotSizeUnit as "SQFT" | "SQM" | "ACRE" | "HECTARE")
+        ? (property.plotSizeUnit as "SQFT" | "SQM" | "ACRE" | "HECTARE")
+        : undefined,
       features: property.features?.join(", ") || "",
       latitude: property.latitude ?? undefined,
       longitude: property.longitude ?? undefined,
@@ -261,6 +272,20 @@ export default function EditListingForm({ propertyId, property, redirectTo, subm
           <div className="space-y-2">
             <Label htmlFor="area">Area (sq ft)</Label>
             <Input id="area" type="number" {...register("area")} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="plotSize">Plot size <span className="font-normal text-text-secondary">(optional)</span></Label>
+            <div className="flex gap-2">
+              <Input id="plotSize" type="number" step="0.01" min="0" placeholder="e.g. 2.7" {...register("plotSize")} className="min-w-0 flex-1" />
+              <select id="plotSizeUnit" aria-label="Plot size unit" {...register("plotSizeUnit")}
+                className="flex min-h-[44px] w-[110px] shrink-0 rounded-lg border border-border bg-surface px-2 py-3 text-base text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20">
+                <option value="SQFT">Sq ft</option>
+                <option value="SQM">Sq m</option>
+                <option value="ACRE">Acres</option>
+                <option value="HECTARE">Ha</option>
+              </select>
+            </div>
+            {errors.plotSize && <p className="text-xs text-error-500">{errors.plotSize.message}</p>}
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label>Location</Label>

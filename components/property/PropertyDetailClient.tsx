@@ -83,6 +83,8 @@ interface PropertyData {
   bedrooms?: number | null;
   bathrooms?: number | null;
   area?: number | null;
+  plotSize?: number | string | null;
+  plotSizeUnit?: string | null;
   latitude?: unknown;
   longitude?: unknown;
   features: string[];
@@ -302,10 +304,10 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
 
       {/* ─── Core two-column discovery & contact layout ─── */}
       <div className="mt-6 grid gap-6 lg:grid-cols-12 lg:gap-8">
-        {/* ─── LEFT: specs, narrative, features, map, reviews ─── */}
+          {/* ─── LEFT: specs, narrative, features, map, reviews ─── */}
         <div className="min-w-0 space-y-6 lg:col-span-8">
           {/* Key metrics strip */}
-          {(property.bedrooms || property.bathrooms || property.area) && (
+          {(property.bedrooms || property.bathrooms || property.area || property.plotSize) && (
             <section aria-label="Key specifications" className="rounded-xl border border-border bg-surface p-3 shadow-sm sm:p-4">
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
                 {property.bedrooms ? (
@@ -327,6 +329,15 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                     <Maximize2 size={18} className="mb-1 shrink-0 text-primary-500" aria-hidden />
                     <p className="font-heading text-base font-bold tabular-nums text-text-primary">{Number(property.area).toLocaleString()}</p>
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Sqft</p>
+                  </div>
+                ) : null}
+                {property.plotSize ? (
+                  <div className="flex flex-col items-center justify-center rounded-lg bg-surface-secondary p-3 text-center">
+                    <Maximize2 size={18} className="mb-1 shrink-0 text-primary-500" aria-hidden />
+                    <p className="font-heading text-base font-bold tabular-nums text-text-primary">{Number(property.plotSize).toLocaleString()}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">
+                      {property.plotSizeUnit === "ACRE" ? "Acres" : property.plotSizeUnit === "SQM" ? "Sq m" : property.plotSizeUnit === "HECTARE" ? "Ha" : "Sqft"}
+                    </p>
                   </div>
                 ) : null}
                 <div className="flex flex-col items-center justify-center rounded-lg bg-surface-secondary p-3 text-center">
