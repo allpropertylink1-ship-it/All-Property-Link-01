@@ -3,6 +3,7 @@ import Link from "next/link"
 import { MapPin, Wrench, Briefcase, BadgeCheck, ArrowUpRight } from "@/components/ui/icons"
 import { AVATAR_POOL } from "@/lib/placeholders"
 import { optimizeImageUrl } from "@/lib/images"
+import { getTradeLabel } from "@/lib/trade-label"
 
 export interface ProfileRow {
   id: string
@@ -79,11 +80,12 @@ export function ProfileCard({
   const Icon = variant === "fundi" ? Wrench : Briefcase
   const priceNum = item.price == null ? null : Number(item.price)
   const showPrice = priceNum != null && !Number.isNaN(priceNum) && priceNum > 0
+  const tradeLabel = getTradeLabel(item.category, item.title)
 
   return (
     <Link
       href={`/services/${item.id}`}
-      aria-label={`View ${displayName}${item.category ? ` — ${item.category.name}` : ""}`}
+      aria-label={`View ${displayName}${tradeLabel ? ` — ${tradeLabel}` : ""}`}
       className="group flex flex-col items-center rounded-lg border border-border bg-surface px-4 py-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:px-5"
     >
       {/* Photo with verified badge */}
@@ -118,11 +120,11 @@ export function ProfileCard({
         </span>
       </div>
 
-      {/* Trade pill */}
-      {item.category && (
+      {/* Trade pill — generic "General Fundi" categories show the real trade from the title instead */}
+      {tradeLabel && (
         <span className="mb-1.5 inline-flex items-center gap-1 rounded-full bg-primary/5 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-primary">
           <Icon size={12} className="shrink-0" aria-hidden="true" />
-          <span className="max-w-[140px] truncate">{item.category.name}</span>
+          <span className="max-w-[140px] truncate">{tradeLabel}</span>
         </span>
       )}
 

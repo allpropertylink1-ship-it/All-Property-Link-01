@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Wrench, MapPin } from "@/components/ui/icons"
 import { PLACEHOLDER_SERVICE } from "@/lib/placeholders"
 import { optimizeImageUrl } from "@/lib/images"
+import { getTradeLabel } from "@/lib/trade-label"
 
 export interface ServiceRow {
   id: string; title: string; price: unknown; currency: string;
@@ -15,6 +16,7 @@ export function ServiceCard({ item, icon }: { item: ServiceRow; icon: typeof Wre
   const images = Array.isArray(item.images) ? item.images : [];
   const imageUrl = images.length > 0 ? optimizeImageUrl(String(images[0]), 600) : null;
   const Icon = icon;
+  const tradeLabel = getTradeLabel(item.category, item.title);
   return (
     <Link href={`/services/${item.id}`} className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
@@ -28,8 +30,8 @@ export function ServiceCard({ item, icon }: { item: ServiceRow; icon: typeof Wre
             </span>
           </div>
         )}
-        {item.category && (
-          <span className="absolute left-2 top-2 z-10 rounded-md bg-primary-500 px-2.5 py-1 text-xs font-semibold text-white">{item.category.name}</span>
+        {tradeLabel && (
+          <span className="absolute left-2 top-2 z-10 rounded-md bg-primary-500 px-2.5 py-1 text-xs font-semibold text-white">{tradeLabel}</span>
         )}
       </div>
       <div className="flex flex-1 flex-col p-3.5">

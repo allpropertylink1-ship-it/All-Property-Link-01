@@ -5,6 +5,7 @@ import Link from "next/link"
 import { ArrowRight, Briefcase, MessageCircle, Phone } from "@/components/ui/icons"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { ProfileCard, type ProfileRow } from "./ProfileCard"
+import { getTradeLabel } from "@/lib/trade-label"
 
 function displayName(item: ProfileRow) {
   if (item.user.companyName) return item.user.companyName
@@ -55,10 +56,11 @@ function ContactButtons({ phone, label }: { phone: string; label: string }) {
 
 function ServicePill({ item }: { item: ProfileRow }) {
   const name = displayName(item)
+  const tradeLabel = getTradeLabel(item.category, item.title)
   return (
     <Link
       href={`/services/${item.id}`}
-      aria-label={`View ${name}${item.category ? ` — ${item.category.name}` : ""}`}
+      aria-label={`View ${name}${tradeLabel ? ` — ${tradeLabel}` : ""}`}
       className="flex min-h-touch items-center gap-2 rounded-xl bg-surface-secondary p-3 transition-colors hover:bg-primary/5"
     >
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface text-primary shadow-sm" aria-hidden="true">
@@ -67,7 +69,7 @@ function ServicePill({ item }: { item: ProfileRow }) {
       <span className="min-w-0">
         <span className="block truncate text-xs font-bold text-text-primary">{name}</span>
         <span className="block truncate text-xs text-text-secondary">
-          {item.category ? item.category.name : item.title}
+          {tradeLabel || item.title}
         </span>
       </span>
     </Link>
