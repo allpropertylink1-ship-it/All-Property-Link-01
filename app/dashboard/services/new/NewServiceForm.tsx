@@ -139,7 +139,6 @@ currency: fd.get("currency") as string,
       region: (fd.get("region") as string) || undefined,
       images: imageUrls.length > 0 ? imageUrls : undefined,
       tags: tags ? tags.split(",").map(t => t.trim()).filter(Boolean) : undefined,
-      customCategoryName: showCustomCategory ? customCategoryName : undefined,
       ...(requireOwnerConsent ? { ownerConsent: fd.get("ownerConsent") === "on" } : {}),
     };
 
@@ -158,22 +157,7 @@ currency: fd.get("currency") as string,
   }
 
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
-  const [showCustomCategory, setShowCustomCategory] = useState(false);
-  const [customCategoryName, setCustomCategoryName] = useState("");
   const [tags, setTags] = useState("");
-
-  // Find the "Other" category ID if it exists
-  const otherCategoryId = categories
-    .flatMap(c => c.children.map(ch => ch.id).concat(c.id))
-    .find(id => id.toLowerCase().includes("other"));
-
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    setSelectedCategoryId(value);
-    const isOther = Boolean(otherCategoryId && value === otherCategoryId);
-    setShowCustomCategory(isOther);
-    if (!isOther) setCustomCategoryName("");
-  };
 
   return (
     <form onSubmit={handleSubmit} onChange={() => setIsDirty(true)} className="space-y-6" aria-label="Create service listing">
@@ -209,7 +193,7 @@ currency: fd.get("currency") as string,
             id="categoryId"
             name="categoryId"
             value={selectedCategoryId}
-            onChange={handleCategoryChange}
+            onChange={(e) => setSelectedCategoryId(e.target.value)}
             required
             className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
           >
@@ -228,23 +212,6 @@ currency: fd.get("currency") as string,
               </optgroup>
             ))}
           </select>
-          {showCustomCategory && (
-            <div className="space-y-2">
-              <label htmlFor="customCategoryName" className="text-sm font-medium text-text-primary">
-                Custom category name
-              </label>
-              <input
-                id="customCategoryName"
-                name="customCategoryName"
-                type="text"
-                value={customCategoryName}
-                onChange={(e) => setCustomCategoryName(e.target.value)}
-                required
-                placeholder="e.g. Smart Home Leak Detection"
-                className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-              />
-            </div>
-          )}
         </div>
 
         <div className="space-y-2 sm:col-span-2">
