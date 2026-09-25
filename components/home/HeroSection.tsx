@@ -6,8 +6,6 @@ import { useEffect, useRef, useState } from "react"
 import {
   Search,
   MapPin,
-  ChevronLeft,
-  ChevronRight,
   ArrowUpRight,
   Home,
   Key,
@@ -244,7 +242,6 @@ export function HeroSection() {
   const [active, setActive] = useState(0)
   const [loaded, setLoaded] = useState(false)
   const [paused, setPaused] = useState(false)
-  const [total, setTotal] = useState<number | null>(null)
   const [query, setQuery] = useState("")
   const [classification, setClassification] = useState("")
   const [budget, setBudget] = useState("")
@@ -284,12 +281,6 @@ export function HeroSection() {
 
   useEffect(() => {
     loadSlides(PERSONAS[0])
-    fetch("/api/properties?limit=1")
-      .then((r) => (r.ok ? r.json() : null))
-      .catch(() => null)
-      .then((res) => {
-        if (res && typeof res.total === "number") setTotal(res.total)
-      })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -312,9 +303,6 @@ export function HeroSection() {
     )
     return () => clearInterval(t)
   }, [slides.length, paused])
-
-  const go = (dir: number) =>
-    setActive((a) => (a + dir + slides.length) % slides.length)
 
   const slide = slides.length > 0 ? slides[active] : null
 
@@ -389,51 +377,10 @@ export function HeroSection() {
 
   return (
     <section aria-label="Featured listings and search" className="bg-surface">
-      <div className="mx-auto w-full max-w-7xl px-4 pb-6 pt-6 sm:pt-8 md:pb-8">
-        {/* Title & value statement header — desktop only (mobile goes straight to search) */}
-        <div className="mb-6 hidden flex-col justify-between gap-4 md:flex md:flex-row md:items-end">
-          <div>
-            <h1
-              key={`${persona.id}-headline`}
-              className="max-w-3xl animate-[fadeUp_0.5s_ease-out] font-heading text-3xl font-extrabold tracking-tight text-text-primary sm:text-4xl"
-            >
-              {persona.headline}
-            </h1>
-            <p className="mt-2 max-w-text text-sm text-text-secondary sm:text-base">
-              {persona.subtitle}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-3">
-            <p className="flex items-center gap-2 text-sm font-semibold text-text-secondary">
-              <span aria-hidden="true" className="h-2.5 w-2.5 animate-pulse rounded-full bg-success-500" />
-              {total != null ? `${total.toLocaleString()}+ Verified Assets` : "Verified Assets"}
-            </p>
-            {slides.length > 1 && (
-              <div className="flex items-center gap-2" role="group" aria-label="Hero carousel controls">
-                <button
-                  type="button"
-                  aria-label="Previous featured listing"
-                  onClick={() => go(-1)}
-                  className="flex min-h-touch min-w-touch items-center justify-center rounded-xl bg-surface-secondary text-primary transition-colors hover:bg-primary/10"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <button
-                  type="button"
-                  aria-label="Next featured listing"
-                  onClick={() => go(1)}
-                  className="flex min-h-touch min-w-touch items-center justify-center rounded-xl bg-primary text-text-onPrimary shadow-sm transition-colors hover:bg-primary-600"
-                >
-                  <ChevronRight size={20} />
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Hero visual showcase / dynamic carousel frame */}
+      <div className="mx-auto w-full max-w-7xl px-4 pb-6 pt-6 sm:pt-8 md:pb-8 lg:max-w-none lg:px-6 lg:pt-0">
+        {/* Hero visual showcase / dynamic carousel frame — mock exact placement (desktop): floating 70vh card */}
         <div
-          className="relative h-[420px] w-full overflow-hidden rounded-xl bg-primary shadow-lg sm:h-[480px] lg:h-[520px]"
+          className="relative h-[420px] w-full overflow-hidden rounded-xl bg-primary shadow-lg sm:h-[480px] lg:h-[70vh] lg:min-h-[70vh] lg:rounded-[24px]"
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
           role="region"
