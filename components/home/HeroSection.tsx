@@ -10,7 +10,6 @@ import {
   Home,
   Key,
   Tent,
-  Trees,
   Wrench,
   BedDouble,
   Bath,
@@ -24,10 +23,9 @@ import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders"
 import { getCoverImage, optimizeImageUrl } from "@/lib/images"
 import { slugifyCity } from "@/lib/seo"
 
-const DAY_MS = 24 * 60 * 60 * 1000
 const AUTO_INTERVAL_MS = 6000
 
-type PersonaId = "sale" | "rent" | "land" | "stay" | "fundis"
+type PersonaId = "sale" | "rent" | "stay" | "fundis"
 
 interface Persona {
   id: PersonaId
@@ -78,23 +76,6 @@ const PERSONAS: Persona[] = [
     service: false,
   },
   {
-    id: "land",
-    label: "Land & Plots",
-    icon: Trees,
-    headline: (
-      <>
-        Prime Land in <span className="text-accent-400">Growth Corridors</span>
-      </>
-    ),
-    subtitle:
-      "Surveyed, title-deed-ready parcels in Kenya's fastest capital appreciation corridors.",
-    placeholder: "Ruiru, Kangundo Road, Malindi...",
-    purpose: null,
-    type: "LAND",
-    featuredLabel: "Title-deed ready",
-    service: false,
-  },
-  {
     id: "stay",
     label: "Airbnbs & Stays",
     icon: Tent,
@@ -135,7 +116,6 @@ const CLASSIFICATIONS = [
   { value: "HOUSE", label: "Houses & Villas" },
   { value: "APARTMENT", label: "Modern Apartments" },
   { value: "COMMERCIAL", label: "Commercial / Office" },
-  { value: "LAND", label: "Land & Plots" },
 ]
 
 const BUDGETS = [
@@ -206,6 +186,8 @@ function waNumber(phone: string): string {
 function toSlides(rows: ApiProperty[]): Slide[] {
   const slides: Slide[] = []
   for (const p of rows) {
+    // Hero never shows LAND — dedicated /land section owns those listings.
+    if (p.propertyType === "LAND") continue
     const cover = getCoverImage(p as { coverImage?: string | null; images?: unknown })
     if (!cover) continue
     slides.push({
@@ -231,6 +213,9 @@ function personaQuery(p: Persona): string | null {
   const params = new URLSearchParams()
   if (p.purpose) params.set("purpose", p.purpose)
   if (p.type) params.set("type", p.type)
+  // Newest-first: backend defaults to createdAt desc, made explicit here.
+  params.set("sort", "createdAt")
+  params.set("order", "desc")
   params.set("limit", "8")
   return params.toString()
 }
@@ -260,7 +245,8 @@ export function HeroSection() {
     const cached = cacheRef.current.get(q)
     if (cached) {
       setSlides(cached)
-      setActive(cached.length > 0 ? Math.floor(Date.now() / (DAY_MS * 2)) % cached.length : 0)
+      // Always start from the newest listing (index 0 = latest createdAt desc).
+      setActive(0)
       setLoaded(true)
       return
     }
@@ -272,9 +258,7 @@ export function HeroSection() {
         const nextSlides = toSlides(res.properties || []).slice(0, 8)
         cacheRef.current.set(q, nextSlides)
         setSlides(nextSlides)
-        if (nextSlides.length > 0) {
-          setActive(Math.floor(Date.now() / (DAY_MS * 2)) % nextSlides.length)
-        }
+        setActive(0)
         setLoaded(true)
       })
   }
@@ -344,7 +328,7 @@ export function HeroSection() {
         .then((r) => (r.ok ? r.json() : { properties: [] }))
         .catch(() => ({ properties: [] }))
         .then((res) => {
-          const props = res.properties || []
+          const props = (res.properties || []).filter((p: ApiProperty) => p.propertyType !== "LAND")
           const next: SearchSuggestion[] = props.slice(0, 5).map((p: ApiProperty) => ({
             slug: p.slug,
             title: p.title,
