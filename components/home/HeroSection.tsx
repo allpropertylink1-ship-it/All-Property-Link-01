@@ -550,7 +550,7 @@ export function HeroSection() {
           </div>
           <form onSubmit={executeSearch} className="grid grid-cols-1 items-end gap-3 md:grid-cols-2 lg:grid-cols-12 lg:gap-4">
             <div className="relative flex flex-col gap-1.5 lg:col-span-5" role="combobox" aria-controls="hero-location-suggestions" aria-expanded={showSuggestions && suggestions.length > 0}>
-              <label htmlFor="hero-location" className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-text-secondary">
+              <label htmlFor="hero-location" className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-text-secondary lg:hidden">
                 <MapPin size={14} className="text-primary" aria-hidden="true" />
                 {persona.service ? "Trade or Service" : "County & Enclave"}
               </label>
@@ -625,12 +625,13 @@ export function HeroSection() {
             {!persona.service && (
               <>
                 <div className="flex flex-col gap-1.5 lg:col-span-3">
-                  <label htmlFor="hero-classification" className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-text-secondary">
+                  <label htmlFor="hero-classification" className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-text-secondary lg:hidden">
                     <Home size={14} className="text-primary" aria-hidden="true" />
                     Asset Classification
                   </label>
                   <select
                     id="hero-classification"
+                    aria-label="Asset classification"
                     value={classification}
                     onChange={(e) => setClassification(e.target.value)}
                     className="min-h-touch w-full cursor-pointer appearance-none rounded-lg border border-border bg-surface-secondary px-3 py-2.5 text-[16px] font-semibold text-text-primary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -641,12 +642,13 @@ export function HeroSection() {
                   </select>
                 </div>
                 <div className="flex flex-col gap-1.5 lg:col-span-2">
-                  <label htmlFor="hero-budget" className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-text-secondary">
+                  <label htmlFor="hero-budget" className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-text-secondary lg:hidden">
                     <SlidersHorizontal size={14} className="text-primary" aria-hidden="true" />
                     Budget (KES)
                   </label>
                   <select
                     id="hero-budget"
+                    aria-label="Budget in KES"
                     value={budget}
                     onChange={(e) => setBudget(e.target.value)}
                     className="min-h-touch w-full cursor-pointer appearance-none rounded-lg border border-border bg-surface-secondary px-3 py-2.5 text-[16px] font-semibold text-text-primary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
