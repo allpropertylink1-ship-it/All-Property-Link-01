@@ -57,10 +57,13 @@ function ContactButtons({ phone, label }: { phone: string; label: string }) {
 function ServicePill({ item }: { item: ProfileRow }) {
   const name = displayName(item)
   const tradeLabel = getTradeLabel(item.category, item.title)
+  // Never repeat the name in the subtitle line.
+  const subtitle =
+    tradeLabel && tradeLabel.toLowerCase() !== name.toLowerCase() ? tradeLabel : null
   return (
     <Link
       href={`/services/${item.id}`}
-      aria-label={`View ${name}${tradeLabel ? ` — ${tradeLabel}` : ""}`}
+      aria-label={`View ${name}${subtitle ? ` — ${subtitle}` : ""}`}
       className="flex min-h-touch items-center gap-2 rounded-xl bg-surface-secondary p-3 transition-colors hover:bg-primary/5"
     >
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface text-primary shadow-sm" aria-hidden="true">
@@ -68,9 +71,9 @@ function ServicePill({ item }: { item: ProfileRow }) {
       </span>
       <span className="min-w-0">
         <span className="block truncate text-xs font-bold text-text-primary">{name}</span>
-        <span className="block truncate text-xs text-text-secondary">
-          {tradeLabel || item.title}
-        </span>
+        {subtitle && (
+          <span className="block truncate text-xs text-text-secondary">{subtitle}</span>
+        )}
       </span>
     </Link>
   )

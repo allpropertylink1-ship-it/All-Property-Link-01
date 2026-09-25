@@ -80,7 +80,8 @@ export function ProfileCard({
   const Icon = variant === "fundi" ? Wrench : Briefcase
   const priceNum = item.price == null ? null : Number(item.price)
   const showPrice = priceNum != null && !Number.isNaN(priceNum) && priceNum > 0
-  const tradeLabel = getTradeLabel(item.category, item.title)
+  // No trade pill on fundi cards — the fallback "General Fundi" category only repeats the card content.
+  const tradeLabel = variant === "fundi" ? null : getTradeLabel(item.category, item.title)
 
   return (
     <Link
@@ -120,7 +121,7 @@ export function ProfileCard({
         </span>
       </div>
 
-      {/* Trade pill — generic "General Fundi" categories show the real trade from the title instead */}
+      {/* Trade pill (providers only — fundi cards omit it entirely) */}
       {tradeLabel && (
         <span className="mb-1.5 inline-flex items-center gap-1 rounded-full bg-primary/5 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-primary">
           <Icon size={12} className="shrink-0" aria-hidden="true" />
