@@ -62,12 +62,12 @@ const ServiceIcon = () => (
 );
 
 const categories = [
-  { href: "/properties?purpose=FOR_SALE", label: "Properties for Sale", icon: SaleIcon },
-  { href: "/properties?purpose=FOR_RENT_LONG_TERM", label: "Long-Term Rentals", icon: RentIcon },
-  { href: "/properties?purpose=FOR_RENT_SHORT_TERM", label: "Short-Term Stays", icon: StayIcon },
+  { href: "/properties?purpose=FOR_SALE", label: "For Sale", icon: SaleIcon },
+  { href: "/properties?purpose=FOR_RENT_LONG_TERM", label: "For Rent", icon: RentIcon },
+  { href: "/airbnbs", label: "Airbnbs", icon: StayIcon },
   { href: "/land", label: "Plots & Land", icon: LandIcon },
-  { href: "/services?type=FUNDI", label: "Fundis", icon: FundiIcon },
-  { href: "/services?type=SERVICE_PROVIDER", label: "Service Providers", icon: ServiceIcon },
+  { href: "/fundis", label: "Fundis", icon: FundiIcon },
+  { href: "/services", label: "Services", icon: ServiceIcon },
 ];
 
 const HomeIcon = () => (

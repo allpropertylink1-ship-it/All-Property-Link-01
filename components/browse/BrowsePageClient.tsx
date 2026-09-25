@@ -7,6 +7,8 @@ import { BrowseResultsGrid } from "./BrowseResultsGrid";
 import { BrowseSkeleton } from "./BrowseSkeleton";
 import { MapPin, Search, SlidersHorizontal, X } from "@/components/ui/icons";
 import { fetchCityCounts } from "@/lib/cities-client";
+import { getProperties } from "@/lib/services/property";
+import { getServiceListings } from "@/lib/services/service";
 
 type PropertyFilterKey = "ALL" | "FOR_SALE" | "FOR_RENT_LONG_TERM" | "FOR_RENT_SHORT_TERM" | "LAND";
 type ServiceFilterKey = "ALL" | "FUNDI" | "SERVICE_PROVIDER";
@@ -121,6 +123,8 @@ export default function BrowsePageClient() {
   const [searchInput, setSearchInput] = useState(searchParam);
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const [counties, setCounties] = useState<{ city: string; count: number }[]>([]);
+  const [propertyCounts, setPropertyCounts] = useState<Record<string, number>>({});
+  const [serviceCounts, setServiceCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetchCityCounts()
@@ -128,6 +132,37 @@ export default function BrowsePageClient() {
         setCounties((cityCounts || []).map((c) => ({ city: c.city, count: c.count })))
       )
       .catch(() => setCounties([]));
+  }, []);
+
+  // Fetch pill counts
+  useEffect(() => {
+    async function fetchPillCounts() {
+      try {
+        const [sale, rent, shortTerm, land, fundis, providers] = await Promise.all([
+          getProperties({ purpose: "FOR_SALE", pageSize: 1 }),
+          getProperties({ purpose: "FOR_RENT_LONG_TERM", pageSize: 1 }),
+          getProperties({ purpose: "FOR_RENT_SHORT_TERM", pageSize: 1 }),
+          getProperties({ propertyType: "LAND", pageSize: 1 }),
+          getServiceListings({ type: "FUNDI", limit: "1" }),
+          getServiceListings({ type: "SERVICE_PROVIDER", limit: "1" }),
+        ]);
+        setPropertyCounts({
+          ALL: sale.total + rent.total + shortTerm.total + land.total,
+          FOR_SALE: sale.total,
+          FOR_RENT_LONG_TERM: rent.total,
+          FOR_RENT_SHORT_TERM: shortTerm.total,
+          LAND: land.total,
+        });
+        setServiceCounts({
+          ALL: fundis.total + providers.total,
+          FUNDI: fundis.total,
+          SERVICE_PROVIDER: providers.total,
+        });
+      } catch {
+        // ignore count errors
+      }
+    }
+    fetchPillCounts();
   }, []);
 
   useEffect(() => {
@@ -555,18 +590,18 @@ export default function BrowsePageClient() {
         )}
       </div>
 
-      {/* Only show filter pills if no filter is active from URL, or if user wants to change filter */}
-      {!isFilterFromUrl && (
-        <div className="mb-6">
-          <FilterPillsGroup
-            activeTab={activeTab}
-            propertyFilter={propertyFilter}
-            serviceFilter={serviceFilter}
-            onPropertyFilterChange={handlePropertyFilterChange}
-            onServiceFilterChange={handleServiceFilterChange}
-          />
-        </div>
-      )}
+      {/* Always show filter pills with counts */}
+      <div className="mb-6">
+        <FilterPillsGroup
+          activeTab={activeTab}
+          propertyFilter={propertyFilter}
+          serviceFilter={serviceFilter}
+          propertyCounts={propertyCounts}
+          serviceCounts={serviceCounts}
+          onPropertyFilterChange={handlePropertyFilterChange}
+          onServiceFilterChange={handleServiceFilterChange}
+        />
+      </div>
 
       {/* Show active filter indicator when filter is applied (from URL or user) */}
       {!isDefaultFilter && (

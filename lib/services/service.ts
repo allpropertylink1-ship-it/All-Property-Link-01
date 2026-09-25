@@ -19,6 +19,7 @@ export interface ServiceCategory {
   slug: string;
   icon: string | null;
   description: string | null;
+  type: "FUNDI" | "SERVICE_PROVIDER" | "BOTH";
   parentId: string | null;
   children: ServiceCategory[];
   _count?: { serviceListings: number };
@@ -50,7 +51,8 @@ export interface ServiceListingCard {
   images: unknown;
   viewCount: number;
   createdAt: string;
-  user: ServiceListingUser | null;
+  tags?: string[];
+  user: (ServiceListingUser & { userTypes?: string[] | null }) | null;
   category: { id: string; name: string; slug: string; icon: string | null } | null;
 }
 

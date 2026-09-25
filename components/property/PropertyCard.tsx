@@ -27,6 +27,8 @@ interface PropertyCardProps {
   isVerified?: boolean;
   priority?: boolean;
   variant?: PropertyCardVariant;
+  hasMultipleUnits?: boolean;
+  unitMixDescription?: string | null;
 }
 
 function FlashIcon() {
@@ -73,17 +75,48 @@ export function PropertyCard({
   isVerified = true,
   priority = false,
   variant = "default",
+  hasMultipleUnits = false,
+  unitMixDescription = null,
+  currency = "KES",
 }: PropertyCardProps) {
   const rawImage = getCoverImage({ coverImage, images }) ?? ""
-  // thumbUrl from API (verified on disk) — avoids 404 double-fetch for historic rows
   const imageUrl = thumbUrl && thumbUrl.trim() ? thumbUrl.trim() : (rawImage || PLACEHOLDER_PROPERTY);
   const lcpAttrs = priority ? ({ fetchPriority: "high" } as Record<string, string>) : {};
 
   const isCompact = variant === "compact";
 
-  // Land lives in its own section — link it directly (avoids a redirect hop).
-  const detailBase = (propertyType || "").toUpperCase() === "LAND" ? "/land" : "/properties";
+  const isLand = (propertyType || "").toUpperCase() === "LAND";
+  const detailBase = isLand ? "/land" : "/properties";
   const detailHref = `${detailBase}/${slugifyCity(city)}/${slug}`;
+
+  function purposeBadge(purpose: string | null | undefined) {
+    if (!purpose) return null
+    const bg = purpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-500" : purpose === "FOR_RENT_LONG_TERM" ? "bg-primary-600" : "bg-primary-500"
+    const label = purpose === "FOR_RENT_SHORT_TERM" ? "Airbnb" : purpose === "FOR_RENT_LONG_TERM" ? "Rent" : "Sale"
+    return (
+      <span className={`absolute left-1.5 top-1.5 z-10 rounded-md px-2 py-0.5 text-[10px] font-semibold text-white ${bg}`}>
+        {label}
+      </span>
+    )
+  }
+
+  function landBadge() {
+    if (!isLand) return null
+    return (
+      <span className="absolute left-1.5 top-1.5 z-10 rounded-md px-2 py-0.5 text-[10px] font-semibold text-white bg-teal-500">
+        Land & Plots
+      </span>
+    )
+  }
+
+  function multiUnitBadge() {
+    if (!hasMultipleUnits) return null
+    return (
+      <span className="absolute left-1.5 top-1.5 z-10 rounded-md px-2 py-0.5 text-[10px] font-semibold text-white bg-purple-500">
+        Multiple Units
+      </span>
+    )
+  }
 
   if (isCompact) {
     return (
@@ -108,13 +141,9 @@ export function PropertyCard({
               if (img.src !== PLACEHOLDER_PROPERTY) img.src = PLACEHOLDER_PROPERTY
             }}
           />
-          <span
-            className={`absolute left-1.5 top-1.5 z-10 rounded-md px-2 py-0.5 text-[10px] font-semibold text-white ${
-              listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-500" : listingPurpose === "FOR_RENT_LONG_TERM" ? "bg-primary-600" : "bg-primary-500"
-            }`}
-          >
-            {listingPurpose === "FOR_RENT_SHORT_TERM" ? "Airbnb" : listingPurpose === "FOR_RENT_LONG_TERM" ? "Rent" : "Sale"}
-          </span>
+          {multiUnitBadge()}
+          {purposeBadge(listingPurpose)}
+          {landBadge()}
           {urgencyText && (
             <span className="absolute right-1.5 top-1.5 z-10 flex items-center gap-1 rounded-md bg-white/90 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-primary-600 shadow-sm backdrop-blur-sm">
               <FlashIcon />
@@ -139,7 +168,11 @@ export function PropertyCard({
             {area != null && area > 0 && <span>{area.toLocaleString()} sqft</span>}
             <span className="capitalize">{propertyType.toLowerCase()}</span>
           </div>
-          <p className="font-heading text-base font-semibold text-primary-600">{formatPrice(price, listingPurpose ?? undefined)}</p>
+          {hasMultipleUnits ? (
+            <p className="font-heading text-base font-semibold text-primary-600 truncate">{unitMixDescription || "Multiple unit types"}</p>
+          ) : (
+            <p className="font-heading text-base font-semibold text-primary-600">{formatPrice(price, listingPurpose ?? undefined)}</p>
+          )}
         </div>
       </Link>
     );
@@ -175,13 +208,9 @@ export function PropertyCard({
               if (img.src !== PLACEHOLDER_PROPERTY) img.src = PLACEHOLDER_PROPERTY
             }}
           />
-          <span
-            className={`absolute left-2 top-2 z-10 rounded-md px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white ${
-              listingPurpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-500" : listingPurpose === "FOR_RENT_LONG_TERM" ? "bg-primary-600" : "bg-primary-500"
-            }`}
-          >
-            {listingPurpose === "FOR_RENT_SHORT_TERM" ? "Airbnb" : listingPurpose === "FOR_RENT_LONG_TERM" ? "Rent" : "Sale"}
-          </span>
+          {multiUnitBadge()}
+          {purposeBadge(listingPurpose)}
+          {landBadge()}
           {urgencyText && (
             <span className="absolute right-2 top-2 z-10 flex items-center gap-1 rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-600 shadow-sm backdrop-blur-sm">
               <FlashIcon />
@@ -202,9 +231,13 @@ export function PropertyCard({
         </div>
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-4 min-[375px]:p-5">
-        <p className="break-words font-heading text-lg font-extrabold tracking-tight text-text-primary min-[375px]:text-xl">
-          {formatPrice(price, listingPurpose ?? undefined)}
-        </p>
+        {hasMultipleUnits ? (
+          <p className="font-heading text-lg font-semibold text-primary-600 truncate">{unitMixDescription || "Multiple unit types"}</p>
+        ) : (
+          <p className="break-words font-heading text-lg font-extrabold tracking-tight text-text-primary min-[375px]:text-xl">
+            {formatPrice(price, listingPurpose ?? undefined)}
+          </p>
+        )}
         <h3 className="line-clamp-2 min-w-0 break-words font-heading text-base font-semibold leading-tight text-text-primary transition-colors group-hover:text-accent-600 md:text-lg">
           {title}
         </h3>

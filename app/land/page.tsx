@@ -1,18 +1,21 @@
 import type { Metadata } from "next"
-import { LandPageClient } from "@/components/property/LandPageClient"
+import { PropertiesPageClient } from "@/components/property/PropertiesPageClient"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 60
 
 export const metadata: Metadata = {
-  title: "Land & Plots for Sale in Kenya",
-  description: "Browse residential plots, farmland and commercial land for sale across Kenya. Connect directly with verified agents and land owners.",
+  title: "Plots & Land for Sale in Kenya",
+  description: "Browse plots and land for sale across Kenya. Find empty plots, agricultural land, and commercial plots in your preferred location.",
   alternates: { canonical: "/land" },
 }
 
-interface Props {
-  searchParams: { [key: string]: string | undefined }
-}
-
-export default function LandPage({ searchParams }: Props) {
-  return <LandPageClient searchParams={searchParams} />
+export default function LandPage() {
+  return (
+    <PropertiesPageClient
+      searchParams={{
+        propertyType: "LAND",
+        limit: "20",
+      }}
+    />
+  )
 }

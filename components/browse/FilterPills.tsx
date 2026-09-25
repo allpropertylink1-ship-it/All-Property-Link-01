@@ -5,10 +5,11 @@ interface FilterPillProps {
   value: string;
   isActive: boolean;
   onClick: () => void;
+  count?: number;
   icon?: React.ReactNode;
 }
 
-export function FilterPill({ label, value, isActive, onClick, icon }: FilterPillProps) {
+export function FilterPill({ label, value, isActive, onClick, count, icon }: FilterPillProps) {
   return (
     <button
       type="button"
@@ -23,6 +24,11 @@ export function FilterPill({ label, value, isActive, onClick, icon }: FilterPill
     >
       {icon && <span className="shrink-0">{icon}</span>}
       <span>{label}</span>
+      {count !== undefined && (
+        <span className={isActive ? "bg-white/20 rounded-full px-1.5 py-0.5 text-[10px] font-medium" : "bg-muted/10 rounded-full px-1.5 py-0.5 text-[10px] font-medium"}>
+          {count}
+        </span>
+      )}
     </button>
   );
 }
@@ -31,6 +37,8 @@ interface FilterPillsGroupProps {
   activeTab: "properties" | "services";
   propertyFilter: string;
   serviceFilter: string;
+  propertyCounts?: Record<string, number>;
+  serviceCounts?: Record<string, number>;
   onPropertyFilterChange: (key: string) => void;
   onServiceFilterChange: (key: string) => void;
 }
@@ -53,6 +61,8 @@ export function FilterPillsGroup({
   activeTab,
   propertyFilter,
   serviceFilter,
+  propertyCounts,
+  serviceCounts,
   onPropertyFilterChange,
   onServiceFilterChange,
 }: FilterPillsGroupProps) {
@@ -66,6 +76,7 @@ export function FilterPillsGroup({
             value={pill.key}
             isActive={propertyFilter === pill.key}
             onClick={() => onPropertyFilterChange(pill.key)}
+            count={propertyCounts?.[pill.key]}
           />
         ))}
       </div>
@@ -81,6 +92,7 @@ export function FilterPillsGroup({
           value={pill.key}
           isActive={serviceFilter === pill.key}
           onClick={() => onServiceFilterChange(pill.key)}
+          count={serviceCounts?.[pill.key]}
         />
       ))}
     </div>

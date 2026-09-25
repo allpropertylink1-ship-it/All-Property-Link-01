@@ -2,6 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { uploadImage, IMAGE_PRESETS, HEIC_HINT, isHeicFile } from "@/lib/image-client";
 import { Check, Loader2, Save, Camera, User, Building2 } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
@@ -114,10 +115,21 @@ const specialtiesService = [
 ]
 
 function BusinessProfilePageInner() {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
+
+  function isAuthError(msg: string): boolean {
+    return /authentication required|session expired|not active|invalid or expired token|please sign in/i.test(msg)
+  }
+  function authErrorMessage(raw: string): string {
+    if (isAuthError(raw)) {
+      return "Your session expired — please sign in again to save your business profile. If you just verified your email, your browser may have blocked the login cookie; try Chrome with third-party cookies allowed, then sign in again."
+    }
+    return raw
+  }
 
   const [form, setForm] = useState({
     companyName: "",
@@ -153,7 +165,9 @@ function BusinessProfilePageInner() {
           businessProfilePhoto: string | null
         }
       }>("/api/user/profile")
-      if (res.data?.user) {
+      if (res.error) {
+        setError(authErrorMessage(res.error))
+      } else if (res.data?.user) {
         const u = res.data.user
         const next = {
           companyName: u.companyName || "",
@@ -200,7 +214,11 @@ function BusinessProfilePageInner() {
       const res = await api.patch("/api/user/profile", { businessProfilePhoto: url })
       if (res.error) throw new Error(res.error)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed")
+      const msg = err instanceof Error ? err.message : "Upload failed"
+      setError(authErrorMessage(msg))
+      if (isAuthError(msg)) {
+        setTimeout(() => router.push("/auth"), 2500)
+      }
     } finally {
       setAvatarUploading(false)
     }
@@ -228,7 +246,11 @@ function BusinessProfilePageInner() {
       const res = await api.patch("/api/user/profile", { businessLogo: url })
       if (res.error) throw new Error(res.error)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed")
+      const msg = err instanceof Error ? err.message : "Upload failed"
+      setError(authErrorMessage(msg))
+      if (isAuthError(msg)) {
+        setTimeout(() => router.push("/auth"), 2500)
+      }
     } finally {
       setLogoUploading(false)
     }
@@ -279,7 +301,11 @@ function BusinessProfilePageInner() {
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong")
+      const msg = err instanceof Error ? err.message : "Something went wrong"
+      setError(authErrorMessage(msg))
+      if (isAuthError(msg)) {
+        setTimeout(() => router.push("/auth"), 2500)
+      }
     } finally {
       setLoading(false)
     }

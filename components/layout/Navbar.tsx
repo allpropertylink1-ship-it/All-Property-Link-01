@@ -12,10 +12,11 @@ const ClientProfileButton = dynamic(() => import("./ProfileButton").then(mod => 
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/browse", label: "Browse" },
   { href: "/properties", label: "Properties" },
-  { href: "/services", label: "Services" },
+  { href: "/airbnbs", label: "Airbnbs" },
   { href: "/land", label: "Plots & Land" },
+  { href: "/fundis", label: "Fundis" },
+  { href: "/services", label: "Services" },
   { href: "/aplreps", label: "Reps" },
   { href: "/about", label: "About" },
 ]

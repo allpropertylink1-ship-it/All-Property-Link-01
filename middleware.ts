@@ -33,7 +33,18 @@ async function readMaintenanceState(origin: string): Promise<{ on: boolean } | n
 }
 
 export default async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  const { pathname, searchParams } = request.nextUrl
+
+  // Redirect old land URL to new dedicated page
+  if (pathname === "/properties" && searchParams.get("type") === "LAND") {
+    const url = new URL("/land", request.url)
+    // Preserve other query params (city, page, etc.)
+    searchParams.forEach((value, key) => {
+      if (key !== "type") url.searchParams.set(key, value)
+    })
+    return NextResponse.redirect(url, 308)
+  }
+
   // Make pathname available to RootLayout for maintenance gating (so /auth stays reachable)
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set("x-pathname", pathname)

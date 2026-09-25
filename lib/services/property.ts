@@ -20,6 +20,8 @@ export interface PropertyCard {
   propertyType: string; listingPurpose: string | null;
   city: string; region: string; bedrooms: number | null; bathrooms: number | null;
   area: number | null; images: unknown; coverImage?: string | null; thumbUrl?: string | null; isFeatured: boolean; createdAt: Date;
+  hasMultipleUnits?: boolean;
+  unitMixDescription?: string | null;
 }
 
 interface PropertyDetailAgent {

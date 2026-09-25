@@ -23,6 +23,7 @@ interface ServiceCardCompactProps {
     companyName: string | null;
     businessLogo: string | null;
     phone?: string | null;
+    userTypes?: string[] | null;
   } | null;
   phone?: string | null;
   avgRating?: number | null;
@@ -53,6 +54,35 @@ export function ServiceCardCompact({
     : "Service provider";
   const logoUrl = resolveImageUrl(user?.businessLogo);
   const area = [city, region].filter(Boolean).join(", ") || "Kenya";
+
+  // Provider type badge
+  function providerBadge(userTypes: string[] | null | undefined) {
+    if (!userTypes || userTypes.length === 0) return null
+    const isFundi = userTypes.includes("FUNDI")
+    const isProvider = userTypes.includes("SERVICE_PROVIDER")
+    if (isFundi && isProvider) {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-full bg-purple/10 px-1.5 py-0.5 text-[10px] font-medium text-purple-700">
+          Fundi & Provider
+        </span>
+      )
+    }
+    if (isFundi) {
+      return (
+        <span className="inline-flex items-center rounded-full bg-blue/10 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
+          Fundi
+        </span>
+      )
+    }
+    if (isProvider) {
+      return (
+        <span className="inline-flex items-center rounded-full bg-green/10 px-1.5 py-0.5 text-[10px] font-medium text-green-700">
+          Provider
+        </span>
+      )
+    }
+    return null
+  }
 
   // Data-driven contact only — never rendered when the listing has no phone.
   const phone = phoneProp ?? user?.phone ?? null;
@@ -106,6 +136,7 @@ export function ServiceCardCompact({
                 {providerName}
               </Link>
             </h3>
+            {user?.userTypes && providerBadge(user.userTypes)}
             {hasRating && (
               <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-surface-secondary px-2 py-0.5">
                 <Star size={14} className="fill-accent-500 text-accent-500" />

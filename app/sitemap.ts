@@ -13,7 +13,9 @@ const staticPages = (base: string): MetadataRoute.Sitemap => [
   { url: `${base}/privacy`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
   { url: `${base}/terms`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
   { url: `${base}/services`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+  { url: `${base}/airbnbs`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
   { url: `${base}/land`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+  { url: `${base}/fundis`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
   { url: `${base}/aplreps`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
 ];
 
