@@ -521,9 +521,9 @@ export function HeroSection() {
         </div>
 
         {/* Integrated multi-tab quick search console (stacked below carousel) */}
-        <div className="relative z-20 mx-auto mt-6 w-full max-w-5xl rounded-xl border border-border bg-surface p-3 shadow-lg sm:p-4 md:mt-8">
+        <div className="relative z-20 mx-auto mt-6 w-full max-w-5xl rounded-xl border border-border bg-surface p-3 shadow-lg sm:p-4 md:mt-8 lg:rounded-2xl lg:p-5 lg:shadow-xl">
           <div
-            className="mb-3 flex items-center gap-1.5 overflow-x-auto border-b border-border pb-3 scrollbar-hide"
+            className="mb-3 flex items-center gap-1.5 overflow-x-auto border-b border-border pb-3 scrollbar-hide lg:mb-4 lg:gap-1 lg:overflow-visible lg:rounded-xl lg:border-0 lg:bg-surface-secondary lg:p-1.5 lg:pb-1.5"
             role="group"
             aria-label="Choose what you are looking for"
           >
@@ -536,10 +536,10 @@ export function HeroSection() {
                   type="button"
                   aria-pressed={selected}
                   onClick={() => switchPersona(p)}
-                  className={`flex min-h-touch shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-[13px] font-semibold transition-all sm:text-sm ${
+                  className={`flex min-h-touch shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-[13px] font-semibold transition-all sm:text-sm lg:flex-1 lg:justify-center lg:rounded-[10px] lg:py-2.5 lg:text-sm ${
                     selected
-                      ? "bg-primary text-text-onPrimary shadow-sm"
-                      : "bg-surface-secondary text-text-secondary hover:bg-primary/5 hover:text-primary"
+                      ? "bg-primary text-text-onPrimary shadow-sm lg:shadow-md"
+                      : "bg-surface-secondary text-text-secondary hover:bg-primary/5 hover:text-primary lg:bg-transparent lg:hover:bg-surface"
                   }`}
                 >
                   <Icon size={16} aria-hidden="true" />
@@ -548,8 +548,8 @@ export function HeroSection() {
               )
             })}
           </div>
-          <form onSubmit={executeSearch} className="grid grid-cols-1 items-end gap-3 md:grid-cols-2 lg:grid-cols-12">
-            <div className="relative flex flex-col gap-1.5 lg:col-span-4" role="combobox" aria-controls="hero-location-suggestions" aria-expanded={showSuggestions && suggestions.length > 0}>
+          <form onSubmit={executeSearch} className="grid grid-cols-1 items-end gap-3 md:grid-cols-2 lg:grid-cols-12 lg:gap-4">
+            <div className="relative flex flex-col gap-1.5 lg:col-span-5" role="combobox" aria-controls="hero-location-suggestions" aria-expanded={showSuggestions && suggestions.length > 0}>
               <label htmlFor="hero-location" className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-text-secondary">
                 <MapPin size={14} className="text-primary" aria-hidden="true" />
                 {persona.service ? "Trade or Service" : "County & Enclave"}
@@ -658,10 +658,10 @@ export function HeroSection() {
                 </div>
               </>
             )}
-            <div className={persona.service ? "md:col-span-2 lg:col-span-8" : "lg:col-span-3"}>
+            <div className={persona.service ? "md:col-span-2 lg:col-span-8" : "lg:col-span-2"}>
               <button
                 type="submit"
-                className="flex min-h-touch w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-5 py-3 text-[16px] font-bold text-white shadow-md transition-colors hover:bg-accent-600"
+                className="flex min-h-touch w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-accent-500 px-5 py-3 text-[16px] font-bold text-white shadow-md transition-colors hover:bg-accent-600 lg:h-[50px] lg:py-0 lg:text-[15px] lg:shadow-lg"
               >
                 <Search size={18} aria-hidden="true" />
                 Execute Search
