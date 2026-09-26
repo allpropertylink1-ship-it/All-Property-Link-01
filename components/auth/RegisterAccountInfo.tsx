@@ -29,7 +29,6 @@ interface Props {
   onLastNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onPhoneChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  onGoogleSuccess: () => Promise<void>
   onGoogleError: (msg: string) => void
   onSwitchToLogin?: () => void
   googleActive?: boolean
@@ -39,7 +38,7 @@ export function RegisterAccountInfo({
   contactMethod, password, referralCode, firstName, lastName, email, phone, error, loading, acceptedTerms, onAcceptedChange,
   onContactMethodChange, onPasswordChange, onReferralCodeChange,
   onBack, onFirstNameChange, onLastNameChange, onEmailChange, onPhoneChange,
-  onGoogleSuccess, onGoogleError, onSwitchToLogin, googleActive = true,
+  onGoogleError, onSwitchToLogin, googleActive = true,
 }: Props) {
   return (
     <div className="space-y-4">
@@ -48,7 +47,6 @@ export function RegisterAccountInfo({
         termsAccepted={acceptedTerms}
         referralCode={referralCode}
         active={googleActive}
-        onSuccess={onGoogleSuccess}
         onError={onGoogleError}
       />
 

@@ -9,6 +9,7 @@ import { LoginForm } from "./LoginForm"
 import { AgentLoginForm } from "./AgentLoginForm"
 import { AgentForgotPasswordForm } from "./AgentForgotPasswordForm"
 import { RegisterForm } from "./RegisterForm"
+import { FormBanner } from "@/components/shared/FormFeedback"
 import { cn } from "@/lib/utils"
 
 const tabs = [
@@ -33,6 +34,8 @@ const SWEEP_MS = 650
 
 interface Props {
   referralCode?: string
+  /** Server-surfaced notice (e.g. a failed Google redirect round-trip). */
+  notice?: string
 }
 
 function LoginContent({
@@ -166,7 +169,7 @@ function WelcomeContent({
   )
 }
 
-export function AuthCard({ referralCode }: Props) {
+export function AuthCard({ referralCode, notice }: Props) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { user, loading, refreshUser, clearSession } = useAuth()
@@ -285,6 +288,11 @@ export function AuthCard({ referralCode }: Props) {
 
   return (
     <div className="relative overflow-hidden rounded-xl border border-border bg-surface shadow-lg">
+      {notice && (
+        <div className="border-b border-border bg-surface-secondary/60 px-6 py-4 sm:px-8">
+          <FormBanner variant="error">{notice}</FormBanner>
+        </div>
+      )}
       {/* Mobile welcome strip */}
       <div className="auth-strip relative px-6 py-10 lg:hidden">
         {view === "login" ? (

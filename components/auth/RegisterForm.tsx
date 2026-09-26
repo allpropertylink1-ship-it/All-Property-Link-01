@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth, COOKIES_BLOCKED_ERROR, type OtpResponse } from "@/lib/auth-context"
+import { useAuth, type OtpResponse } from "@/lib/auth-context"
 import { OtpInput } from "./OtpInput"
 import { RegisterAccountInfo } from "./RegisterAccountInfo"
 import { formatTime } from "./RegisterForm.utils"
@@ -14,7 +14,7 @@ type Step = "form" | "otp"
 
 export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogin, returnUrl, googleActive = true }: { referralCode?: string; onSwitchToLogin?: () => void; returnUrl?: string; googleActive?: boolean }) {
   const router = useRouter()
-  const { signup, sendOtp, verifyOtp, refreshUser, updateRegistration } = useAuth()
+  const { signup, sendOtp, verifyOtp, updateRegistration } = useAuth()
   const [step, setStep] = useState<Step>("form")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -191,18 +191,6 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
     setOtpValues(["", "", "", "", "", ""])
   }
 
-  async function handleGoogleSuccess() {
-    const u = await refreshUser()
-    // Definitive DENIED after a successful Google POST = cookies blocked.
-    // UNKNOWN (undefined) navigates optimistically; server decides.
-    if (u === null) {
-      setError(COOKIES_BLOCKED_ERROR)
-      return
-    }
-    router.push(resolvePostAuthTarget(u ?? null, returnUrl))
-    router.refresh()
-  }
-
   function handleGoogleError(msg: string) {
     setError(msg)
   }
@@ -279,7 +267,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
         onReferralCodeChange={setReferralCode} onBack={onSwitchToLogin ? () => onSwitchToLogin() : undefined}
         onFirstNameChange={handleFirstNameChange} onLastNameChange={handleLastNameChange}
         onEmailChange={handleEmailChange} onPhoneChange={handlePhoneChange}
-        onGoogleSuccess={handleGoogleSuccess} onGoogleError={handleGoogleError}
+        onGoogleError={handleGoogleError}
         onSwitchToLogin={onSwitchToLogin}
       />
     </form>

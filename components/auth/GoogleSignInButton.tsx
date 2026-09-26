@@ -1,22 +1,17 @@
 ﻿"use client"
-import { useState, useEffect, useRef, useCallback } from "react"
-import { api } from "@/lib/api-client"
+import { useState, useEffect, useRef } from "react"
 
 import { CURRENT_TERMS_VERSION } from "@/lib/auth-context"
 
 interface GoogleSignInButtonProps {
-  onSuccess: () => void
   onError: (error: string) => void
   mode?: "signin" | "signup"
   termsAccepted?: boolean
   referralCode?: string
   /**
-   * Whether this panel is the visible one. google.accounts.id.initialize()
-   * is GLOBAL last-wins: with sign-in + sign-up buttons mounted together,
-   * both must not initialize — the hidden panel would steal the callback
-   * (its response then lands on the wrong form, or nowhere visible).
-   * Only the active panel initializes + renders; inactive renders a
-   * same-footprint placeholder. Defaults true (standalone pages).
+   * Whether this panel is the visible one. Only the active panel renders a
+   * GIS button (a hidden container measures 0px and steals layout). Defaults
+   * true (standalone pages).
    */
   active?: boolean
 }
@@ -63,38 +58,45 @@ function loadGoogleScript(): Promise<void> {
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "103540540209-89aqffdkc4f7mk2q19v1kk5k5a8liu4v.apps.googleusercontent.com"
 
-export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsAccepted, referralCode, active = true }: GoogleSignInButtonProps) {
+/**
+ * Name of the first-party intent cookie the signup panel maintains while it
+ * is visible. The redirect callback route reads it to recover the Terms
+ * acceptance + referral that a redirect round-trip would otherwise lose
+ * (GIS posts only the credential). Short-lived, same-site, cleared on use.
+ */
+const INTENT_COOKIE = "apl_gintent"
+
+function writeIntentCookie(termsAccepted: boolean | undefined, referralCode: string | undefined) {
+  try {
+    const returnUrl = new URLSearchParams(window.location.search).get("return")
+    const value = encodeURIComponent(JSON.stringify({
+      termsAccepted: termsAccepted === true,
+      referralCode: (referralCode || "").trim() || null,
+      termsVersion: CURRENT_TERMS_VERSION,
+      returnUrl,
+    }))
+    const secure = window.location.protocol === "https:" ? "; Secure" : ""
+    document.cookie = `${INTENT_COOKIE}=${value}; Path=/; Max-Age=600; SameSite=Lax${secure}`
+  } catch {
+    // Cookie write failure: the callback route treats a missing intent as a
+    // plain sign-in attempt (new users get CONSENT_REQUIRED, surfaced back).
+  }
+}
+
+function clearIntentCookie() {
+  try {
+    document.cookie = `${INTENT_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`
+  } catch {
+    // Best-effort only.
+  }
+}
+
+export function GoogleSignInButton({ onError, mode = "signin", termsAccepted, referralCode, active = true }: GoogleSignInButtonProps) {
   const [ready, setReady] = useState(false)
   const [scriptError, setScriptError] = useState(false)
-  const [oauthLoading, setOauthLoading] = useState(false)
   const btnRef = useRef<HTMLDivElement>(null)
-  const wrapperRef = useRef<HTMLDivElement>(null)
   const renderedRef = useRef(false)
   const needsConsentGate = mode === "signup" && termsAccepted === false
-
-  const handleCredential = useCallback(async (credential: string) => {
-    if (needsConsentGate) {
-      onError("Please agree to the Terms of Service and Privacy Policy and confirm you are 18+ years old to continue with Google.")
-      return
-    }
-    setOauthLoading(true)
-    const payload: Record<string, unknown> = { credential }
-    if (mode === "signup" || termsAccepted) {
-      payload.acceptedTerms = true
-      payload.ageConfirmed = true
-      payload.termsVersion = CURRENT_TERMS_VERSION
-    }
-    // Always capture APL rep referral (incl. ?ref= tap) on Google signup.
-    const ref = (referralCode || "").trim()
-    if (mode === "signup" && ref) payload.referralCode = ref
-    const { data, error } = await api.post<{ user: { firstName: string } }>("/api/auth/oauth/google", payload)
-    setOauthLoading(false)
-    if (error) {
-      onError(error)
-      return
-    }
-    if (data?.user) onSuccess()
-  }, [onSuccess, onError, mode, termsAccepted, referralCode, needsConsentGate])
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) return
@@ -103,11 +105,22 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsA
       .catch(() => setScriptError(true))
   }, [])
 
+  // Keep the signup intent cookie in step with the form while this panel is
+  // visible; clear it when leaving so a later sign-in click can't inherit a
+  // stale signup intent.
+  useEffect(() => {
+    if (mode !== "signup") return
+    if (!active) {
+      clearIntentCookie()
+      return
+    }
+    writeIntentCookie(termsAccepted, referralCode)
+  }, [mode, active, termsAccepted, referralCode])
+
   useEffect(() => {
     if (!ready) return
     if (!active || !btnRef.current) {
-      // Inactive panel: relinquish the global callback slot so the visible
-      // panel owns it, and allow a fresh render on reactivation.
+      // Inactive panel: allow a fresh render on reactivation.
       renderedRef.current = false
       return
     }
@@ -119,19 +132,15 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsA
       return
     }
 
-    // Re-initialize whenever the handler closure changes (Terms tick,
-    // referral edit): initialize() is global last-wins, so the active panel
-    // must always own it with a fresh closure — otherwise the callback keeps
-    // refusing after the box is ticked, or drops the referral.
+    // Redirect mode (not popup): after approval Google POSTs the credential
+    // to our same-origin callback route. Immune to popup blockers,
+    // opener loss, and Cross-Origin-Opener-Policy postMessage blocks that
+    // silently strand popup flows. No JS callback is involved, so there is
+    // no stale-closure hazard — initialize once per activation.
     google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
-      callback: (response: { credential?: string }) => {
-        if (response?.credential) {
-          handleCredential(response.credential)
-        } else {
-          onError("Google sign-in failed")
-        }
-      },
+      ux_mode: "redirect",
+      login_uri: `${window.location.origin}/api/auth/google/callback`,
     })
     if (renderedRef.current) return
     renderedRef.current = true
@@ -146,11 +155,10 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsA
       width,
       logo_alignment: "left",
     })
-  }, [ready, active, mode, handleCredential, onError])
+  }, [ready, active, mode])
 
   if (!active) {
-    // Inactive panel: same footprint, no GSI wiring (the visible panel owns
-    // the global initialize slot). Keeps toggle layout stable.
+    // Inactive panel: same footprint, no GSI wiring. Keeps toggle layout stable.
     return <div className="touch-target w-full rounded-xl border border-border bg-surface-secondary/50" style={{ minHeight: 52 }} aria-hidden="true" />
   }
 
@@ -185,7 +193,7 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsA
   }
 
   return (
-    <div ref={wrapperRef} className="relative w-full">
+    <div className="relative w-full">
       <div
         ref={btnRef}
         className={`touch-target w-full overflow-hidden rounded-xl ${needsConsentGate ? "pointer-events-none opacity-60" : ""}`}
@@ -202,12 +210,6 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsA
       )}
       {needsConsentGate && (
         <p className="mt-1.5 text-xs text-text-secondary">Please tick the agreement below to enable Google sign-up.</p>
-      )}
-      {oauthLoading && (
-        <div className="mt-2 flex items-center justify-center gap-2" role="status">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <span className="text-sm text-text-secondary">Verifying Google account...</span>
-        </div>
       )}
     </div>
   )

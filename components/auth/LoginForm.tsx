@@ -1,7 +1,7 @@
 ﻿"use client"
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth, COOKIES_BLOCKED_ERROR } from "@/lib/auth-context"
+import { useAuth } from "@/lib/auth-context"
 import { PasswordToggle } from "./PasswordToggle"
 import { GoogleSignInButton } from "./GoogleSignInButton"
 import { OtpInput } from "./OtpInput"
@@ -13,7 +13,7 @@ import { resolvePostAuthTarget } from "@/lib/persona"
 
 export function LoginForm({ onSwitchToRegister, returnUrl, googleActive = true }: { onSwitchToRegister?: () => void; returnUrl?: string; googleActive?: boolean }) {
   const router = useRouter()
-  const { login, sendMagicLink, phoneLogin, verifyOtp, refreshUser } = useAuth()
+  const { login, sendMagicLink, phoneLogin, verifyOtp } = useAuth()
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
@@ -275,17 +275,6 @@ export function LoginForm({ onSwitchToRegister, returnUrl, googleActive = true }
       <GoogleSignInButton
         mode="signin"
         active={googleActive}
-        onSuccess={async () => {
-          const u = await refreshUser()
-          // Same rule as password login: definitive DENIED right after a
-          // successful Google POST means third-party cookies were rejected.
-          if (u === null) {
-            setError(COOKIES_BLOCKED_ERROR)
-            return
-          }
-          router.push(resolvePostAuthTarget(u ?? null, returnUrl))
-          router.refresh()
-        }}
         onError={(msg) => setError(msg)}
       />
       <p className="text-center text-xs text-text-secondary">APL agents and admins sign in with code / password — Google sign-in is for marketplace accounts only.</p>
