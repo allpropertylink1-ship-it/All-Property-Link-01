@@ -17,27 +17,27 @@ export default async function AuthPage({ searchParams }: { searchParams: Promise
   const isDev = process.env.VERCEL_ENV !== 'production'
 
   return (
-    <div className={`flex min-h-[100dvh] items-center justify-center bg-surface-secondary px-4 py-10 ${isDev ? 'pt-14' : ''}`}>
+    <div className={`flex min-h-[100dvh] items-center justify-center bg-surface-secondary px-4 py-6 ${isDev ? 'pt-14' : ''}`}>
       {isDev && (
         <div className="fixed left-0 top-0 z-50 w-full bg-primary px-4 py-1.5 text-center text-xs font-medium text-white">
           Test accounts available &mdash; use password <strong>Test@123</strong>
         </div>
       )}
-      <div className="w-full max-w-5xl">
-        <div className="mb-4 text-center">
-          <Link href="/" className="inline-flex items-center gap-2.5" aria-label="All Property Link home">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary font-heading text-sm font-bold text-white">
+      <div className="w-full max-w-3xl">
+        <div className="mb-3 text-center">
+          <Link href="/" className="inline-flex items-center gap-2" aria-label="All Property Link home">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-heading text-xs font-bold text-white">
               APL
             </span>
-            <span className="font-heading text-xl font-bold text-text-primary">
+            <span className="font-heading text-lg font-bold text-text-primary">
               All Property <span className="text-accent-600">Link</span>
             </span>
           </Link>
         </div>
         <AuthCard referralCode={ref} />
-        <div className="mx-auto mt-4 max-w-2xl">
+        <div className="mx-auto mt-3 max-w-xl">
           <AuthAssurance>
-            256-Bit SSL Encrypted and Kenya Data Protection Act 2019 Compliant
+            256-bit SSL · Kenya Data Protection Act 2019
           </AuthAssurance>
         </div>
       </div>

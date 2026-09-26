@@ -3,7 +3,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { PasswordToggle } from "./PasswordToggle"
-import { AuthAssurance, AuthSubmitButton, InputLeadingIcon, stitchInputWithIconClass } from "./stitch-auth"
+import { AuthSubmitButton, InputLeadingIcon, stitchInputWithIconClass } from "./stitch-auth"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { BadgeCheck } from "@/components/ui/icons"
 
@@ -45,14 +45,14 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
   }
 
   return (
-    <div className="space-y-4">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {error && (
           <FormBanner variant="error">{error}</FormBanner>
         )}
         <div>
-          <label htmlFor="agentCode" className="block text-sm font-semibold text-text-primary">
-            Representative Email or Agent ID
+          <label htmlFor="agentCode" className="block text-[13px] font-semibold text-text-primary">
+            Email or Agent ID
           </label>
           <div className="relative">
             <InputLeadingIcon icon={BadgeCheck} />
@@ -62,15 +62,14 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
               type="text"
               required
               autoComplete="off"
-              aria-label="Representative Email or Agent ID"
               className={stitchInputWithIconClass}
               style={{ fontSize: "16px" }}
-              placeholder="e.g. REP-NAI-4028 or rep.name@example.co.ke"
+              placeholder="REP-NAI-4028 or you@example.co.ke"
             />
           </div>
         </div>
         <div>
-          <label htmlFor="agent-password" className="block text-sm font-semibold text-text-primary">
+          <label htmlFor="agent-password" className="block text-[13px] font-semibold text-text-primary">
             Password
           </label>
           <div className="mt-1">
@@ -79,13 +78,13 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
               name="password"
               autoComplete="current-password"
               required
-              placeholder="Enter your secure password"
+              placeholder="Your password"
             />
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <label className="flex cursor-pointer items-center gap-2" htmlFor="agent-remember-me">
+        <div className="flex items-center justify-between gap-2">
+          <label className="flex cursor-pointer items-center gap-1.5" htmlFor="agent-remember-me">
             <input
               id="agent-remember-me"
               type="checkbox"
@@ -93,25 +92,21 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
               onChange={(e) => setRememberMe(e.target.checked)}
               className="h-4 w-4 rounded border border-border bg-surface text-primary-600 focus:ring-2 focus:ring-primary"
             />
-            <span className="text-sm text-text-secondary">Remember this device for 30 days</span>
+            <span className="text-[13px] text-text-secondary">Remember me</span>
           </label>
           {onForgotPassword && (
             <button
               type="button"
               onClick={onForgotPassword}
-              className="text-sm font-semibold text-accent-600 transition-colors hover:text-accent-700"
+              className="text-[13px] font-semibold text-accent-600 transition-colors hover:text-accent-700"
             >
-              Forgot Password?
+              Forgot password?
             </button>
           )}
         </div>
 
-        <AuthSubmitButton loading={loading} label="Access Field Console" loadingLabel="Verifying Credentials..." />
+        <AuthSubmitButton loading={loading} label="Sign in" loadingLabel="Signing in..." />
       </form>
-
-      <AuthAssurance>
-        Official Representative Console and 256-Bit SSL Encrypted Session
-      </AuthAssurance>
     </div>
   )
 }

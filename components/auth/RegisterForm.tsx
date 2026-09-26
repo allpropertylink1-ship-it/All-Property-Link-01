@@ -194,21 +194,21 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
   if (step === "otp") {
     const isEmail = otpType === "EMAIL_VERIFICATION"
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="text-center">
-          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-accent-100 text-accent-600">
-            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-accent-100 text-accent-600">
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <rect x="2" y="4" width="20" height="16" rx="2" />
               <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
             </svg>
           </span>
-          <h2 className="mt-3 font-heading text-xl font-bold tracking-tight text-text-primary">Verify Your {isEmail ? "Email Address" : "Phone Number"}</h2>
-          <p className="mt-1.5 text-sm text-text-secondary">
-            We sent a 6-digit confirmation code to <strong className="break-all text-text-primary">{otpDestination}</strong>
+          <h2 className="mt-2 font-heading text-lg font-bold tracking-tight text-text-primary">Check your {isEmail ? "email" : "phone"}</h2>
+          <p className="mt-0.5 text-[13px] text-text-secondary">
+            Code sent to <strong className="break-all text-text-primary">{otpDestination}</strong>
             <button
               type="button"
               onClick={() => { setStep("form"); setOtpValues(["", "", "", "", "", ""]) }}
-              className="ml-2 inline-flex items-center gap-1 text-xs font-semibold text-accent-600 hover:text-accent-700"
+              className="ml-1.5 inline-flex items-center gap-1 text-xs font-semibold text-accent-600 hover:text-accent-700"
             >
               Edit
             </button>
@@ -223,14 +223,14 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
 
         <div className="flex items-center justify-between text-xs">
           {otpExpiresIn > 0 ? (
-            <span className="text-text-secondary">Code expires in {formatTime(otpExpiresIn)}</span>
+            <span className="text-text-secondary">Expires in {formatTime(otpExpiresIn)}</span>
           ) : (
-            <span className="font-medium text-error-500">Code expired. Request a new one.</span>
+            <span className="font-medium text-error-500">Expired — request a new one.</span>
           )}
           {cooldown > 0 ? (
-            <span className="text-text-secondary">Resend code in {formatTime(cooldown)}</span>
+            <span className="text-text-secondary">Resend in {formatTime(cooldown)}</span>
           ) : (
-            <button type="button" onClick={handleResendOtp} className="font-semibold text-accent-600 hover:text-accent-700">Resend Code</button>
+            <button type="button" onClick={handleResendOtp} className="font-semibold text-accent-600 hover:text-accent-700">Resend</button>
           )}
         </div>
 
@@ -239,9 +239,9 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
           onClick={handleOtpVerify}
           disabled={otpLoading || otpValues.join("").length !== 6}
           aria-busy={otpLoading}
-          className="touch-target flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3.5 font-semibold text-white transition-all hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary/30 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+          className="touch-target flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary/30 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {otpLoading ? "Verifying..." : "Verify and Complete Registration"}
+          {otpLoading ? "Verifying..." : "Verify"}
         </button>
       </div>
     )

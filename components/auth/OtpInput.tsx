@@ -35,7 +35,7 @@ export function OtpInput({ value, onChange, length = 6, disabled = false }: OtpI
   }
 
   return (
-    <div className="flex justify-center gap-2 sm:gap-2.5" onPaste={handlePaste} role="group" aria-label="6-digit verification code">
+    <div className="flex justify-center gap-1.5 sm:gap-2" onPaste={handlePaste} role="group" aria-label="6-digit verification code">
       {Array.from({ length }).map((_, i) => (
         <input key={i} ref={(el) => { inputs.current[i] = el }}
           type="text" inputMode="numeric" maxLength={1}
@@ -45,7 +45,7 @@ export function OtpInput({ value, onChange, length = 6, disabled = false }: OtpI
           aria-label={`Digit ${i + 1} of ${length}`}
           autoComplete={i === 0 ? "one-time-code" : "off"}
           style={{ fontSize: "16px" }}
-          className="h-12 w-12 min-w-0 max-w-12 flex-1 rounded-xl border border-border bg-surface-secondary text-center text-lg font-bold text-text-primary focus:border-accent-500 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-accent-500/25 disabled:opacity-50" />
+          className="h-10 w-10 min-w-0 max-w-10 flex-1 rounded-lg border border-border bg-surface-secondary text-center text-base font-bold text-text-primary focus:border-accent-500 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-accent-500/25 disabled:opacity-50" />
       ))}
     </div>
   )

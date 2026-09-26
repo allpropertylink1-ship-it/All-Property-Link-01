@@ -12,20 +12,20 @@ import { RegisterForm } from "./RegisterForm"
 import { cn } from "@/lib/utils"
 
 const tabs = [
-  { id: "user", label: "Client & Property Owner", description: "Owners, buyers, renters & providers" },
-  { id: "agent", label: "APL Field Representative", description: "Accredited reps & inspectors" },
+  { id: "user", label: "Client & Owner" },
+  { id: "agent", label: "Field Rep" },
 ] as const
 
 const sidePoints = [
   {
     icon: Handshake,
-    title: "Direct Engagement",
-    body: "Negotiate directly with verified Property Owners and Agents across Kenya.",
+    title: "Direct deals",
+    body: "Verified owners & agents across Kenya.",
   },
   {
     icon: ShieldCheck,
-    title: "ID-Audited Fundis & Technicians",
-    body: "Trade professionals vetted against their identification documents before they reach you.",
+    title: "ID-vetted fundis",
+    body: "Trade pros checked before they reach you.",
   },
 ]
 
@@ -54,10 +54,7 @@ function LoginContent({
     <>
       {!showAgentForgot && (
         <div>
-          <p className="mb-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-text-secondary">
-            Access Classification
-          </p>
-          <div className="mb-4 grid grid-cols-2 gap-1 rounded-xl bg-surface-secondary p-1.5" role="tablist" aria-label="Sign in as">
+          <div className="mb-3 grid grid-cols-2 gap-1 rounded-lg bg-surface-secondary p-1" role="tablist" aria-label="Sign in as">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -66,14 +63,13 @@ function LoginContent({
                 aria-selected={activeTab === tab.id}
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
-                  "touch-target rounded-lg px-3 py-2.5 text-left transition-all duration-150 sm:px-4",
+                  "touch-target rounded-md px-3 py-2 text-center text-[13px] transition-all duration-150",
                   activeTab === tab.id
                     ? "bg-surface font-bold text-primary shadow-sm"
                     : "font-medium text-text-secondary hover:text-text-primary"
                 )}
               >
-                <span className="block text-sm">{tab.label}</span>
-                <span className="mt-0.5 block text-[11px] font-normal text-text-secondary">{tab.description}</span>
+                {tab.label}
               </button>
             ))}
           </div>
@@ -81,13 +77,10 @@ function LoginContent({
       )}
 
       {activeTab === "agent" && !showAgentForgot && (
-        <div className="mb-4 rounded-xl bg-surface-secondary p-3.5">
-          <p className="flex items-center gap-2 text-sm font-bold text-primary">
-            <BadgeCheck size={18} className="text-accent-600" />
-            Official Representative Console
-          </p>
-          <p className="mt-1 text-xs leading-relaxed text-text-secondary">
-            Field Officers and Certified Inspectors sign in with their allocated regional credentials or assigned Field Rep ID.
+        <div className="mb-3 flex items-start gap-2 rounded-lg bg-surface-secondary p-2.5">
+          <BadgeCheck size={16} className="mt-0.5 shrink-0 text-accent-600" />
+          <p className="text-xs leading-snug text-text-secondary">
+            <span className="font-bold text-primary">Rep console.</span> Sign in with your regional credentials or Field Rep ID.
           </p>
         </div>
       )}
@@ -112,35 +105,54 @@ function WelcomeContent({
   compact?: boolean
   onToggle: () => void
 }) {
+  if (compact) {
+    return (
+      <div className="flex w-full items-center justify-between gap-3 px-1">
+        <p className="text-left text-sm font-semibold leading-snug text-white">
+          {view === "login" ? "Welcome back." : "Create your APL account."}
+          <span className="block text-[11px] font-normal text-white/65">
+            {view === "login" ? "Sign in to continue." : "Verify identity to continue."}
+          </span>
+        </p>
+        <button
+          type="button"
+          onClick={onToggle}
+          className="shrink-0 rounded-lg border border-white/25 bg-white/10 px-3.5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-white/20"
+        >
+          {view === "login" ? "Register" : "Sign in"}
+        </button>
+      </div>
+    )
+  }
   return (
-    <div className="flex w-full flex-col items-center px-6 text-center lg:items-start lg:px-10 lg:text-left">
-      <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-accent-200 ring-1 ring-white/15">
+    <div className="flex w-full flex-col items-center px-5 text-center lg:items-start lg:px-8 lg:text-left">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-0.5 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-accent-200 ring-1 ring-white/15">
         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-400" aria-hidden="true" />
-        {view === "login" ? "APL Portal Log In" : "Registration Portal"}
+        {view === "login" ? "Welcome back" : "Join APL"}
       </span>
-      <h1 className="mt-4 font-heading text-2xl font-bold leading-tight tracking-tight text-white lg:text-[1.75rem]">
+      <h1 className="mt-2.5 font-heading text-xl font-bold leading-snug tracking-tight text-white">
         {view === "login" ? (
-          <>Welcome back to Kenya&apos;s direct real estate and certified artisan network.</>
+          <>Kenya&apos;s direct property & artisan network.</>
         ) : (
-          <>Join Kenya&apos;s authoritative real estate and artisan ecosystem.</>
+          <>Create your APL account.</>
         )}
       </h1>
-      <p className="mt-2 max-w-sm text-sm leading-relaxed text-white/80">
+      <p className="mt-1 max-w-xs text-[13px] leading-relaxed text-white/75">
         {view === "login"
-          ? "Sign in to continue to your dashboard."
-          : "Create your account — you'll verify your identity to continue."}
+          ? "Sign in to your dashboard."
+          : "Verify your identity to continue."}
       </p>
 
       {!compact && (
-        <div className="mt-6 w-full space-y-2.5">
+        <div className="mt-4 w-full space-y-2">
           {sidePoints.map((point) => (
-            <div key={point.title} className="flex items-start gap-3 rounded-xl bg-white/5 p-3 ring-1 ring-white/10">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-500/20 text-accent-200">
-                <point.icon size={20} />
+            <div key={point.title} className="flex items-center gap-2.5 rounded-lg bg-white/5 px-2.5 py-2 ring-1 ring-white/10">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-500/20 text-accent-200">
+                <point.icon size={16} />
               </span>
               <span className="text-left">
-                <span className="block text-sm font-semibold text-white">{point.title}</span>
-                <span className="mt-0.5 block text-xs leading-relaxed text-white/70">{point.body}</span>
+                <span className="block text-[13px] font-semibold text-white">{point.title}</span>
+                <span className="block text-[11px] leading-snug text-white/65">{point.body}</span>
               </span>
             </div>
           ))}
@@ -149,14 +161,13 @@ function WelcomeContent({
 
       {!compact && (
         <>
-          <div className="mt-5 h-px w-16 bg-accent-400" aria-hidden="true" />
           <button
             type="button"
             onClick={onToggle}
-            className="mt-4 inline-flex touch-target items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/20"
+            className="mt-4 inline-flex touch-target items-center justify-center gap-1.5 rounded-lg border border-white/25 bg-white/10 px-5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-white/20"
           >
-            {view === "login" ? "Create an account" : "Sign in"}
-            <ArrowRight size={16} className="text-accent-200" />
+            {view === "login" ? "Create account" : "Sign in"}
+            <ArrowRight size={14} className="text-accent-200" />
           </button>
         </>
       )}
@@ -282,9 +293,9 @@ export function AuthCard({ referralCode }: Props) {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-border bg-surface shadow-lg">
-      {/* Mobile welcome strip */}
-      <div className="auth-strip relative px-6 py-10 lg:hidden">
+    <div className="relative overflow-hidden rounded-xl border border-border bg-surface shadow-md">
+      {/* Mobile welcome strip — slim, single line */}
+      <div className="auth-strip relative px-5 py-5 lg:hidden">
         {view === "login" ? (
           <WelcomeContent compact view="login" onToggle={() => toggleView("register")} />
         ) : (
@@ -298,17 +309,17 @@ export function AuthCard({ referralCode }: Props) {
           ref={loginPaneRef}
           aria-hidden={settledView !== "login"}
           className={cn(
-            "p-6 sm:p-8 lg:p-10",
+            "p-5 sm:p-6",
             view !== "login" && "hidden lg:block"
           )}
         >
-          <h2 className="font-heading text-2xl font-bold tracking-tight text-text-primary">
-            Sign In to Your Account
+          <h2 className="font-heading text-xl font-bold tracking-tight text-text-primary">
+            Sign in
           </h2>
-          <p className="mt-1.5 text-sm text-text-secondary">
-            Enter your verified credentials to access your direct transaction dashboard.
+          <p className="mt-0.5 text-[13px] text-text-secondary">
+            Access your dashboard.
           </p>
-          <div className="mt-5">
+          <div className="mt-4">
             <LoginContent
               activeTab={activeTab}
               showAgentForgot={showAgentForgot}
@@ -325,17 +336,17 @@ export function AuthCard({ referralCode }: Props) {
           ref={registerPaneRef}
           aria-hidden={settledView !== "register"}
           className={cn(
-            "p-6 sm:p-8 lg:p-10",
+            "p-5 sm:p-6",
             view !== "register" && "hidden lg:block"
           )}
         >
-          <h2 className="font-heading text-2xl font-bold tracking-tight text-text-primary">
-            Create Your All Property Link Account
+          <h2 className="font-heading text-xl font-bold tracking-tight text-text-primary">
+            Create account
           </h2>
-          <p className="mt-1.5 text-sm text-text-secondary">
-            Join the All Property Link community across Kenya.
+          <p className="mt-0.5 text-[13px] text-text-secondary">
+            Join APL Kenya in under a minute.
           </p>
-          <div className="mt-5">
+          <div className="mt-4">
             <RegisterForm
               referralCode={referralCode}
               onSwitchToLogin={() => toggleView("login")}

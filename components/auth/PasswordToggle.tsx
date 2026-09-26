@@ -28,12 +28,12 @@ export function PasswordToggle({ id, name, value, onChange, placeholder, autoCom
         required={required}
         minLength={minLength}
         style={{ fontSize: "16px" }}
-        className={`block w-full rounded-xl border border-border bg-surface-secondary px-4 py-3.5 pr-12 text-text-primary placeholder:text-text-secondary focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30 ${className}`}
+        className={`block w-full rounded-lg border border-border bg-surface-secondary px-3 py-2.5 pr-11 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30 ${className}`}
       />
       <button
         type="button"
         onClick={() => setVisible(!visible)}
-        className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-secondary hover:text-text-primary"
+        className="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-secondary hover:text-text-primary"
         aria-label={visible ? "Hide password" : "Show password"}
       >
         {visible ? (
