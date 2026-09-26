@@ -64,7 +64,10 @@ class ApiClient {
   ): Promise<ApiResponse<T>> {
     try {
       const method = options.method || "GET"
-      const cacheControl = method === "GET" ? "max-age=30, stale-while-revalidate=120" : "no-store"
+      // Session reads must never be cached: a stale pre-consent /me bounces
+      // users between /dashboard and /auth/consent after they accept Terms.
+      const isSessionPath = path.startsWith("/api/auth") || path.startsWith("/api/user")
+      const cacheControl = method === "GET" && !isSessionPath ? "max-age=30, stale-while-revalidate=120" : "no-store"
       const headers = {
         "Content-Type": "application/json",
         "Cache-Control": cacheControl,
@@ -83,7 +86,7 @@ class ApiClient {
       for (;;) {
         attempt += 1
         try {
-          res = await this.fetchOnce(path, { ...options, headers }, 30000)
+          res = await this.fetchOnce(path, { ...options, headers, ...(isSessionPath ? { cache: "no-store" as RequestCache } : {}) }, 30000)
           if (!this.isRetriableStatus(res.status) || attempt >= maxAttempts) break
         } catch (err) {
           lastError = err

@@ -4,8 +4,7 @@ import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { DashboardBanner } from "@/components/dashboard/DashboardBanner";
 import { KycGate } from "@/components/dashboard/KycGate";
 import { RequireAuthMethod } from "@/lib/auth-guard";
-
-const CURRENT_TERMS_VERSION = "2026-09-17";
+import { CURRENT_TERMS_VERSION } from "@/lib/persona";
 
 export default async function DashboardLayout({
   children,

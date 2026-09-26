@@ -1,7 +1,11 @@
+export const CURRENT_TERMS_VERSION = "2026-09-17"
+
 export interface PersonaUser {
   authMethod?: string
   primaryUserType?: string | null
   userTypes?: string[]
+  acceptedTermsAt?: string | null
+  termsVersion?: string | null
 }
 
 /** APL Representatives are staff: authMethod "agent" (+ aplAgentId server-side). */

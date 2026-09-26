@@ -1,26 +1,43 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { Suspense, useState, useEffect, useRef } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { useAuth, CURRENT_TERMS_VERSION } from "@/lib/auth-context"
-import { personaHomeTarget } from "@/lib/persona"
+import { useAuth } from "@/lib/auth-context"
+import { CURRENT_TERMS_VERSION, resolvePostAuthTarget } from "@/lib/persona"
 import { FormBanner } from "@/components/shared/FormFeedback"
 
+function isFreshlyConsented(u: { acceptedTermsAt?: string | null; termsVersion?: string | null } | null | undefined) {
+  return !!u?.acceptedTermsAt && u.termsVersion === CURRENT_TERMS_VERSION
+}
+
 export default function ConsentPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-[100dvh] items-center justify-center bg-surface-secondary"><div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" aria-label="Loading" /></div>}>
+      <ConsentInner />
+    </Suspense>
+  )
+}
+
+function ConsentInner() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const returnUrl = searchParams.get("return")
   const { user, loading, acceptConsent, refreshUser } = useAuth()
   const [accepted, setAccepted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [confirming, setConfirming] = useState(false)
   const [error, setError] = useState("")
+  const didRedirect = useRef(false)
 
-  const needsConsent = !loading && (!user || !user.acceptedTermsAt || user.termsVersion !== CURRENT_TERMS_VERSION)
+  const needsConsent = !loading && (!user || !isFreshlyConsented(user))
 
   useEffect(() => {
-    if (!loading && user && !needsConsent) {
-      router.replace(personaHomeTarget(user))
+    if (!loading && user && !needsConsent && !didRedirect.current) {
+      didRedirect.current = true
+      router.replace(resolvePostAuthTarget(user, returnUrl))
     }
-  }, [loading, user, needsConsent, router])
+  }, [loading, user, needsConsent, router, returnUrl])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -29,6 +46,7 @@ export default function ConsentPage() {
       return
     }
     setSubmitting(true)
+    setConfirming(false)
     setError("")
     const result = await acceptConsent()
     if (result.error) {
@@ -36,8 +54,36 @@ export default function ConsentPage() {
       setSubmitting(false)
       return
     }
-    const u = await refreshUser().catch(() => null)
-    router.replace(personaHomeTarget(u ?? user))
+    // Source of truth is the POST response user — never fall back to the
+    // stale pre-consent context user (that fallback caused the bounce loop).
+    if (isFreshlyConsented(result.user)) {
+      didRedirect.current = true
+      router.refresh()
+      router.replace(resolvePostAuthTarget(result.user, returnUrl))
+      return
+    }
+    // POST succeeded but returned no fresh user (proxy blip): poll /me with
+    // no-store + cache-buster until the server confirms, else surface error.
+    setConfirming(true)
+    let fresh: { acceptedTermsAt?: string | null; termsVersion?: string | null; authMethod?: string; primaryUserType?: string | null; userTypes?: string[] } | null | undefined = null
+    for (let i = 0; i < 5; i++) {
+      await new Promise((r) => setTimeout(r, 400 * (i + 1)))
+      try {
+        fresh = await refreshUser()
+      } catch {
+        fresh = undefined
+      }
+      if (isFreshlyConsented(fresh)) break
+    }
+    setSubmitting(false)
+    setConfirming(false)
+    if (isFreshlyConsented(fresh)) {
+      didRedirect.current = true
+      router.refresh()
+      router.replace(resolvePostAuthTarget(fresh, returnUrl))
+      return
+    }
+    setError("Saved, but confirming your session timed out. Please wait a moment then refresh — you should land in your dashboard, not back here.")
   }
 
   if (loading) {
@@ -114,11 +160,11 @@ export default function ConsentPage() {
 
           <button
             type="submit"
-            disabled={submitting || !accepted}
-            aria-busy={submitting}
+            disabled={submitting || confirming || !accepted}
+            aria-busy={submitting || confirming}
             className="mt-6 touch-target flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3.5 font-semibold text-white transition-all hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {submitting ? "Saving..." : "I Agree and Continue"}
+            {confirming ? "Confirming..." : submitting ? "Saving..." : "I Agree and Continue"}
           </button>
         </form>
 

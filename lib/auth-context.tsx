@@ -2,8 +2,9 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react"
 import { api } from "./api-client"
+import { CURRENT_TERMS_VERSION } from "./persona"
 
-export const CURRENT_TERMS_VERSION = "2026-09-17"
+export { CURRENT_TERMS_VERSION }
 
 // Shown when login succeeds but the session cookies were rejected by the
 // browser (third-party-cookie blocking). Retrying usually goes through the
@@ -64,7 +65,7 @@ interface AuthContextType {
   agentResetPassword: (token: string, password: string) => Promise<{ error?: string }>
   firstPasswordChange: (newPassword: string) => Promise<{ error?: string }>
   changePassword: (newPassword: string, currentPassword?: string) => Promise<{ error?: string }>
-  acceptConsent: () => Promise<{ error?: string }>
+  acceptConsent: () => Promise<{ error?: string; user?: User }>
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -105,12 +106,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // UNKNOWN never touches client state: a transient blip must not sign
     // a healthy session out (nor keep a dead one alive for redirect).
     let res: Response | null = null
+    // Cache-buster + no-store: a cached pre-consent /me bounced users
+    // between /dashboard and /auth/consent after they accepted Terms.
+    const meUrl = `/api/auth/me?t=${Date.now()}`
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), 15000)
         try {
-          res = await fetch("/api/auth/me", { credentials: "include", signal: controller.signal })
+          res = await fetch(meUrl, { credentials: "include", signal: controller.signal, cache: "no-store" })
         } finally {
           clearTimeout(timeoutId)
         }
@@ -273,10 +277,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const acceptConsent = useCallback(async () => {
-    const { error } = await api.post("/api/auth/consent", { acceptedTerms: true, ageConfirmed: true, termsVersion: CURRENT_TERMS_VERSION })
+    // POST now returns the fresh user — use it as source of truth so we
+    // never navigate on a stale pre-consent GET /me.
+    const { data, error } = await api.post<{ success: boolean; acceptedTermsAt: string; termsVersion: string; user?: User }>("/api/auth/consent", { acceptedTerms: true, ageConfirmed: true, termsVersion: CURRENT_TERMS_VERSION })
     if (error) return { error }
-    await fetchUser()
-    return {}
+    if (data?.user) {
+      setUser(data.user)
+      return { user: data.user }
+    }
+    const fresh = await fetchUser()
+    return fresh ? { user: fresh } : {}
   }, [fetchUser])
 
   return (
