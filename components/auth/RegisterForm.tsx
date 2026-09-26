@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useAuth, type OtpResponse } from "@/lib/auth-context"
 import { OtpInput } from "./OtpInput"
 import { RegisterAccountInfo } from "./RegisterAccountInfo"
-import { formatTime } from "./RegisterForm.utils"
+import { formatTime, kenyanPhoneError } from "./RegisterForm.utils"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { resolvePostAuthTarget } from "@/lib/persona"
 
@@ -36,6 +36,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
   const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
+  const [recoveryEmail, setRecoveryEmail] = useState("")
   const [acceptedTerms, setAcceptedTerms] = useState(false)
 
   useEffect(() => {
@@ -94,10 +95,18 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
       return
     }
 
-    if (contactMethod === "phone" && phoneRaw.replace(/\D/g, "").length !== 9) {
-      setError("Please enter a valid 9-digit Kenyan phone number")
-      setLoading(false)
-      return
+    if (contactMethod === "phone") {
+      const phoneErr = kenyanPhoneError(phoneRaw)
+      if (phoneErr) {
+        setError(phoneErr)
+        setLoading(false)
+        return
+      }
+      if (recoveryEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recoveryEmail.trim())) {
+        setError("Recovery email doesn't look valid — check it or leave it empty.")
+        setLoading(false)
+        return
+      }
     }
 
     if (contactMethod === "email") {
@@ -130,7 +139,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
         firstName: firstNameValue, lastName: lastNameValue,
       })
     } else {
-      result = await signup({ firstName: firstNameValue, lastName: lastNameValue, password, email: emailValue, phone: phoneValue, referralCode: referralCode || undefined, acceptedTerms: true, ageConfirmed: true })
+      result = await signup({ firstName: firstNameValue, lastName: lastNameValue, password, email: emailValue, phone: phoneValue, referralCode: referralCode || undefined, acceptedTerms: true, ageConfirmed: true, recoveryEmail: contactMethod === "phone" && recoveryEmail.trim() ? recoveryEmail.trim() : undefined })
     }
 
     if (result.error) {
@@ -252,17 +261,19 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
   const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)
+  const handleRecoveryEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => setRecoveryEmail(e.target.value)
 
   return (
     <form onSubmit={handleSubmit}>
       <RegisterAccountInfo
         contactMethod={contactMethod} password={password} referralCode={referralCode}
-        firstName={firstName} lastName={lastName} email={email} phone={phone}
+        firstName={firstName} lastName={lastName} email={email} phone={phone} recoveryEmail={recoveryEmail}
         error={error} loading={loading} acceptedTerms={acceptedTerms} onAcceptedChange={setAcceptedTerms}
         onContactMethodChange={setContactMethod} onPasswordChange={setPassword}
         onReferralCodeChange={setReferralCode} onBack={onSwitchToLogin ? () => onSwitchToLogin() : undefined}
         onFirstNameChange={handleFirstNameChange} onLastNameChange={handleLastNameChange}
         onEmailChange={handleEmailChange} onPhoneChange={handlePhoneChange}
+        onRecoveryEmailChange={handleRecoveryEmailChange}
         onSwitchToLogin={onSwitchToLogin}
       />
     </form>

@@ -53,7 +53,7 @@ interface AuthContextType {
   login: (emailOrPhone: string, password: string, rememberMe?: boolean) => Promise<{ error?: string; code?: string; user?: User }>
   logout: () => Promise<void>
   phoneLogin: (phone: string) => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
-  signup: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string }) => Promise<{ error?: string; code?: string; otp?: OtpResponse }>
+  signup: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string; recoveryEmail?: string }) => Promise<{ error?: string; code?: string; otp?: OtpResponse }>
   sendOtp: (identifier: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
   verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION", rememberMe?: boolean) => Promise<{ error?: string; code?: string; user?: User }>
   updateRegistration: (data: { oldIdentifier: string; email?: string; phone?: string; firstName?: string; lastName?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
@@ -157,9 +157,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchUser])
 
   const login = useCallback(async (emailOrPhone: string, password: string, rememberMe = true) => {
-    const isPhone = /^(\+254|0?7\d{8})$/.test(emailOrPhone.replace(/\s/g, ""))
-    const payload = isPhone
-      ? { phone: emailOrPhone.replace(/\s/g, "").replace(/^0/, "+254"), password, rememberMe }
+    // Kenyan phone detection mirrors backend normalizeKenyanPhone:
+    // 9-digit core (7xx/1xx), 07xx/01xx, or +254/254 forms.
+    const raw = emailOrPhone.replace(/[\s-]/g, "")
+    const m = raw.match(/^(?:\+?254|0)?([17]\d{8})$/)
+    const payload = m
+      ? { phone: `+254${m[1]}`, password, rememberMe }
       : { email: emailOrPhone, password, rememberMe }
     const { data, error, code } = await api.post<{ user: User }>("/api/auth/login", payload)
     if (data?.user) {
@@ -190,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }, [])
 
-  const signup = useCallback(async (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string }) => {
+  const signup = useCallback(async (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string; recoveryEmail?: string }) => {
     const payload = { ...data, termsVersion: data.termsVersion || CURRENT_TERMS_VERSION }
     const { data: result, error } = await api.post<OtpResponse & { code?: string }>("/api/auth/register", payload)
     if (error) return { error, code: (result as unknown as { code?: string })?.code }

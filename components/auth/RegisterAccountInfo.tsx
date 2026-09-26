@@ -16,6 +16,7 @@ interface Props {
   lastName: string
   email: string
   phone: string
+  recoveryEmail: string
   error: string
   loading: boolean
   acceptedTerms: boolean
@@ -28,13 +29,14 @@ interface Props {
   onLastNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onPhoneChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onRecoveryEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onSwitchToLogin?: () => void
 }
 
 export function RegisterAccountInfo({
-  contactMethod, password, referralCode, firstName, lastName, email, phone, error, loading, acceptedTerms, onAcceptedChange,
+  contactMethod, password, referralCode, firstName, lastName, email, phone, recoveryEmail, error, loading, acceptedTerms, onAcceptedChange,
   onContactMethodChange, onPasswordChange, onReferralCodeChange,
-  onBack, onFirstNameChange, onLastNameChange, onEmailChange, onPhoneChange,
+  onBack, onFirstNameChange, onLastNameChange, onEmailChange, onPhoneChange, onRecoveryEmailChange,
   onSwitchToLogin,
 }: Props) {
   const goBack = onBack ?? (onSwitchToLogin ? () => onSwitchToLogin() : undefined)
@@ -104,16 +106,27 @@ export function RegisterAccountInfo({
               style={{ fontSize: "16px" }} placeholder="you@example.co.ke" />
           </div>
         ) : (
-          <div>
-            <label htmlFor="phone" className="block text-xs font-semibold text-text-primary">Phone</label>
-            <div className="mt-1 flex">
-              <span className="inline-flex items-center rounded-lg rounded-r-none border border-r-0 border-border bg-surface-secondary px-2.5 text-xs text-text-secondary">+254</span>
-              <input id="phone" name="phone" type="tel" inputMode="numeric" required maxLength={9}
-                value={phone} onChange={onPhoneChange}
-                className="block w-full rounded-lg rounded-l-none border border-border bg-surface-secondary px-3 py-2.5 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
-                style={{ fontSize: "16px" }} placeholder="712 345 678" />
+          <>
+            <div>
+              <label htmlFor="phone" className="block text-xs font-semibold text-text-primary">Phone</label>
+              <div className="mt-1 flex">
+                <span className="inline-flex items-center rounded-lg rounded-r-none border border-r-0 border-border bg-surface-secondary px-2.5 text-xs text-text-secondary">+254</span>
+                <input id="phone" name="phone" type="tel" inputMode="numeric" required maxLength={12}
+                  value={phone} onChange={onPhoneChange}
+                  className="block w-full rounded-lg rounded-l-none border border-border bg-surface-secondary px-3 py-2.5 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  style={{ fontSize: "16px" }} placeholder="712345678 or 0112345678" />
+              </div>
             </div>
-          </div>
+            <div>
+              <label htmlFor="recoveryEmail" className="block text-xs font-semibold text-text-primary">
+                Recovery email <span className="font-normal text-text-secondary">(recommended — your way back in if you lose this number)</span>
+              </label>
+              <input id="recoveryEmail" name="recoveryEmail" type="email" autoComplete="email"
+                value={recoveryEmail} onChange={onRecoveryEmailChange}
+                className={stitchInputClass}
+                style={{ fontSize: "16px" }} placeholder="you@example.co.ke" />
+            </div>
+          </>
         )}
 
         <div>

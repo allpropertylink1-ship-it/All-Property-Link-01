@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { PasswordToggle } from "./PasswordToggle"
 import { OtpInput } from "./OtpInput"
+import { normalizeKenyanPhoneClient, kenyanPhoneError } from "./RegisterForm.utils"
 import { SetPasswordForm } from "./SetPasswordForm"
 import { AuthSubmitButton, InputLeadingIcon, stitchInputWithIconClass } from "./stitch-auth"
 import { FormBanner } from "@/components/shared/FormFeedback"
@@ -71,14 +72,14 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
   }
 
   async function handlePhoneSendCode() {
-    const digits = phone.replace(/\D/g, "")
-    if (digits.length !== 9) {
-      setPhoneError("Please enter a valid 9-digit Kenyan phone number")
+    const err = kenyanPhoneError(phone)
+    if (err) {
+      setPhoneError(err)
       return
     }
     setPhoneLoading(true)
     setPhoneError("")
-    const fullPhone = `+254${digits}`
+    const fullPhone = normalizeKenyanPhoneClient(phone)!
     const result = await phoneLogin(fullPhone)
     if (result?.error) {
       setPhoneError(result.error)
@@ -105,8 +106,12 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
     if (code.length !== 6) return
     setOtpLoading(true)
     setPhoneError("")
-    const digits = phone.replace(/\D/g, "")
-    const fullPhone = `+254${digits}`
+    const fullPhone = normalizeKenyanPhoneClient(phone)
+    if (!fullPhone) {
+      setPhoneError("That phone number looks invalid. Please go back and check it.")
+      setOtpLoading(false)
+      return
+    }
     const result = await verifyOtp(fullPhone, code, "PHONE_VERIFICATION", rememberMe)
     if (result?.error) {
       setPhoneError(result.error)
@@ -289,10 +294,10 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
                     id="login-phone"
                     type="tel"
                     inputMode="numeric"
-                    maxLength={9}
+                    maxLength={13}
                     value={phone}
                     onChange={(e) => { setPhone(e.target.value); setPhoneError("") }}
-                    placeholder="712 345 678"
+                    placeholder="712345678 or 0112345678"
                     className="block w-full rounded-lg rounded-l-none border border-border bg-surface-secondary px-3 py-2.5 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
                     style={{ fontSize: "16px" }}
                   />
@@ -314,7 +319,7 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
                 <FormBanner variant="error">{phoneError}</FormBanner>
               )}
               <p className="text-center text-[13px] text-text-secondary">
-                Code sent to <strong className="text-text-primary">+254{phone.replace(/\D/g, "")}</strong>
+                If an account exists for <strong className="text-text-primary">{normalizeKenyanPhoneClient(phone) ?? phone}</strong>, a code is on its way.
               </p>
               <OtpInput
                 value={otpValues.join("")}
