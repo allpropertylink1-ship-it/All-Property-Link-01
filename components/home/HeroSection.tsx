@@ -214,9 +214,11 @@ function personaQuery(p: Persona): string | null {
   if (p.purpose) params.set("purpose", p.purpose)
   if (p.type) params.set("type", p.type)
   // Newest-first: backend defaults to createdAt desc, made explicit here.
+  // NOTE: API has no LAND-exclusion param, so fetch a wider pool (max 50)
+  // then filter LAND client-side in toSlides() to still fill 8 slides.
   params.set("sort", "createdAt")
   params.set("order", "desc")
-  params.set("limit", "8")
+  params.set("limit", "50")
   return params.toString()
 }
 
@@ -323,7 +325,7 @@ export function HeroSection() {
     debounceRef.current = setTimeout(() => {
       const params = new URLSearchParams(base)
       params.set("search", value)
-      params.set("limit", "5")
+      params.set("limit", "15")
       fetch(`/api/properties?${params.toString()}`)
         .then((r) => (r.ok ? r.json() : { properties: [] }))
         .catch(() => ({ properties: [] }))
