@@ -130,6 +130,11 @@ export async function POST(req: NextRequest) {
   const dest = new URL("/auth", req.url)
   const ret = safeReturn(intent.returnUrl)
   if (ret) dest.searchParams.set("return", ret)
+  // Marker so /auth can distinguish "came back from Google with a fresh
+  // session" from a plain visit. If the session check then comes back
+  // DENIED, the cookies didn't stick and AuthCard says so explicitly
+  // instead of showing a bare form that looks like "nothing happened".
+  dest.searchParams.set("google_ok", "1")
   const destStr = dest.toString()
   const destAttr = destStr.replace(/&/g, "&amp;").replace(/"/g, "&quot;")
   const html =

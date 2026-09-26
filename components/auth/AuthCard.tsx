@@ -175,6 +175,10 @@ export function AuthCard({ referralCode, notice }: Props) {
   const { user, loading, refreshUser, clearSession } = useAuth()
   const returnParam = searchParams.get("return")
   const returnUrl = isSafeReturnUrl(returnParam) ? (returnParam as string) : undefined
+  // Set by the Google callback route on success. If the follow-up session
+  // check is definitively DENIED, the fresh session cookies didn't stick in
+  // this browser — say so explicitly instead of a bare form.
+  const googleOk = searchParams.get("google_ok") === "1"
   // Client-side net for in-app navigation to /auth while signed in (server
   // guard in app/auth/page.tsx covers hard loads). Sends each persona home.
   // NOTE: no early return here — hooks below must run unconditionally.
@@ -291,6 +295,11 @@ export function AuthCard({ referralCode, notice }: Props) {
       {notice && (
         <div className="border-b border-border bg-surface-secondary/60 px-6 py-4 sm:px-8">
           <FormBanner variant="error">{notice}</FormBanner>
+        </div>
+      )}
+      {googleOk && sessionChecked === "denied" && (
+        <div className="border-b border-border bg-surface-secondary/60 px-6 py-4 sm:px-8">
+          <FormBanner variant="error">Google approved your sign-in, but the login session didn&apos;t stick in this browser. Please allow cookies for this site (open it in the main Chrome app, not from inside another app), then try again.</FormBanner>
         </div>
       )}
       {/* Mobile welcome strip */}
