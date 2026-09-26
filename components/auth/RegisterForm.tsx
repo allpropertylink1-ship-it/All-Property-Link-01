@@ -12,7 +12,7 @@ import { resolvePostAuthTarget } from "@/lib/persona"
 type ContactMethod = "email" | "phone"
 type Step = "form" | "otp"
 
-export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogin, returnUrl, googleActive = true }: { referralCode?: string; onSwitchToLogin?: () => void; returnUrl?: string; googleActive?: boolean }) {
+export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogin, returnUrl }: { referralCode?: string; onSwitchToLogin?: () => void; returnUrl?: string }) {
   const router = useRouter()
   const { signup, sendOtp, verifyOtp, updateRegistration } = useAuth()
   const [step, setStep] = useState<Step>("form")
@@ -191,10 +191,6 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
     setOtpValues(["", "", "", "", "", ""])
   }
 
-  function handleGoogleError(msg: string) {
-    setError(msg)
-  }
-
   if (step === "otp") {
     const isEmail = otpType === "EMAIL_VERIFICATION"
     return (
@@ -260,14 +256,13 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
   return (
     <form onSubmit={handleSubmit}>
       <RegisterAccountInfo
-        contactMethod={contactMethod} password={password} referralCode={referralCode} googleActive={googleActive}
+        contactMethod={contactMethod} password={password} referralCode={referralCode}
         firstName={firstName} lastName={lastName} email={email} phone={phone}
         error={error} loading={loading} acceptedTerms={acceptedTerms} onAcceptedChange={setAcceptedTerms}
         onContactMethodChange={setContactMethod} onPasswordChange={setPassword}
         onReferralCodeChange={setReferralCode} onBack={onSwitchToLogin ? () => onSwitchToLogin() : undefined}
         onFirstNameChange={handleFirstNameChange} onLastNameChange={handleLastNameChange}
         onEmailChange={handleEmailChange} onPhoneChange={handlePhoneChange}
-        onGoogleError={handleGoogleError}
         onSwitchToLogin={onSwitchToLogin}
       />
     </form>

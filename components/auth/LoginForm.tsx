@@ -3,7 +3,6 @@ import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { PasswordToggle } from "./PasswordToggle"
-import { GoogleSignInButton } from "./GoogleSignInButton"
 import { OtpInput } from "./OtpInput"
 import { SetPasswordForm } from "./SetPasswordForm"
 import { AuthAssurance, AuthDivider, AuthSubmitButton, InputLeadingIcon, stitchInputWithIconClass } from "./stitch-auth"
@@ -11,7 +10,7 @@ import { FormBanner } from "@/components/shared/FormFeedback"
 import { Mail } from "@/components/ui/icons"
 import { resolvePostAuthTarget } from "@/lib/persona"
 
-export function LoginForm({ onSwitchToRegister, returnUrl, googleActive = true }: { onSwitchToRegister?: () => void; returnUrl?: string; googleActive?: boolean }) {
+export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegister?: () => void; returnUrl?: string }) {
   const router = useRouter()
   const { login, sendMagicLink, phoneLogin, verifyOtp } = useAuth()
   const [error, setError] = useState("")
@@ -269,15 +268,6 @@ export function LoginForm({ onSwitchToRegister, returnUrl, googleActive = true }
 
         <AuthSubmitButton loading={loading} label="Sign In to Account" loadingLabel="Verifying Credentials..." />
       </form>
-
-      <AuthDivider />
-
-      <GoogleSignInButton
-        mode="signin"
-        active={googleActive}
-        onError={(msg) => setError(msg)}
-      />
-      <p className="text-center text-xs text-text-secondary">APL agents and admins sign in with code / password — Google sign-in is for marketplace accounts only.</p>
 
       <div className="space-y-4">
         <AuthDivider label="or sign in with phone" />

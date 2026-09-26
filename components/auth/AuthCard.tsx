@@ -9,7 +9,6 @@ import { LoginForm } from "./LoginForm"
 import { AgentLoginForm } from "./AgentLoginForm"
 import { AgentForgotPasswordForm } from "./AgentForgotPasswordForm"
 import { RegisterForm } from "./RegisterForm"
-import { FormBanner } from "@/components/shared/FormFeedback"
 import { cn } from "@/lib/utils"
 
 const tabs = [
@@ -34,8 +33,6 @@ const SWEEP_MS = 650
 
 interface Props {
   referralCode?: string
-  /** Server-surfaced notice (e.g. a failed Google redirect round-trip). */
-  notice?: string
 }
 
 function LoginContent({
@@ -45,7 +42,6 @@ function LoginContent({
   onShowAgentForgot,
   onSwitchToRegister,
   returnUrl,
-  googleActive = true,
 }: {
   activeTab: "user" | "agent"
   showAgentForgot: boolean
@@ -53,7 +49,6 @@ function LoginContent({
   onShowAgentForgot: () => void
   onSwitchToRegister: () => void
   returnUrl?: string
-  googleActive?: boolean
 }) {
   return (
     <>
@@ -98,7 +93,7 @@ function LoginContent({
       )}
 
       {activeTab === "user" ? (
-        <LoginForm onSwitchToRegister={onSwitchToRegister} returnUrl={returnUrl} googleActive={googleActive} />
+        <LoginForm onSwitchToRegister={onSwitchToRegister} returnUrl={returnUrl} />
       ) : showAgentForgot ? (
         <AgentForgotPasswordForm />
       ) : (
@@ -169,16 +164,12 @@ function WelcomeContent({
   )
 }
 
-export function AuthCard({ referralCode, notice }: Props) {
+export function AuthCard({ referralCode }: Props) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { user, loading, refreshUser, clearSession } = useAuth()
   const returnParam = searchParams.get("return")
   const returnUrl = isSafeReturnUrl(returnParam) ? (returnParam as string) : undefined
-  // Set by the Google callback route on success. If the follow-up session
-  // check is definitively DENIED, the fresh session cookies didn't stick in
-  // this browser — say so explicitly instead of a bare form.
-  const googleOk = searchParams.get("google_ok") === "1"
   // Client-side net for in-app navigation to /auth while signed in (server
   // guard in app/auth/page.tsx covers hard loads). Sends each persona home.
   // NOTE: no early return here — hooks below must run unconditionally.
@@ -292,16 +283,6 @@ export function AuthCard({ referralCode, notice }: Props) {
 
   return (
     <div className="relative overflow-hidden rounded-xl border border-border bg-surface shadow-lg">
-      {notice && (
-        <div className="border-b border-border bg-surface-secondary/60 px-6 py-4 sm:px-8">
-          <FormBanner variant="error">{notice}</FormBanner>
-        </div>
-      )}
-      {googleOk && sessionChecked === "denied" && (
-        <div className="border-b border-border bg-surface-secondary/60 px-6 py-4 sm:px-8">
-          <FormBanner variant="error">Google approved your sign-in, but the login session didn&apos;t stick in this browser. Please allow cookies for this site (open it in the main Chrome app, not from inside another app), then try again.</FormBanner>
-        </div>
-      )}
       {/* Mobile welcome strip */}
       <div className="auth-strip relative px-6 py-10 lg:hidden">
         {view === "login" ? (
@@ -335,7 +316,6 @@ export function AuthCard({ referralCode, notice }: Props) {
               onShowAgentForgot={() => setShowAgentForgot(true)}
               onSwitchToRegister={() => toggleView("register")}
               returnUrl={returnUrl}
-              googleActive={view === "login"}
             />
           </div>
         </div>
@@ -360,7 +340,6 @@ export function AuthCard({ referralCode, notice }: Props) {
               referralCode={referralCode}
               onSwitchToLogin={() => toggleView("login")}
               returnUrl={returnUrl}
-              googleActive={view === "register"}
             />
           </div>
         </div>

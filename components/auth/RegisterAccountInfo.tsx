@@ -3,8 +3,7 @@
 import { ArrowLeft, ArrowRight } from "@/components/ui/icons"
 import { PasswordStrength } from "./PasswordStrength"
 import { PasswordToggle } from "./PasswordToggle"
-import { GoogleSignInButton } from "./GoogleSignInButton"
-import { AuthDivider, stitchInputClass } from "./stitch-auth"
+import { stitchInputClass } from "./stitch-auth"
 import { FormBanner } from "@/components/shared/FormFeedback"
 
 type ContactMethod = "email" | "phone"
@@ -29,29 +28,17 @@ interface Props {
   onLastNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onPhoneChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  onGoogleError: (msg: string) => void
   onSwitchToLogin?: () => void
-  googleActive?: boolean
 }
 
 export function RegisterAccountInfo({
   contactMethod, password, referralCode, firstName, lastName, email, phone, error, loading, acceptedTerms, onAcceptedChange,
   onContactMethodChange, onPasswordChange, onReferralCodeChange,
   onBack, onFirstNameChange, onLastNameChange, onEmailChange, onPhoneChange,
-  onGoogleError, onSwitchToLogin, googleActive = true,
+  onSwitchToLogin,
 }: Props) {
   return (
     <div className="space-y-4">
-      <GoogleSignInButton
-        mode="signup"
-        termsAccepted={acceptedTerms}
-        referralCode={referralCode}
-        active={googleActive}
-        onError={onGoogleError}
-      />
-
-      <AuthDivider label="or register with credentials" />
-
       {onBack && (
         <button type="button" onClick={onBack} className="flex touch-target items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700">
           <ArrowLeft size={16} /> Back to Sign In

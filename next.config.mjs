@@ -30,10 +30,6 @@ const nextConfig = {
         protocol: "https",
         hostname: "delightful-encouragement-production-878d.up.railway.app",
       },
-      {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-      },
     ],
   },
   async headers() {
