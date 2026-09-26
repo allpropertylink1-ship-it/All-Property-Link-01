@@ -9,6 +9,7 @@ interface GoogleSignInButtonProps {
   onError: (error: string) => void
   mode?: "signin" | "signup"
   termsAccepted?: boolean
+  referralCode?: string
 }
 
 function loadGoogleScript(): Promise<void> {
@@ -31,7 +32,7 @@ function loadGoogleScript(): Promise<void> {
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "103540540209-89aqffdkc4f7mk2q19v1kk5k5a8liu4v.apps.googleusercontent.com"
 
-export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsAccepted }: GoogleSignInButtonProps) {
+export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsAccepted, referralCode }: GoogleSignInButtonProps) {
   const [ready, setReady] = useState(false)
   const [scriptError, setScriptError] = useState(false)
   const [oauthLoading, setOauthLoading] = useState(false)
@@ -52,6 +53,9 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsA
       payload.ageConfirmed = true
       payload.termsVersion = CURRENT_TERMS_VERSION
     }
+    // Always capture APL rep referral (incl. ?ref= tap) on Google signup.
+    const ref = (referralCode || "").trim()
+    if (mode === "signup" && ref) payload.referralCode = ref
     const { data, error } = await api.post<{ user: { firstName: string } }>("/api/auth/oauth/google", payload)
     setOauthLoading(false)
     if (error) {
@@ -59,7 +63,7 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsA
       return
     }
     if (data?.user) onSuccess()
-  }, [onSuccess, onError, mode, termsAccepted, needsConsentGate])
+  }, [onSuccess, onError, mode, termsAccepted, referralCode, needsConsentGate])
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) return

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth, type OtpResponse } from "@/lib/auth-context"
+import { useAuth, COOKIES_BLOCKED_ERROR, type OtpResponse } from "@/lib/auth-context"
 import { OtpInput } from "./OtpInput"
 import { RegisterAccountInfo } from "./RegisterAccountInfo"
 import { formatTime } from "./RegisterForm.utils"
@@ -193,7 +193,14 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
 
   async function handleGoogleSuccess() {
     const u = await refreshUser()
+    // Definitive DENIED after a successful Google POST = cookies blocked.
+    // UNKNOWN (undefined) navigates optimistically; server decides.
+    if (u === null) {
+      setError(COOKIES_BLOCKED_ERROR)
+      return
+    }
     router.push(resolvePostAuthTarget(u ?? null, returnUrl))
+    router.refresh()
   }
 
   function handleGoogleError(msg: string) {

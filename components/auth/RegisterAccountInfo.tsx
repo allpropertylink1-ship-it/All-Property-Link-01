@@ -45,6 +45,7 @@ export function RegisterAccountInfo({
       <GoogleSignInButton
         mode="signup"
         termsAccepted={acceptedTerms}
+        referralCode={referralCode}
         onSuccess={onGoogleSuccess}
         onError={onGoogleError}
       />

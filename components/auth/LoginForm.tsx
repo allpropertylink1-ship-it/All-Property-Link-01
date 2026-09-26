@@ -1,7 +1,7 @@
 ﻿"use client"
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth, COOKIES_BLOCKED_ERROR } from "@/lib/auth-context"
 import { PasswordToggle } from "./PasswordToggle"
 import { GoogleSignInButton } from "./GoogleSignInButton"
 import { OtpInput } from "./OtpInput"
@@ -276,11 +276,18 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
         mode="signin"
         onSuccess={async () => {
           const u = await refreshUser()
+          // Same rule as password login: definitive DENIED right after a
+          // successful Google POST means third-party cookies were rejected.
+          if (u === null) {
+            setError(COOKIES_BLOCKED_ERROR)
+            return
+          }
           router.push(resolvePostAuthTarget(u ?? null, returnUrl))
           router.refresh()
         }}
         onError={(msg) => setError(msg)}
       />
+      <p className="text-center text-xs text-text-secondary">APL agents and admins sign in with code / password — Google sign-in is for marketplace accounts only.</p>
 
       <div className="space-y-4">
         <AuthDivider label="or sign in with phone" />
