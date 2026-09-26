@@ -120,16 +120,30 @@ export async function POST(req: NextRequest) {
     return fail(req, code)
   }
 
-  // Success: land on /auth so its signed-in guard routes by persona with the
-  // full session user (same destination the popup flow pushed to client-side).
+  // Success: deliver the session on a 200 document response, NOT on a 3xx
+  // redirect. A subset of mobile browsers / in-app webviews silently drops
+  // Set-Cookie headers attached to redirect responses while accepting the
+  // identical headers on a 200 page — which presents exactly as "Google
+  // worked but I'm back on the form with no error". The page forwards to
+  // /auth immediately (meta refresh + JS replace, no user action), where the
+  // signed-in guard routes by persona with the full session user.
   const dest = new URL("/auth", req.url)
   const ret = safeReturn(intent.returnUrl)
   if (ret) dest.searchParams.set("return", ret)
-  // 303: POST-redirect-GET — the browser must GET /auth (with the fresh
-  // first-party cookies), never re-POST the credential into it (405).
-  const res = NextResponse.redirect(dest, 303)
-  // First-party navigation response: these cookies always stick (this is the
-  // path that never suffers third-party-cookie blocking).
+  const destStr = dest.toString()
+  const destAttr = destStr.replace(/&/g, "&amp;").replace(/"/g, "&quot;")
+  const html =
+    `<!DOCTYPE html><html><head><meta charset="utf-8">` +
+    `<meta name="viewport" content="width=device-width,initial-scale=1">` +
+    `<meta http-equiv="refresh" content="0;url=${destAttr}">` +
+    `<title>Signing you in…</title></head><body>` +
+    `<p style="font-family:sans-serif;padding:40px;text-align:center">Signing you in…</p>` +
+    `<script>location.replace(${JSON.stringify(destStr)})</script>` +
+    `</body></html>`
+  const res = new NextResponse(html, {
+    status: 200,
+    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },
+  })
   const setCookies = upstream.headers.getSetCookie?.() || []
   if (setCookies.length > 0) {
     for (const c of setCookies) res.headers.append("set-cookie", c)
