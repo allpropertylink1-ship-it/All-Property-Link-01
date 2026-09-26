@@ -28,7 +28,10 @@ interface GoogleIntent {
 function fail(req: NextRequest, code: string): NextResponse {
   const dest = new URL("/auth", req.url)
   dest.searchParams.set("google_error", code)
-  return NextResponse.redirect(dest)
+  // 303 (not the 307 default): this route receives a POST, but the landing
+  // page must be fetched with GET. A 307 would replay the credential POST
+  // into /auth and die with 405 instead of showing the form/banner.
+  return NextResponse.redirect(dest, 303)
 }
 
 function safeReturn(value: unknown): string | null {
@@ -122,7 +125,9 @@ export async function POST(req: NextRequest) {
   const dest = new URL("/auth", req.url)
   const ret = safeReturn(intent.returnUrl)
   if (ret) dest.searchParams.set("return", ret)
-  const res = NextResponse.redirect(dest)
+  // 303: POST-redirect-GET — the browser must GET /auth (with the fresh
+  // first-party cookies), never re-POST the credential into it (405).
+  const res = NextResponse.redirect(dest, 303)
   // First-party navigation response: these cookies always stick (this is the
   // path that never suffers third-party-cookie blocking).
   const setCookies = upstream.headers.getSetCookie?.() || []
