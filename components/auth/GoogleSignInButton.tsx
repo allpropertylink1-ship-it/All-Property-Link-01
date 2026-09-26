@@ -12,10 +12,32 @@ interface GoogleSignInButtonProps {
   referralCode?: string
 }
 
+function waitForGsi(timeoutMs = 10000): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if ((window as unknown as { google?: { accounts?: { id?: unknown } } }).google?.accounts?.id) {
+      resolve()
+      return
+    }
+    const started = Date.now()
+    const timer = setInterval(() => {
+      if ((window as unknown as { google?: { accounts?: { id?: unknown } } }).google?.accounts?.id) {
+        clearInterval(timer)
+        resolve()
+      } else if (Date.now() - started > timeoutMs) {
+        clearInterval(timer)
+        reject(new Error("Google script load timed out"))
+      }
+    }, 100)
+  })
+}
+
 function loadGoogleScript(): Promise<void> {
   return new Promise((resolve, reject) => {
     if (document.getElementById("google-gsi-script")) {
-      resolve()
+      // A second button instance mounted while the script is still loading:
+      // the element exists but window.google may not yet. Poll for it
+      // instead of resolving immediately (that raced to a dead button).
+      waitForGsi().then(resolve, reject)
       return
     }
     const script = document.createElement("script")
