@@ -110,6 +110,26 @@ const specialtiesService: { value: string; group: string }[] = [
   { value: "WINES_SPIRITS", group: "Wines & Spirits" },
 ];
 
+function toCustomSpecialtyCode(raw: string) {
+  return raw
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .replace(/__+/g, "_")
+    .slice(0, 60);
+}
+
+function prettySpecialtyLabel(code: string, presets: { value: string; group: string }[]) {
+  const hit = presets.find((p) => p.value === code);
+  if (hit) return hit.group;
+  return code
+    .toLowerCase()
+    .split("_")
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}
+
 function OnboardingPageInner() {
   const router = useRouter();
   const { refreshUser } = useAuth();
@@ -128,6 +148,7 @@ function OnboardingPageInner() {
     location: "",
     estateSubLocation: "",
   });
+  const [customSpecialty, setCustomSpecialty] = useState("");
 
   function toggleSpecialty(value: string) {
     setForm((prev) => ({
@@ -135,6 +156,32 @@ function OnboardingPageInner() {
       specialties: prev.specialties.includes(value)
         ? prev.specialties.filter((s) => s !== value)
         : [...prev.specialties, value],
+    }));
+  }
+
+  function addCustomSpecialty() {
+    const code = toCustomSpecialtyCode(customSpecialty);
+    if (!code || code.length < 2) {
+      setError("Type a custom service with at least 2 characters, then tap Add.");
+      return;
+    }
+    if (form.specialties.includes(code)) {
+      setError(`"${prettySpecialtyLabel(code, selectedSpecialties)}" is already added.`);
+      return;
+    }
+    if (form.specialties.length >= 20) {
+      setError("You can add up to 20 specialties.");
+      return;
+    }
+    setError("");
+    setForm((prev) => ({ ...prev, specialties: [...prev.specialties, code] }));
+    setCustomSpecialty("");
+  }
+
+  function removeSpecialty(value: string) {
+    setForm((prev) => ({
+      ...prev,
+      specialties: prev.specialties.filter((s) => s !== value),
     }));
   }
 
@@ -310,7 +357,7 @@ function OnboardingPageInner() {
                 key={cat.value}
                 type="button"
                 aria-pressed={form.category === cat.value}
-                onClick={() => { updateField("category", cat.value); setForm((prev) => ({ ...prev, specialties: [] })); }}
+                onClick={() => { updateField("category", cat.value); setForm((prev) => ({ ...prev, specialties: [] })); setCustomSpecialty(""); setError(""); }}
                 className={cn(
                   "touch-target rounded-lg border px-4 py-3 text-sm font-medium transition-colors",
                   form.category === cat.value
@@ -359,6 +406,60 @@ function OnboardingPageInner() {
                 );
               })}
             </div>
+            <div className="space-y-2 rounded-xl border border-dashed border-border bg-surface-secondary/50 p-4">
+              <label className="block text-sm font-medium text-text-primary" htmlFor="obCustomSpecialty">
+                Can&apos;t find your service? Type it here
+              </label>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  id="obCustomSpecialty"
+                  type="text"
+                  value={customSpecialty}
+                  onChange={(e) => setCustomSpecialty(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomSpecialty(); } }}
+                  placeholder="e.g. Solar water heating, Borehole drilling"
+                  maxLength={60}
+                  className="w-full flex-1 rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                />
+                <button
+                  type="button"
+                  onClick={addCustomSpecialty}
+                  disabled={!customSpecialty.trim()}
+                  className="touch-target min-h-[44px] shrink-0 rounded-lg border border-primary-500 px-5 py-3 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Add service
+                </button>
+              </div>
+              <p className="text-xs text-text-secondary">Custom services are saved to your profile with the rest of your specialties.</p>
+            </div>
+            {form.specialties.filter((s) => !selectedSpecialties.some((p) => p.value === s)).length > 0 && (
+              <div className="space-y-2">
+                <span className="block text-xs font-medium uppercase tracking-wide text-text-secondary">
+                  Your custom services ({form.specialties.filter((s) => !selectedSpecialties.some((p) => p.value === s)).length})
+                </span>
+                <div className="flex flex-wrap gap-2" role="list" aria-label="Custom services added">
+                  {form.specialties
+                    .filter((s) => !selectedSpecialties.some((p) => p.value === s))
+                    .map((code) => (
+                      <span
+                        key={code}
+                        role="listitem"
+                        className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-accent-500 bg-accent-50 py-2 pl-4 pr-2 text-sm font-medium text-accent-700"
+                      >
+                        {prettySpecialtyLabel(code, selectedSpecialties)}
+                        <button
+                          type="button"
+                          onClick={() => removeSpecialty(code)}
+                          aria-label={`Remove ${prettySpecialtyLabel(code, selectedSpecialties)}`}
+                          className="flex h-7 w-7 items-center justify-center rounded-full text-accent-700 transition-colors hover:bg-accent-500 hover:text-white"
+                        >
+                          <span aria-hidden="true">×</span>
+                        </button>
+                      </span>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
         </section>
