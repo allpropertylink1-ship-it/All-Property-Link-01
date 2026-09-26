@@ -331,7 +331,8 @@ export function AuthCard({ referralCode }: Props) {
           </div>
         </div>
 
-        {/* Right pane — register */}
+        {/* Right pane — register (no pane header: the sliding panel
+            already labels this view, so a second title is duplication) */}
         <div
           ref={registerPaneRef}
           aria-hidden={settledView !== "register"}
@@ -340,13 +341,7 @@ export function AuthCard({ referralCode }: Props) {
             view !== "register" && "hidden lg:block"
           )}
         >
-          <h2 className="font-heading text-xl font-bold tracking-tight text-text-primary">
-            Create account
-          </h2>
-          <p className="mt-0.5 text-[13px] text-text-secondary">
-            Join APL Kenya in under a minute.
-          </p>
-          <div className="mt-4">
+          <div className="mt-0">
             <RegisterForm
               referralCode={referralCode}
               onSwitchToLogin={() => toggleView("login")}
