@@ -56,7 +56,9 @@ function loadGoogleScript(): Promise<void> {
   })
 }
 
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "103540540209-89aqffdkc4f7mk2q19v1kk5k5a8liu4v.apps.googleusercontent.com"
+// Project-owned client (project 1053793884191). NOTE: a Vercel env
+// NEXT_PUBLIC_GOOGLE_CLIENT_ID would override this — keep it unset or in sync.
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "1053793884191-kv89kqiehqonbsc6072uom61a4nchqtf.apps.googleusercontent.com"
 
 /**
  * Name of the first-party intent cookie the signup panel maintains while it
