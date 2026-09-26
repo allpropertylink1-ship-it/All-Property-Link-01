@@ -11,7 +11,7 @@ import { FormBanner } from "@/components/shared/FormFeedback"
 import { Mail } from "@/components/ui/icons"
 import { resolvePostAuthTarget } from "@/lib/persona"
 
-export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegister?: () => void; returnUrl?: string }) {
+export function LoginForm({ onSwitchToRegister, returnUrl, googleActive = true }: { onSwitchToRegister?: () => void; returnUrl?: string; googleActive?: boolean }) {
   const router = useRouter()
   const { login, sendMagicLink, phoneLogin, verifyOtp, refreshUser } = useAuth()
   const [error, setError] = useState("")
@@ -274,6 +274,7 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
 
       <GoogleSignInButton
         mode="signin"
+        active={googleActive}
         onSuccess={async () => {
           const u = await refreshUser()
           // Same rule as password login: definitive DENIED right after a

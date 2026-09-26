@@ -32,13 +32,14 @@ interface Props {
   onGoogleSuccess: () => Promise<void>
   onGoogleError: (msg: string) => void
   onSwitchToLogin?: () => void
+  googleActive?: boolean
 }
 
 export function RegisterAccountInfo({
   contactMethod, password, referralCode, firstName, lastName, email, phone, error, loading, acceptedTerms, onAcceptedChange,
   onContactMethodChange, onPasswordChange, onReferralCodeChange,
   onBack, onFirstNameChange, onLastNameChange, onEmailChange, onPhoneChange,
-  onGoogleSuccess, onGoogleError, onSwitchToLogin,
+  onGoogleSuccess, onGoogleError, onSwitchToLogin, googleActive = true,
 }: Props) {
   return (
     <div className="space-y-4">
@@ -46,6 +47,7 @@ export function RegisterAccountInfo({
         mode="signup"
         termsAccepted={acceptedTerms}
         referralCode={referralCode}
+        active={googleActive}
         onSuccess={onGoogleSuccess}
         onError={onGoogleError}
       />

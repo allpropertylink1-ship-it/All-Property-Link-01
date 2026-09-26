@@ -10,6 +10,15 @@ interface GoogleSignInButtonProps {
   mode?: "signin" | "signup"
   termsAccepted?: boolean
   referralCode?: string
+  /**
+   * Whether this panel is the visible one. google.accounts.id.initialize()
+   * is GLOBAL last-wins: with sign-in + sign-up buttons mounted together,
+   * both must not initialize — the hidden panel would steal the callback
+   * (its response then lands on the wrong form, or nowhere visible).
+   * Only the active panel initializes + renders; inactive renders a
+   * same-footprint placeholder. Defaults true (standalone pages).
+   */
+  active?: boolean
 }
 
 function waitForGsi(timeoutMs = 10000): Promise<void> {
@@ -54,7 +63,7 @@ function loadGoogleScript(): Promise<void> {
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "103540540209-89aqffdkc4f7mk2q19v1kk5k5a8liu4v.apps.googleusercontent.com"
 
-export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsAccepted, referralCode }: GoogleSignInButtonProps) {
+export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsAccepted, referralCode, active = true }: GoogleSignInButtonProps) {
   const [ready, setReady] = useState(false)
   const [scriptError, setScriptError] = useState(false)
   const [oauthLoading, setOauthLoading] = useState(false)
@@ -95,9 +104,14 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsA
   }, [])
 
   useEffect(() => {
-    if (!ready || renderedRef.current || !btnRef.current) return
+    if (!ready) return
+    if (!active || !btnRef.current) {
+      // Inactive panel: relinquish the global callback slot so the visible
+      // panel owns it, and allow a fresh render on reactivation.
+      renderedRef.current = false
+      return
+    }
     const container = btnRef.current
-    renderedRef.current = true
 
     const google = (window as unknown as Record<string, unknown>).google as { accounts?: { id: { initialize: (config: Record<string, unknown>) => void; renderButton: (element: HTMLElement, options: Record<string, unknown>) => void } } } | undefined
     if (!google?.accounts?.id) {
@@ -105,6 +119,10 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsA
       return
     }
 
+    // Re-initialize whenever the handler closure changes (Terms tick,
+    // referral edit): initialize() is global last-wins, so the active panel
+    // must always own it with a fresh closure — otherwise the callback keeps
+    // refusing after the box is ticked, or drops the referral.
     google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
       callback: (response: { credential?: string }) => {
@@ -115,6 +133,8 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsA
         }
       },
     })
+    if (renderedRef.current) return
+    renderedRef.current = true
 
     const width = container.offsetWidth || 384
     google.accounts.id.renderButton(container, {
@@ -126,7 +146,13 @@ export function GoogleSignInButton({ onSuccess, onError, mode = "signin", termsA
       width,
       logo_alignment: "left",
     })
-  }, [ready, mode, handleCredential, onError])
+  }, [ready, active, mode, handleCredential, onError])
+
+  if (!active) {
+    // Inactive panel: same footprint, no GSI wiring (the visible panel owns
+    // the global initialize slot). Keeps toggle layout stable.
+    return <div className="touch-target w-full rounded-xl border border-border bg-surface-secondary/50" style={{ minHeight: 52 }} aria-hidden="true" />
+  }
 
   const showPlaceholder = !GOOGLE_CLIENT_ID || scriptError
 

@@ -12,7 +12,7 @@ import { resolvePostAuthTarget } from "@/lib/persona"
 type ContactMethod = "email" | "phone"
 type Step = "form" | "otp"
 
-export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogin, returnUrl }: { referralCode?: string; onSwitchToLogin?: () => void; returnUrl?: string }) {
+export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogin, returnUrl, googleActive = true }: { referralCode?: string; onSwitchToLogin?: () => void; returnUrl?: string; googleActive?: boolean }) {
   const router = useRouter()
   const { signup, sendOtp, verifyOtp, refreshUser, updateRegistration } = useAuth()
   const [step, setStep] = useState<Step>("form")
@@ -272,7 +272,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
   return (
     <form onSubmit={handleSubmit}>
       <RegisterAccountInfo
-        contactMethod={contactMethod} password={password} referralCode={referralCode}
+        contactMethod={contactMethod} password={password} referralCode={referralCode} googleActive={googleActive}
         firstName={firstName} lastName={lastName} email={email} phone={phone}
         error={error} loading={loading} acceptedTerms={acceptedTerms} onAcceptedChange={setAcceptedTerms}
         onContactMethodChange={setContactMethod} onPasswordChange={setPassword}

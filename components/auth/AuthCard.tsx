@@ -42,6 +42,7 @@ function LoginContent({
   onShowAgentForgot,
   onSwitchToRegister,
   returnUrl,
+  googleActive = true,
 }: {
   activeTab: "user" | "agent"
   showAgentForgot: boolean
@@ -49,6 +50,7 @@ function LoginContent({
   onShowAgentForgot: () => void
   onSwitchToRegister: () => void
   returnUrl?: string
+  googleActive?: boolean
 }) {
   return (
     <>
@@ -93,7 +95,7 @@ function LoginContent({
       )}
 
       {activeTab === "user" ? (
-        <LoginForm onSwitchToRegister={onSwitchToRegister} returnUrl={returnUrl} />
+        <LoginForm onSwitchToRegister={onSwitchToRegister} returnUrl={returnUrl} googleActive={googleActive} />
       ) : showAgentForgot ? (
         <AgentForgotPasswordForm />
       ) : (
@@ -316,6 +318,7 @@ export function AuthCard({ referralCode }: Props) {
               onShowAgentForgot={() => setShowAgentForgot(true)}
               onSwitchToRegister={() => toggleView("register")}
               returnUrl={returnUrl}
+              googleActive={view === "login"}
             />
           </div>
         </div>
@@ -340,6 +343,7 @@ export function AuthCard({ referralCode }: Props) {
               referralCode={referralCode}
               onSwitchToLogin={() => toggleView("login")}
               returnUrl={returnUrl}
+              googleActive={view === "register"}
             />
           </div>
         </div>
