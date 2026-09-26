@@ -94,9 +94,15 @@ class ApiClient {
         }
         await new Promise((r) => setTimeout(r, 300 * attempt))
       }
-      // If proxy gave a retriable status or threw, try direct origin once
+      // If proxy gave a retriable status or threw, try direct origin once.
+      // Session paths (/api/auth, /api/user) NEVER fall back direct: auth
+      // Set-Cookie must come via the same-origin proxy, otherwise browsers
+      // that block third-party cookies (Safari, Brave, in-app) drop the
+      // session and the next mutation 401s with "Authentication required".
+      // Fail fast through the proxy instead of masking it as an auth error.
       const needsDirectFallback =
-        (res && this.isRetriableStatus(res.status)) || (!res && lastError)
+        !isSessionPath &&
+        ((res && this.isRetriableStatus(res.status)) || (!res && lastError))
       if (needsDirectFallback) {
         // Direct fallback already handles its own 401/json parsing
         return this.directFetch<T>(path, options, headers)

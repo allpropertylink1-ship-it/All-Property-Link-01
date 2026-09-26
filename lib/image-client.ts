@@ -107,6 +107,7 @@ export async function uploadImage(
   const tryPost = async (url: string): Promise<Response> =>
     fetch(url, {
       method: "POST",
+      credentials: "include",
       body: (() => {
         const fd = new FormData();
         fd.append("file", processed, processed instanceof File ? processed.name : undefined);

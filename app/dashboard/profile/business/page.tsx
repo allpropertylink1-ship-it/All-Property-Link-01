@@ -121,12 +121,54 @@ function BusinessProfilePageInner() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
 
+  const DRAFT_KEY = "apl-business-profile-draft"
+  const RETURN_TO = "/dashboard/profile/business"
+
+  interface BusinessFormState {
+    companyName: string
+    contactPerson: string
+    category: string
+    specialties: string[]
+    website: string
+    location: string
+    estateSubLocation: string
+  }
+  function isAccountInactiveError(msg: string): boolean {
+    return /not active|pending approval|account.*inactive|ACCOUNT_INACTIVE/i.test(msg)
+  }
   function isAuthError(msg: string): boolean {
-    return /authentication required|session expired|not active|invalid or expired token|please sign in/i.test(msg)
+    return /authentication required|session expired|invalid or expired token|please sign in|session expired/i.test(msg)
+  }
+  function saveDraft(f: BusinessFormState) {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(f))
+    } catch {}
+  }
+  function loadDraft(): BusinessFormState | null {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY)
+      if (!raw) return null
+      const parsed = JSON.parse(raw)
+      if (typeof parsed !== "object" || parsed === null) return null
+      return parsed as BusinessFormState
+    } catch {
+      return null
+    }
+  }
+  function clearDraft() {
+    try {
+      localStorage.removeItem(DRAFT_KEY)
+    } catch {}
+  }
+  function redirectToLogin() {
+    setTimeout(() => router.push(`/auth?return=${encodeURIComponent(RETURN_TO)}`), 2500)
   }
   function authErrorMessage(raw: string): string {
+    if (isAccountInactiveError(raw)) {
+      return "Your account is not active yet (pending approval or suspended). Your entries are saved on this device — please contact support instead of signing in again."
+    }
     if (isAuthError(raw)) {
-      return "Your session expired — please sign in again to save your business profile. If you just verified your email, your browser may have blocked the login cookie; try Chrome with third-party cookies allowed, then sign in again."
+      return "Your session expired — please sign in again to save your business profile. Your entries are saved on this device and will be restored after you sign in. If you just verified your email, your browser may have blocked the login cookie; try Chrome with third-party cookies allowed, then sign in again."
     }
     return raw
   }
@@ -167,6 +209,13 @@ function BusinessProfilePageInner() {
       }>("/api/user/profile")
       if (res.error) {
         setError(authErrorMessage(res.error))
+        // Restore the user's unsent draft so a dead session never wipes typing.
+        const draft = loadDraft()
+        if (draft) {
+          setForm(draft)
+          setInitialForm(draft)
+        }
+        if (isAuthError(res.error)) redirectToLogin()
       } else if (res.data?.user) {
         const u = res.data.user
         const next = {
@@ -185,6 +234,8 @@ function BusinessProfilePageInner() {
       }
       setFetching(false)
     })()
+    // Helpers are stable module-level logic; mount-fetch runs once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function uploadFile(file: File, folder: string): Promise<string> {
@@ -217,7 +268,8 @@ function BusinessProfilePageInner() {
       const msg = err instanceof Error ? err.message : "Upload failed"
       setError(authErrorMessage(msg))
       if (isAuthError(msg)) {
-        setTimeout(() => router.push("/auth"), 2500)
+        saveDraft(form)
+        redirectToLogin()
       }
     } finally {
       setAvatarUploading(false)
@@ -249,7 +301,8 @@ function BusinessProfilePageInner() {
       const msg = err instanceof Error ? err.message : "Upload failed"
       setError(authErrorMessage(msg))
       if (isAuthError(msg)) {
-        setTimeout(() => router.push("/auth"), 2500)
+        saveDraft(form)
+        redirectToLogin()
       }
     } finally {
       setLogoUploading(false)
@@ -284,6 +337,17 @@ function BusinessProfilePageInner() {
     setError("")
     setSuccess(false)
     try {
+      // Pre-submit session probe: after the KYC approval wait the 15-min
+      // access cookie is usually dead. Check first so we save the draft and
+      // redirect instead of PATCH-ing into a 401 "Authentication required".
+      // Note: /me returns 200 with { user: null } when signed out.
+      const me = await api.get<{ user: unknown }>("/api/auth/me")
+      if (me.error || !me.data?.user) {
+        saveDraft(form)
+        setError(authErrorMessage(me.error || "Session expired — please sign in again."))
+        redirectToLogin()
+        return
+      }
       // AGENT, PROPERTY_OWNER and CUSTOMER have no specialties — clear any stale values.
       const normalized =
         form.category === "AGENT" || form.category === "PROPERTY_OWNER" || form.category === "CUSTOMER"
@@ -298,13 +362,15 @@ function BusinessProfilePageInner() {
       if (res.error) throw new Error(res.error)
       setForm(normalized)
       setInitialForm({ ...normalized })
+      clearDraft()
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong"
       setError(authErrorMessage(msg))
       if (isAuthError(msg)) {
-        setTimeout(() => router.push("/auth"), 2500)
+        saveDraft(form)
+        redirectToLogin()
       }
     } finally {
       setLoading(false)
