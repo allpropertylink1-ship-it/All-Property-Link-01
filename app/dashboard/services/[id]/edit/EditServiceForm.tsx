@@ -8,6 +8,7 @@ import { Upload, Loader2, X } from "@/components/ui/icons";
 import { api } from "@/lib/api-client";
 import { FormBanner } from "@/components/shared/FormFeedback";
 import ImageCropQueue from "@/components/shared/ImageCropQueue";
+import ServiceShelfPicker from "@/components/dashboard/ServiceShelfPicker";
 
 interface Category {
   id: string;
@@ -19,6 +20,7 @@ interface Category {
 interface ServiceData {
   id: string;
   categoryId: string;
+  categories?: { id: string; name: string; slug: string }[];
   title: string;
   description: string;
   price?: number | null;
@@ -61,6 +63,12 @@ export function EditServiceForm({
 
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
+
+  const initialShelves =
+    Array.isArray(service.categories) && service.categories.length > 0
+      ? service.categories.map((c) => c.id)
+      : [service.categoryId];
+  const [shelfIds, setShelfIds] = useState<string[]>(initialShelves);
   // Optional pre-upload crop step (see PropertyImageUploader for the pattern).
   const [queue, setQueue] = useState<File[] | null>(null);
 
@@ -152,8 +160,14 @@ export function EditServiceForm({
     setSubmitting(true);
 
     const fd = new FormData(e.currentTarget);
+    if (shelfIds.length === 0) {
+      setError("Tick at least one sector shelf for this advert.");
+      setSubmitting(false);
+      return;
+    }
     const data: Record<string, unknown> = {
-      categoryId: fd.get("categoryId") as string,
+      categoryId: shelfIds[0],
+      categoryIds: shelfIds,
       title: fd.get("title") as string,
       description: fd.get("description") as string,
       currency: fd.get("currency") as string,
@@ -216,34 +230,11 @@ export function EditServiceForm({
         </div>
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <label
-            htmlFor="categoryId"
-            className="text-sm font-medium text-text-primary"
-          >
-            Category
-          </label>
-          <select
-            id="categoryId"
-            name="categoryId"
-            required
-            defaultValue={service.categoryId}
-            className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-          >
-            <option value="">Select a category</option>
-            {categories.map((cat) => (
-              <optgroup key={cat.id} label={cat.name}>
-                {cat.children.length > 0
-                  ? cat.children.map((child) => (
-                      <option key={child.id} value={child.id}>
-                        {child.name}
-                      </option>
-                    ))
-                  : (
-                    <option value={cat.id}>{cat.name}</option>
-                  )}
-              </optgroup>
-            ))}
-          </select>
+          <ServiceShelfPicker
+            categories={categories}
+            value={shelfIds}
+            onChange={(next) => { setShelfIds(next); setIsDirty(true); }}
+          />
         </div>
 
         <div className="space-y-2 sm:col-span-2">

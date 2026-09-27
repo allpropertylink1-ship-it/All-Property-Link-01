@@ -19,6 +19,7 @@ interface Category {
 interface AgentService {
   id: string
   categoryId: string
+  categories?: { id: string; name: string; slug: string }[]
   title: string
   description: string
   price: number | string | null
@@ -114,6 +115,9 @@ export default function AgentEditReferralServicePage() {
           service={{
             id: service.id,
             categoryId: service.categoryId,
+            categories: Array.isArray(service.categories) && service.categories.length > 0
+              ? service.categories
+              : [service.category],
             title: service.title,
             description: service.description,
             price: service.price ? Number(service.price) : null,

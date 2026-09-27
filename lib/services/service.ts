@@ -89,6 +89,7 @@ export interface ServiceDetail {
   createdAt: string;
   user: ServiceDetailUser | null;
   category: { id: string; name: string; slug: string; icon: string | null; description: string | null } | null;
+  categories?: { id: string; name: string; slug: string }[];
   avgRating: number | null;
   reviewCount: number;
 }

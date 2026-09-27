@@ -87,6 +87,9 @@ export default async function EditServicePage({ params }: { params: { id: string
           service={{
             id: service.id,
             categoryId: service.categoryId,
+            categories: Array.isArray(service.categories) && service.categories.length > 0
+              ? service.categories
+              : [service.category],
             title: service.title,
             description: service.description,
             price: service.price ? Number(service.price) : null,

@@ -68,6 +68,15 @@ export default async function ServiceDetailPage({ params }: Props) {
   const rawImages = Array.isArray(service.images) ? service.images : [];
   const imageUrls = rawImages.filter((u: unknown): u is string => typeof u === "string");
 
+  // Multi-shelf: one advert may span several sectors — show each selected shelf.
+  const shelves = (
+    Array.isArray(service.categories) && service.categories.length > 0
+      ? service.categories
+      : service.category
+        ? [service.category]
+        : []
+  ) as { id: string; name: string; slug: string }[];
+
   const providerId = service.user?.id ?? null;
   const reviewData = providerId ? await getUserReviews(providerId) : null;
 
@@ -134,10 +143,14 @@ export default async function ServiceDetailPage({ params }: Props) {
                 )}
               </div>
 
-              {service.category && (
-                <span className="inline-flex items-center rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary-700">
-                  {service.category.name}
-                </span>
+              {shelves.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {shelves.map((shelf) => (
+                    <span key={shelf.id} className="inline-flex items-center rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary-700">
+                      {shelf.name}
+                    </span>
+                  ))}
+                </div>
               )}
 
               {service.user.specialties && service.user.specialties.length > 0 && (
@@ -188,15 +201,15 @@ export default async function ServiceDetailPage({ params }: Props) {
           <PropertyGallery images={imageUrls} title={service.title} />
 
           <div>
-            <div className="mb-2 flex items-center gap-2">
-              {service.category && (
-                <Link
-                  href={`/services?category=${service.category.slug}`}
-                  className="text-xs font-medium uppercase tracking-wider text-primary-600 hover:text-primary-700"
-                >
-                  {service.category.name}
-                </Link>
-              )}
+            <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+              {shelves.map((shelf, i) => (
+                <span key={shelf.id} className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-primary-600">
+                  {i > 0 && <span aria-hidden="true" className="text-text-secondary">·</span>}
+                  <Link href={`/services?category=${shelf.slug}`} className="hover:text-primary-700">
+                    {shelf.name}
+                  </Link>
+                </span>
+              ))}
             </div>
             <h1 className="font-heading text-2xl font-bold leading-tight text-text-primary sm:text-3xl">
               {service.title}
@@ -243,8 +256,8 @@ export default async function ServiceDetailPage({ params }: Props) {
                   <p className="truncate text-sm font-semibold text-text-primary">
                     {service.user.companyName || `${service.user.firstName} ${service.user.lastName}`}
                   </p>
-                  {service.category && (
-                    <span className="text-xs text-primary-600">{service.category.name}</span>
+                  {shelves.length > 0 && (
+                    <span className="text-xs text-primary-600">{shelves.map((s) => s.name).join(" · ")}</span>
                   )}
                 </div>
               </div>

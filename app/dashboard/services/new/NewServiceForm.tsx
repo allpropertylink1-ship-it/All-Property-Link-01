@@ -8,6 +8,7 @@ import { Upload, Loader2, X } from "@/components/ui/icons";
 import { api } from "@/lib/api-client";
 import { FormBanner } from "@/components/shared/FormFeedback";
 import ImageCropQueue from "@/components/shared/ImageCropQueue";
+import ServiceShelfPicker from "@/components/dashboard/ServiceShelfPicker";
 
 interface Category {
   id: string;
@@ -127,8 +128,14 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
     setSubmitting(true);
 
     const fd = new FormData(e.currentTarget);
+    if (shelfIds.length === 0) {
+      setError("Tick at least one sector shelf for this advert.");
+      setSubmitting(false);
+      return;
+    }
     const data: Record<string, unknown> = {
-      categoryId: fd.get("categoryId") as string,
+      categoryId: shelfIds[0],
+      categoryIds: shelfIds,
       title: fd.get("title") as string,
       description: fd.get("description") as string,
       price: (fd.get("price") as string) || undefined,
@@ -156,14 +163,8 @@ currency: fd.get("currency") as string,
     }
   }
 
-  const [selectedSectorId, setSelectedSectorId] = useState("");
-  const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  const [shelfIds, setShelfIds] = useState<string[]>([]);
   const [tags, setTags] = useState("");
-
-  const selectedSector = categories.find((c) => c.id === selectedSectorId);
-  // Roots are sectors; a root with no children IS the shelf (e.g. single-child
-  // sectors). Children are the listing shelves.
-  const sectorShelves = selectedSector ? selectedSector.children : [];
 
   return (
     <form onSubmit={handleSubmit} onChange={() => setIsDirty(true)} className="space-y-6" aria-label="Create service listing">
@@ -192,52 +193,11 @@ currency: fd.get("currency") as string,
         </div>
       <div className="grid gap-6 sm:grid-cols-2">
 <div className="space-y-2 sm:col-span-2">
-          <label htmlFor="sectorId" className="text-sm font-medium text-text-primary">
-            Sector
-          </label>
-          <select
-            id="sectorId"
-            value={selectedSectorId}
-            onChange={(e) => {
-              setSelectedSectorId(e.target.value);
-              setSelectedCategoryId("");
-            }}
-            required
-            className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-          >
-            <option value="">Select a sector</option>
-            {categories.map((sector) => (
-              <option key={sector.id} value={sector.id}>
-                {sector.name}
-              </option>
-            ))}
-          </select>
-          <p className="text-xs text-text-secondary">Only sectors matching your profile specialties are shown</p>
-        </div>
-<div className="space-y-2 sm:col-span-2">
-          <label htmlFor="categoryId" className="text-sm font-medium text-text-primary">
-            Category
-          </label>
-          <select
-            id="categoryId"
-            name="categoryId"
-            value={selectedCategoryId}
-            onChange={(e) => setSelectedCategoryId(e.target.value)}
-            required
-            disabled={!selectedSectorId}
-            className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <option value="">{selectedSectorId ? "Select a category" : "Select a sector first"}</option>
-            {sectorShelves.length > 0 ? (
-              sectorShelves.map((child) => (
-                <option key={child.id} value={child.id}>
-                  {child.name}
-                </option>
-              ))
-            ) : (
-              selectedSector && <option value={selectedSector.id}>{selectedSector.name}</option>
-            )}
-          </select>
+          <ServiceShelfPicker
+            categories={categories}
+            value={shelfIds}
+            onChange={(next) => { setShelfIds(next); setIsDirty(true); }}
+          />
         </div>
 
         <div className="space-y-2 sm:col-span-2">
