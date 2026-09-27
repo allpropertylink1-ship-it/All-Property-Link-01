@@ -12,6 +12,8 @@ import {
   createProperty as createPropertyService,
   updateProperty as updatePropertyService,
   deleteProperty as deletePropertyService,
+  restoreProperty as restorePropertyService,
+  purgeProperty as purgePropertyService,
   publishProperty as publishPropertyService,
   rejectProperty as rejectPropertyService,
 } from "@/lib/services/property";
@@ -88,6 +90,40 @@ export async function deleteProperty(id: string) {
   } catch (err) {
     if (isRedirect(err)) throw err;
     return fail(err instanceof Error ? err.message : "Failed to delete listing");
+  }
+}
+
+export async function restoreProperty(id: string) {
+  try {
+    await requireAuth();
+
+    const result = await restorePropertyService(id);
+    if (!result.success) return result;
+
+    revalidatePath("/properties");
+    revalidatePath("/dashboard/listings");
+    revalidatePath("/dashboard");
+    return ok();
+  } catch (err) {
+    if (isRedirect(err)) throw err;
+    return fail(err instanceof Error ? err.message : "Failed to restore listing");
+  }
+}
+
+export async function purgeProperty(id: string, confirmTitle: string) {
+  try {
+    await requireAuth();
+
+    const result = await purgePropertyService(id, confirmTitle);
+    if (!result.success) return result;
+
+    revalidatePath("/properties");
+    revalidatePath("/dashboard/listings");
+    revalidatePath("/dashboard");
+    return ok();
+  } catch (err) {
+    if (isRedirect(err)) throw err;
+    return fail(err instanceof Error ? err.message : "Failed to permanently delete listing");
   }
 }
 

@@ -3,6 +3,7 @@ import { requireAuth, serverFetch } from "@/lib/auth-utils";
 import { personaRedirectTarget } from "@/lib/persona";
 import { redirect } from "next/navigation";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { ListingRowActions } from "@/components/dashboard/ListingRowActions";
 import { Building2, Plus, ArrowRight } from "@/components/ui/icons";
 
 interface ServiceRow {
@@ -20,7 +21,7 @@ function statusPill(status: string) {
   return { cls: "bg-warning-500/10 text-warning-700", label: "Pending" };
 }
 
-export default async function MyServicesPage() {
+export default async function MyServicesPage({ searchParams }: { searchParams?: { bin?: string } }) {
   const session = await requireAuth();
   const me = session.user as { authMethod?: string; primaryUserType?: string | null; userTypes?: string[] };
   const personaTarget = personaRedirectTarget(me);
@@ -59,7 +60,8 @@ export default async function MyServicesPage() {
     )
   }
 
-  const res = await serverFetch("/api/user/services");
+  const inBin = searchParams?.bin === "1";
+  const res = await serverFetch(`/api/user/services${inBin ? "?deleted=1" : ""}`);
   const data = await res.json().catch(() => null);
   const services: ServiceRow[] = data?.services || [];
 
@@ -74,11 +76,16 @@ export default async function MyServicesPage() {
             My Services
           </h1>
           <p className="mt-1 text-sm text-text-secondary">Every service you offer, with live moderation status.</p>
+          <div className="mt-3 flex gap-2 text-sm">
+            <Link href="/dashboard/services" className={!inBin ? "font-semibold text-primary-600" : "text-text-secondary hover:text-primary-600"}>Active</Link>
+            <span aria-hidden="true" className="text-border">|</span>
+            <Link href="/dashboard/services?bin=1" className={inBin ? "font-semibold text-primary-600" : "text-text-secondary hover:text-primary-600"}>Recycle bin</Link>
+          </div>
         </section>
         <EmptyState
-          title="No services yet"
-          description="Create your first service listing to get hired."
-          action={{ label: "Create service", href: "/dashboard/services/new" }}
+          title={inBin ? "Bin is empty" : "No services yet"}
+          description={inBin ? "Deleted services stay here 3 days before permanent removal." : "Create your first service listing to get hired."}
+          action={inBin ? undefined : { label: "Create service", href: "/dashboard/services/new" }}
         />
       </div>
     );
@@ -96,7 +103,9 @@ export default async function MyServicesPage() {
               My Services
             </h1>
             <p className="mt-1 text-sm text-text-secondary">
-              {services.length} service{services.length !== 1 ? "s" : ""} in your catalogue
+              {inBin
+                ? `${services.length} deleted service${services.length !== 1 ? "s" : ""} — auto-removed after 3 days`
+                : `${services.length} service${services.length !== 1 ? "s" : ""} in your catalogue`}
             </p>
           </div>
           <Link
@@ -106,6 +115,11 @@ export default async function MyServicesPage() {
             <Plus size={18} />
             New service
           </Link>
+        </div>
+        <div className="mt-3 flex gap-2 text-sm">
+          <Link href="/dashboard/services" className={!inBin ? "font-semibold text-primary-600" : "text-text-secondary hover:text-primary-600"}>Active</Link>
+          <span aria-hidden="true" className="text-border">|</span>
+          <Link href="/dashboard/services?bin=1" className={inBin ? "font-semibold text-primary-600" : "text-text-secondary hover:text-primary-600"}>Recycle bin</Link>
         </div>
       </section>
 
@@ -125,12 +139,15 @@ export default async function MyServicesPage() {
                 </span>
               </div>
               <div className="mt-3 border-t border-border pt-3 text-right">
-                <Link
-                  href={`/dashboard/services/${s.id}/edit`}
-                  className="touch-target inline-flex items-center gap-1 rounded-lg px-3 py-2 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-50"
-                >
-                  Manage <ArrowRight size={12} />
-                </Link>
+                <span className="inline-flex items-center gap-1">
+                  <Link
+                    href={`/dashboard/services/${s.id}/edit`}
+                    className="touch-target inline-flex items-center gap-1 rounded-lg px-3 py-2 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-50"
+                  >
+                    Manage <ArrowRight size={12} />
+                  </Link>
+                  <ListingRowActions kind="service" id={s.id} title={s.title} deleted={inBin} />
+                </span>
               </div>
             </li>
           );
@@ -176,12 +193,15 @@ export default async function MyServicesPage() {
                       {s.reviewCount ?? 0}
                     </td>
                     <td className="px-4 py-3">
-                      <Link
-                        href={`/dashboard/services/${s.id}/edit`}
-                        className="touch-target inline-flex items-center rounded-lg px-3 py-2 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-50"
-                      >
-                        Edit
-                      </Link>
+                      <span className="inline-flex items-center gap-1">
+                        <Link
+                          href={`/dashboard/services/${s.id}/edit`}
+                          className="touch-target inline-flex items-center rounded-lg px-3 py-2 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-50"
+                        >
+                          Edit
+                        </Link>
+                        <ListingRowActions kind="service" id={s.id} title={s.title} deleted={inBin} />
+                      </span>
                     </td>
                   </tr>
                 );

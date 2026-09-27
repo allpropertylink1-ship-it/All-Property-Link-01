@@ -149,8 +149,7 @@ export const getServiceCategories = cache(async (): Promise<ServiceCategory[]> =
   }
 })
 
-export const getServiceById = cache(async (id: string): Promise<ServiceDetail | null> => {
-  const controller = new AbortController();
+export const getServiceById = cache(async (id: string): Promise<ServiceDetail | null> => {  const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const res = await fetch(
@@ -167,8 +166,7 @@ export const getServiceById = cache(async (id: string): Promise<ServiceDetail | 
   }
 })
 
-export const getServiceReviews = cache(async (targetId: string): Promise<ServiceReviewsResponse> => {
-  const controller = new AbortController();
+export const getServiceReviews = cache(async (targetId: string): Promise<ServiceReviewsResponse> => {  const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const res = await fetch(
@@ -183,3 +181,33 @@ export const getServiceReviews = cache(async (targetId: string): Promise<Service
     return { reviews: [], total: 0 };
   }
 })
+
+type MutateResult = { success: boolean; error?: string };
+
+async function mutateService(id: string, action: "delete" | "restore" | "purge", body?: Record<string, unknown>): Promise<MutateResult> {
+  try {
+    const { serverFetch } = await import("@/lib/auth-utils");
+    const suffix = action === "delete" ? "" : `/${action}`;
+    const res = await serverFetch(`/api/services/${encodeURIComponent(id)}${suffix}`, {
+      method: action === "delete" ? "DELETE" : "POST",
+      ...(body ? { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {}),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      return { success: false, error: (data as { error?: string })?.error || `API returned ${res.status}` };
+    }
+    return { success: true };
+  } catch (e) { return { success: false, error: String(e) }; }
+}
+
+export async function deleteService(id: string): Promise<MutateResult> {
+  return mutateService(id, "delete");
+}
+
+export async function restoreService(id: string): Promise<MutateResult> {
+  return mutateService(id, "restore");
+}
+
+export async function purgeService(id: string, confirmTitle: string): Promise<MutateResult> {
+  return mutateService(id, "purge", { confirmTitle });
+}

@@ -4,6 +4,7 @@ import { requireAuth, serverFetch } from "@/lib/auth-utils";
 import { personaRedirectTarget, canListProperties } from "@/lib/persona";
 import { redirect } from "next/navigation";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { ListingRowActions } from "@/components/dashboard/ListingRowActions";
 import { Plus, Building2, ArrowRight } from "@/components/ui/icons";
 
 interface ListingRow {
@@ -24,7 +25,7 @@ function formatPrice(listing: ListingRow) {
   return `${listing.currency} ${Number(listing.price).toLocaleString()}${suffix}`;
 }
 
-export default async function ListingsPage() {
+export default async function ListingsPage({ searchParams }: { searchParams?: { bin?: string } }) {
   const session = await requireAuth();
   const me = session.user as { authMethod?: string; primaryUserType?: string | null; userTypes?: string[] };
   const personaTarget = personaRedirectTarget(me);
@@ -61,7 +62,8 @@ export default async function ListingsPage() {
     );
   }
 
-  const res = await serverFetch("/api/user/properties");
+  const inBin = searchParams?.bin === "1";
+  const res = await serverFetch(`/api/user/properties${inBin ? "?deleted=1" : ""}`);
   const data = await res.json().catch(() => null);
   const listings: ListingRow[] = data?.properties || [];
 
@@ -76,11 +78,16 @@ export default async function ListingsPage() {
             My Listings
           </h1>
           <p className="mt-1 text-sm text-text-secondary">Every property you have posted, with live status.</p>
+          <div className="mt-3 flex gap-2 text-sm">
+            <Link href="/dashboard/listings" className={!inBin ? "font-semibold text-primary-600" : "text-text-secondary hover:text-primary-600"}>Active</Link>
+            <span aria-hidden="true" className="text-border">|</span>
+            <Link href="/dashboard/listings?bin=1" className={inBin ? "font-semibold text-primary-600" : "text-text-secondary hover:text-primary-600"}>Recycle bin</Link>
+          </div>
         </section>
         <EmptyState
-          title="No listings yet"
-          description="Create your first property listing to get started."
-          action={{ label: "Create listing", href: "/dashboard/listings/new" }}
+          title={inBin ? "Bin is empty" : "No listings yet"}
+          description={inBin ? "Deleted listings stay here 3 days before permanent removal." : "Create your first property listing to get started."}
+          action={inBin ? undefined : { label: "Create listing", href: "/dashboard/listings/new" }}
         />
       </div>
     );
@@ -98,7 +105,9 @@ export default async function ListingsPage() {
               My Listings
             </h1>
             <p className="mt-1 text-sm text-text-secondary">
-              {listings.length} active propert{listings.length !== 1 ? "ies" : "y"} in your portfolio
+              {inBin
+                ? `${listings.length} deleted propert${listings.length !== 1 ? "ies" : "y"} — auto-removed after 3 days`
+                : `${listings.length} active propert${listings.length !== 1 ? "ies" : "y"} in your portfolio`}
             </p>
           </div>
           <Link
@@ -108,6 +117,11 @@ export default async function ListingsPage() {
             <Plus size={18} />
             New listing
           </Link>
+        </div>
+        <div className="mt-3 flex gap-2 text-sm">
+          <Link href="/dashboard/listings" className={!inBin ? "font-semibold text-primary-600" : "text-text-secondary hover:text-primary-600"}>Active</Link>
+          <span aria-hidden="true" className="text-border">|</span>
+          <Link href="/dashboard/listings?bin=1" className={inBin ? "font-semibold text-primary-600" : "text-text-secondary hover:text-primary-600"}>Recycle bin</Link>
         </div>
       </section>
 
@@ -133,12 +147,15 @@ export default async function ListingsPage() {
             </div>
             <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
               <span className="text-xs text-text-secondary">{listing.moderationStatus.replace(/_/g, " ")}</span>
-              <Link
-                href={`/dashboard/listings/${listing.id}/edit`}
-                className="touch-target inline-flex items-center gap-1 rounded-lg px-3 py-2 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-50"
-              >
-                Manage <ArrowRight size={12} />
-              </Link>
+              <span className="inline-flex items-center gap-1">
+                <Link
+                  href={`/dashboard/listings/${listing.id}/edit`}
+                  className="touch-target inline-flex items-center gap-1 rounded-lg px-3 py-2 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-50"
+                >
+                  Manage <ArrowRight size={12} />
+                </Link>
+                <ListingRowActions kind="property" id={listing.id} title={listing.title} deleted={inBin} />
+              </span>
             </div>
           </li>
         ))}
@@ -187,12 +204,15 @@ export default async function ListingsPage() {
                     {new Date(listing.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">
-                    <Link
-                      href={`/dashboard/listings/${listing.id}/edit`}
-                      className="touch-target inline-flex items-center rounded-lg px-3 py-2 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-50"
-                    >
-                      Edit
-                    </Link>
+                    <span className="inline-flex items-center gap-1">
+                      <Link
+                        href={`/dashboard/listings/${listing.id}/edit`}
+                        className="touch-target inline-flex items-center rounded-lg px-3 py-2 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-50"
+                      >
+                        Edit
+                      </Link>
+                      <ListingRowActions kind="property" id={listing.id} title={listing.title} deleted={inBin} />
+                    </span>
                   </td>
                 </tr>
               ))}

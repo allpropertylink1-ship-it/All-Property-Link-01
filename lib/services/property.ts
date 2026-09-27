@@ -136,6 +136,32 @@ export async function deleteProperty(id: string): Promise<MutateResult> {
   } catch (e) { return { success: false, error: String(e) }; }
 }
 
+export async function restoreProperty(id: string): Promise<MutateResult> {
+  try {
+    const { serverFetch } = await import("@/lib/auth-utils");
+    const res = await serverFetch(`/api/properties/${encodeURIComponent(id)}/restore`, {
+      method: "POST",
+    });
+    if (!res.ok) return { success: false, error: `API returned ${res.status}` };
+    return { success: true };
+  } catch (e) { return { success: false, error: String(e) }; }
+}
+
+export async function purgeProperty(id: string, confirmTitle: string): Promise<MutateResult> {
+  try {
+    const { serverFetch } = await import("@/lib/auth-utils");
+    const res = await serverFetch(`/api/properties/${encodeURIComponent(id)}/purge`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ confirmTitle }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      return { success: false, error: (data as { error?: string })?.error || `API returned ${res.status}` };
+    }
+    return { success: true };
+  } catch (e) { return { success: false, error: String(e) }; }
+}
+
 export async function approveProperty(id: string, reviewerId: string): Promise<MutateResult> {
   try {
     const { serverFetch } = await import("@/lib/auth-utils");
