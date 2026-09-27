@@ -75,7 +75,7 @@ export default async function MyServicesPage({ searchParams }: { searchParams?: 
           <h1 id="services-heading" className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">
             My Services
           </h1>
-          <p className="mt-1 text-sm text-text-secondary">Every service you offer, with live moderation status.</p>
+          <p className="mt-1 text-sm text-text-secondary">Your single service listing covers all your specialties, with live moderation status.</p>
           <div className="mt-3 flex gap-2 text-sm">
             <Link href="/dashboard/services" className={!inBin ? "font-semibold text-primary-600" : "text-text-secondary hover:text-primary-600"}>Active</Link>
             <span aria-hidden="true" className="text-border">|</span>
@@ -84,8 +84,8 @@ export default async function MyServicesPage({ searchParams }: { searchParams?: 
         </section>
         <EmptyState
           title={inBin ? "Bin is empty" : "No services yet"}
-          description={inBin ? "Deleted services stay here 3 days before permanent removal." : "Create your first service listing to get hired."}
-          action={inBin ? undefined : { label: "Create service", href: "/dashboard/services/new" }}
+          description={inBin ? "Deleted services stay here 3 days before permanent removal." : "Create your single service listing to get hired — it covers all your specialties."}
+          action={inBin ? undefined : { label: "Create my listing", href: "/dashboard/services/new" }}
         />
       </div>
     );
@@ -100,21 +100,33 @@ export default async function MyServicesPage({ searchParams }: { searchParams?: 
         <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 id="services-heading" className="font-heading text-2xl font-bold tracking-tight text-text-primary">
-              My Services
+              {inBin ? "My Services" : services.length === 1 ? "My Listing" : "My Services"}
             </h1>
             <p className="mt-1 text-sm text-text-secondary">
               {inBin
                 ? `${services.length} deleted service${services.length !== 1 ? "s" : ""} — auto-removed after 3 days`
-                : `${services.length} service${services.length !== 1 ? "s" : ""} in your catalogue`}
+                : services.length === 1
+                  ? "Your single listing — it covers all your specialties"
+                  : `${services.length} services (grandfathered) — edit existing, no new creates`}
             </p>
           </div>
-          <Link
-            href="/dashboard/services/new"
-            className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-text-on-primary transition-colors hover:bg-primary-700"
-          >
-            <Plus size={18} />
-            New service
-          </Link>
+          {!inBin && services.length === 1 ? (
+            <Link
+              href={`/dashboard/services/${services[0].id}/edit`}
+              className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-text-on-primary transition-colors hover:bg-primary-700"
+            >
+              Edit my listing
+              <ArrowRight size={16} />
+            </Link>
+          ) : !inBin && services.length === 0 ? (
+            <Link
+              href="/dashboard/services/new"
+              className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-text-on-primary transition-colors hover:bg-primary-700"
+            >
+              <Plus size={18} />
+              Create my listing
+            </Link>
+          ) : null}
         </div>
         <div className="mt-3 flex gap-2 text-sm">
           <Link href="/dashboard/services" className={!inBin ? "font-semibold text-primary-600" : "text-text-secondary hover:text-primary-600"}>Active</Link>
@@ -122,6 +134,13 @@ export default async function MyServicesPage({ searchParams }: { searchParams?: 
           <Link href="/dashboard/services?bin=1" className={inBin ? "font-semibold text-primary-600" : "text-text-secondary hover:text-primary-600"}>Recycle bin</Link>
         </div>
       </section>
+
+      {!inBin && services.length > 1 && (
+        <div className="rounded-xl border border-primary-200 bg-primary-50/50 px-4 py-3 text-sm text-primary-800" role="status">
+          You have {services.length} listings from before the single-listing plan. They stay live —
+          manage them below. New creates are disabled; deleting down to zero lets you post one fresh listing.
+        </div>
+      )}
 
       {/* Mobile: Stitch service cards */}
       <ul className="space-y-3 sm:hidden" aria-label="My services">

@@ -10,7 +10,7 @@ import { FormBanner } from "@/components/shared/FormFeedback";
 import ImageCropQueue from "@/components/shared/ImageCropQueue";
 import ImageCropDialog from "@/components/shared/ImageCropDialog";
 import { cropBlobToFile } from "@/lib/crop-utils";
-import ServiceShelfPicker from "@/components/dashboard/ServiceShelfPicker";
+import SyncedShelvesNotice from "@/components/dashboard/SyncedShelvesNotice";
 
 interface Category {
   id: string;
@@ -172,17 +172,27 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
     setIsDirty(true);
   }, []);
 
+  // Single-listing plan: shelves mirror the mine-filtered categories prop
+  // (the server re-derives them from profile specialties and ignores these).
+  const syncedShelves = categories.flatMap((c) =>
+    c.children.length > 0
+      ? c.children.map((ch) => ({ id: ch.id, name: `${c.name} — ${ch.name}` }))
+      : [{ id: c.id, name: c.name }]
+  );
+  const syncedIds = syncedShelves.map((s) => s.id);
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
     setSubmitting(true);
 
     const fd = new FormData(e.currentTarget);
-    if (shelfIds.length === 0) {
-      setError("Tick at least one sector shelf for this advert.");
+    if (syncedIds.length === 0) {
+      setError("Add at least one specialty to your business profile first.");
       setSubmitting(false);
       return;
     }
+    const shelfIds = syncedIds;
     const data: Record<string, unknown> = {
       categoryId: shelfIds[0],
       categoryIds: shelfIds,
@@ -216,7 +226,6 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
     }
   }
 
-  const [shelfIds, setShelfIds] = useState<string[]>([]);
   const [tags, setTags] = useState("");
   // Optional per-shelf prices keyed by category id. Overall price below
   // applies where a shelf has no override; everything is optional, KES only.
@@ -270,19 +279,7 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
         </div>
       <div className="grid gap-6 sm:grid-cols-2">
 <div className="space-y-2 sm:col-span-2">
-          <ServiceShelfPicker
-            categories={categories}
-            value={shelfIds}
-            onChange={(next) => {
-              setShelfIds(next);
-              setShelfPrices((prev) => {
-                const kept: Record<string, string> = {};
-                for (const id of next) if (prev[id] !== undefined) kept[id] = prev[id];
-                return kept;
-              });
-              setIsDirty(true);
-            }}
-          />
+          <SyncedShelvesNotice shelves={syncedShelves} />
         </div>
 
         <div className="space-y-2 sm:col-span-2">
@@ -357,12 +354,12 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
           </select>
         </div>
 
-        {shelfIds.length > 1 && (
+        {syncedIds.length > 1 && (
           <div className="space-y-3 sm:col-span-2 rounded-xl border border-border bg-surface-secondary/40 p-4">
             <p className="text-sm font-medium text-text-primary">
-              Price per shelf <span className="font-normal text-text-secondary">(optional — leave empty to use the overall price)</span>
+              Price per specialty <span className="font-normal text-text-secondary">(optional — leave empty to use the overall price)</span>
             </p>
-            {shelfIds.map((id) => (
+            {syncedIds.map((id) => (
               <div key={id} className="grid grid-cols-[1fr_140px] items-center gap-3">
                 <label htmlFor={`shelf-price-${id}`} className="truncate text-sm text-text-secondary">
                   {shelfLabel(id)}

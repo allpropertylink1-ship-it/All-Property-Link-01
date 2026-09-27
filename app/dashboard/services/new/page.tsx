@@ -52,6 +52,16 @@ export default async function NewServicePage() {
     )
   }
 
+  // Single-listing plan: one ACTIVE listing per provider — redirect to edit.
+  const mineServicesRes = await serverFetch("/api/user/services");
+  const mineServicesData = await mineServicesRes.json().catch(() => null);
+  const existingActive = Array.isArray(mineServicesData?.services)
+    ? mineServicesData.services.filter((s: { deletedAt?: string | null }) => !s.deletedAt)
+    : [];
+  if (existingActive.length > 0 && existingActive[0]?.id) {
+    redirect(`/dashboard/services/${existingActive[0].id}/edit`);
+  }
+
   // Filtered tree first (only sectors/children intersecting the provider's
   // own specialties). Falls back to the full tree with a notice when the
   // provider has no codified specialties yet (e.g. legacy customs).
@@ -74,10 +84,10 @@ export default async function NewServicePage() {
           Service business
         </p>
         <h1 id="new-service-heading" className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">
-          Create Service Listing
+          Create My Listing
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
-          Describe the service, set pricing, add photos, then publish.
+          One listing covers all your specialties — describe it, set overall and per-specialty pricing, add photos, then publish.
         </p>
       </section>
       <div className="mx-auto max-w-3xl">

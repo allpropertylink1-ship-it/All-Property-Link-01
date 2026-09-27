@@ -10,7 +10,7 @@ import { FormBanner } from "@/components/shared/FormFeedback";
 import ImageCropQueue from "@/components/shared/ImageCropQueue";
 import ImageCropDialog from "@/components/shared/ImageCropDialog";
 import { cropBlobToFile } from "@/lib/crop-utils";
-import ServiceShelfPicker from "@/components/dashboard/ServiceShelfPicker";
+import SyncedShelvesNotice from "@/components/dashboard/SyncedShelvesNotice";
 
 interface Category {
   id: string;
@@ -66,11 +66,16 @@ export function EditServiceForm({
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
 
-  const initialShelves =
+  // Single-listing plan: shelves are read-only (synced from the business
+  // profile). PATCH never sends categoryId/categoryIds.
+  const shelfIds =
     Array.isArray(service.categories) && service.categories.length > 0
       ? service.categories.map((c) => c.id)
       : [service.categoryId];
-  const [shelfIds, setShelfIds] = useState<string[]>(initialShelves);
+  const syncedShelves =
+    Array.isArray(service.categories) && service.categories.length > 0
+      ? service.categories.map((c) => ({ id: c.id, name: c.name }))
+      : [{ id: service.categoryId, name: service.category?.name ?? "Service" }];
   const [shelfPrices, setShelfPrices] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {};
     if (Array.isArray(service.shelfPrices)) {
@@ -245,14 +250,7 @@ export function EditServiceForm({
     setSubmitting(true);
 
     const fd = new FormData(e.currentTarget);
-    if (shelfIds.length === 0) {
-      setError("Tick at least one sector shelf for this advert.");
-      setSubmitting(false);
-      return;
-    }
     const data: Record<string, unknown> = {
-      categoryId: shelfIds[0],
-      categoryIds: shelfIds,
       title: fd.get("title") as string,
       description: fd.get("description") as string,
       pricePeriod: fd.get("pricePeriod") as string,
@@ -333,19 +331,7 @@ export function EditServiceForm({
         </div>
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <ServiceShelfPicker
-            categories={categories}
-            value={shelfIds}
-            onChange={(next) => {
-              setShelfIds(next);
-              setShelfPrices((prev) => {
-                const kept: Record<string, string> = {};
-                for (const id of next) if (prev[id] !== undefined) kept[id] = prev[id];
-                return kept;
-              });
-              setIsDirty(true);
-            }}
-          />
+          <SyncedShelvesNotice shelves={syncedShelves} />
         </div>
 
         <div className="space-y-2 sm:col-span-2">
@@ -420,7 +406,7 @@ export function EditServiceForm({
         {shelfIds.length > 1 && (
           <div className="space-y-3 sm:col-span-2 rounded-xl border border-border bg-surface-secondary/40 p-4">
             <p className="text-sm font-medium text-text-primary">
-              Price per shelf <span className="font-normal text-text-secondary">(optional — leave empty to use the overall price)</span>
+              Price per specialty <span className="font-normal text-text-secondary">(optional — leave empty to use the overall price)</span>
             </p>
             {shelfIds.map((id) => (
               <div key={id} className="grid grid-cols-[1fr_140px] items-center gap-3">
