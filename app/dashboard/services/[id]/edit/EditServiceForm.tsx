@@ -91,6 +91,49 @@ export function EditServiceForm({
   }
   // Optional pre-upload crop step (see PropertyImageUploader for the pattern).
   const [queue, setQueue] = useState<File[] | null>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const coverInputId = useId();
+  const [coverUploading, setCoverUploading] = useState(false);
+
+  function validImageFile(file: File): string | null {
+    if (isHeicFile(file)) return `${file.name}: ${HEIC_HINT}`;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      return `Invalid type: ${file.name}. Only JPEG, PNG, WebP.`;
+    }
+    if (file.size > 10 * 1024 * 1024) return `${file.name} is too large. Max 10MB.`;
+    return null;
+  }
+
+  async function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const problem = validImageFile(file);
+    if (problem) {
+      setError(problem);
+      e.target.value = "";
+      return;
+    }
+    setError("");
+    setCoverUploading(true);
+    try {
+      const url = await uploadImage(file, "services");
+      setCoverUrl(url);
+      setCoverCleared(false);
+      setIsDirty(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Cover upload failed");
+    } finally {
+      setCoverUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  function removeCover() {
+    setCoverUrl(null);
+    setCoverCleared(true);
+    setIsDirty(true);
+    if (coverInputRef.current) coverInputRef.current.value = "";
+  }
 
   const uploadQueuedFiles = useCallback(
     async (files: File[]) => {
@@ -459,9 +502,70 @@ export function EditServiceForm({
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-600 font-heading text-sm font-bold text-white">3</span>
           <div>
             <h2 id="svc-edit-photos" className="font-heading text-base font-semibold text-text-primary">Step 3 of 4 &middot; Photos</h2>
-            <p className="text-sm text-text-secondary">Up to 10 images showing your work — tap “Cover” on the photo customers should see first</p>
+            <p className="text-sm text-text-secondary">One cover photo customers see first, plus up to 10 gallery photos of your work</p>
           </div>
         </div>
+      <div className="space-y-6">
+
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-text-primary">
+            Cover photo <span className="font-normal text-text-secondary">(optional — shown first to customers)</span>
+          </p>
+          <input
+            ref={coverInputRef}
+            id={coverInputId}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={handleCoverChange}
+            disabled={coverUploading}
+          />
+          {coverUrl ? (
+            <div className="relative w-full max-w-sm overflow-hidden rounded-xl border border-border bg-surface">
+              <img src={coverUrl} alt="Cover photo" className="h-48 w-full object-cover" />
+              <span className="absolute top-3 left-3 rounded-full bg-primary-600 px-3 py-1 text-xs font-semibold text-white">
+                Cover
+              </span>
+              <div className="flex gap-2 p-3">
+                <label
+                  htmlFor={coverInputId}
+                  className="touch-target inline-flex min-h-[44px] cursor-pointer items-center rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary"
+                >
+                  {coverUploading ? "Uploading..." : "Change"}
+                </label>
+                <button
+                  type="button"
+                  onClick={removeCover}
+                  className="touch-target inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 py-2 text-sm font-medium text-error-500 transition-colors hover:bg-error-500/10"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          ) : (
+            <label
+              htmlFor={coverInputId}
+              className="touch-target block w-full max-w-sm cursor-pointer rounded-xl border-2 border-dashed bg-surface-secondary p-6 text-center transition-colors hover:border-primary-500"
+            >
+              <div className="pointer-events-none flex flex-col items-center gap-2">
+                {coverUploading ? (
+                  <Loader2 className="h-7 w-7 animate-spin text-primary-500" />
+                ) : (
+                  <Upload className="h-7 w-7 text-primary-500" />
+                )}
+                <span className="text-sm font-medium text-text-primary">
+                  {coverUploading ? "Uploading..." : "Click to upload cover photo"}
+                </span>
+                <span className="text-xs text-text-secondary">JPEG, PNG, WebP — Max 10MB</span>
+              </div>
+            </label>
+          )}
+        </div>
+
+        <div className="space-y-3 border-t border-border pt-6">
+          <p className="text-sm font-medium text-text-primary">
+            Gallery photos <span className="font-normal text-text-secondary">(up to 10)</span>
+          </p>
       <div className="space-y-4">
 
         {imagePreviews.length < 10 && (
@@ -487,7 +591,7 @@ export function EditServiceForm({
                   <Upload className="h-8 w-8 text-primary-500" />
                 )}
                 <span className="text-sm font-medium text-text-primary">
-                  {uploading ? "Uploading..." : "Click to upload images"}
+                  {uploading ? "Uploading..." : "Click to upload gallery photos"}
                 </span>
                 <span className="text-xs text-text-secondary">JPEG, PNG, WebP — Max 10MB each</span>
               </div>
@@ -496,55 +600,28 @@ export function EditServiceForm({
         )}
 
         {imagePreviews.length > 0 && (
-          <div className="grid gap-4 sm:grid-cols-3" role="list" aria-label="Service images">
-            {imagePreviews.map((preview, index) => {
-              const url = imageUrls[index];
-              const isCover = !!url && coverUrl === url;
-              return (
+          <div className="grid gap-4 sm:grid-cols-3" role="list" aria-label="Gallery photos">
+            {imagePreviews.map((preview, index) => (
               <div key={index} className="relative group rounded-xl border border-border bg-surface p-2" role="listitem">
                 <img
                   src={preview}
-                  alt={isCover ? "Cover photo" : "Service image"}
+                  alt="Gallery photo"
                   className="rounded-lg w-full h-48 object-cover"
                 />
-                {isCover && (
-                  <span className="absolute top-3 left-3 rounded-full bg-primary-600 px-3 py-1 text-xs font-semibold text-white">
-                    Cover
-                  </span>
-                )}
-                {!isCover && url && (
-                  <button
-                    type="button"
-                    onClick={() => { setCoverUrl(url); setCoverCleared(false); setIsDirty(true); }}
-                    className="touch-target absolute bottom-3 left-3 rounded-full bg-black/60 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-black/80"
-                    aria-label="Use as cover photo"
-                  >
-                    Cover
-                  </button>
-                )}
-                {isCover && (
-                  <button
-                    type="button"
-                    onClick={() => { setCoverUrl(null); setCoverCleared(true); setIsDirty(true); }}
-                    className="touch-target absolute bottom-3 left-3 rounded-full bg-black/60 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-black/80"
-                    aria-label="Remove cover photo"
-                  >
-                    Uncover
-                  </button>
-                )}
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(index)}
                   className="touch-target absolute top-3 right-3 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-error-500/80 text-white hover:bg-error-500 transition-colors"
-                  aria-label="Remove image"
+                  aria-label="Remove gallery photo"
                 >
                   <X size={14} />
                 </button>
               </div>
-              );
-            })}
+            ))}
           </div>
         )}
+        </div>
+        </div>
       </div>
       </section>
 
