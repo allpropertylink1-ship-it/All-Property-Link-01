@@ -73,7 +73,7 @@ export default async function RootLayout({
           <main className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6">{inMaintenance ? <MaintenanceNotice title={status?.maintenanceTitle} message={status?.maintenanceMessage} /> : children}</main>
           <CookieConsent />
           <BottomNav />
-          <Footer />
+          {!isAuthRoute && <Footer />}
         </AuthProvider>
         <PWAInstallPrompt />
         <script
