@@ -8,6 +8,8 @@ import { Upload, Loader2, X } from "@/components/ui/icons";
 import { api } from "@/lib/api-client";
 import { FormBanner } from "@/components/shared/FormFeedback";
 import ImageCropQueue from "@/components/shared/ImageCropQueue";
+import ImageCropDialog from "@/components/shared/ImageCropDialog";
+import { cropBlobToFile } from "@/lib/crop-utils";
 import ServiceShelfPicker from "@/components/dashboard/ServiceShelfPicker";
 
 interface Category {
@@ -94,6 +96,8 @@ export function EditServiceForm({
   const coverInputRef = useRef<HTMLInputElement>(null);
   const coverInputId = useId();
   const [coverUploading, setCoverUploading] = useState(false);
+  // Optional pre-upload crop step for the cover (dialog offers Apply crop / Use original).
+  const [pendingCover, setPendingCover] = useState<File | null>(null);
 
   function validImageFile(file: File): string | null {
     if (isHeicFile(file)) return `${file.name}: ${HEIC_HINT}`;
@@ -114,6 +118,13 @@ export function EditServiceForm({
       return;
     }
     setError("");
+    e.target.value = "";
+    // Crop step is optional — dialog offers Apply crop / Use original.
+    setPendingCover(file);
+  }
+
+  async function finishCoverUpload(file: File) {
+    setPendingCover(null);
     setCoverUploading(true);
     try {
       const url = await uploadImage(file, "services");
@@ -124,7 +135,6 @@ export function EditServiceForm({
       setError(err instanceof Error ? err.message : "Cover upload failed");
     } finally {
       setCoverUploading(false);
-      e.target.value = "";
     }
   }
 
@@ -298,6 +308,17 @@ export function EditServiceForm({
           context="service-images"
           onDone={handleQueueDone}
           onCancel={handleQueueCancel}
+        />
+      )}
+      {pendingCover && (
+        <ImageCropDialog
+          sourceFile={pendingCover}
+          label="Cover photo"
+          guidance="This photo is shown first to customers — crop it to frame your work clearly."
+          context="service-images"
+          onComplete={(blob) => finishCoverUpload(cropBlobToFile(blob, pendingCover.name))}
+          onSkip={() => finishCoverUpload(pendingCover)}
+          onCancel={() => setPendingCover(null)}
         />
       )}
 
