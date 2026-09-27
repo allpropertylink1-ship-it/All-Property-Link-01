@@ -17,7 +17,6 @@ interface Category {
   children: { id: string; name: string; slug: string }[];
 }
 
-const CURRENCIES = ["KES", "USD"] as const;
 const PRICE_PERIODS = ["TOTAL", "PER_MONTH", "PER_NIGHT", "PER_WEEK", "PER_SQM"] as const;
 
 export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerConsent }: {
@@ -113,7 +112,13 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
   }, []);
 
   const handleRemoveImage = useCallback((index: number) => {
-    setImageUrls((prev) => prev.filter((_, i) => i !== index));
+    setImageUrls((prev) => {
+      const removed = prev[index];
+      if (removed) {
+        setCoverUrl((cur) => (cur === removed ? null : cur));
+      }
+      return prev.filter((_, i) => i !== index);
+    });
     setImagePreviews((prev) => {
       const entry = prev[index];
       if (entry?.startsWith("blob:")) URL.revokeObjectURL(entry);
@@ -139,8 +144,11 @@ export function NewServiceForm({ categories, endpoint, redirectTo, requireOwnerC
       title: fd.get("title") as string,
       description: fd.get("description") as string,
       price: (fd.get("price") as string) || undefined,
-currency: fd.get("currency") as string,
       pricePeriod: fd.get("pricePeriod") as string,
+      shelfPrices: Object.entries(shelfPrices)
+        .filter(([, p]) => p.trim() !== "" && Number.isFinite(Number(p)) && Number(p) >= 0)
+        .map(([categoryId, p]) => ({ categoryId, price: Number(p) })),
+      coverImage: coverUrl || undefined,
       location: (fd.get("location") as string) || undefined,
       city: fd.get("city") as string,
       region: (fd.get("region") as string) || undefined,
@@ -165,6 +173,19 @@ currency: fd.get("currency") as string,
 
   const [shelfIds, setShelfIds] = useState<string[]>([]);
   const [tags, setTags] = useState("");
+  // Optional per-shelf prices keyed by category id. Overall price below
+  // applies where a shelf has no override; everything is optional, KES only.
+  const [shelfPrices, setShelfPrices] = useState<Record<string, string>>({});
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
+
+  function shelfLabel(id: string): string {
+    for (const c of categories) {
+      if (c.id === id) return c.name;
+      const hit = c.children.find((ch) => ch.id === id);
+      if (hit) return `${c.name} — ${hit.name}`;
+    }
+    return "Shelf";
+  }
 
   return (
     <form onSubmit={handleSubmit} onChange={() => setIsDirty(true)} className="space-y-6" aria-label="Create service listing">
@@ -196,7 +217,15 @@ currency: fd.get("currency") as string,
           <ServiceShelfPicker
             categories={categories}
             value={shelfIds}
-            onChange={(next) => { setShelfIds(next); setIsDirty(true); }}
+            onChange={(next) => {
+              setShelfIds(next);
+              setShelfPrices((prev) => {
+                const kept: Record<string, string> = {};
+                for (const id of next) if (prev[id] !== undefined) kept[id] = prev[id];
+                return kept;
+              });
+              setIsDirty(true);
+            }}
           />
         </div>
 
@@ -243,7 +272,7 @@ currency: fd.get("currency") as string,
 
         <div className="space-y-2">
           <label htmlFor="price" className="text-sm font-medium text-text-primary">
-            Price <span className="text-text-secondary">(optional)</span>
+            Overall price (KES) <span className="text-text-secondary">(optional)</span>
           </label>
           <input
             id="price"
@@ -251,23 +280,10 @@ currency: fd.get("currency") as string,
             type="number"
             step="0.01"
             min="0"
+            placeholder="e.g. 3500 — leave empty for no price"
             className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
           />
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="currency" className="text-sm font-medium text-text-primary">
-            Currency
-          </label>
-          <select
-            id="currency"
-            name="currency"
-            className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-          >
-            {CURRENCIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
+          <p className="text-xs text-text-secondary">All prices are in Kenya Shillings (KES). Applies to every ticked shelf unless overridden below.</p>
         </div>
 
         <div className="space-y-2">
@@ -284,6 +300,33 @@ currency: fd.get("currency") as string,
             ))}
           </select>
         </div>
+
+        {shelfIds.length > 1 && (
+          <div className="space-y-3 sm:col-span-2 rounded-xl border border-border bg-surface-secondary/40 p-4">
+            <p className="text-sm font-medium text-text-primary">
+              Price per shelf <span className="font-normal text-text-secondary">(optional — leave empty to use the overall price)</span>
+            </p>
+            {shelfIds.map((id) => (
+              <div key={id} className="grid grid-cols-[1fr_140px] items-center gap-3">
+                <label htmlFor={`shelf-price-${id}`} className="truncate text-sm text-text-secondary">
+                  {shelfLabel(id)}
+                </label>
+                <input
+                  id={`shelf-price-${id}`}
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  inputMode="decimal"
+                  value={shelfPrices[id] || ""}
+                  onChange={(e) => setShelfPrices((prev) => ({ ...prev, [id]: e.target.value }))}
+                  placeholder="KES"
+                  aria-label={`Price in KES for ${shelfLabel(id)}`}
+                  className="flex h-12 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="space-y-2">
           <label htmlFor="city" className="text-sm font-medium text-text-primary">
@@ -347,7 +390,7 @@ currency: fd.get("currency") as string,
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-600 font-heading text-sm font-bold text-white">3</span>
           <div>
             <h2 id="svc-new-photos" className="font-heading text-base font-semibold text-text-primary">Step 3 of 4 &middot; Photos</h2>
-            <p className="text-sm text-text-secondary">Up to 10 images showing your work</p>
+            <p className="text-sm text-text-secondary">Up to 10 images showing your work — tap “Cover” on the photo customers should see first</p>
           </div>
         </div>
       <div className="space-y-4">
@@ -385,13 +428,31 @@ currency: fd.get("currency") as string,
 
         {imagePreviews.length > 0 && (
           <div className="grid gap-4 sm:grid-cols-3" role="list" aria-label="Service images">
-            {imagePreviews.map((preview, index) => (
+            {imagePreviews.map((preview, index) => {
+              const url = imageUrls[index];
+              const isCover = !!url && coverUrl === url;
+              return (
               <div key={index} className="relative group rounded-xl border border-border bg-surface p-2" role="listitem">
                 <img
                   src={preview}
-                  alt="Service image"
+                  alt={isCover ? "Cover photo" : "Service image"}
                   className="rounded-lg w-full h-48 object-cover"
                 />
+                {isCover && (
+                  <span className="absolute top-3 left-3 rounded-full bg-primary-600 px-3 py-1 text-xs font-semibold text-white">
+                    Cover
+                  </span>
+                )}
+                {!isCover && url && (
+                  <button
+                    type="button"
+                    onClick={() => { setCoverUrl(url); setIsDirty(true); }}
+                    className="touch-target absolute bottom-3 left-3 rounded-full bg-black/60 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-black/80"
+                    aria-label="Use as cover photo"
+                  >
+                    Cover
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(index)}
@@ -401,7 +462,8 @@ currency: fd.get("currency") as string,
                   <X size={14} />
                 </button>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -416,7 +478,7 @@ currency: fd.get("currency") as string,
             <p className="text-sm text-text-secondary">Confirm and publish your service</p>
           </div>
         </div>
-      <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center pt-2">
+      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end pt-2">
         {requireOwnerConsent && (
           <label className="flex w-full cursor-pointer items-start gap-3 rounded-lg border border-border bg-surface-secondary px-4 py-3 text-sm">
             <input
@@ -431,21 +493,21 @@ currency: fd.get("currency") as string,
           </label>
         )}
         <button
+          type="button"
+          onClick={() => router.back()}
+          className="touch-target order-2 rounded-xl border-2 border-border bg-surface px-6 py-3 text-sm font-semibold text-text-primary shadow-sm transition-colors hover:border-primary-400 hover:bg-surface-secondary sm:order-1"
+        >
+          Cancel
+        </button>
+        <button
           type="submit"
           disabled={submitting || !isDirty}
           aria-busy={submitting}
           title={!isDirty ? "Make changes before saving" : undefined}
-          className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-3 text-sm font-medium text-text-on-primary transition-colors hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="touch-target order-1 inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-8 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-primary-700 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none sm:order-2"
         >
           {submitting && <Loader2 size={16} className="animate-spin" />}
           {submitting ? "Creating..." : "Create service"}
-        </button>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="touch-target rounded-lg border border-border px-5 py-3 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-secondary"
-        >
-          Cancel
         </button>
       </div>
       </section>

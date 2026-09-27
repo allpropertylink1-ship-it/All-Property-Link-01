@@ -90,6 +90,8 @@ export interface ServiceDetail {
   user: ServiceDetailUser | null;
   category: { id: string; name: string; slug: string; icon: string | null; description: string | null } | null;
   categories?: { id: string; name: string; slug: string }[];
+  shelfPrices?: { categoryId: string; price: number }[] | null;
+  coverImage?: string | null;
   avgRating: number | null;
   reviewCount: number;
 }

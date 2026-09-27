@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     alternates: { canonical: `/services/${service.id}` },
     openGraph: {
-    title: `${service.title} — All Property Link`,
+    title: `${service.title} â€” All Property Link`,
       description,
       type: "website",
       locale: "en_KE",
@@ -68,7 +68,23 @@ export default async function ServiceDetailPage({ params }: Props) {
   const rawImages = Array.isArray(service.images) ? service.images : [];
   const imageUrls = rawImages.filter((u: unknown): u is string => typeof u === "string");
 
-  // Multi-shelf: one advert may span several sectors — show each selected shelf.
+  // Cover photo first (deduplicated), then the rest of the gallery.
+  const cover = typeof service.coverImage === "string" && service.coverImage ? service.coverImage : null;
+  const galleryUrls = cover
+    ? [cover, ...imageUrls.filter((u) => u !== cover)]
+    : imageUrls;
+
+  // Per-shelf prices resolved against shelf names (overall price = fallback).
+  const shelfPriceRows = (
+    Array.isArray(service.shelfPrices) ? service.shelfPrices : []
+  ).filter(
+    (r): r is { categoryId: string; price: number } =>
+      !!r && typeof r.categoryId === "string" && typeof r.price === "number"
+  );
+  const shelfNameOf = (id: string): string =>
+    shelves.find((s) => s.id === id)?.name ?? "Shelf";
+
+  // Multi-shelf: one advert may span several sectors â€” show each selected shelf.
   const shelves = (
     Array.isArray(service.categories) && service.categories.length > 0
       ? service.categories
@@ -86,7 +102,7 @@ export default async function ServiceDetailPage({ params }: Props) {
     name: service.title,
     description: service.description,
     url: `${siteUrl()}/services/${service.id}`,
-    ...(imageUrls[0] ? { image: imageUrls[0] } : {}),
+    ...(galleryUrls[0] ? { image: galleryUrls[0] } : {}),
     provider: {
       "@type": service.user?.companyName ? "Organization" : "Person",
       name: service.user?.companyName || `${service.user?.firstName || ""} ${service.user?.lastName || ""}`.trim(),
@@ -101,7 +117,7 @@ export default async function ServiceDetailPage({ params }: Props) {
     <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }} />
       <div className="grid gap-6 lg:grid-cols-[240px_1fr_280px] lg:gap-8 xl:grid-cols-[260px_1fr_300px]">
-        {/* ─── LEFT SIDEBAR: Provider Profile ─── */}
+        {/* â”€â”€â”€ LEFT SIDEBAR: Provider Profile â”€â”€â”€ */}
         <aside className="hidden space-y-5 lg:block">
           {service.user && (
             <div className="rounded-xl border border-border bg-surface p-5">
@@ -196,15 +212,15 @@ export default async function ServiceDetailPage({ params }: Props) {
 
         </aside>
 
-        {/* ─── CENTER: Gallery + Details + Reviews ─── */}
+        {/* â”€â”€â”€ CENTER: Gallery + Details + Reviews â”€â”€â”€ */}
         <div className="min-w-0 space-y-5">
-          <PropertyGallery images={imageUrls} title={service.title} />
+          <PropertyGallery images={galleryUrls} title={service.title} />
 
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
               {shelves.map((shelf, i) => (
                 <span key={shelf.id} className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-primary-600">
-                  {i > 0 && <span aria-hidden="true" className="text-text-secondary">·</span>}
+                  {i > 0 && <span aria-hidden="true" className="text-text-secondary">Â·</span>}
                   <Link href={`/services?category=${shelf.slug}`} className="hover:text-primary-700">
                     {shelf.name}
                   </Link>
@@ -225,6 +241,18 @@ export default async function ServiceDetailPage({ params }: Props) {
                 service.pricePeriod,
               )}
             </p>
+            {shelfPriceRows.length > 0 && (
+              <dl className="mt-3 space-y-1.5 rounded-xl border border-border bg-surface-secondary/40 p-3">
+                {shelfPriceRows.map((row) => (
+                  <div key={row.categoryId} className="flex items-baseline justify-between gap-3 text-sm">
+                    <dt className="min-w-0 truncate text-text-secondary">{shelfNameOf(row.categoryId)}</dt>
+                    <dd className="shrink-0 font-semibold text-text-primary">
+                      KES {Number(row.price).toLocaleString()}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            )}
             {service.avgRating && (
               <div className="mt-2 flex items-center gap-2">
                 <StarRating rating={Math.round(service.avgRating)} />
@@ -257,7 +285,7 @@ export default async function ServiceDetailPage({ params }: Props) {
                     {service.user.companyName || `${service.user.firstName} ${service.user.lastName}`}
                   </p>
                   {shelves.length > 0 && (
-                    <span className="text-xs text-primary-600">{shelves.map((s) => s.name).join(" · ")}</span>
+                    <span className="text-xs text-primary-600">{shelves.map((s) => s.name).join(" Â· ")}</span>
                   )}
                 </div>
               </div>
@@ -295,7 +323,7 @@ export default async function ServiceDetailPage({ params }: Props) {
             </div>
           )}
 
-          {/* ─── Reviews Section (customer reviews of the provider) ─── */}
+          {/* â”€â”€â”€ Reviews Section (customer reviews of the provider) â”€â”€â”€ */}
           {reviewData && providerId && (
             <div>
               <h2 className="mb-4 text-sm font-semibold text-text-primary">
@@ -316,7 +344,7 @@ export default async function ServiceDetailPage({ params }: Props) {
           )}
         </div>
 
-        {/* ─── RIGHT SIDEBAR: Contact + Share ─── */}
+        {/* â”€â”€â”€ RIGHT SIDEBAR: Contact + Share â”€â”€â”€ */}
         <aside className="min-w-0 space-y-5">
           {service.user && (
             <>

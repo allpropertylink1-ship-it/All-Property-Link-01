@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useCallback } from "react"
 import { useParams } from "next/navigation"
@@ -20,10 +20,12 @@ interface AgentService {
   id: string
   categoryId: string
   categories?: { id: string; name: string; slug: string }[]
+  shelfPrices?: { categoryId: string; price: number }[]
+  coverImage?: string | null
   title: string
   description: string
   price: number | string | null
-  currency: string
+
   pricePeriod: string
   location: string | null
   city: string | null
@@ -118,10 +120,12 @@ export default function AgentEditReferralServicePage() {
             categories: Array.isArray(service.categories) && service.categories.length > 0
               ? service.categories
               : [service.category],
+            shelfPrices: Array.isArray(service.shelfPrices) ? service.shelfPrices : [],
+            coverImage: service.coverImage || null,
             title: service.title,
             description: service.description,
             price: service.price ? Number(service.price) : null,
-            currency: service.currency,
+
             pricePeriod: service.pricePeriod,
             location: service.location,
             city: service.city,
