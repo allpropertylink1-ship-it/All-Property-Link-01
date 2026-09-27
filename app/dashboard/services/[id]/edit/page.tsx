@@ -36,8 +36,9 @@ export default async function EditServicePage({ params }: { params: { id: string
     )
   }
 
-  const [serviceRes, categoriesRes] = await Promise.all([
+  const [serviceRes, mineRes, fullRes] = await Promise.all([
     serverFetch(`/api/user/services/${encodeURIComponent(params.id)}`),
+    serverFetch("/api/services/categories/mine"),
     serverFetch("/api/services/categories"),
   ])
   const serviceData = await serviceRes.json().catch(() => null)
@@ -45,8 +46,26 @@ export default async function EditServicePage({ params }: { params: { id: string
 
   if (!serviceRes.ok || !service) notFound()
 
-  const categoriesData = await categoriesRes.json().catch(() => null)
-  const rootCategories: Category[] = categoriesData?.categories || []
+  const mineData = await mineRes.json().catch(() => null)
+  const fullData = await fullRes.json().catch(() => null)
+  const mineRoots: Category[] = Array.isArray(mineData?.categories) ? mineData.categories : []
+  const fullRoots: Category[] = Array.isArray(fullData?.categories) ? fullData.categories : []
+  // Grandfather: the listing's current shelf is always present even when it
+  // no longer intersects the provider's specialties (PATCH allows keeping it).
+  const base = mineRoots.length > 0 ? mineRoots : fullRoots
+  const currentId: string = service.categoryId
+  const inTree = base.some((r) => r.id === currentId || r.children.some((c) => c.id === currentId))
+  let rootCategories = base
+  let grandfathered = false
+  if (!inTree) {
+    const holder = fullRoots.find((r) => r.id === currentId || r.children.some((c) => c.id === currentId))
+    if (holder) {
+      rootCategories = [...base, holder]
+      grandfathered = true
+    } else {
+      rootCategories = fullRoots
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -58,6 +77,12 @@ export default async function EditServicePage({ params }: { params: { id: string
         <p className="mt-1 text-sm text-text-secondary">Update details, pricing, photos, then save.</p>
       </section>
       <div className="mx-auto max-w-3xl">
+        {grandfathered && (
+          <div className="mb-4 rounded-xl border border-primary-200 bg-primary-50/50 px-4 py-3 text-sm text-primary-800" role="status">
+            This listing&apos;s current category is kept even though it&apos;s outside your present specialties.
+            Keeping it is allowed; moving it requires one of your specialties.
+          </div>
+        )}
         <EditServiceForm
           service={{
             id: service.id,

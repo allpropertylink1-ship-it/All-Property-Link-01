@@ -52,9 +52,20 @@ export default async function NewServicePage() {
     )
   }
 
-  const res = await serverFetch("/api/services/categories");
-  const data = await res.json().catch(() => null);
-  const rootCategories: Category[] = data?.categories || [];
+  // Filtered tree first (only sectors/children intersecting the provider's
+  // own specialties). Falls back to the full tree with a notice when the
+  // provider has no codified specialties yet (e.g. legacy customs).
+  const mineRes = await serverFetch("/api/services/categories/mine");
+  const mineData = await mineRes.json().catch(() => null);
+  const mineCategories: Category[] = Array.isArray(mineData?.categories) ? mineData.categories : [];
+  let rootCategories = mineCategories;
+  let scoped = true;
+  if (rootCategories.length === 0) {
+    const res = await serverFetch("/api/services/categories");
+    const data = await res.json().catch(() => null);
+    rootCategories = data?.categories || [];
+    scoped = false;
+  }
 
   return (
     <div className="space-y-6">
@@ -70,6 +81,12 @@ export default async function NewServicePage() {
         </p>
       </section>
       <div className="mx-auto max-w-3xl">
+        {!scoped && (
+          <div className="mb-4 rounded-xl border border-primary-200 bg-primary-50/50 px-4 py-3 text-sm text-primary-800" role="status">
+            Showing all categories because your profile has no matching specialties yet. Add specialties under
+            sectors in your business profile to get a filtered shelf.
+          </div>
+        )}
         <NewServiceForm categories={rootCategories} />
       </div>
     </div>

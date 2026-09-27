@@ -39,6 +39,7 @@ export default function AgentEditReferralServicePage() {
   const serviceId = String(params.serviceId)
   const [service, setService] = useState<AgentService | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
+  const [grandfathered, setGrandfathered] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
@@ -48,11 +49,27 @@ export default function AgentEditReferralServicePage() {
       api.get<{ service: AgentService }>(
         `/api/agent/referrals/${referralId}/services/${serviceId}`
       ),
-      api.get<{ categories: Category[] }>("/api/agent/services/categories"),
+      api.get<{ categories: Category[] }>(`/api/agent/services/categories?referralId=${encodeURIComponent(referralId)}`),
     ])
     if (svcRes.data) setService(svcRes.data.service)
     else setError(svcRes.error || "Failed to load service")
-    if (catRes.data) setCategories(catRes.data.categories)
+    let roots: Category[] = catRes.data?.categories ?? []
+    // Grandfather: keep the listing's current shelf even when outside the
+    // owner's present specialties (PATCH allows keeping it).
+    const currentId = svcRes.data?.service.categoryId
+    if (currentId && !roots.some((r) => r.id === currentId || r.children.some((c) => c.id === currentId))) {
+      const fullRes = await api.get<{ categories: Category[] }>(`/api/agent/services/categories`)
+      const holder = fullRes.data?.categories.find(
+        (r) => r.id === currentId || r.children.some((c) => c.id === currentId)
+      )
+      if (holder) {
+        roots = [...roots, holder]
+        setGrandfathered(true)
+      } else if (fullRes.data) {
+        roots = fullRes.data.categories
+      }
+    }
+    setCategories(roots)
     setLoading(false)
   }, [referralId, serviceId])
 
@@ -88,6 +105,11 @@ export default function AgentEditReferralServicePage() {
       <p className="mb-8 text-sm text-text-secondary">Your edits are saved for review under your referral&apos;s account.</p>
 
       <div className="mx-auto max-w-2xl rounded-xl border border-border bg-surface p-6">
+        {grandfathered && (
+          <div className="mb-4 rounded-xl border border-primary-200 bg-primary-50/50 px-4 py-3 text-sm text-primary-800" role="status">
+            This listing&apos;s current category is kept even though it&apos;s outside the owner&apos;s present specialties.
+          </div>
+        )}
         <EditServiceForm
           service={{
             id: service.id,

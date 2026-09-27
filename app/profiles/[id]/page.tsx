@@ -9,6 +9,7 @@ import { getProperties } from "@/lib/services/property"
 import { siteUrl, slugifyCity } from "@/lib/seo"
 import { formatReviewerName } from "@/lib/utils"
 import { resolveImageUrl } from "@/lib/images";
+import { labelForSpecialty, sectorForSpecialty } from "@/lib/service-taxonomy";
 
 interface Props {
   params: { id: string }
@@ -113,6 +114,18 @@ export default async function ProfilePage({ params }: Props) {
 
   const avatarUrl = resolveImageUrl(profile.businessLogo || profile.avatar)
 
+  // Group specialties by sector for a compact hero summary (Other buckets hidden).
+  const heroSpecs = ((profile.specialties as string[]) || []).filter(
+    (s) => !s.endsWith("_OTHER") && s !== "OTHER_CUSTOM"
+  );
+  const heroSectors = Array.from(new Set(heroSpecs.map((s) => sectorForSpecialty(s)?.name).filter(Boolean)));
+  const heroSummary =
+    heroSpecs.length === 0
+      ? null
+      : heroSectors.length <= 1
+        ? heroSpecs.slice(0, 3).map((s) => labelForSpecialty(s)).join(" · ")
+        : `${heroSpecs.slice(0, 2).map((s) => labelForSpecialty(s)).join(" · ")} (+${heroSpecs.length - 2} across ${heroSectors.length} sectors)`;
+
   return (
     <div className="min-h-[100dvh] bg-surface">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -144,7 +157,7 @@ export default async function ProfilePage({ params }: Props) {
                   {[
                     profile.category,
                     profile.city,
-                    profile.specialties && profile.specialties.length > 0 ? profile.specialties.slice(0, 3).join(" · ") : null,
+                    heroSummary,
                   ]
                     .filter(Boolean)
                     .join("  ·  ") || `Member since ${new Date(profile.createdAt).toLocaleDateString("en-KE", { month: "long", year: "numeric" })}`}

@@ -32,7 +32,7 @@ export default function AgentPostReferralServicePage() {
       api.get<{ referral: { firstName: string; lastName: string } }>(
         `/api/agent/referrals/${referralId}`
       ),
-      api.get<{ categories: Category[] }>("/api/agent/services/categories"),
+      api.get<{ categories: Category[] }>(`/api/agent/services/categories?referralId=${encodeURIComponent(referralId)}`),
     ])
     if (refRes.data) {
       setReferralName(`${refRes.data.referral.firstName} ${refRes.data.referral.lastName}`.trim())
