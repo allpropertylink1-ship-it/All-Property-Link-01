@@ -14,6 +14,7 @@ import {
   X,
 } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
+import { canListProperties, canListServices } from "@/lib/persona"
 
 interface NavLink {
   href: string
@@ -26,10 +27,10 @@ const primary: NavLink[] = [
   { href: "/dashboard", label: "Business Summary", icon: Briefcase },
 ]
 
-function getSecondaryNav(hasServiceAccess: boolean): NavLink[] {
+function getSecondaryNav(canProperties: boolean, canServices: boolean): NavLink[] {
   return [
-    { href: "/dashboard/listings", label: "My Listings", icon: Building2 },
-    ...(hasServiceAccess ? [{ href: "/dashboard/services", label: "My Services", icon: Building2 }] : []),
+    ...(canProperties ? [{ href: "/dashboard/listings", label: "My Listings", icon: Building2 }] : []),
+    ...(canServices ? [{ href: "/dashboard/services", label: "My Services", icon: Building2 }] : []),
     { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
   ]
 }
@@ -98,8 +99,8 @@ function NavGroup({ links, section, onNavigate }: { links: NavLink[]; section: k
 
 function NavSections({ onNavigate }: { onNavigate?: () => void }) {
   const { user } = useAuth()
-  const userTypes = user?.userTypes ?? []
-  const hasServiceAccess = userTypes.includes("FUNDI") || userTypes.includes("SERVICE_PROVIDER")
+  const canProperties = canListProperties({ userTypes: user?.userTypes })
+  const canServices = canListServices({ userTypes: user?.userTypes })
 
   if (user?.authMethod === "agent") {
     return <NavGroup links={agentPrimary} section="agent" onNavigate={onNavigate} />
@@ -118,7 +119,7 @@ function NavSections({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <>
       <NavGroup links={primary} section="primary" onNavigate={onNavigate} />
-      <NavGroup links={getSecondaryNav(hasServiceAccess)} section="secondary" onNavigate={onNavigate} />
+      <NavGroup links={getSecondaryNav(canProperties, canServices)} section="secondary" onNavigate={onNavigate} />
       <NavGroup links={tertiary} section="tertiary" onNavigate={onNavigate} />
     </>
   )

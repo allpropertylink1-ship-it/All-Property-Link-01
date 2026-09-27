@@ -1,5 +1,5 @@
 import { requireAuth, serverFetch } from "@/lib/auth-utils"
-import { personaRedirectTarget } from "@/lib/persona"
+import { canListProperties, canListServices, personaRedirectTarget } from "@/lib/persona"
 import { redirect } from "next/navigation"
 import {
   Building2, Bell, Wrench,
@@ -84,6 +84,33 @@ export default async function DashboardPage() {
   const issueFeed = await getIssues()
   const bannerIssues = [...issueFeed.issues, ...issueFeed.listings.flatMap((l) => l.issues.map((i) => ({ ...i, label: `${l.title}: ${i.label}` })))].slice(0, 4)
 
+  // Role-gated dashboard: property posters (owners + agents) never see
+  // service cards/actions, and service providers (fundis + providers)
+  // never see property cards/actions. Route guards on the listings/services
+  // pages enforce the same rule server-side; this only hides the UI.
+  const canProperties = canListProperties({ userTypes: user.userTypes })
+  const canServices = canListServices({ userTypes: user.userTypes })
+  const visibleStatCards = statCards.filter((card) => {
+    if (card.key === "totalListings") return canProperties
+    if (card.key === "totalServices") return canServices
+    return true
+  })
+  const visibleQuickActions = quickActions.filter((action) => {
+    if (action.href === "/dashboard/listings/new") return canProperties
+    if (action.href === "/dashboard/services/new") return canServices
+    return true
+  })
+  const metricsGridCls =
+    visibleStatCards.length <= 1
+      ? "grid gap-4 sm:grid-cols-1"
+      : visibleStatCards.length === 2
+        ? "grid gap-4 sm:grid-cols-2"
+        : "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+  const actionsGridCls =
+    visibleQuickActions.length <= 2
+      ? "grid gap-4 sm:grid-cols-2"
+      : "grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+
   return (
     <div className="space-y-6">
       {/* Stitch owner console header — identity strip */}
@@ -127,8 +154,8 @@ export default async function DashboardPage() {
       {/* Stitch stat-card row */}
       <section aria-labelledby="metrics-heading">
         <h2 id="metrics-heading" className="mb-3 font-heading text-base font-semibold text-text-primary">Metrics</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {statCards.map((card) => {
+        <div className={metricsGridCls}>
+          {visibleStatCards.map((card) => {
             const Icon = card.icon
             const value = stats[card.key] as number
             return (
@@ -154,8 +181,8 @@ export default async function DashboardPage() {
       <section aria-labelledby="actions-heading" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
         <h2 id="actions-heading" className="mb-1 font-heading text-base font-semibold text-text-primary">Quick Actions</h2>
         <p className="mb-4 text-sm text-text-secondary">Jump straight into the task that matters today.</p>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {quickActions.map((action) => {
+        <div className={actionsGridCls}>
+          {visibleQuickActions.map((action) => {
             const Icon = action.icon
             return (
               <Link
