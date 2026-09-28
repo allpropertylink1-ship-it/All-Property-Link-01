@@ -42,10 +42,11 @@ function cardProps(p: ApiProperty, priority: boolean) {
 function FullSkeleton() {
   return (
     <div className="animate-pulse overflow-hidden rounded-xl border border-border bg-surface">
-      <div className="aspect-[4/3] bg-surface-secondary" />
-      <div className="space-y-2 p-4">
+      <div className="aspect-[16/10] bg-surface-secondary" />
+      <div className="space-y-2 p-3.5">
         <div className="h-4 w-2/3 rounded bg-surface-secondary" />
         <div className="h-3 w-1/2 rounded bg-surface-secondary" />
+        <div className="h-3 w-3/4 rounded bg-surface-secondary" />
       </div>
     </div>
   )
@@ -71,8 +72,8 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
 
   return (
     <section aria-labelledby="home-featured-heading" className="bg-surface">
-      <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div className="container mx-auto max-w-7xl px-4 py-10 sm:py-12">
+        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 id="home-featured-heading" className="font-heading text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
               Featured Kenyan Properties
@@ -88,14 +89,14 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
         </div>
         {loading ? (
           <>
-            <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scrollbar-hide lg:hidden" aria-busy="true" aria-label="Loading featured properties">
+            <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scrollbar-hide sm:hidden" aria-busy="true" aria-label="Loading featured properties">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="w-[78%] shrink-0 snap-start sm:w-[45%]">
+                <div key={i} className="w-[80%] shrink-0 snap-start">
                   <FullSkeleton />
                 </div>
               ))}
             </div>
-            <div className="hidden gap-4 lg:grid lg:grid-cols-4" aria-busy="true" aria-label="Loading featured properties">
+            <div className="hidden gap-4 sm:grid sm:grid-cols-2 sm:gap-5 lg:grid-cols-4" aria-busy="true" aria-label="Loading featured properties">
               {Array.from({ length: 8 }).map((_, i) => (
                 <FullSkeleton key={i} />
               ))}
@@ -109,16 +110,16 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
           </p>
         ) : (
           <>
-            {/* Mobile rail: horizontal snap scroll (Stitch mobile home) */}
-            <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide lg:hidden">
+            {/* Mobile rail: horizontal snap scroll (mobile only) */}
+            <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:hidden">
               {properties.map((p, i) => (
-                <div key={p.slug} className="w-[78%] shrink-0 snap-start sm:w-[45%]">
+                <div key={p.slug} className="w-[80%] shrink-0 snap-start">
                   <PropertyCard {...cardProps(p, i === 0)} />
                 </div>
               ))}
             </div>
-            {/* Desktop: 4-column matrix (Stitch desktop home) */}
-            <div className="hidden gap-4 lg:grid lg:grid-cols-4">
+            {/* Tablet: 2-col grid / Desktop: 4-col matrix (2 rows of 4 with 8 listings) */}
+            <div className="hidden gap-4 sm:grid sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
               {properties.map((p, i) => (
                 <PropertyCard key={p.slug} {...cardProps(p, i === 0)} />
               ))}

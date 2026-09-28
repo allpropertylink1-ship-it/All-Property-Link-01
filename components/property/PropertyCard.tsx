@@ -170,9 +170,9 @@ export function PropertyCard({
           </div>
           {hasMultipleUnits ? (
             <p className="font-heading text-base font-semibold text-primary-600 truncate">{unitMixDescription || "Multiple unit types"}</p>
-          ) : (
+          ) : price != null ? (
             <p className="font-heading text-base font-semibold text-primary-600">{formatPrice(price, listingPurpose ?? undefined)}</p>
-          )}
+          ) : null}
         </div>
       </Link>
     );
@@ -181,10 +181,10 @@ export function PropertyCard({
   return (
     <Link
       href={detailHref}
-      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-all duration-300 hover:-translate-y-[3px] hover:shadow-lg"
+      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md"
     >
       <div className="relative w-full overflow-hidden">
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface-secondary">
+        <div className="relative aspect-[16/10] w-full overflow-hidden bg-surface-secondary">
           <div className="absolute inset-0 animate-pulse bg-surface-secondary" aria-hidden="true" />
           <img
             src={imageUrl}
@@ -195,7 +195,7 @@ export function PropertyCard({
             loading={priority ? "eager" : "lazy"}
             decoding={priority ? "sync" : "async"}
             {...lcpAttrs}
-            sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 400px"
+            sizes="(max-width: 640px) 80vw, (max-width: 1024px) 45vw, 280px"
             onLoad={(e) => {
               const p = (e.target as HTMLImageElement).previousElementSibling as HTMLElement | null
               if (p) p.style.display = "none"
@@ -222,7 +222,7 @@ export function PropertyCard({
               <VerifiedIcon />
             </span>
           )}
-          <span className="absolute bottom-2 left-2 z-10 flex max-w-[70%] items-center gap-1 truncate rounded-md bg-white/90 px-2 py-0.5 text-xs font-semibold text-text-primary shadow-sm backdrop-blur-sm">
+          <span className="absolute bottom-2 left-2 z-10 flex max-w-[70%] items-center gap-1 truncate rounded-md bg-white/90 px-2 py-0.5 text-[11px] font-semibold text-text-primary shadow-sm backdrop-blur-sm">
             <MapPinIcon className="h-3 w-3 shrink-0 text-primary" />
             <span className="truncate">
               {region}, {city}
@@ -230,39 +230,39 @@ export function PropertyCard({
           </span>
         </div>
       </div>
-      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-4 min-[375px]:p-5">
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 p-3.5 sm:p-4">
         {hasMultipleUnits ? (
-          <p className="font-heading text-lg font-semibold text-primary-600 truncate">{unitMixDescription || "Multiple unit types"}</p>
-        ) : (
-          <p className="break-words font-heading text-lg font-extrabold tracking-tight text-text-primary min-[375px]:text-xl">
+          <p className="font-heading text-base font-semibold text-primary-600 truncate">{unitMixDescription || "Multiple unit types"}</p>
+        ) : price != null ? (
+          <p className="break-words font-heading text-base font-bold tracking-tight text-text-primary sm:text-lg">
             {formatPrice(price, listingPurpose ?? undefined)}
           </p>
-        )}
-        <h3 className="line-clamp-2 min-w-0 break-words font-heading text-base font-semibold leading-tight text-text-primary transition-colors group-hover:text-accent-600 md:text-lg">
+        ) : null}
+        <h3 className="line-clamp-2 min-w-0 break-words font-heading text-sm font-semibold leading-snug text-text-primary transition-colors group-hover:text-accent-600 sm:text-[15px]">
           {title}
         </h3>
-        <div className="grid grid-cols-3 gap-1 rounded-lg bg-surface-secondary py-1.5 text-center text-xs text-text-secondary">
+        <div className="grid grid-cols-3 gap-1 rounded-lg bg-surface-secondary py-1 text-center text-xs text-text-secondary">
           {bedrooms != null && bedrooms > 0 && (
             <div>
               <span className="block text-[10px] font-semibold uppercase tracking-wide">Beds</span>
-              <span className="font-heading text-sm font-bold text-text-primary">{bedrooms}</span>
+              <span className="font-heading text-[13px] font-bold text-text-primary">{bedrooms}</span>
             </div>
           )}
           {bathrooms != null && bathrooms > 0 && (
             <div>
               <span className="block text-[10px] font-semibold uppercase tracking-wide">Baths</span>
-              <span className="font-heading text-sm font-bold text-text-primary">{bathrooms}</span>
+              <span className="font-heading text-[13px] font-bold text-text-primary">{bathrooms}</span>
             </div>
           )}
           {area != null && area > 0 && (
             <div>
               <span className="block text-[10px] font-semibold uppercase tracking-wide">Area</span>
-              <span className="font-heading text-sm font-bold text-text-primary">{area.toLocaleString()} <span className="text-[10px] font-semibold">sqft</span></span>
+              <span className="font-heading text-[13px] font-bold text-text-primary">{area.toLocaleString()} <span className="text-[10px] font-semibold">sqft</span></span>
             </div>
           )}
           <div>
             <span className="block text-[10px] font-semibold uppercase tracking-wide">Type</span>
-            <span className="font-heading text-sm font-bold capitalize text-text-primary">{propertyType.toLowerCase()}</span>
+            <span className="font-heading text-[13px] font-bold capitalize text-text-primary">{propertyType.toLowerCase()}</span>
           </div>
         </div>
       </div>
