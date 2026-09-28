@@ -66,7 +66,7 @@ const SLIDES: HeroSlide[] = [
 ]
 
 const HERO_CTAS = [
-  { label: "Advertise Property", href: "/list-property" },
+  { label: "Advertise Property", href: "/dashboard/listings/new" },
   { label: "Search Property", href: "/properties" },
   { label: "Find a Fundi", href: "/fundis" },
 ]
@@ -132,8 +132,8 @@ export function HeroSection() {
         <div className="absolute inset-0 z-20 bg-gradient-to-t from-primary-900/80 via-primary-900/25 to-primary-900/40" aria-hidden="true" />
       </div>
 
-      {/* Copy — anchored toward the foot of the hero, clear of the dots */}
-      <div className="absolute inset-0 z-30 mx-auto flex w-full max-w-7xl flex-col justify-end px-4 pb-24 pt-16 sm:px-6 sm:pb-28 lg:px-6">
+      {/* Copy — desktop: left edge matches navbar logo (same max-w-content + px), bottom matches dots (both 32px) */}
+      <div className="absolute inset-0 z-30 mx-auto flex w-full max-w-content flex-col justify-end px-3 pb-24 pt-16 sm:px-4 sm:pb-28 lg:px-6 lg:pb-8">
         <div key={active} className="max-w-3xl animate-[fadeUp_0.5s_ease-out]">
           <p className="font-poppins text-[28px] font-light uppercase leading-[1.25] text-white sm:text-[37px]">
             {slide.eyebrow}
