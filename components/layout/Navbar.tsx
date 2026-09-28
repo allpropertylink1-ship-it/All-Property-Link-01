@@ -11,14 +11,14 @@ import dynamic from "next/dynamic"
 const ClientProfileButton = dynamic(() => import("./ProfileButton").then(mod => mod.ProfileButton), { ssr: false })
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/properties", label: "Properties" },
-  { href: "/airbnbs", label: "Airbnbs" },
-  { href: "/land", label: "Plots & Land" },
-  { href: "/fundis", label: "Fundis" },
-  { href: "/services", label: "Services" },
-  { href: "/aplreps", label: "Reps" },
-  { href: "/about", label: "About" },
+  { href: "/", label: "HOME" },
+  { href: "/properties", label: "PROPERTIES" },
+  { href: "/airbnbs", label: "AIRBNBS" },
+  { href: "/land", label: "PLOTS & LAND" },
+  { href: "/fundis", label: "FUNDIS" },
+  { href: "/services", label: "SERVICES" },
+  { href: "/aplreps", label: "REPS" },
+  { href: "/about", label: "ABOUT" },
 ]
 
 export function Navbar() {
@@ -28,22 +28,47 @@ export function Navbar() {
   const isHome = pathname === "/"
   const isAgent = user?.authMethod === "agent"
   const [mobileOpen, setMobileOpen] = useState(false)
+  // Transparent overlay at the very top of the homepage; solid white once scrolled.
+  const [scrolled, setScrolled] = useState(false)
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : ""
     return () => { document.body.style.overflow = "" }
   }, [mobileOpen])
 
+  useEffect(() => {
+    if (!isHome) {
+      setScrolled(true)
+      return
+    }
+    setScrolled(window.scrollY > 40)
+    const onScroll = () => setScrolled(window.scrollY > 40)
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [isHome, pathname])
+
+  const overlay = isHome && !scrolled
+
   return (
     <>
-      <nav className="sticky top-0 z-50 border-b border-border bg-surface/95 shadow-sm backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-content items-center justify-between gap-2 px-3 sm:gap-4 sm:px-4 lg:h-20 lg:px-6">
-          <Link href="/" className="flex min-w-0 shrink-0 items-center justify-center gap-2 leading-none">
+      <nav
+        className={
+          isHome
+            ? `fixed left-0 right-0 top-0 z-50 font-poppins transition-all duration-300 ${
+                overlay
+                  ? "border-b border-transparent bg-transparent"
+                  : "border-b border-border bg-surface/95 shadow-sm backdrop-blur-md"
+              }`
+            : "sticky top-0 z-50 border-b border-border bg-surface/95 font-poppins shadow-sm backdrop-blur-md"
+        }
+      >
+        <div className="mx-auto flex h-16 max-w-content items-center justify-between gap-2 px-3 sm:gap-4 sm:px-4 lg:h-[76px] lg:px-6">
+          <Link href="/" className="flex min-w-0 shrink-0 items-center justify-center gap-2 leading-none" aria-label="All Property Link home">
             <Image
               src="/logos/logo-mark.png"
               alt="All Property Link"
               width={120}
               height={120}
-              className="h-8 w-auto sm:h-9"
+              className="h-8 w-auto transition-all duration-300 sm:h-9"
               priority
             />
             <Image
@@ -51,13 +76,13 @@ export function Navbar() {
               alt="All Property Link"
               width={300}
               height={60}
-              className="hidden h-7 w-auto min-[400px]:block sm:h-9"
+              className="hidden h-7 w-auto transition-all duration-300 min-[400px]:block sm:h-9"
               priority
             />
           </Link>
 
           {/* Desktop navigation */}
-          <div className="hidden items-center gap-6 md:flex">
+          <div className="hidden items-center gap-4 font-poppins xl:flex xl:gap-6">
             {navLinks.map((link) => {
               const active = isActive(link.href);
               return (
@@ -66,8 +91,10 @@ export function Navbar() {
                   href={link.href}
                   aria-current={active ? "page" : undefined}
                   className={active
-                    ? "border-b-2 border-primary py-1 text-sm font-bold text-primary transition-colors"
-                    : "py-1 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"}
+                    ? "border-b-2 border-primary py-1 text-[14px] font-bold tracking-[2.1px] text-primary transition-colors"
+                    : overlay
+                      ? "py-1 text-[14px] font-normal tracking-[2.1px] text-white transition-colors hover:text-white/75"
+                      : "py-1 text-[14px] font-normal tracking-[2.1px] text-text-secondary transition-colors hover:text-text-primary"}
                 >
                   {link.label}
                 </Link>
@@ -85,25 +112,36 @@ export function Navbar() {
           </div>
 
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
-            <ClientProfileButton />
-            {/* Mobile hamburger - only on home page, far right */}
-            {isHome && (
-              <button
+            {user ? (
+              <ClientProfileButton />
+            ) : (
+              <Link
+                href="/auth"
+                className={`hidden min-h-touch items-center rounded px-5 py-2 font-poppins text-[14px] font-light tracking-[0.7px] text-white transition-all duration-300 md:inline-flex ${
+                  overlay ? "bg-transparent" : "bg-primary shadow-sm hover:bg-primary-600"
+                }`}
+              >
+                Log in / Join APL
+              </Link>
+            )}
+            {/* Hamburger - visible whenever the desktop link row is hidden */}
+            <button
                 type="button"
-                className="touch-target flex h-11 w-11 items-center justify-center rounded-lg border border-transparent hover:bg-surface-secondary lg:hidden"
+                className={`touch-target flex h-11 w-11 items-center justify-center rounded-lg border border-transparent transition-colors xl:hidden ${
+                  overlay ? "text-white hover:bg-white/10" : "hover:bg-surface-secondary"
+                }`}
                 onClick={() => setMobileOpen(!mobileOpen)}
                 aria-label={mobileOpen ? "Close menu" : "Open menu"}
                 aria-expanded={mobileOpen}
               >
                 {mobileOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
-            )}
           </div>
         </div>
       </nav>
-      {/* Mobile navigation - compact dropdown up to About, translucent */}
+      {/* Mobile navigation - compact dropdown, translucent */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden">
+        <div className="fixed inset-0 z-[60] xl:hidden">
           <button type="button" aria-label="Close menu" className="absolute inset-0 bg-black/20" onClick={() => setMobileOpen(false)} />
           <div className="absolute right-4 top-[calc(4rem+env(safe-area-inset-top))] max-h-[calc(100dvh-5rem)] w-full max-w-[85vw] sm:w-64 overflow-y-auto rounded-2xl bg-white border border-border shadow-2xl">
             <div className="flex h-12 items-center justify-between px-4 border-b border-border">
@@ -134,7 +172,7 @@ export function Navbar() {
                   </Link>
                 );
               })}
-              {isAgent && (
+              {isAgent ? (
                 <Link
                   href="/dashboard/agent"
                   onClick={() => setMobileOpen(false)}
@@ -142,6 +180,14 @@ export function Navbar() {
                 >
                   <Briefcase size={18} />
                   Agent Dashboard
+                </Link>
+              ) : (
+                <Link
+                  href="/auth"
+                  onClick={() => setMobileOpen(false)}
+                  className="mt-2 flex items-center justify-center gap-2 rounded bg-primary px-3 py-3 font-poppins text-[15px] font-bold text-white shadow-sm"
+                >
+                  Log in / Join APL
                 </Link>
               )}
             </nav>
