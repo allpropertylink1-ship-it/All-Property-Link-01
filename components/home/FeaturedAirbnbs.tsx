@@ -9,6 +9,11 @@ interface ApiProperty extends LatestListCardData {
   currency: string
   isFeatured: boolean
   createdAt: string | Date
+  agent?: { phone?: string | null } | null
+}
+
+function withPhone(p: ApiProperty): LatestListCardData {
+  return { ...p, agentPhone: p.agent?.phone ?? null }
 }
 
 export function FeaturedAirbnbs({ initialData, error: initialError }: { initialData?: ApiProperty[]; error?: string | null }) {
@@ -42,14 +47,14 @@ export function FeaturedAirbnbs({ initialData, error: initialError }: { initialD
             <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide lg:hidden">
               {properties.map((p, i) => (
                 <div key={p.slug} className="w-[78%] shrink-0 snap-start sm:w-[45%]">
-                  <LatestListCard item={p} priority={i === 0} />
+                  <LatestListCard item={withPhone(p)} priority={i === 0} />
                 </div>
               ))}
             </div>
             {/* Desktop: 2 columns x 3 rows */}
             <div className="hidden gap-6 lg:grid lg:grid-cols-2">
               {properties.map((p, i) => (
-                <LatestListCard key={p.slug} item={p} priority={i === 0} />
+                <LatestListCard key={p.slug} item={withPhone(p)} priority={i === 0} />
               ))}
             </div>
           </>

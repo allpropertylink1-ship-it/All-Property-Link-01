@@ -8,9 +8,14 @@ import { FeaturedAirbnbs } from "@/components/home/FeaturedAirbnbs"
 import { FeaturedFundis } from "@/components/home/FeaturedFundis"
 import { FeaturedProviders } from "@/components/home/FeaturedProviders"
 import { CTASection } from "@/components/home/CTASection"
-import { LatestListCard } from "@/components/home/LatestListCard"
+import { LatestListCard, type LatestListCardData } from "@/components/home/LatestListCard"
 import type { PropertyCard as PropertyCardType } from "@/lib/services/property"
 import type { ProfileRow } from "@/components/home/ProfileCard"
+
+function withPhone(p: PropertyCardType): LatestListCardData {
+  const agent = (p as unknown as { agent?: { phone?: string | null } | null }).agent
+  return { ...p, agentPhone: agent?.phone ?? null }
+}
 
 function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
   const properties = (initialData || []).slice(0, 6)
@@ -33,17 +38,17 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
         {/* Mobile + tablet rail: horizontal snap scroll */}
         <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide lg:hidden">
           {properties.map((p, i) => (
-            <div key={p.slug} className="w-[78%] shrink-0 snap-start sm:w-[45%]">
-              <LatestListCard item={p} priority={i === 0} />
+                <div key={p.slug} className="w-[78%] shrink-0 snap-start sm:w-[45%]">
+                  <LatestListCard item={withPhone(p)} priority={i === 0} />
+                </div>
+          ))}
+        </div>
+            {/* Desktop: 2 columns x 3 rows */}
+            <div className="hidden gap-6 lg:grid lg:grid-cols-2">
+              {properties.map((p, i) => (
+                <LatestListCard key={p.slug} item={withPhone(p)} priority={i === 0} />
+              ))}
             </div>
-          ))}
-        </div>
-        {/* Desktop: 2 columns x 3 rows */}
-        <div className="hidden gap-6 lg:grid lg:grid-cols-2">
-          {properties.map((p, i) => (
-            <LatestListCard key={p.slug} item={p} priority={i === 0} />
-          ))}
-        </div>
       </div>
     </section>
   )

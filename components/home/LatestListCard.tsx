@@ -22,6 +22,7 @@ export interface LatestListCardData {
   area?: number | null
   images: unknown
   coverImage?: string | null
+  agentPhone?: string | null
 }
 
 function purposeLabel(purpose: string | null | undefined): string | null {
@@ -55,9 +56,10 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
   const detailHref = `${isLand ? "/land" : "/properties"}/${slugifyCity(item.city || "kenya")}/${item.slug}`
   const purpose = purposeLabel(item.listingPurpose ?? null)
   const safeActive = Math.min(active, slides.length - 1)
+  const callHref = item.agentPhone && item.agentPhone.trim() ? `tel:${item.agentPhone.trim()}` : detailHref
 
   return (
-    <div className="flex flex-col overflow-hidden rounded border-[1.25px] border-[#E5E7EB] bg-white font-poppins transition-shadow duration-300 hover:shadow-[0_4px_6px_-1px_rgb(0,0,0/0.1),0_2px_4px_-2px_rgb(0,0,0/0.1)] lg:flex-row">
+    <div className="flex flex-col overflow-hidden rounded border border-[#E5E7EB] bg-white font-poppins transition-shadow duration-300 hover:shadow-[0_4px_6px_-1px_rgb(0,0,0/0.1),0_2px_4px_-2px_rgb(0,0,0/0.1)] lg:flex-row lg:border-[1.25px]">
       {/* Image carousel */}
       <div className="relative h-[200px] w-full shrink-0 overflow-hidden bg-[#F3F4F6] lg:h-[200px] lg:w-[200px]">
         {slides.map((src, i) => (
@@ -113,13 +115,13 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
       </div>
 
       {/* Details */}
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-4">
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-3">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="rounded bg-[#F3F4F6] px-3 py-1 font-poppins text-[12px] font-semibold capitalize text-[#1F2937]">
+          <span className="rounded bg-[#F3F4F6] px-3 py-1 font-poppins text-[12px] font-semibold capitalize leading-4 text-[#1F2937]">
             {(item.propertyType || "").toLowerCase()}
           </span>
           {purpose && (
-            <span className="rounded bg-[#F97316] px-3 py-1 font-poppins text-[12px] font-semibold text-white">
+            <span className="rounded bg-[#F97316] px-3 py-1 font-poppins text-[12px] font-semibold leading-4 text-white">
               {purpose}
             </span>
           )}
@@ -160,18 +162,18 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
           </span>
         </p>
         <div className="mt-1 flex items-center justify-end gap-2">
-          <Link
-            href={detailHref}
+          <a
+            href={callHref}
             aria-label={`Call about ${item.title}`}
-            className="inline-flex h-[26px] items-center gap-1 rounded border-[1.25px] border-[#B3AED5] bg-white px-3 font-poppins text-[12px] font-medium text-[#5A5991] transition-colors hover:bg-[#F3F4F6]"
+            className="inline-flex h-[26px] items-center gap-1 rounded border border-[#B3AED5] bg-white px-3 font-poppins text-[12px] font-medium leading-4 text-[#5A5991] transition-colors hover:bg-[#F3F4F6] lg:border-[1.25px]"
           >
             <Phone size={12} aria-hidden="true" />
             Call
-          </Link>
+          </a>
           <Link
             href={detailHref}
             aria-label={`Email about ${item.title}`}
-            className="inline-flex h-[26px] items-center gap-1 rounded border-[1.25px] border-[#B3AED5] bg-white px-3 font-poppins text-[12px] font-medium text-[#5A5991] transition-colors hover:bg-[#F3F4F6]"
+            className="inline-flex h-[26px] items-center gap-1 rounded border border-[#B3AED5] bg-white px-3 font-poppins text-[12px] font-medium leading-4 text-[#5A5991] transition-colors hover:bg-[#F3F4F6] lg:border-[1.25px]"
           >
             <Mail size={12} aria-hidden="true" />
             Email
