@@ -23,6 +23,7 @@ export interface LatestListCardData {
   images: unknown
   coverImage?: string | null
   agentPhone?: string | null
+  listerKind?: "OWNER" | "AGENT" | null
 }
 
 function purposeLabel(purpose: string | null | undefined): string | null {
@@ -123,6 +124,16 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
           {purpose && (
             <span className="rounded bg-[#F97316] px-3 py-1 font-poppins text-[12px] font-semibold leading-4 text-white">
               {purpose}
+            </span>
+          )}
+          {item.listerKind === "OWNER" && (
+            <span className="rounded bg-primary px-3 py-1 font-poppins text-[12px] font-semibold leading-4 text-white">
+              Owner
+            </span>
+          )}
+          {item.listerKind === "AGENT" && (
+            <span className="rounded bg-[#1F2937] px-3 py-1 font-poppins text-[12px] font-semibold leading-4 text-white">
+              Agent
             </span>
           )}
         </div>

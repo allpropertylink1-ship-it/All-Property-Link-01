@@ -13,8 +13,10 @@ import type { PropertyCard as PropertyCardType } from "@/lib/services/property"
 import type { ProfileRow } from "@/components/home/ProfileCard"
 
 function withPhone(p: PropertyCardType): LatestListCardData {
-  const agent = (p as unknown as { agent?: { phone?: string | null } | null }).agent
-  return { ...p, agentPhone: agent?.phone ?? null }
+  const agent = (p as unknown as { agent?: { phone?: string | null; userTypes?: string[] | null } | null }).agent
+  const types = agent?.userTypes ?? []
+  const listerKind = types.includes("AGENT") ? "AGENT" : types.includes("PROPERTY_OWNER") ? "OWNER" : null
+  return { ...p, agentPhone: agent?.phone ?? null, listerKind }
 }
 
 function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
