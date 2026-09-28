@@ -3,7 +3,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { CookieConsent } from "@/components/shared/CookieConsent";
-import { Footer } from "@/components/layout/Footer";
+import { ConditionalFooter } from "@/components/layout/ConditionalFooter";
 import { AuthProvider } from "@/lib/auth-context";
 import { siteUrl } from "@/lib/seo";
 import { getSiteStatus } from "@/lib/services/status";
@@ -73,7 +73,7 @@ export default async function RootLayout({
           <main className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6">{inMaintenance ? <MaintenanceNotice title={status?.maintenanceTitle} message={status?.maintenanceMessage} /> : children}</main>
           <CookieConsent />
           <BottomNav />
-          {!isAuthRoute && <Footer />}
+          <ConditionalFooter />
         </AuthProvider>
         <PWAInstallPrompt />
         <script
