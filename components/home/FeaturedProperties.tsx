@@ -54,17 +54,19 @@ function FullSkeleton() {
 
 export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[] }) {
   const [properties, setProperties] = useState<ApiProperty[]>(
-    (initialData || []).filter(isSaleOrRent)
+    (initialData || []).filter(isSaleOrRent).slice(0, 8)
   )
   const [loading, setLoading] = useState(!initialData)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (initialData) return
-    fetch("/api/properties?limit=8")
+    // Source HOUSE directly: unfiltered fetch returns mostly LAND, which this
+    // section filters out (leaving a near-empty grid). 632 HOUSE live.
+    fetch("/api/properties?type=HOUSE&limit=12")
       .then((r) => { if (!r.ok) throw new Error(`Status ${r.status}`); return r.json() })
       .then((data: { properties: ApiProperty[] }) => {
-        setProperties((data.properties || []).filter(isSaleOrRent))
+        setProperties((data.properties || []).filter(isSaleOrRent).slice(0, 8))
         setLoading(false)
       })
       .catch((e) => { setError(e.message); setLoading(false) })

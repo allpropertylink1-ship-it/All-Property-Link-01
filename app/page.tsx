@@ -20,7 +20,9 @@ export default async function HomePage() {
   // Server-side fetches cached by ISR (revalidate: 60) — embedded in HTML so
   // the browser renders cards immediately instead of a client-side waterfall.
   const [saleRent, airbnbs, land, fundis, providers] = await Promise.all([
-    getProperties({ pageSize: 8 }),
+    // NOTE: unfiltered fetch returns mostly LAND (seed-heavy), which this
+    // section filters out — so source HOUSE directly (632 live) to fill 2 rows.
+    getProperties({ propertyType: "HOUSE", pageSize: 12 }),
     getProperties({ purpose: "FOR_RENT_SHORT_TERM", pageSize: 8 }),
     getProperties({ propertyType: "LAND", pageSize: 8 }),
     getServiceListings({ type: "FUNDI", limit: "6" }),
