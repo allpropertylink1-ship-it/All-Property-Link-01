@@ -8,21 +8,20 @@ import { FeaturedAirbnbs } from "@/components/home/FeaturedAirbnbs"
 import { FeaturedFundis } from "@/components/home/FeaturedFundis"
 import { FeaturedProviders } from "@/components/home/FeaturedProviders"
 import { CTASection } from "@/components/home/CTASection"
-import { PropertyCard } from "@/components/property/PropertyCard"
+import { LatestListCard } from "@/components/home/LatestListCard"
 import type { PropertyCard as PropertyCardType } from "@/lib/services/property"
 import type { ProfileRow } from "@/components/home/ProfileCard"
 
 function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
-  if (!initialData || initialData.length === 0) return null
+  const properties = (initialData || []).slice(0, 6)
+  if (properties.length === 0) return null
   return (
     <section aria-labelledby="home-land-heading" className="bg-surface">
-      <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 id="home-land-heading" className="font-heading text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
-              Prime Land &amp; Development Plots
-            </h2>
-          </div>
+      <div className="mx-auto max-w-7xl px-6 py-20">
+        <h2 id="home-land-heading" className="font-poppins text-[40px] font-normal leading-10 tracking-[-1px] text-text-primary">
+          Prime Land &amp; Development Plots
+        </h2>
+        <div className="mb-10 mt-8 flex items-center justify-end">
           <Link
             href="/land"
             className="inline-flex min-h-touch shrink-0 items-center gap-1.5 text-sm font-bold text-primary transition-colors hover:text-accent-600"
@@ -31,51 +30,18 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
             <ArrowRight size={18} aria-hidden="true" />
           </Link>
         </div>
-        {/* Mobile rail: horizontal snap scroll */}
-        <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide lg:hidden">
-          {initialData.map((p, i) => (
+        {/* Mobile + tablet rail: horizontal snap scroll */}
+        <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide lg:hidden">
+          {properties.map((p, i) => (
             <div key={p.slug} className="w-[78%] shrink-0 snap-start sm:w-[45%]">
-              <PropertyCard
-                slug={p.slug}
-                title={p.title}
-                price={p.price == null ? null : Number(p.price)}
-                currency={p.currency}
-                propertyType={p.propertyType}
-                listingPurpose={p.listingPurpose}
-                city={p.city}
-                region={p.region}
-                images={p.images}
-                coverImage={p.coverImage ?? null}
-                isFeatured={p.isFeatured}
-                bedrooms={p.bedrooms}
-                bathrooms={p.bathrooms}
-                area={p.area}
-                priority={i === 0}
-              />
+              <LatestListCard item={p} priority={i === 0} />
             </div>
           ))}
         </div>
-        {/* Desktop: 4-column matrix (matches Featured Kenyan Properties) */}
-        <div className="hidden gap-4 lg:grid lg:grid-cols-4">
-          {initialData.map((p, i) => (
-            <PropertyCard
-              key={p.slug}
-              slug={p.slug}
-              title={p.title}
-              price={p.price == null ? null : Number(p.price)}
-              currency={p.currency}
-              propertyType={p.propertyType}
-              listingPurpose={p.listingPurpose}
-              city={p.city}
-              region={p.region}
-              images={p.images}
-              coverImage={p.coverImage ?? null}
-              isFeatured={p.isFeatured}
-              bedrooms={p.bedrooms}
-              bathrooms={p.bathrooms}
-              area={p.area}
-              priority={i === 0}
-            />
+        {/* Desktop: 2 columns x 3 rows */}
+        <div className="hidden gap-6 lg:grid lg:grid-cols-2">
+          {properties.map((p, i) => (
+            <LatestListCard key={p.slug} item={p} priority={i === 0} />
           ))}
         </div>
       </div>

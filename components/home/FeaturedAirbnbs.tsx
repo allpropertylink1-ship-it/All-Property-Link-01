@@ -1,77 +1,27 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import Link from "next/link"
 import { ArrowRight } from "@/components/ui/icons"
 import { FormBanner } from "@/components/shared/FormFeedback"
-import { PropertyCard } from "@/components/property/PropertyCard"
+import { LatestListCard, type LatestListCardData } from "@/components/home/LatestListCard"
 
-interface ApiProperty {
-  slug: string; title: string; price: number | null; currency: string;
-  propertyType: string; listingPurpose: string | null;
-  city: string; region: string; images: unknown; coverImage?: string | null; thumbUrl?: string | null;
-  bedrooms?: number | null; bathrooms?: number | null; area?: number | null;
-  isFeatured: boolean; createdAt: string | Date;
+interface ApiProperty extends LatestListCardData {
+  currency: string
+  isFeatured: boolean
+  createdAt: string | Date
 }
 
-function FullSkeleton() {
-  return (
-    <div className="animate-pulse overflow-hidden rounded-xl border border-border bg-surface">
-      <div className="aspect-[4/3] bg-surface-secondary" />
-      <div className="space-y-2 p-4">
-        <div className="h-4 w-2/3 rounded bg-surface-secondary" />
-        <div className="h-3 w-1/2 rounded bg-surface-secondary" />
-      </div>
-    </div>
-  )
-}
-
-function cardProps(p: ApiProperty, priority: boolean) {
-  return {
-    slug: p.slug,
-    title: p.title,
-    price: p.price == null ? null : Number(p.price),
-    currency: p.currency,
-    propertyType: p.propertyType,
-    listingPurpose: p.listingPurpose,
-    city: p.city,
-    region: p.region,
-    images: p.images,
-    coverImage: p.coverImage ?? null,
-    thumbUrl: p.thumbUrl ?? null,
-    isFeatured: p.isFeatured,
-    bedrooms: p.bedrooms ?? null,
-    bathrooms: p.bathrooms ?? null,
-    area: p.area ?? null,
-    priority,
-  }
-}
-
-export function FeaturedAirbnbs({ initialData }: { initialData?: ApiProperty[] }) {
-  const [properties, setProperties] = useState<ApiProperty[]>(initialData || [])
-  const [loading, setLoading] = useState(!initialData)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (initialData) return
-    fetch("/api/properties?purpose=FOR_RENT_SHORT_TERM&limit=8")
-      .then((r) => { if (!r.ok) throw new Error(`Status ${r.status}`); return r.json() })
-      .then((data: { properties: ApiProperty[] }) => {
-        setProperties(data.properties || [])
-        setLoading(false)
-      })
-      .catch((e) => { setError(e.message); setLoading(false) })
-  }, [initialData])
+export function FeaturedAirbnbs({ initialData, error: initialError }: { initialData?: ApiProperty[]; error?: string | null }) {
+  const properties = (initialData || []).slice(0, 6)
+  const error = initialError ?? null
 
   return (
     <section aria-labelledby="home-airbnb-heading" className="bg-surface">
-      <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 id="home-airbnb-heading" className="font-heading text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
-              Featured Airbnbs
-            </h2>
-          </div>
+      <div className="mx-auto max-w-7xl px-6 py-20">
+        <h2 id="home-airbnb-heading" className="font-poppins text-[40px] font-normal leading-10 tracking-[-1px] text-text-primary">
+          Featured Airbnbs
+        </h2>
+        <div className="mb-10 mt-8 flex items-center justify-end">
           <Link
             href="/properties?purpose=FOR_RENT_SHORT_TERM"
             className="inline-flex min-h-touch shrink-0 items-center gap-1.5 text-sm font-bold text-primary transition-colors hover:text-accent-600"
@@ -80,22 +30,7 @@ export function FeaturedAirbnbs({ initialData }: { initialData?: ApiProperty[] }
             <ArrowRight size={18} aria-hidden="true" />
           </Link>
         </div>
-        {loading ? (
-          <>
-            <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scrollbar-hide lg:hidden" aria-busy="true" aria-label="Loading featured airbnbs">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="w-[78%] shrink-0 snap-start sm:w-[45%]">
-                  <FullSkeleton />
-                </div>
-              ))}
-            </div>
-            <div className="hidden gap-4 lg:grid lg:grid-cols-4" aria-busy="true" aria-label="Loading featured airbnbs">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <FullSkeleton key={i} />
-              ))}
-            </div>
-          </>
-        ) : error ? (
+        {error ? (
           <FormBanner variant="error">Could not load featured stays: {error}</FormBanner>
         ) : properties.length === 0 ? (
           <p role="status" className="py-8 text-center text-sm text-text-secondary">
@@ -103,18 +38,18 @@ export function FeaturedAirbnbs({ initialData }: { initialData?: ApiProperty[] }
           </p>
         ) : (
           <>
-            {/* Mobile rail: horizontal snap scroll */}
-            <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide lg:hidden">
+            {/* Mobile + tablet rail: horizontal snap scroll */}
+            <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide lg:hidden">
               {properties.map((p, i) => (
                 <div key={p.slug} className="w-[78%] shrink-0 snap-start sm:w-[45%]">
-                  <PropertyCard {...cardProps(p, i === 0)} />
+                  <LatestListCard item={p} priority={i === 0} />
                 </div>
               ))}
             </div>
-            {/* Desktop: 4-column matrix (matches Featured Kenyan Properties) */}
-            <div className="hidden gap-4 lg:grid lg:grid-cols-4">
+            {/* Desktop: 2 columns x 3 rows */}
+            <div className="hidden gap-6 lg:grid lg:grid-cols-2">
               {properties.map((p, i) => (
-                <PropertyCard key={p.slug} {...cardProps(p, i === 0)} />
+                <LatestListCard key={p.slug} item={p} priority={i === 0} />
               ))}
             </div>
           </>
