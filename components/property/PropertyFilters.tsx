@@ -40,7 +40,7 @@ const TYPE_OPTIONS = [
 
 const BEDROOM_OPTIONS = ["", "1", "2", "3", "4", "5"] as const;
 
-const sectionLabel = "mb-1.5 block text-sm font-semibold text-text-primary";
+const sectionLabel = "mb-1.5 block text-[13px] font-semibold text-text-primary";
 const fieldInput =
   "w-full rounded-lg border border-border bg-surface-secondary text-[16px] text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20";
 
@@ -64,13 +64,13 @@ export function PropertyFilters({
   return (
     <form method="GET" action={basePath} className="flex flex-col gap-4 lg:gap-3">
       <div className="flex items-center justify-between border-b border-border pb-2">
-        <span className="flex items-center gap-2 font-heading text-[15px] font-bold text-text-primary">
+        <span className="flex items-center gap-2 font-heading text-sm font-bold text-text-primary">
           <Filter size={16} />
           Refine Results
         </span>
         <a
           href={basePath}
-          className="inline-flex min-h-[44px] items-center text-sm font-medium text-accent-600 hover:underline lg:min-h-[32px]"
+          className="inline-flex min-h-[44px] items-center text-[13px] font-medium text-accent-600 hover:underline lg:min-h-[32px]"
         >
           Reset All
         </a>
@@ -117,7 +117,7 @@ export function PropertyFilters({
                 type="button"
                 onClick={() => setPurpose(active ? "" : t.value)}
                 aria-pressed={active}
-                className={`min-h-[40px] rounded-md px-1 py-1.5 text-[13px] transition-colors lg:min-h-[32px] ${
+                className={`min-h-[38px] rounded-md px-1 py-1 text-xs transition-colors lg:min-h-[30px] ${
                   active
                     ? "bg-primary font-semibold text-white shadow-sm"
                     : "text-text-secondary hover:text-text-primary"
@@ -142,7 +142,7 @@ export function PropertyFilters({
                 role="radio"
                 aria-checked={active}
                 onClick={() => setType(o.value)}
-                className={`${i === 0 ? "col-span-2" : ""} min-h-[40px] px-2 py-1.5 text-center text-[13px] transition-colors lg:min-h-[32px] ${
+                className={`${i === 0 ? "col-span-2" : ""} min-h-[38px] px-2 py-1 text-center text-xs transition-colors lg:min-h-[30px] ${
                   active
                     ? "rounded-lg bg-primary font-semibold text-white shadow-sm"
                     : "rounded-lg bg-surface-secondary text-text-secondary hover:bg-surface-secondary/60 hover:text-text-primary"
@@ -234,7 +234,7 @@ export function PropertyFilters({
                 type="button"
                 onClick={() => setBeds(b)}
                 aria-pressed={active}
-                className={`min-h-[40px] flex-1 px-1 text-[13px] lg:min-h-[32px] ${
+                className={`min-h-[38px] flex-1 px-1 text-xs lg:min-h-[30px] ${
                   active
                     ? "rounded-lg bg-primary font-semibold text-white"
                     : "rounded-lg bg-surface-secondary text-text-primary hover:bg-surface-secondary/60"
@@ -258,7 +258,7 @@ export function PropertyFilters({
                 <span
                   key={h.label}
                   aria-current="true"
-                  className="inline-flex min-h-[32px] items-center whitespace-nowrap rounded-full bg-primary px-3 text-[13px] font-medium text-white shadow-sm"
+                  className="inline-flex min-h-[30px] items-center whitespace-nowrap rounded-full bg-primary px-2.5 text-xs font-medium text-white shadow-sm lg:min-h-[28px]"
                 >
                   {h.label}
                 </span>
@@ -266,7 +266,7 @@ export function PropertyFilters({
                 <a
                   key={h.label}
                   href={h.href}
-                  className="inline-flex min-h-[32px] items-center whitespace-nowrap rounded-full border border-border bg-surface px-3 text-[13px] font-medium text-text-primary transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
+                  className="inline-flex min-h-[30px] items-center whitespace-nowrap rounded-full border border-border bg-surface px-2.5 text-xs font-medium text-text-primary transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary lg:min-h-[28px]"
                 >
                   {h.label}
                 </a>

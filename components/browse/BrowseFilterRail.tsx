@@ -64,11 +64,11 @@ const ASSET_OPTIONS = [
 
 const BEDROOM_OPTIONS = ["", "1", "2", "3", "4", "5"] as const;
 
-const sectionLabel = "mb-1.5 block text-sm font-semibold text-text-primary";
+const sectionLabel = "mb-1.5 block text-[13px] font-semibold text-text-primary";
 const fieldInput =
   "w-full rounded-lg border border-border bg-surface-secondary text-[16px] text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20";
 const pillOption = (active: boolean) =>
-  `flex items-center justify-center rounded-lg px-2 text-center text-[13px] transition-colors ${
+  `flex items-center justify-center rounded-lg px-2 text-center text-xs transition-colors ${
     active
       ? "bg-primary font-semibold text-white shadow-sm"
       : "bg-surface-secondary text-text-secondary hover:bg-surface-secondary/60 hover:text-text-primary"
@@ -100,7 +100,7 @@ function OptionGrid({
               role="radio"
               aria-checked={active}
               onClick={() => onPick(o.value)}
-              className={`${i === 0 ? "col-span-2" : ""} min-h-[40px] px-2 py-1.5 lg:min-h-[34px] ${pillOption(active)}`}
+              className={`${i === 0 ? "col-span-2" : ""} min-h-[38px] px-2 py-1 lg:min-h-[30px] ${pillOption(active)}`}
             >
               {o.label}
             </button>
@@ -149,14 +149,14 @@ export function BrowseFilterRail({
       }}
     >
       <div className="flex items-center justify-between border-b border-border pb-2">
-        <span className="flex items-center gap-2 font-heading text-[15px] font-bold text-text-primary">
+        <span className="flex items-center gap-2 font-heading text-sm font-bold text-text-primary">
           <Filter size={16} aria-hidden="true" />
           Filter results
         </span>
         <button
           type="button"
           onClick={onReset}
-          className="inline-flex min-h-[44px] items-center text-sm font-medium text-accent-600 hover:underline lg:min-h-[32px]"
+          className="inline-flex min-h-[44px] items-center text-[13px] font-medium text-accent-600 hover:underline lg:min-h-[32px]"
         >
           Reset all
         </button>
@@ -317,7 +317,7 @@ export function BrowseFilterRail({
                   type="button"
                   onClick={() => onBedroomsChange(b)}
                   aria-pressed={active}
-                  className={`min-h-[40px] flex-1 px-1 text-[13px] tabular-nums lg:min-h-[32px] ${pillOption(active)}`}
+                  className={`min-h-[38px] flex-1 px-1 text-xs tabular-nums lg:min-h-[30px] ${pillOption(active)}`}
                 >
                   {b === "" ? "Any" : `${b}+`}
                 </button>
@@ -339,7 +339,7 @@ export function BrowseFilterRail({
                 <span
                   key={h.label}
                   aria-current="true"
-                  className="inline-flex min-h-[32px] items-center whitespace-nowrap rounded-full bg-primary px-3 text-[13px] font-medium text-white shadow-sm"
+                  className="inline-flex min-h-[30px] items-center whitespace-nowrap rounded-full bg-primary px-2.5 text-xs font-medium text-white shadow-sm lg:min-h-[28px]"
                 >
                   {h.label}
                 </span>
@@ -347,7 +347,7 @@ export function BrowseFilterRail({
                 <a
                   key={h.label}
                   href={h.href}
-                  className="inline-flex min-h-[32px] items-center whitespace-nowrap rounded-full border border-border bg-surface px-3 text-[13px] font-medium text-text-primary transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
+                  className="inline-flex min-h-[30px] items-center whitespace-nowrap rounded-full border border-border bg-surface px-2.5 text-xs font-medium text-text-primary transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary lg:min-h-[28px]"
                 >
                   {h.label}
                 </a>
