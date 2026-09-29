@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Poppins } from "next/font/google";
+import { Inter, Sora } from "next/font/google";
 import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { CookieConsent } from "@/components/shared/CookieConsent";
@@ -12,19 +12,13 @@ import { headers } from "next/headers";
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 import "./globals.css";
 
-const sora = Plus_Jakarta_Sans({
+const heading = Sora({
   subsets: ["latin"],
   weight: ["500", "600", "700", "800"],
   variable: "--font-heading",
 });
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-poppins",
-});
-
-const dmSans = Plus_Jakarta_Sans({
+const body = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-body",
@@ -73,7 +67,7 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-title" content="All Property Link" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
-      <body className={`${sora.variable} ${dmSans.variable} ${poppins.variable} flex min-h-[100dvh] flex-col antialiased`}>
+      <body className={`${heading.variable} ${body.variable} flex min-h-[100dvh] flex-col antialiased`}>
         <AuthProvider>
           <Navbar />
           <main className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6">{inMaintenance ? <MaintenanceNotice title={status?.maintenanceTitle} message={status?.maintenanceMessage} /> : children}</main>

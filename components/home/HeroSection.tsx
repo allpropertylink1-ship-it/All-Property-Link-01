@@ -91,7 +91,7 @@ export function HeroSection() {
   return (
     <section
       aria-label="Featured highlights"
-      className="relative -mt-16 h-screen min-h-[600px] w-full overflow-hidden bg-primary-900 font-poppins lg:-mt-[76px]"
+      className="relative -mt-16 h-screen min-h-[600px] w-full overflow-hidden bg-primary-900 font-heading lg:-mt-[76px]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -135,19 +135,19 @@ export function HeroSection() {
       {/* Copy — desktop: left edge matches navbar logo (same max-w-content + px), bottom matches dots (both 32px) */}
       <div className="absolute inset-0 z-30 mx-auto flex w-full max-w-content flex-col justify-end px-3 pb-24 pt-16 sm:px-4 sm:pb-28 lg:px-6 lg:pb-8">
         <div key={active} className="max-w-3xl animate-[fadeUp_0.5s_ease-out]">
-          <p className="font-poppins text-[28px] font-light uppercase leading-[1.25] text-white sm:text-[37px]">
+          <p className="font-heading text-[28px] font-light uppercase leading-[1.25] text-white sm:text-[37px]">
             {slide.eyebrow}
           </p>
-          <h1 className="mt-1 font-poppins text-[40px] font-light uppercase leading-[1.25] text-white drop-shadow-md sm:text-[53px]">
+          <h1 className="mt-1 font-heading text-[40px] font-light uppercase leading-[1.25] text-white drop-shadow-md sm:text-[53px]">
             {slide.title}
           </h1>
-          <p className="mt-4 max-w-xl font-poppins text-[18px] font-light leading-[1.6] text-white sm:text-[20px]">{slide.subtitle}</p>
+          <p className="mt-4 max-w-xl font-heading text-[18px] font-light leading-[1.6] text-white sm:text-[20px]">{slide.subtitle}</p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             {HERO_CTAS.map((cta) => (
               <Link
                 key={cta.href + cta.label}
                 href={cta.href}
-                className="inline-flex min-h-touch items-center justify-center rounded border-[1.25px] border-white bg-black/20 px-6 py-3 font-poppins text-[16px] font-medium tracking-[0.4px] text-white backdrop-blur-[2px] transition-colors hover:bg-white hover:text-primary sm:w-auto"
+                className="inline-flex min-h-touch items-center justify-center rounded border-[1.25px] border-white bg-black/20 px-6 py-3 font-heading text-[16px] font-medium tracking-[0.4px] text-white backdrop-blur-[2px] transition-colors hover:bg-white hover:text-primary sm:w-auto"
               >
                 {cta.label}
               </Link>

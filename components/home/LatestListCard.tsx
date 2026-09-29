@@ -67,7 +67,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
   const callHref = item.agentPhone && item.agentPhone.trim() ? `tel:${item.agentPhone.trim()}` : detailHref
 
   return (
-    <div className="flex flex-col overflow-hidden rounded border border-[#E5E7EB] bg-white font-poppins transition-shadow duration-300 hover:shadow-[0_4px_6px_-1px_rgb(0,0,0/0.1),0_2px_4px_-2px_rgb(0,0,0/0.1)] lg:flex-row lg:border-[1.25px]">
+    <div className="flex flex-col overflow-hidden rounded border border-[#E5E7EB] bg-white font-body transition-shadow duration-300 hover:shadow-[0_4px_6px_-1px_rgb(0,0,0/0.1),0_2px_4px_-2px_rgb(0,0,0/0.1)] lg:flex-row lg:border-[1.25px]">
       {/* Image carousel */}
       <div className="relative h-[200px] w-full shrink-0 overflow-hidden bg-[#F3F4F6] lg:h-[240px] lg:w-[240px]">
         {slides.map((src, i) => (
@@ -89,7 +89,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
           />
         ))}
         {/* Counter */}
-        <span className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 font-poppins text-[12px] font-medium text-white">
+        <span className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 font-body text-[12px] font-medium text-white">
           {safeActive + 1} / {slides.length}
         </span>
         {/* Next arrow */}
@@ -125,34 +125,34 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
       {/* Details */}
       <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-3">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="rounded bg-[#F3F4F6] px-3 py-1 font-poppins text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-[#1F2937]">
+          <span className="rounded bg-[#F3F4F6] px-3 py-1 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-[#1F2937]">
             {item.propertyType || ""}
           </span>
           {purpose && (
-            <span className="rounded bg-[#F97316] px-3 py-1 font-poppins text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
+            <span className="rounded bg-[#F97316] px-3 py-1 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
               {purpose}
             </span>
           )}
           {item.listerKind === "OWNER" && (
-            <span className="rounded bg-primary px-3 py-1 font-poppins text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
+            <span className="rounded bg-primary px-3 py-1 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
               Owner
             </span>
           )}
           {item.listerKind === "AGENT" && (
-            <span className="rounded bg-[#1F2937] px-3 py-1 font-poppins text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
+            <span className="rounded bg-[#1F2937] px-3 py-1 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
               Agent
             </span>
           )}
         </div>
         {item.price != null && (
-          <p className="font-poppins text-[16px] font-bold leading-6 text-primary">
+          <p className="font-body text-[16px] font-bold leading-6 text-primary">
             {formatPrice(item.price, item.listingPurpose ?? undefined)}
           </p>
         )}
-        <Link href={detailHref} className="line-clamp-1 font-poppins text-[14px] font-semibold leading-5 text-[#111827] hover:text-primary">
-          <h3 className="line-clamp-1 font-poppins text-[14px] font-semibold leading-5">{item.title}</h3>
+        <Link href={detailHref} className="line-clamp-1 font-body text-[14px] font-semibold leading-5 text-[#111827] hover:text-primary">
+          <h3 className="line-clamp-1 font-body text-[14px] font-semibold leading-5">{item.title}</h3>
         </Link>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-poppins text-[14px] font-light leading-5 tabular-nums text-[#4B5569]">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[14px] font-light leading-5 tabular-nums text-[#4B5569]">
           {!isNonLiving && (
             <span
               className="inline-flex items-center gap-1.5"
@@ -191,7 +191,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             )}
           </span>
         </div>
-        <p className="flex items-center gap-1.5 font-poppins text-[14px] font-light leading-5 text-[#4B5569]">
+        <p className="flex items-center gap-1.5 font-body text-[14px] font-light leading-5 text-[#4B5569]">
           <IconMapPin size={16} stroke={1.5} aria-hidden="true" className="shrink-0" />
           <span className="truncate">
             {item.city}
@@ -202,7 +202,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
           <a
             href={callHref}
             aria-label={`Call about ${item.title}`}
-            className="inline-flex h-[26px] items-center gap-1 rounded border border-[#B3AED5] bg-white px-3 font-poppins text-[12px] font-medium leading-4 text-[#5A5991] transition-colors hover:bg-[#F3F4F6] lg:border-[1.25px]"
+            className="inline-flex h-[26px] items-center gap-1 rounded border border-[#B3AED5] bg-white px-3 font-body text-[12px] font-medium leading-4 text-[#5A5991] transition-colors hover:bg-[#F3F4F6] lg:border-[1.25px]"
           >
             <IconPhone size={12} stroke={1.5} aria-hidden="true" />
             Call
@@ -210,7 +210,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
           <Link
             href={detailHref}
             aria-label={`Email about ${item.title}`}
-            className="inline-flex h-[26px] items-center gap-1 rounded border border-[#B3AED5] bg-white px-3 font-poppins text-[12px] font-medium leading-4 text-[#5A5991] transition-colors hover:bg-[#F3F4F6] lg:border-[1.25px]"
+            className="inline-flex h-[26px] items-center gap-1 rounded border border-[#B3AED5] bg-white px-3 font-body text-[12px] font-medium leading-4 text-[#5A5991] transition-colors hover:bg-[#F3F4F6] lg:border-[1.25px]"
           >
             <IconMail size={12} stroke={1.5} aria-hidden="true" />
             Email

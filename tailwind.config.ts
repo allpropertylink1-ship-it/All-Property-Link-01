@@ -83,7 +83,7 @@ const config: Config = {
       fontFamily: {
         heading: ["var(--font-heading)", "system-ui", "sans-serif"],
         body: ["var(--font-body)", "system-ui", "sans-serif"],
-        poppins: ["var(--font-poppins)", "system-ui", "sans-serif"],
+        poppins: ["var(--font-heading)", "system-ui", "sans-serif"],
       },
       fontSize: {
         xs: ["0.75rem", { lineHeight: "1rem" }],

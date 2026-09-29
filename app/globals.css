@@ -25,8 +25,8 @@
   }
 
   :root {
-    --font-heading: "Plus Jakarta Sans", system-ui, sans-serif;
-    --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
+    --font-heading: "Sora", system-ui, sans-serif;
+    --font-body: "Inter", system-ui, sans-serif;
 
     --color-bg: #FAFAFA;
     --color-surface: #FFFFFF;
