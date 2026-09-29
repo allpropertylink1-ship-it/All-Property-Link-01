@@ -32,7 +32,7 @@ function isSaleOrRent(p: ApiProperty) {
 function FullSkeleton() {
   return (
     <div className="animate-pulse overflow-hidden rounded border-[1.25px] border-[#E5E7EB] bg-white">
-      <div className="aspect-square w-full bg-surface-secondary" />
+      <div className="h-[200px] w-full bg-surface-secondary" />
       <div className="space-y-2 p-4">
         <div className="h-4 w-2/3 rounded bg-surface-secondary" />
         <div className="h-3 w-1/2 rounded bg-surface-secondary" />
@@ -89,7 +89,7 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
                 </div>
               ))}
             </div>
-            <div className="hidden gap-4 lg:grid lg:grid-cols-3" aria-busy="true" aria-label="Loading latest properties">
+            <div className="hidden gap-4 lg:grid lg:grid-cols-2" aria-busy="true" aria-label="Loading latest properties">
               {Array.from({ length: 6 }).map((_, i) => (
                 <FullSkeleton key={i} />
               ))}
@@ -111,8 +111,8 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
                 </div>
               ))}
             </div>
-            {/* Desktop: 3 columns x 2 rows — keeps square images compact */}
-            <div className="hidden gap-4 lg:grid lg:grid-cols-3">
+            {/* Desktop: 2 columns x 3 rows */}
+            <div className="hidden gap-4 lg:grid lg:grid-cols-2">
               {properties.map((p, i) => (
                 <LatestListCard key={p.slug} item={withPhone(p)} priority={i === 0} />
               ))}

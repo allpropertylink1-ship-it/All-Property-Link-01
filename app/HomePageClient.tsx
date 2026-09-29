@@ -49,8 +49,8 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
                 </div>
           ))}
         </div>
-            {/* Desktop: 3 columns x 2 rows — keeps square images compact */}
-            <div className="hidden gap-4 lg:grid lg:grid-cols-3">
+            {/* Desktop: 2 columns x 3 rows */}
+            <div className="hidden gap-4 lg:grid lg:grid-cols-2">
               {properties.map((p, i) => (
                 <LatestListCard key={p.slug} item={withPhone(p)} priority={i === 0} />
               ))}

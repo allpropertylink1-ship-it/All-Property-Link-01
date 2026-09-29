@@ -42,10 +42,9 @@ function HeartIcon({ filled }: { filled: boolean }) {
 }
 
 /**
- * Homepage list card: vertical everywhere, square (1:1) full-bleed cover up
- * top for a larger viewing estate on desktop, same geometry in mobile rails
- * so one card fills the viewport. Cover photo first, arrow + dots + counter
- * carousel, KES-only price, no agent row.
+ * PurpleRoof-geometry list card: horizontal (image left + details right) on
+ * desktop, vertical (image top) on mobile rails. Cover photo first, arrow +
+ * dots + counter carousel, KES-only price, no agent row.
  */
 export function LatestListCard({ item, priority = false }: { item: LatestListCardData; priority?: boolean }) {
   const gallery = getGalleryImages({ coverImage: item.coverImage, images: item.images }).slice(0, 5)
@@ -61,9 +60,9 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
   const callHref = item.agentPhone && item.agentPhone.trim() ? `tel:${item.agentPhone.trim()}` : detailHref
 
   return (
-    <div className="flex flex-col overflow-hidden rounded border border-[#E5E7EB] bg-white font-poppins transition-shadow duration-300 hover:shadow-[0_4px_6px_-1px_rgb(0,0,0/0.1),0_2px_4px_-2px_rgb(0,0,0/0.1)] lg:border-[1.25px]">
-      {/* Image carousel — square 1:1 for maximum viewing estate */}
-      <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-[#F3F4F6]">
+    <div className="flex flex-col overflow-hidden rounded border border-[#E5E7EB] bg-white font-poppins transition-shadow duration-300 hover:shadow-[0_4px_6px_-1px_rgb(0,0,0/0.1),0_2px_4px_-2px_rgb(0,0,0/0.1)] lg:flex-row lg:border-[1.25px]">
+      {/* Image carousel */}
+      <div className="relative h-[200px] w-full shrink-0 overflow-hidden bg-[#F3F4F6] lg:h-[200px] lg:w-[200px]">
         {slides.map((src, i) => (
           <img
             key={`${src}-${i}`}
