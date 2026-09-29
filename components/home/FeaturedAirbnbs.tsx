@@ -29,11 +29,11 @@ export function FeaturedAirbnbs({ initialData, error: initialError }: { initialD
 
   return (
     <section aria-labelledby="home-airbnb-heading" className="bg-surface">
-      <div className="mx-auto max-w-7xl px-6 py-20">
-        <h2 id="home-airbnb-heading" className="font-poppins text-[40px] font-normal leading-10 tracking-[-1px] text-text-primary">
-          Featured Airbnbs
-        </h2>
-        <div className="mb-10 mt-8 flex items-center justify-end">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <h2 id="home-airbnb-heading" className="font-poppins text-[28px] font-semibold leading-tight tracking-tight text-text-primary sm:text-[32px]">
+            Featured Airbnbs
+          </h2>
           <Link
             href="/properties?purpose=FOR_RENT_SHORT_TERM"
             className="inline-flex min-h-touch shrink-0 items-center gap-1.5 text-sm font-bold text-primary transition-colors hover:text-accent-600"
@@ -59,7 +59,7 @@ export function FeaturedAirbnbs({ initialData, error: initialError }: { initialD
               ))}
             </div>
             {/* Desktop: 2 columns x 3 rows */}
-            <div className="hidden gap-6 lg:grid lg:grid-cols-2">
+            <div className="hidden gap-4 lg:grid lg:grid-cols-2">
               {properties.map((p, i) => (
                 <LatestListCard key={p.slug} item={withPhone(p)} priority={i === 0} />
               ))}

@@ -14,7 +14,7 @@ export function CTASection() {
   const listHref = user ? "/dashboard/listings/new" : "/auth/login"
   return (
     <section aria-labelledby="home-cta-heading" className="bg-surface">
-      <div className="container mx-auto max-w-7xl px-4 pb-12 sm:pb-16">
+      <div className="container mx-auto max-w-7xl px-4 pb-6 sm:px-6 sm:pb-8">
         <div className="relative overflow-hidden rounded-xl bg-primary p-6 shadow-xl sm:p-10">
           {/* Ambient decorative shapes */}
           <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -right-20 h-96 w-96 rounded-full bg-white/5 blur-3xl" />

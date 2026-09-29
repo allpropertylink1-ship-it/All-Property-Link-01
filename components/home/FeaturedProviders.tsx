@@ -77,8 +77,8 @@ export function FeaturedProviders({ initialData }: { initialData?: ProfileRow[] 
 
   return (
     <section aria-labelledby="home-providers-heading" className="bg-surface">
-      <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div className="container mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 id="home-providers-heading" className="font-heading text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
               Service Providers
