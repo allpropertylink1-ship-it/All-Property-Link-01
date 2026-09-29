@@ -118,21 +118,21 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
       {/* Details */}
       <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-3">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="rounded bg-[#F3F4F6] px-3 py-1 font-poppins text-[12px] font-semibold capitalize leading-4 text-[#1F2937]">
-            {(item.propertyType || "").toLowerCase()}
+          <span className="rounded bg-[#F3F4F6] px-3 py-1 font-poppins text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-[#1F2937]">
+            {item.propertyType || ""}
           </span>
           {purpose && (
-            <span className="rounded bg-[#F97316] px-3 py-1 font-poppins text-[12px] font-semibold leading-4 text-white">
+            <span className="rounded bg-[#F97316] px-3 py-1 font-poppins text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
               {purpose}
             </span>
           )}
           {item.listerKind === "OWNER" && (
-            <span className="rounded bg-primary px-3 py-1 font-poppins text-[12px] font-semibold leading-4 text-white">
+            <span className="rounded bg-primary px-3 py-1 font-poppins text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
               Owner
             </span>
           )}
           {item.listerKind === "AGENT" && (
-            <span className="rounded bg-[#1F2937] px-3 py-1 font-poppins text-[12px] font-semibold leading-4 text-white">
+            <span className="rounded bg-[#1F2937] px-3 py-1 font-poppins text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
               Agent
             </span>
           )}
@@ -145,7 +145,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
         <Link href={detailHref} className="line-clamp-1 font-poppins text-[14px] font-semibold leading-5 text-[#111827] hover:text-primary">
           <h3 className="line-clamp-1 font-poppins text-[14px] font-semibold leading-5">{item.title}</h3>
         </Link>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-poppins text-[14px] font-normal leading-5 text-[#4B5569]">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-poppins text-[14px] font-light leading-5 text-[#4B5569]">
           {item.bedrooms != null && item.bedrooms > 0 && (
             <span className="inline-flex items-center gap-1">
               <BedDouble size={14} aria-hidden="true" />
@@ -165,7 +165,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             </span>
           )}
         </div>
-        <p className="flex items-center gap-1 font-poppins text-[14px] font-normal leading-5 text-[#4B5569]">
+        <p className="flex items-center gap-1 font-poppins text-[14px] font-light leading-5 text-[#4B5569]">
           <MapPin size={14} aria-hidden="true" className="shrink-0" />
           <span className="truncate">
             {item.city}
