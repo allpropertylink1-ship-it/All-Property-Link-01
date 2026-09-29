@@ -11,6 +11,13 @@ import MaintenanceNotice from "@/components/shared/MaintenanceNotice";
 import { headers } from "next/headers";
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 import "./globals.css";
+// Bundle Font Awesome core CSS at build time and disable runtime injection —
+// otherwise icon sizing arrives after first paint and giant unstyled SVGs
+// flash on every page load.
+import { config as faConfig } from "@fortawesome/fontawesome-svg-core";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+
+faConfig.autoAddCss = false;
 
 const sora = Plus_Jakarta_Sans({
   subsets: ["latin"],
