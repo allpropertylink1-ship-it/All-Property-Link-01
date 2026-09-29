@@ -9,6 +9,7 @@ import {
   Briefcase,
   Building2,
   Bell,
+  Star,
   User,
   Menu,
   X,
@@ -31,6 +32,7 @@ function getSecondaryNav(canProperties: boolean, canServices: boolean): NavLink[
   return [
     ...(canProperties ? [{ href: "/dashboard/listings", label: "My Listings", icon: Building2 }] : []),
     ...(canServices ? [{ href: "/dashboard/services", label: "My Services", icon: Building2 }] : []),
+    { href: "/dashboard/reviews", label: "Reviews", icon: Star },
     { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
   ]
 }
@@ -111,7 +113,7 @@ function NavSections({ onNavigate }: { onNavigate?: () => void }) {
   if (user?.primaryUserType === "CUSTOMER") {
     return (
       <>
-        <NavGroup links={[{ href: "/dashboard/notifications", label: "Notifications", icon: Bell }]} section="secondary" onNavigate={onNavigate} />
+        <NavGroup links={[{ href: "/dashboard/reviews", label: "Reviews", icon: Star }, { href: "/dashboard/notifications", label: "Notifications", icon: Bell }]} section="secondary" onNavigate={onNavigate} />
         <NavGroup links={[{ href: "/dashboard/profile", label: "Personal Profile", icon: User }]} section="tertiary" onNavigate={onNavigate} />
       </>
     )

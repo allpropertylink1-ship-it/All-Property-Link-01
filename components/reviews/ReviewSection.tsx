@@ -8,15 +8,22 @@ import { api } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth-context";
 import { FormBanner } from "@/components/shared/FormFeedback";
 import { formatReviewerName } from "@/lib/utils";
+import {
+  ResponseBlock,
+  DeletedOriginalNotice,
+  type ThreadResponse,
+} from "@/components/reviews/review-thread";
 
 export interface ReviewItem {
   id: string;
   userId: string;
-  rating: number;
+  rating: number | null;
   comment: string | null;
   createdAt: string | Date;
   updatedAt?: string | Date | null;
+  deleted?: boolean;
   user: { firstName: string; lastName: string };
+  response?: ThreadResponse | null;
 }
 
 interface ReviewSectionProps {
@@ -109,7 +116,7 @@ export function ReviewSection({
 
   function startEdit(review: ReviewItem) {
     setEditingId(review.id);
-    setRating(review.rating);
+    setRating(review.rating ?? 5);
     setComment(review.comment || "");
     setFormError("");
     setShowForm(true);
@@ -144,7 +151,7 @@ export function ReviewSection({
           return { ...updated };
         })
       );
-      setMeta((m) => ({ ...m, sum: m.sum - (reviews.find((r) => r.id === editingId)?.rating ?? 0) + updated.rating }));
+      setMeta((m) => ({ ...m, sum: m.sum - (reviews.find((r) => r.id === editingId)?.rating ?? 0) + (updated.rating ?? 0) }));
     } else {
       const { data, error } = await api.post<{ review: ReviewItem }>("/api/reviews", {
         targetType: "USER",
@@ -173,12 +180,21 @@ export function ReviewSection({
     }
     setDeleting(true);
     const target = reviews.find((r) => r.id === id);
-    const { error } = await api.delete(`/api/reviews/${id}`);
+    const { data, error } = await api.delete<{ softDeleted?: boolean }>(`/api/reviews/${id}`);
     setDeleting(false);
     setConfirmDeleteId(null);
     if (error) return;
-    setReviews((prev) => prev.filter((r) => r.id !== id));
-    if (target) setMeta((m) => ({ total: m.total - 1, sum: m.sum - target.rating }));
+    if (data?.softDeleted && target?.response) {
+      // Original deleted but the seller response survives → ghost placeholder
+      // keeps the thread's context instead of vanishing.
+      setReviews((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, deleted: true, rating: null, comment: null } : r))
+      );
+    } else {
+      setReviews((prev) => prev.filter((r) => r.id !== id));
+    }
+    if (target && typeof target.rating === "number")
+      setMeta((m) => ({ total: m.total - 1, sum: m.sum - target.rating! }));
   }
 
   async function loadMore() {
@@ -381,14 +397,18 @@ export function ReviewSection({
         ) : (
           reviews.map((review) => {
             const isOwn = user?.id === review.userId;
+            const isGhost = !!review.deleted;
             const edited =
+              !isGhost &&
               review.updatedAt && new Date(review.updatedAt) > new Date(review.createdAt);
-            const reviewerName = formatReviewerName(review.user.firstName, review.user.lastName);
+            const reviewerName = isGhost
+              ? "Former customer"
+              : formatReviewerName(review.user.firstName, review.user.lastName);
             return (
               <article
                 key={review.id}
                 className={`group rounded-xl border bg-surface p-5 transition-colors sm:p-6 ${
-                  isOwn ? "border-accent-500/60" : "border-border hover:shadow-[0_2px_8px_rgba(21,47,41,0.07)]"
+                  isOwn && !isGhost ? "border-accent-500/60" : "border-border hover:shadow-[0_2px_8px_rgba(21,47,41,0.07)]"
                 }`}
               >
                 <div className="flex items-start justify-between gap-4">
@@ -397,13 +417,15 @@ export function ReviewSection({
                       className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold ${tintFor(reviewerName)}`}
                       aria-hidden
                     >
-                      {(review.user.firstName?.[0] || "?").toUpperCase()}
-                      {(review.user.lastName?.[0] || "").toUpperCase()}
+                      {isGhost
+                        ? "–"
+                        : (review.user.firstName?.[0] || "?").toUpperCase()}
+                      {!isGhost && (review.user.lastName?.[0] || "").toUpperCase()}
                     </div>
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
                         <span className="truncate text-sm font-semibold text-text-primary">{reviewerName}</span>
-                        {isOwn && (
+                        {isOwn && !isGhost && (
                           <span className="rounded-full bg-primary-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-700">
                             You
                           </span>
@@ -415,16 +437,22 @@ export function ReviewSection({
                       </p>
                     </div>
                   </div>
-                  <Stars value={review.rating} />
+                  {!isGhost && typeof review.rating === "number" && <Stars value={review.rating} />}
                 </div>
 
-                {review.comment && (
-                  <p className="mt-4 whitespace-pre-line break-words text-sm leading-relaxed text-text-secondary [overflow-wrap:anywhere]">
-                    {review.comment}
-                  </p>
+                {isGhost ? (
+                  <DeletedOriginalNotice />
+                ) : (
+                  review.comment && (
+                    <p className="mt-4 whitespace-pre-line break-words text-sm leading-relaxed text-text-secondary [overflow-wrap:anywhere]">
+                      {review.comment}
+                    </p>
+                  )
                 )}
 
-                {isOwn && (
+                {review.response && <ResponseBlock response={review.response} />}
+
+                {isOwn && !isGhost && (
                   <div className="mt-4 flex items-center gap-2.5 border-t border-border pt-4">
                     <button
                       onClick={() => startEdit(review)}

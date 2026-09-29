@@ -9,14 +9,29 @@ export interface ReviewAuthor {
   lastName: string
 }
 
+export interface ReviewResponse {
+  id: string
+  comment: string
+  createdAt: string | Date
+  updatedAt?: string | Date | null
+  responderId: string
+  responder: ReviewAuthor
+}
+
 export interface ReviewItem {
   id: string
   userId: string
-  rating: number
+  targetType?: string
+  targetId?: string
+  rating: number | null
   comment: string | null
   createdAt: string | Date
   updatedAt?: string | Date | null
+  deletedAt?: string | Date | null
+  deleted?: boolean
+  placeholder?: string
   user: ReviewAuthor
+  response?: ReviewResponse | null
 }
 
 export interface ReviewSummary {
