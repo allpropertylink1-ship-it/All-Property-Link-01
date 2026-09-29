@@ -220,9 +220,13 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
   const subTypeLabel = prettySubType(property.subType);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-28 pt-2 sm:pt-4 lg:pb-12">
-      {/* ─── Title & action bar (Stitch: badges, h1, location, price) ─── */}
-      <div className="flex flex-col gap-4 py-4 sm:py-5 lg:flex-row lg:items-end lg:justify-between">
+    <div className="mx-auto flex max-w-7xl flex-col px-4 pb-28 pt-2 sm:pt-4 lg:pb-12">
+      {/* ─── Core two-column layout: gallery + sticky agent rail side-by-side on desktop ─── */}
+      <div className="order-1 mt-2 grid gap-6 sm:mt-4 lg:grid-cols-12 lg:gap-8">
+          {/* ─── LEFT: title, gallery, specs, narrative, features, map, reviews ─── */}
+        <div className="flex min-w-0 flex-col gap-6 lg:col-span-8">
+          {/* ─── Title & action bar (DOM-first for SEO/a11y; visually BELOW gallery on desktop) ─── */}
+          <div className="order-1 flex flex-col gap-4 lg:order-2 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex min-w-0 flex-col gap-2.5">
           <div className="flex flex-wrap items-center gap-2" aria-label="Listing badges">
             {property.listingPurpose && (
@@ -262,25 +266,23 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
         )}
       </div>
 
-      {/* ─── Gallery card with glass location chip ─── */}
-      <section aria-label="Property photos" className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
-        <PropertyGallery images={imageUrls} title={property.title} />
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-surface-secondary/70 px-4 py-2.5 backdrop-blur">
-          <p className="flex min-w-0 items-center gap-1.5 text-xs font-medium text-text-secondary">
-            <MapPin size={14} className="shrink-0 text-primary-500" aria-hidden />
-            <span className="truncate">{locationLine}</span>
-          </p>
-          <p className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-text-secondary">
-            <Camera size={14} aria-hidden />
-            <span>{imageUrls.length} {imageUrls.length === 1 ? "photo" : "photos"}</span>
-          </p>
-        </div>
-      </section>
+          {/* ─── Gallery card with location chip (mobile 2nd, desktop FIRST, agent rail to its right) ─── */}
+          <section aria-label="Property photos" className="order-2 overflow-hidden rounded-xl border border-border bg-surface shadow-sm lg:order-1">
+            <PropertyGallery images={imageUrls} title={property.title} />
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-surface-secondary/70 px-4 py-2.5 backdrop-blur">
+              <p className="flex min-w-0 items-center gap-1.5 text-xs font-medium text-text-secondary">
+                <MapPin size={14} className="shrink-0 text-primary-500" aria-hidden />
+                <span className="truncate">{locationLine}</span>
+              </p>
+              <p className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-text-secondary">
+                <Camera size={14} aria-hidden />
+                <span>{imageUrls.length} {imageUrls.length === 1 ? "photo" : "photos"}</span>
+              </p>
+            </div>
+          </section>
 
-      {/* ─── Core two-column discovery & contact layout ─── */}
-      <div className="mt-6 grid gap-6 lg:grid-cols-12 lg:gap-8">
-          {/* ─── LEFT: specs, narrative, features, map, reviews ─── */}
-        <div className="min-w-0 space-y-6 lg:col-span-8">
+          {/* ─── Discovery content ─── */}
+          <div className="order-3 flex min-w-0 flex-col gap-6">
           {/* Key metrics strip */}
           {(property.bedrooms || property.bathrooms || property.area || property.plotSize) && (
             <section aria-label="Key specifications" className="rounded-xl border border-border bg-surface p-3 shadow-sm sm:p-4">
@@ -497,6 +499,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
               />
             </section>
           )}
+          </div>
         </div>
 
         {/* ─── RIGHT: sticky agent contact card ─── */}
@@ -651,7 +654,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
 
       {/* ─── Similar-properties rail ─── */}
       {otherFiltered.length > 0 && (
-        <section aria-labelledby="similar-heading" className="mt-10">
+        <section aria-labelledby="similar-heading" className="order-2 mt-10">
           <div className="mb-4 flex items-baseline justify-between gap-3">
             <h2 id="similar-heading" className="font-heading text-lg font-bold text-text-primary sm:text-xl">
               Similar listings{agentName ? ` from ${agentName}` : " nearby"}
