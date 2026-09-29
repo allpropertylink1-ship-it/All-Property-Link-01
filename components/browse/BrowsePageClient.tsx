@@ -1,14 +1,12 @@
 ﻿"use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { FilterPillsGroup } from "./FilterPills";
+import { BrowseFilterRail } from "./BrowseFilterRail";
 import { BrowseResultsGrid } from "./BrowseResultsGrid";
 import { BrowseSkeleton } from "./BrowseSkeleton";
-import { MapPin, Search, SlidersHorizontal, X } from "@/components/ui/icons";
+import { FilterPanel } from "@/components/property/FilterPanel";
 import { fetchCityCounts } from "@/lib/cities-client";
-import { getProperties } from "@/lib/services/property";
-import { getServiceListings } from "@/lib/services/service";
 
 type PropertyFilterKey = "ALL" | "FOR_SALE" | "FOR_RENT_LONG_TERM" | "FOR_RENT_SHORT_TERM" | "LAND";
 type ServiceFilterKey = "ALL" | "FUNDI" | "SERVICE_PROVIDER";
@@ -123,8 +121,6 @@ export default function BrowsePageClient() {
   const [searchInput, setSearchInput] = useState(searchParam);
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const [counties, setCounties] = useState<{ city: string; count: number }[]>([]);
-  const [propertyCounts, setPropertyCounts] = useState<Record<string, number>>({});
-  const [serviceCounts, setServiceCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetchCityCounts()
@@ -132,37 +128,6 @@ export default function BrowsePageClient() {
         setCounties((cityCounts || []).map((c) => ({ city: c.city, count: c.count })))
       )
       .catch(() => setCounties([]));
-  }, []);
-
-  // Fetch pill counts
-  useEffect(() => {
-    async function fetchPillCounts() {
-      try {
-        const [sale, rent, shortTerm, land, fundis, providers] = await Promise.all([
-          getProperties({ purpose: "FOR_SALE", pageSize: 1 }),
-          getProperties({ purpose: "FOR_RENT_LONG_TERM", pageSize: 1 }),
-          getProperties({ purpose: "FOR_RENT_SHORT_TERM", pageSize: 1 }),
-          getProperties({ propertyType: "LAND", pageSize: 1 }),
-          getServiceListings({ type: "FUNDI", limit: "1" }),
-          getServiceListings({ type: "SERVICE_PROVIDER", limit: "1" }),
-        ]);
-        setPropertyCounts({
-          ALL: sale.total + rent.total + shortTerm.total + land.total,
-          FOR_SALE: sale.total,
-          FOR_RENT_LONG_TERM: rent.total,
-          FOR_RENT_SHORT_TERM: shortTerm.total,
-          LAND: land.total,
-        });
-        setServiceCounts({
-          ALL: fundis.total + providers.total,
-          FUNDI: fundis.total,
-          SERVICE_PROVIDER: providers.total,
-        });
-      } catch {
-        // ignore count errors
-      }
-    }
-    fetchPillCounts();
   }, []);
 
   useEffect(() => {
@@ -192,17 +157,11 @@ export default function BrowsePageClient() {
     searchDebounceRef.current = setTimeout(() => pushSearch(value), 350);
   };
 
-  const handleSearchClear = () => {
+  const handleSearchClear = useCallback(() => {
     setSearchInput("");
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     pushSearch("");
-  };
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
-    pushSearch(searchInput);
-  };
+  }, [pushSearch]);
 
   // Read URL params and set initial filters
   const syncFiltersFromUrl = useCallback(() => {
@@ -381,16 +340,6 @@ export default function BrowsePageClient() {
     updateUrl(tab, filter);
   };
 
-  const handleClearFilter = () => {
-    if (activeTab === "properties") {
-      setPropertyFilter("ALL");
-      updateUrl("properties", "ALL");
-    } else {
-      setServiceFilter("ALL");
-      updateUrl("services", "ALL");
-    }
-  };
-
   const handleFilterChange = useCallback((key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set(key, value);
@@ -426,24 +375,53 @@ export default function BrowsePageClient() {
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }, [searchParams, router, pathname]);
 
-  // Determine if filter came from URL (not user interaction)
-  const isFilterFromUrl = propertyFilter !== "ALL" || serviceFilter !== "ALL";
-  const currentFilter = activeTab === "properties" ? propertyFilter : serviceFilter;
-  const isDefaultFilter = currentFilter === "ALL";
+  // Rail-controlled values (read from URL so back/forward + shareable links keep working)
+  const selectedCity = searchParams.get("city") ?? "";
+  const assetType = searchParams.get("propertyType") ?? "";
+  const minPrice = searchParams.get("minPrice") ?? "";
+  const maxPrice = searchParams.get("maxPrice") ?? "";
+  const bedrooms = searchParams.get("bedrooms") ?? "";
 
-  const filterLabels: Record<string, string> = {
-    FOR_SALE: "For Sale",
-    FOR_RENT_LONG_TERM: "For Rent",
-    FOR_RENT_SHORT_TERM: "Short-Term",
-    LAND: "Land & Plots",
-    FUNDI: "Fundis",
-    SERVICE_PROVIDER: "Services",
-    ALL: activeTab === "properties" ? "All Properties" : "All Services",
-  };
+  const hotspots = useMemo(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    const buildHref = (city: string) => {
+      const p = new URLSearchParams(params.toString());
+      if (city) p.set("city", city);
+      else p.delete("city");
+      p.delete("page");
+      const qs = p.toString();
+      return qs ? `${pathname}?${qs}` : pathname;
+    };
+    const top = [...counties].sort((a, b) => b.count - a.count).slice(0, 5);
+    return [
+      { label: "All Hubs", href: buildHref(""), active: !selectedCity },
+      ...top.map((c) => ({ label: c.city, href: buildHref(c.city), active: selectedCity === c.city })),
+    ];
+  }, [counties, selectedCity, searchParams, pathname]);
+
+  const handleRailReset = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("search");
+    params.delete("q");
+    params.delete("city");
+    params.delete("minPrice");
+    params.delete("maxPrice");
+    params.delete("propertyType");
+    params.delete("bedrooms");
+    params.delete("purpose");
+    params.delete("type");
+    params.delete("filter");
+    params.delete("category");
+    params.set("page", "1");
+    handleSearchClear();
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    if (activeTab === "properties") setPropertyFilter("ALL");
+    else setServiceFilter("ALL");
+  }, [searchParams, router, pathname, activeTab, handleSearchClear]);
 
   const searchPlaceholder =
     activeTab === "properties"
-      ? "Search properties by title, city or area…"
+      ? "Locality, Estate, or Project..."
       : "Search fundis & services by title or description…";
 
   return (
@@ -490,136 +468,54 @@ export default function BrowsePageClient() {
         </button>
       </div>
 
-      {/* Search matrix — keyword + county + type + Update Feed, integrates with active category filter */}
-      <div className="mb-6 rounded-xl bg-surface p-2 shadow-sm">
-        <form
-          onSubmit={handleSearchSubmit}
-          role="search"
-          aria-label={activeTab === "properties" ? "Search properties" : "Search services"}
-          className={`grid grid-cols-1 items-center gap-2 ${
-            activeTab === "properties" ? "md:grid-cols-4" : "md:grid-cols-3"
-          }`}
-        >
-          <div className="relative flex min-h-[44px] items-center">
-            <Search
-              size={18}
-              className="pointer-events-none absolute left-3.5 text-text-secondary"
-              aria-hidden="true"
-            />
-            <label htmlFor="browse-keyword" className="sr-only">
-              {activeTab === "properties" ? "Search properties" : "Search services"}
-            </label>
-            <input
-              id="browse-keyword"
-              type="search"
-              value={searchInput}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              placeholder={searchPlaceholder}
-              className="w-full bg-transparent py-2 pl-11 pr-11 text-[16px] text-text-primary placeholder:text-text-secondary focus:outline-none"
-              autoComplete="off"
-            />
-            {searchInput ? (
-              <button
-                type="button"
-                onClick={handleSearchClear}
-                className="absolute right-1 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
-                aria-label="Clear search"
-              >
-                <X size={16} />
-              </button>
-            ) : null}
-          </div>
-
-          <div className="flex min-h-[44px] items-center gap-2 px-3 py-2">
-            <MapPin size={18} className="shrink-0 text-text-secondary" />
-            <label htmlFor="browse-county" className="sr-only">
-              Filter by county
-            </label>
-            <select
-              id="browse-county"
-              value={searchParams.get("city") ?? ""}
-              onChange={(e) => {
-                const v = e.target.value;
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
+        <div className="lg:col-span-4 xl:col-span-3">
+          <FilterPanel>
+            <BrowseFilterRail
+              activeTab={activeTab}
+              searchInput={searchInput}
+              searchPlaceholder={searchPlaceholder}
+              onSearchChange={handleSearchChange}
+              onSearchClear={handleSearchClear}
+              counties={counties}
+              selectedCity={selectedCity}
+              onCityChange={(v) => {
                 if (v) handleFilterChange("city", v);
                 else handleFilterRemove("city");
               }}
-              className="w-full cursor-pointer bg-transparent text-[16px] text-text-primary focus:outline-none"
-            >
-              <option value="">All Counties</option>
-              {counties.map((c) => (
-                <option key={c.city} value={c.city}>
-                  {c.city} ({c.count})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {activeTab === "properties" && (
-            <div className="flex min-h-[44px] items-center gap-2 px-3 py-2">
-              <SlidersHorizontal size={18} className="shrink-0 text-text-secondary" />
-              <label htmlFor="browse-type" className="sr-only">
-                Filter by category
-              </label>
-              <select
-                id="browse-type"
-                value={propertyFilter}
-                onChange={(e) => handlePropertyFilterChange(e.target.value)}
-                className="w-full cursor-pointer bg-transparent text-[16px] text-text-primary focus:outline-none"
-              >
-                <option value="ALL">All Categories</option>
-                <option value="FOR_SALE">For Sale</option>
-                <option value="FOR_RENT_LONG_TERM">For Rent</option>
-                <option value="FOR_RENT_SHORT_TERM">Short-Term</option>
-                <option value="LAND">Land &amp; Plots</option>
-              </select>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            className="flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-600"
-          >
-            <SlidersHorizontal size={18} />
-            <span>Update Feed</span>
-          </button>
-        </form>
-        {searchParam && !loading && (
-          <p className="px-3 pb-2 pt-1 text-xs text-text-secondary" aria-live="polite">
-            Searching {activeTab} {isDefaultFilter ? "" : `in ${filterLabels[currentFilter] ?? currentFilter} `}for <span className="font-medium text-text-primary">&ldquo;{searchParam}&rdquo;</span>
-          </p>
-        )}
-      </div>
-
-      {/* Always show filter pills with counts */}
-      <div className="mb-6">
-        <FilterPillsGroup
-          activeTab={activeTab}
-          propertyFilter={propertyFilter}
-          serviceFilter={serviceFilter}
-          propertyCounts={propertyCounts}
-          serviceCounts={serviceCounts}
-          onPropertyFilterChange={handlePropertyFilterChange}
-          onServiceFilterChange={handleServiceFilterChange}
-        />
-      </div>
-
-      {/* Show active filter indicator when filter is applied (from URL or user) */}
-      {!isDefaultFilter && (
-        <div className="mb-6 flex items-center gap-2 rounded-lg border border-primary-200 bg-primary-50 px-4 py-3" role="status" aria-live="polite">
-          <span className="text-sm font-medium text-primary-700">
-            Showing: <strong>{filterLabels[currentFilter] || currentFilter}</strong>
-            {searchParam ? <span className="font-normal"> · “{searchParam}”</span> : null}
-          </span>
-          <button
-            type="button"
-            onClick={handleClearFilter}
-            className="ml-auto touch-target flex h-8 w-8 items-center justify-center rounded-md text-primary-600 hover:bg-primary-100 transition-colors"
-            aria-label="Clear filter"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
+              propertyFilter={propertyFilter}
+              onPropertyFilterChange={handlePropertyFilterChange}
+              serviceFilter={serviceFilter}
+              onServiceFilterChange={handleServiceFilterChange}
+              assetType={assetType}
+              onAssetChange={(v) => {
+                if (v) handleFilterChange("propertyType", v);
+                else handleFilterRemove("propertyType");
+              }}
+              minPrice={minPrice}
+              maxPrice={maxPrice}
+              onPriceChange={(key, v) => {
+                if (v) handleFilterChange(key, v);
+                else handleFilterRemove(key);
+              }}
+              bedrooms={bedrooms}
+              onBedroomsChange={(v) => {
+                if (v) handleFilterChange("bedrooms", v);
+                else handleFilterRemove("bedrooms");
+              }}
+              hotspots={hotspots}
+              resultCount={total}
+              onReset={handleRailReset}
+              onApply={() => {
+                if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+                pushSearch(searchInput);
+                document.getElementById("browse-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+            />
+          </FilterPanel>
         </div>
-      )}
+
+        <main id="browse-results" className="flex scroll-mt-24 flex-col gap-6 lg:col-span-8 xl:col-span-9">
 
       {loading ? (
         <BrowseSkeleton count={8} />
@@ -649,6 +545,8 @@ export default function BrowsePageClient() {
           onFilterRemove={handleFilterRemove}
         />
       )}
+        </main>
+      </div>
     </div>
   );
 }

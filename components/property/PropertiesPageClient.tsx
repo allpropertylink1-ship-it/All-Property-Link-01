@@ -7,13 +7,12 @@ import { PropertyFilters } from "./PropertyFilters"
 import { FilterPanel } from "./FilterPanel"
 import { AdvisoryBanner } from "@/components/browse/AdvisoryBanner"
 import { BrowseSkeleton } from "@/components/browse/BrowseSkeleton"
-import { HotspotPills, type Hotspot } from "@/components/browse/HotspotPills"
+import type { Hotspot } from "@/components/browse/HotspotPills"
 import {
   ResultsHeader,
   type CatalogLayout,
   type CatalogSortKey,
 } from "@/components/browse/ResultsHeader"
-import { SearchMatrixBar, type CountyOption } from "@/components/browse/SearchMatrixBar"
 import { Pagination } from "@/components/shared/Pagination"
 import { fetchCityCounts } from "@/lib/cities-client"
 import { slugifyCity } from "@/lib/seo"
@@ -71,11 +70,6 @@ export function PropertiesPageClient({ searchParams }: Props) {
     }).catch(e => setError(e.message))
   }, [city, propertyType, purpose, minPrice, maxPrice, bedrooms, page, search, sort])
 
-  const counties: CountyOption[] = useMemo(
-    () => cities.map((c) => ({ city: c.city, count: c._count.city })),
-    [cities]
-  )
-
   const hotspots: Hotspot[] = useMemo(() => {
     const top = [...cities].sort((a, b) => b._count.city - a._count.city).slice(0, 5)
     return [
@@ -106,20 +100,6 @@ export function PropertiesPageClient({ searchParams }: Props) {
 
   return (
     <div className="bg-surface-secondary/40">
-      <section aria-label="Search and filter" className="w-full bg-surface py-4 shadow-sm">
-        <div className="mx-auto flex w-full max-w-content flex-col gap-3 px-4 xl:flex-row xl:items-center xl:justify-between">
-          <SearchMatrixBar
-            action="/properties"
-            keywordDefault={search}
-            counties={counties}
-            countyDefault={city}
-            typeDefault={propertyType}
-            preserve={{ purpose, sort, minPrice, maxPrice, bedrooms }}
-          />
-          <HotspotPills hotspots={hotspots} />
-        </div>
-      </section>
-
       <section className="mx-auto w-full max-w-content px-4 py-6">
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
           <div className="lg:col-span-4 xl:col-span-3">
@@ -132,6 +112,8 @@ export function PropertiesPageClient({ searchParams }: Props) {
                 minPrice={minPrice}
                 maxPrice={maxPrice}
                 bedrooms={bedrooms}
+                searchDefault={search}
+                hotspots={hotspots}
                 basePath="/properties"
               />
             </FilterPanel>

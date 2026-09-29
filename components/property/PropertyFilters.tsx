@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Filter, Shield } from "@/components/ui/icons";
+import { Filter, MapPin, Search, Shield } from "@/components/ui/icons";
+
+export interface RailHotspot {
+  label: string;
+  href: string;
+  active: boolean;
+}
 
 interface PropertyFiltersProps {
   cities: { city: string; _count: { city: number } }[];
@@ -11,6 +17,8 @@ interface PropertyFiltersProps {
   minPrice?: string;
   maxPrice?: string;
   bedrooms?: string;
+  searchDefault?: string;
+  hotspots?: RailHotspot[];
   /** Canonical path used by "Reset All", e.g. "/properties" */
   basePath?: string;
   /** When set, the county is locked (city pages): renders a hidden input instead of the select */
@@ -42,6 +50,8 @@ export function PropertyFilters({
   minPrice,
   maxPrice,
   bedrooms,
+  searchDefault,
+  hotspots = [],
   basePath = "/properties",
   fixedCity,
 }: PropertyFiltersProps) {
@@ -68,8 +78,31 @@ export function PropertyFilters({
       <input type="hidden" name="bedrooms" value={beds} />
       {fixedCity !== undefined && <input type="hidden" name="city" value={fixedCity} />}
 
+      <div>
+        <label htmlFor="filter-keyword" className={sectionLabel}>
+          Search
+        </label>
+        <span className="mb-2 block text-xs text-text-secondary">Locality, estate or project</span>
+        <div className="relative">
+          <Search
+            size={18}
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary"
+            aria-hidden="true"
+          />
+          <input
+            id="filter-keyword"
+            name="search"
+            type="search"
+            defaultValue={searchDefault || ""}
+            placeholder="Locality, Estate, or Project..."
+            autoComplete="off"
+            className="w-full rounded-lg border border-border bg-surface-secondary py-3 pl-11 pr-4 text-[16px] text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+          />
+        </div>
+      </div>
+
       <fieldset>
-        <legend className={sectionLabel}>Transaction Type</legend>
+        <legend className={sectionLabel}>I want to</legend>
         <div
           className="grid grid-cols-3 gap-1 rounded-lg bg-surface-secondary p-1 text-center text-sm"
           role="group"
@@ -97,7 +130,7 @@ export function PropertyFilters({
       </fieldset>
 
       <fieldset>
-        <legend className={sectionLabel}>Asset Classification</legend>
+        <legend className={sectionLabel}>Property type</legend>
         <div className="flex flex-col gap-1 text-sm" role="radiogroup" aria-label="Property type">
           {TYPE_OPTIONS.map((o) => {
             const active = type === o.value;
@@ -133,21 +166,29 @@ export function PropertyFilters({
       {fixedCity === undefined && (
         <div>
           <label htmlFor="filter-city" className={sectionLabel}>
-            County &amp; Neighbourhood
+            Location
           </label>
-          <select
-            id="filter-city"
-            name="city"
-            defaultValue={selectedCity || ""}
-            className="w-full rounded-lg border border-border bg-surface-secondary px-4 py-3 text-[16px] text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-          >
-            <option value="">All Zones</option>
-            {cities.map((c) => (
-              <option key={c.city} value={c.city}>
-                {c.city} ({c._count.city})
-              </option>
-            ))}
-          </select>
+          <span className="mb-2 block text-xs text-text-secondary">County or town</span>
+          <div className="relative">
+            <MapPin
+              size={18}
+              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary"
+              aria-hidden="true"
+            />
+            <select
+              id="filter-city"
+              name="city"
+              defaultValue={selectedCity || ""}
+              className="w-full cursor-pointer appearance-none rounded-lg border border-border bg-surface-secondary py-3 pl-11 pr-4 text-[16px] text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            >
+              <option value="">All counties</option>
+              {cities.map((c) => (
+                <option key={c.city} value={c.city}>
+                  {c.city} ({c._count.city})
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       )}
 
@@ -214,16 +255,46 @@ export function PropertyFilters({
         </div>
       </fieldset>
 
-      <div className="flex flex-col gap-2 pt-1">
+      {hotspots.length > 0 && (
+        <div>
+          <span className={sectionLabel} id="filter-hotspots-label">
+            Popular areas
+          </span>
+          <span className="mb-2 block text-xs text-text-secondary">Jump to a hotspot hub</span>
+          <div className="flex flex-wrap gap-2" role="group" aria-labelledby="filter-hotspots-label">
+            {hotspots.map((h) =>
+              h.active ? (
+                <span
+                  key={h.label}
+                  aria-current="true"
+                  className="inline-flex min-h-[40px] items-center whitespace-nowrap rounded-full bg-primary px-4 text-sm font-medium text-white shadow-sm"
+                >
+                  {h.label}
+                </span>
+              ) : (
+                <a
+                  key={h.label}
+                  href={h.href}
+                  className="inline-flex min-h-[40px] items-center whitespace-nowrap rounded-full border border-border bg-surface px-4 text-sm font-medium text-text-primary transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
+                >
+                  {h.label}
+                </a>
+              )
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-2 border-t border-border pt-4">
         <button
           type="submit"
           className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-600"
         >
-          <Filter size={16} />
-          Apply Selected Filters
+          <Filter size={16} aria-hidden="true" />
+          Show results
         </button>
         <p className="flex items-center justify-center gap-1 pt-1 text-xs text-text-secondary">
-          <Shield size={14} />
+          <Shield size={14} aria-hidden="true" />
           100% Registry &amp; Escrow Protected
         </p>
       </div>
