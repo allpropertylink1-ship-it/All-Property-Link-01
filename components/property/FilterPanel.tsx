@@ -64,7 +64,7 @@ export function FilterPanel({ children }: { children: React.ReactNode }) {
             <X size={20} />
           </button>
         </div>
-        <div className="flex flex-col gap-6 rounded-xl bg-surface p-6 shadow-sm">{children}</div>
+        <div className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-sm">{children}</div>
       </aside>
     </>
   );

@@ -33,14 +33,16 @@ const PURPOSE_TABS = [
 
 const TYPE_OPTIONS = [
   { value: "", label: "All types" },
-  { value: "HOUSE", label: "Houses, Villas & Maisonettes" },
-  { value: "APARTMENT", label: "Apartments & Duplexes" },
-  { value: "COMMERCIAL", label: "Commercial Real Estate" },
+  { value: "HOUSE", label: "Houses & Villas" },
+  { value: "APARTMENT", label: "Apartments" },
+  { value: "COMMERCIAL", label: "Commercial" },
 ] as const;
 
 const BEDROOM_OPTIONS = ["", "1", "2", "3", "4", "5"] as const;
 
-const sectionLabel = "mb-2 block text-sm font-semibold text-text-primary";
+const sectionLabel = "mb-1.5 block text-sm font-semibold text-text-primary";
+const fieldInput =
+  "w-full rounded-lg border border-border bg-surface-secondary text-[16px] text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20";
 
 export function PropertyFilters({
   cities,
@@ -60,15 +62,15 @@ export function PropertyFilters({
   const [beds, setBeds] = useState(bedrooms || "");
 
   return (
-    <form method="GET" action={basePath} className="flex flex-col gap-6">
-      <div className="flex items-center justify-between border-b border-border pb-3">
-        <span className="flex items-center gap-2 font-heading text-base font-bold text-text-primary">
-          <Filter size={18} />
+    <form method="GET" action={basePath} className="flex flex-col gap-4 lg:gap-3">
+      <div className="flex items-center justify-between border-b border-border pb-2">
+        <span className="flex items-center gap-2 font-heading text-[15px] font-bold text-text-primary">
+          <Filter size={16} />
           Refine Results
         </span>
         <a
           href={basePath}
-          className="inline-flex min-h-[44px] items-center text-sm font-medium text-accent-600 hover:underline"
+          className="inline-flex min-h-[44px] items-center text-sm font-medium text-accent-600 hover:underline lg:min-h-[32px]"
         >
           Reset All
         </a>
@@ -82,11 +84,10 @@ export function PropertyFilters({
         <label htmlFor="filter-keyword" className={sectionLabel}>
           Search
         </label>
-        <span className="mb-2 block text-xs text-text-secondary">Locality, estate or project</span>
         <div className="relative">
           <Search
-            size={18}
-            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary"
+            size={16}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary"
             aria-hidden="true"
           />
           <input
@@ -96,7 +97,7 @@ export function PropertyFilters({
             defaultValue={searchDefault || ""}
             placeholder="Locality, Estate, or Project..."
             autoComplete="off"
-            className="w-full rounded-lg border border-border bg-surface-secondary py-3 pl-11 pr-4 text-[16px] text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            className={`${fieldInput} py-2.5 pl-10 pr-3 lg:py-2`}
           />
         </div>
       </div>
@@ -104,7 +105,7 @@ export function PropertyFilters({
       <fieldset>
         <legend className={sectionLabel}>I want to</legend>
         <div
-          className="grid grid-cols-3 gap-1 rounded-lg bg-surface-secondary p-1 text-center text-sm"
+          className="grid grid-cols-3 gap-1 rounded-lg bg-surface-secondary p-1 text-center"
           role="group"
           aria-label="Transaction type"
         >
@@ -116,9 +117,9 @@ export function PropertyFilters({
                 type="button"
                 onClick={() => setPurpose(active ? "" : t.value)}
                 aria-pressed={active}
-                className={`min-h-[44px] rounded-md px-2 py-2 text-sm transition-colors ${
+                className={`min-h-[40px] rounded-md px-1 py-1.5 text-[13px] transition-colors lg:min-h-[32px] ${
                   active
-                    ? "bg-primary font-bold text-white shadow-sm"
+                    ? "bg-primary font-semibold text-white shadow-sm"
                     : "text-text-secondary hover:text-text-primary"
                 }`}
               >
@@ -131,8 +132,8 @@ export function PropertyFilters({
 
       <fieldset>
         <legend className={sectionLabel}>Property type</legend>
-        <div className="flex flex-col gap-1 text-sm" role="radiogroup" aria-label="Property type">
-          {TYPE_OPTIONS.map((o) => {
+        <div className="grid grid-cols-2 gap-1.5" role="radiogroup" aria-label="Property type">
+          {TYPE_OPTIONS.map((o, i) => {
             const active = type === o.value;
             return (
               <button
@@ -141,20 +142,12 @@ export function PropertyFilters({
                 role="radio"
                 aria-checked={active}
                 onClick={() => setType(o.value)}
-                className={`flex min-h-[44px] items-center gap-2 rounded-lg px-3 text-left transition-colors ${
+                className={`${i === 0 ? "col-span-2" : ""} min-h-[40px] px-2 py-1.5 text-center text-[13px] transition-colors lg:min-h-[32px] ${
                   active
-                    ? "bg-primary-50 font-semibold text-text-primary"
-                    : "text-text-secondary hover:bg-surface-secondary hover:text-text-primary"
+                    ? "rounded-lg bg-primary font-semibold text-white shadow-sm"
+                    : "rounded-lg bg-surface-secondary text-text-secondary hover:bg-surface-secondary/60 hover:text-text-primary"
                 }`}
               >
-                <span
-                  aria-hidden="true"
-                  className={`flex h-4 w-4 items-center justify-center rounded-full border ${
-                    active ? "border-primary-500" : "border-border"
-                  }`}
-                >
-                  {active && <span className="h-2 w-2 rounded-full bg-primary-500" />}
-                </span>
                 {o.label}
               </button>
             );
@@ -168,18 +161,17 @@ export function PropertyFilters({
           <label htmlFor="filter-city" className={sectionLabel}>
             Location
           </label>
-          <span className="mb-2 block text-xs text-text-secondary">County or town</span>
           <div className="relative">
             <MapPin
-              size={18}
-              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary"
+              size={16}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary"
               aria-hidden="true"
             />
             <select
               id="filter-city"
               name="city"
               defaultValue={selectedCity || ""}
-              className="w-full cursor-pointer appearance-none rounded-lg border border-border bg-surface-secondary py-3 pl-11 pr-4 text-[16px] text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className={`${fieldInput} cursor-pointer appearance-none py-2.5 pl-10 pr-3 lg:py-2`}
             >
               <option value="">All counties</option>
               {cities.map((c) => (
@@ -193,14 +185,14 @@ export function PropertyFilters({
       )}
 
       <div>
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-semibold text-text-primary">Price Range (KES)</span>
-          <span className="text-xs font-bold text-accent-600">Kenyan Shillings</span>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
+        <span className={`${sectionLabel} flex items-baseline justify-between`}>
+          Price range
+          <span className="text-xs font-medium text-text-secondary">KES</span>
+        </span>
+        <div className="grid grid-cols-2 gap-1.5">
           <div>
             <label htmlFor="filter-minPrice" className="mb-1 block text-xs text-text-secondary">
-              Min Budget
+              Min
             </label>
             <input
               id="filter-minPrice"
@@ -210,12 +202,12 @@ export function PropertyFilters({
               inputMode="numeric"
               defaultValue={minPrice || ""}
               placeholder="No min"
-              className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-3 text-[16px] text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className={`${fieldInput} px-2.5 py-2.5 lg:py-2`}
             />
           </div>
           <div>
             <label htmlFor="filter-maxPrice" className="mb-1 block text-xs text-text-secondary">
-              Max Budget
+              Max
             </label>
             <input
               id="filter-maxPrice"
@@ -225,7 +217,7 @@ export function PropertyFilters({
               inputMode="numeric"
               defaultValue={maxPrice || ""}
               placeholder="No max"
-              className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-3 text-[16px] text-text-primary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className={`${fieldInput} px-2.5 py-2.5 lg:py-2`}
             />
           </div>
         </div>
@@ -242,10 +234,10 @@ export function PropertyFilters({
                 type="button"
                 onClick={() => setBeds(b)}
                 aria-pressed={active}
-                className={`flex min-h-[44px] flex-1 items-center justify-center rounded-lg px-1 text-sm transition-colors ${
+                className={`min-h-[40px] flex-1 px-1 text-[13px] lg:min-h-[32px] ${
                   active
-                    ? "bg-primary font-bold text-white"
-                    : "bg-surface-secondary text-text-primary hover:bg-surface-secondary/70"
+                    ? "rounded-lg bg-primary font-semibold text-white"
+                    : "rounded-lg bg-surface-secondary text-text-primary hover:bg-surface-secondary/60"
                 }`}
               >
                 {b === "" ? "Any" : `${b}+`}
@@ -260,14 +252,13 @@ export function PropertyFilters({
           <span className={sectionLabel} id="filter-hotspots-label">
             Popular areas
           </span>
-          <span className="mb-2 block text-xs text-text-secondary">Jump to a hotspot hub</span>
-          <div className="flex flex-wrap gap-2" role="group" aria-labelledby="filter-hotspots-label">
+          <div className="flex flex-wrap gap-1.5" role="group" aria-labelledby="filter-hotspots-label">
             {hotspots.map((h) =>
               h.active ? (
                 <span
                   key={h.label}
                   aria-current="true"
-                  className="inline-flex min-h-[40px] items-center whitespace-nowrap rounded-full bg-primary px-4 text-sm font-medium text-white shadow-sm"
+                  className="inline-flex min-h-[32px] items-center whitespace-nowrap rounded-full bg-primary px-3 text-[13px] font-medium text-white shadow-sm"
                 >
                   {h.label}
                 </span>
@@ -275,7 +266,7 @@ export function PropertyFilters({
                 <a
                   key={h.label}
                   href={h.href}
-                  className="inline-flex min-h-[40px] items-center whitespace-nowrap rounded-full border border-border bg-surface px-4 text-sm font-medium text-text-primary transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
+                  className="inline-flex min-h-[32px] items-center whitespace-nowrap rounded-full border border-border bg-surface px-3 text-[13px] font-medium text-text-primary transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
                 >
                   {h.label}
                 </a>
@@ -285,15 +276,15 @@ export function PropertyFilters({
         </div>
       )}
 
-      <div className="flex flex-col gap-2 border-t border-border pt-4">
+      <div className="flex flex-col gap-1.5 border-t border-border pt-3">
         <button
           type="submit"
-          className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-600"
+          className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-600 lg:min-h-[40px] lg:py-2"
         >
           <Filter size={16} aria-hidden="true" />
           Show results
         </button>
-        <p className="flex items-center justify-center gap-1 pt-1 text-xs text-text-secondary">
+        <p className="flex items-center justify-center gap-1 text-xs text-text-secondary">
           <Shield size={14} aria-hidden="true" />
           100% Registry &amp; Escrow Protected
         </p>
