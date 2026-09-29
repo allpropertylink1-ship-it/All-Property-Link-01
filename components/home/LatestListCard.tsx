@@ -3,17 +3,16 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import {
-  faBed,
-  faBath,
-  faRulerCombined,
-  faLocationDot,
-  faPhone,
-  faEnvelope,
-  faChevronRight,
-  faHeart,
-} from "@fortawesome/free-solid-svg-icons"
+  IconBed,
+  IconBath,
+  IconRuler,
+  IconMapPin,
+  IconPhone,
+  IconMail,
+  IconChevronRight,
+  IconHeart,
+} from "@tabler/icons-react"
 import { formatPrice } from "@/lib/utils"
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders"
 import { getCoverImage, getGalleryImages, optimizeImageUrl } from "@/lib/images"
@@ -101,7 +100,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             onClick={() => setActive((a) => (a + 1) % slides.length)}
             className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-[#374151] transition-colors hover:bg-white"
           >
-            <FontAwesomeIcon icon={faChevronRight} className="text-[16px]" aria-hidden="true" />
+            <IconChevronRight size={16} stroke={1.5} aria-hidden="true" />
           </button>
         )}
         {/* Dots */}
@@ -159,7 +158,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
               className="inline-flex items-center gap-1.5"
               aria-label={hasBeds ? `${item.bedrooms} bedrooms` : "Bedrooms not specified"}
             >
-              <FontAwesomeIcon icon={faBed} fixedWidth aria-hidden="true" />
+              <IconBed size={16} stroke={1.5} aria-hidden="true" />
               {hasBeds ? (
                 <>{item.bedrooms} {item.bedrooms === 1 ? "Bed" : "Beds"}</>
               ) : (
@@ -172,7 +171,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
               className="inline-flex items-center gap-1.5"
               aria-label={hasBaths ? `${item.bathrooms} bathrooms` : "Bathrooms not specified"}
             >
-              <FontAwesomeIcon icon={faBath} fixedWidth aria-hidden="true" />
+              <IconBath size={16} stroke={1.5} aria-hidden="true" />
               {hasBaths ? (
                 <>{item.bathrooms} {item.bathrooms === 1 ? "Bath" : "Baths"}</>
               ) : (
@@ -184,7 +183,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             className="inline-flex items-center gap-1.5"
             aria-label={hasArea ? `${item.area?.toLocaleString()} square feet` : "Size not specified"}
           >
-            <FontAwesomeIcon icon={faRulerCombined} fixedWidth aria-hidden="true" />
+            <IconRuler size={16} stroke={1.5} aria-hidden="true" />
             {hasArea ? (
               <>{item.area?.toLocaleString()} Sqft</>
             ) : (
@@ -193,7 +192,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
           </span>
         </div>
         <p className="flex items-center gap-1.5 font-poppins text-[14px] font-light leading-5 text-[#4B5569]">
-          <FontAwesomeIcon icon={faLocationDot} fixedWidth aria-hidden="true" className="shrink-0" />
+          <IconMapPin size={16} stroke={1.5} aria-hidden="true" className="shrink-0" />
           <span className="truncate">
             {item.city}
             {item.region && item.region !== item.city ? ` - ${item.region}` : ""}
@@ -205,7 +204,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             aria-label={`Call about ${item.title}`}
             className="inline-flex h-[26px] items-center gap-1 rounded border border-[#B3AED5] bg-white px-3 font-poppins text-[12px] font-medium leading-4 text-[#5A5991] transition-colors hover:bg-[#F3F4F6] lg:border-[1.25px]"
           >
-            <FontAwesomeIcon icon={faPhone} className="text-[12px]" aria-hidden="true" />
+            <IconPhone size={12} stroke={1.5} aria-hidden="true" />
             Call
           </a>
           <Link
@@ -213,7 +212,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             aria-label={`Email about ${item.title}`}
             className="inline-flex h-[26px] items-center gap-1 rounded border border-[#B3AED5] bg-white px-3 font-poppins text-[12px] font-medium leading-4 text-[#5A5991] transition-colors hover:bg-[#F3F4F6] lg:border-[1.25px]"
           >
-            <FontAwesomeIcon icon={faEnvelope} className="text-[12px]" aria-hidden="true" />
+            <IconMail size={12} stroke={1.5} aria-hidden="true" />
             Email
           </Link>
           <button
@@ -225,7 +224,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
               fav ? "text-rose-600" : "text-[#9CA3AF] hover:text-rose-500"
             }`}
           >
-            <FontAwesomeIcon icon={faHeart} className="text-[18px]" aria-hidden="true" />
+            <IconHeart size={18} stroke={1.5} aria-hidden="true" fill={fav ? "currentColor" : "none"} />
           </button>
         </div>
       </div>
