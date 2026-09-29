@@ -23,7 +23,6 @@ import {
   MapPin,
   ShieldCheck,
   CheckCircle2,
-  Calendar,
   Home,
   Key,
   Camera,
@@ -34,7 +33,6 @@ import { getGalleryImages, optimizeImageUrl } from "@/lib/images";
 import { slugifyCity } from "@/lib/seo";
 import { formatPrice } from "@/lib/utils";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
-import { FormBanner } from "@/components/shared/FormFeedback";
 import type { ReviewItem } from "@/lib/services/review";
 import { resolveImageUrl } from "@/lib/images";
 
@@ -136,13 +134,6 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
   const [loading, setLoading] = useState(!initial);
   const [error, setError] = useState(false);
 
-  // Book-viewing form state (drives the WhatsApp handoff to the agent)
-  const [viewerName, setViewerName] = useState("");
-  const [viewerPhone, setViewerPhone] = useState("");
-  const [viewerDate, setViewerDate] = useState("");
-  const [viewerTime, setViewerTime] = useState("10:00 AM - Morning");
-  const [viewingStatus, setViewingStatus] = useState<"idle" | "error" | "success">("idle");
-
   useEffect(() => {
     if (!slug) return;
     // If SSR already gave us this exact property, don't re-fetch it —
@@ -222,29 +213,11 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
   const agentName = property.agent
     ? property.agent.companyName || `${property.agent.firstName} ${property.agent.lastName}`
     : null;
-  const agentPersonName = property.agent ? `${property.agent.firstName} ${property.agent.lastName}` : null;
   const agentPhoneDigits = property.agent?.phone ? property.agent.phone.replace(/[^0-9]/g, "") : "";
-  const priceLabel = property.price == null ? "Price on request" : formatPrice(property.price, property.listingPurpose ?? undefined);
+  const priceLabel = property.price == null ? null : formatPrice(property.price, property.listingPurpose ?? undefined);
+  const hasPrice = property.price != null;
   const locationLine = `${property.region ? `${property.region}, ` : ""}${property.city}, ${property.country}`;
-  const propertyTitle = property.title;
   const subTypeLabel = prettySubType(property.subType);
-
-  function scrollToViewing() {
-    document.getElementById("book-viewing")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  function handleViewingSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!viewerName.trim() || !viewerPhone.trim() || !viewerDate) {
-      setViewingStatus("error");
-      return;
-    }
-    setViewingStatus("success");
-    if (agentPhoneDigits) {
-      const msg = `Hi ${agentPersonName ?? "there"}, I'm ${viewerName.trim()} (${viewerPhone.trim()}). I'd like to book a viewing of "${propertyTitle}" on ${viewerDate} at ${viewerTime}.`;
-      window.open(`https://wa.me/${agentPhoneDigits}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
-    }
-  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-28 pt-2 sm:pt-4 lg:pb-12">
@@ -274,6 +247,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
             <span>{locationLine}</span>
           </p>
         </div>
+        {hasPrice && (
         <div className="shrink-0 lg:pb-1 lg:text-right">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">
             {property.listingPurpose === "FOR_SALE" || !property.listingPurpose ? "Guide Sale Price" : "Asking Price"}
@@ -285,6 +259,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
             {property.currency} {property.listingPurpose === "FOR_RENT_SHORT_TERM" ? "· per night" : property.listingPurpose === "FOR_RENT_LONG_TERM" ? "· per month" : "· negotiable"}
           </p>
         </div>
+        )}
       </div>
 
       {/* ─── Gallery card with glass location chip ─── */}
@@ -384,10 +359,12 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                   <dt className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Listing Purpose</dt>
                   <dd className="mt-0.5 truncate text-sm font-semibold text-text-primary">{purposeLabel(property.listingPurpose)}</dd>
                 </div>
+                {hasPrice && (
                 <div className="min-w-0">
                   <dt className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Price</dt>
                   <dd className="mt-0.5 truncate text-sm font-semibold text-text-primary">{priceLabel}</dd>
                 </div>
+                )}
               </dl>
             </section>
           )}
@@ -473,14 +450,6 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                   </a>
                 )}
               </div>
-              <button
-                type="button"
-                onClick={scrollToViewing}
-                className="touch-target mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-accent-600"
-              >
-                <Calendar size={16} aria-hidden />
-                Book Viewing
-              </button>
             </section>
           )}
 
@@ -613,7 +582,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                   </div>
                 )}
 
-                {/* Direct CTAs: Call ghost + green WhatsApp + amber Book Viewing */}
+                {/* Direct CTAs: Call + WhatsApp */}
                 <div className="mt-4 space-y-2.5">
                   {agentPhoneDigits && (
                     <a
@@ -644,14 +613,6 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                       Email Agent
                     </a>
                   )}
-                  <button
-                    type="button"
-                    onClick={scrollToViewing}
-                    className="touch-target flex w-full items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-accent-600"
-                  >
-                    <Calendar size={16} aria-hidden />
-                    Book Viewing
-                  </button>
                   {property.agent.website && (
                     <a
                       href={property.agent.website}
@@ -663,74 +624,6 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                       {property.agent.website.replace(/^https?:\/\//, "")}
                     </a>
                   )}
-                </div>
-
-                {/* Book-viewing form */}
-                <div id="book-viewing" className="mt-4 scroll-mt-24 border-t border-border pt-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-text-primary">Book Private Site Inspection</p>
-                  <form onSubmit={handleViewingSubmit} className="mt-3 flex flex-col gap-2.5">
-                    <div>
-                      <label htmlFor="viewing-name" className="mb-1 block text-xs font-medium text-text-secondary">Your Full Name</label>
-                      <input
-                        id="viewing-name"
-                        type="text"
-                        autoComplete="name"
-                        value={viewerName}
-                        onChange={(e) => setViewerName(e.target.value)}
-                        placeholder="e.g. Jane Wanjiku"
-                        className="touch-target w-full rounded-lg border border-border bg-surface-secondary px-4 py-3 text-[16px] text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="viewing-phone" className="mb-1 block text-xs font-medium text-text-secondary">Phone Number (M-Pesa / WhatsApp)</label>
-                      <input
-                        id="viewing-phone"
-                        type="tel"
-                        autoComplete="tel"
-                        value={viewerPhone}
-                        onChange={(e) => setViewerPhone(e.target.value)}
-                        placeholder="+254 7..."
-                        className="touch-target w-full rounded-lg border border-border bg-surface-secondary px-4 py-3 text-[16px] text-text-primary placeholder:text-text-secondary focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <div>
-                        <label htmlFor="viewing-date" className="mb-1 block text-xs font-medium text-text-secondary">Tour Date</label>
-                        <input
-                          id="viewing-date"
-                          type="date"
-                          value={viewerDate}
-                          onChange={(e) => setViewerDate(e.target.value)}
-                          className="touch-target w-full rounded-lg border border-border bg-surface-secondary px-3 py-3 text-[16px] text-text-primary focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="viewing-time" className="mb-1 block text-xs font-medium text-text-secondary">Preferred Time</label>
-                        <select
-                          id="viewing-time"
-                          value={viewerTime}
-                          onChange={(e) => setViewerTime(e.target.value)}
-                          className="touch-target w-full rounded-lg border border-border bg-surface-secondary px-3 py-3 text-[16px] text-text-primary focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                        >
-                          <option>10:00 AM - Morning</option>
-                          <option>02:00 PM - Afternoon</option>
-                          <option>04:30 PM - Golden Hour</option>
-                        </select>
-                      </div>
-                    </div>
-                    {viewingStatus === "error" && (
-                      <FormBanner variant="error">Please enter your name, phone number, and preferred date.</FormBanner>
-                    )}
-                    {viewingStatus === "success" && (
-                      <FormBanner variant="success">Inspection request ready — we opened WhatsApp so you can send it directly to the agent.</FormBanner>
-                    )}
-                    <button
-                      type="submit"
-                      className="touch-target mt-1 w-full rounded-lg bg-accent-500 px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-accent-600"
-                    >
-                      Schedule Site Visit
-                    </button>
-                  </form>
                 </div>
 
                 {/* Trust shield */}
@@ -802,26 +695,33 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
       {property.agent?.phone && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
+            {hasPrice && (
             <div className="min-w-0">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Total Valuation</p>
               <p className="truncate font-heading text-base font-bold tabular-nums text-text-primary">{priceLabel}</p>
             </div>
+            )}
             <div className="flex shrink-0 items-center gap-2">
               <a
                 href={`tel:${property.agent.phone}`}
                 aria-label="Call agent"
-                className="touch-target flex h-12 items-center justify-center rounded-lg border border-border px-4 text-sm font-semibold text-text-primary"
+                className="touch-target flex h-12 items-center justify-center gap-2 rounded-lg border border-border px-4 text-sm font-semibold text-text-primary"
               >
                 <Phone size={18} aria-hidden />
+                <span>Call Agent</span>
               </a>
-              <button
-                type="button"
-                onClick={scrollToViewing}
-                className="touch-target flex h-12 items-center gap-2 rounded-lg bg-accent-500 px-5 text-sm font-bold text-white shadow-sm"
-              >
-                <Calendar size={18} aria-hidden />
-                Book Viewing
-              </button>
+              {agentPhoneDigits && (
+                <a
+                  href={`https://wa.me/${agentPhoneDigits}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Chat on WhatsApp"
+                  className="touch-target flex h-12 items-center justify-center gap-2 rounded-lg bg-whatsapp px-4 text-sm font-semibold text-white"
+                >
+                  <MessageCircle size={18} aria-hidden />
+                  <span>WhatsApp</span>
+                </a>
+              )}
             </div>
           </div>
         </div>
