@@ -66,7 +66,7 @@ const categories = [
   { href: "/properties?purpose=FOR_RENT_LONG_TERM", label: "For Rent", icon: RentIcon },
   { href: "/airbnbs", label: "Airbnbs", icon: StayIcon },
   { href: "/land", label: "Plots & Land", icon: LandIcon },
-  { href: "/fundis", label: "Fundis", icon: FundiIcon },
+  { href: "/services?type=FUNDI", label: "Fundis", icon: FundiIcon },
   { href: "/services", label: "Services", icon: ServiceIcon },
 ];
 
@@ -175,7 +175,7 @@ export function BottomNav() {
                 </svg>
               </button>
             </div>
-            <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2">
+            <div className="grid grid-cols-2 gap-3">
               {categories.map((cat) => (
                 <Link
                   key={cat.href}

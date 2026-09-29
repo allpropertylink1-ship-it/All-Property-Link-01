@@ -68,7 +68,7 @@ const SLIDES: HeroSlide[] = [
 const HERO_CTAS = [
   { label: "Advertise Property", href: "/dashboard/listings/new" },
   { label: "Search Property", href: "/properties" },
-  { label: "Find a Fundi", href: "/fundis" },
+  { label: "Find a Fundi", href: "/services?type=FUNDI" },
 ]
 
 export function HeroSection() {

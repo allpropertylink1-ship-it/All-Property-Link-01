@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { CheckCircle } from "@/components/ui/icons";
+import { Check, CheckCircle } from "@/components/ui/icons";
 
 interface FilterCardProps {
   title: string;
@@ -54,8 +54,8 @@ export function FilterCard({
         )}
         <div className="absolute bottom-2 left-2 right-2 flex justify-end">
           {isActive && (
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-600 text-white text-xs font-bold shadow-lg">
-              ✓
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-600 text-white shadow-lg">
+              <Check size={14} aria-hidden />
             </span>
           )}
         </div>

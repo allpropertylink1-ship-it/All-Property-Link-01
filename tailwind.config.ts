@@ -67,6 +67,18 @@ const config: Config = {
         border: {
           DEFAULT: "var(--color-line)",
         },
+        badgeFundi: {
+          DEFAULT: "#1D4ED8",
+          bg: "#DBEAFE",
+        },
+        badgeProvider: {
+          DEFAULT: "#15803D",
+          bg: "#DCFCE7",
+        },
+        badgeBoth: {
+          DEFAULT: "#7E22CE",
+          bg: "#F3E8FF",
+        },
       },
       fontFamily: {
         heading: ["var(--font-heading)", "system-ui", "sans-serif"],

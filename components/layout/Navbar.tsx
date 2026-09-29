@@ -15,7 +15,7 @@ const navLinks = [
   { href: "/properties", label: "PROPERTIES" },
   { href: "/airbnbs", label: "AIRBNBS" },
   { href: "/land", label: "PLOTS & LAND" },
-  { href: "/fundis", label: "FUNDIS" },
+  { href: "/services?type=FUNDI", label: "FUNDIS" },
   { href: "/services", label: "SERVICES" },
   { href: "/aplreps", label: "REPS" },
   { href: "/about", label: "ABOUT" },

@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { resolveImageUrl } from "@/lib/images";
 import { PLACEHOLDER_SERVICE } from "@/lib/placeholders";
-import { formatPrice } from "@/lib/utils";
-import { BadgeCheck, MapPin, MessageCircle, Phone, Star } from "@/components/ui/icons";
+import { fmtKES } from "@/lib/utils";
+import { BadgeCheck, MessageCircle, Phone, Star } from "@/components/ui/icons";
 
 interface ServiceCardCompactProps {
   id: string;
@@ -62,21 +62,21 @@ export function ServiceCardCompact({
     const isProvider = userTypes.includes("SERVICE_PROVIDER")
     if (isFundi && isProvider) {
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-purple/10 px-1.5 py-0.5 text-[10px] font-medium text-purple-700">
+        <span className="inline-flex items-center gap-1 rounded-full bg-badgeBoth-bg px-1.5 py-0.5 text-[10px] font-medium text-badgeBoth">
           Fundi & Provider
         </span>
       )
     }
     if (isFundi) {
       return (
-        <span className="inline-flex items-center rounded-full bg-blue/10 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
+        <span className="inline-flex items-center rounded-full bg-badgeFundi-bg px-1.5 py-0.5 text-[10px] font-medium text-badgeFundi">
           Fundi
         </span>
       )
     }
     if (isProvider) {
       return (
-        <span className="inline-flex items-center rounded-full bg-green/10 px-1.5 py-0.5 text-[10px] font-medium text-green-700">
+        <span className="inline-flex items-center rounded-full bg-badgeProvider-bg px-1.5 py-0.5 text-[10px] font-medium text-badgeProvider">
           Provider
         </span>
       )
@@ -133,7 +133,7 @@ export function ServiceCardCompact({
               className="truncate font-heading text-base font-bold text-text-primary"
             >
               <Link href={`/services/${id}`} className="hover:text-primary-600">
-                {providerName}
+                {title}
               </Link>
             </h3>
             {user?.userTypes && providerBadge(user.userTypes)}
@@ -149,9 +149,8 @@ export function ServiceCardCompact({
               </span>
             )}
           </div>
-          <p className="mt-0.5 line-clamp-1 text-sm text-text-secondary">{title}</p>
-          <p className="mt-1 flex items-center gap-1 text-sm text-text-secondary">
-            <MapPin size={15} className="shrink-0" />
+          <p className="mt-0.5 line-clamp-1 text-sm text-text-secondary">{providerName}</p>
+          <p className="mt-1 text-sm text-text-secondary">
             <span className="truncate">{area}</span>
           </p>
         </div>
@@ -163,22 +162,23 @@ export function ServiceCardCompact({
           <span className="text-[11px] font-medium uppercase tracking-wide text-text-secondary">
             {category ? category.name : "Service rate"}
           </span>
+          {price != null && (
           <span className="truncate font-heading text-base font-bold text-text-primary">
-            {price != null
-              ? `${formatPrice(Number(price))}${
+            {`${fmtKES(price)}${
                   pricePeriod && pricePeriod !== "TOTAL"
                     ? `/${pricePeriod.toLowerCase().replace("per_", "")}`
                     : ""
-                }`
-              : "Price on request"}
+                }`}
           </span>
+          )}
         </div>
         {category && (
           <Link
             href={`/services?category=${category.slug}`}
+            aria-label={`More ${category.name} services`}
             className="shrink-0 rounded-md bg-surface px-2.5 py-1 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-50"
           >
-            {category.name}
+            More {category.name}
           </Link>
         )}
       </div>

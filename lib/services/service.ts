@@ -120,16 +120,21 @@ export const getServiceListings = cache(async (filters: ServiceFilters = {}): Pr
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
+  const endpoint = `/api/services?${params}`;
   try {
     const res = await fetch(`${API_BASE}/api/services?${params}`, {
       next: { revalidate: 60 },
       signal: controller.signal,
     });
     clearTimeout(timeout);
-    if (!res.ok) return { services: [], total: 0, page: 1, totalPages: 0 };
+    if (!res.ok) {
+      console.error(`[getServiceListings] ${endpoint} failed with status ${res.status}`);
+      return { services: [], total: 0, page: 1, totalPages: 0 };
+    }
     return res.json();
-  } catch {
+  } catch (e) {
     clearTimeout(timeout);
+    console.error(`[getServiceListings] ${endpoint} aborted/failed`, e);
     return { services: [], total: 0, page: 1, totalPages: 0 };
   }
 })
@@ -137,50 +142,65 @@ export const getServiceListings = cache(async (filters: ServiceFilters = {}): Pr
 export const getServiceCategories = cache(async (): Promise<ServiceCategory[]> => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
+  const endpoint = `/api/services/categories`;
   try {
     const res = await fetch(`${API_BASE}/api/services/categories`, {
       next: { revalidate: 300 },
       signal: controller.signal,
     });
     clearTimeout(timeout);
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.error(`[getServiceCategories] ${endpoint} failed with status ${res.status}`);
+      return [];
+    }
     const data = await res.json();
     return (data.categories || []) as ServiceCategory[];
-  } catch {
+  } catch (e) {
     clearTimeout(timeout);
+    console.error(`[getServiceCategories] ${endpoint} aborted/failed`, e);
     return [];
   }
 })
 
 export const getServiceById = cache(async (id: string): Promise<ServiceDetail | null> => {  const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
+  const endpoint = `/api/services/${encodeURIComponent(id)}`;
   try {
     const res = await fetch(
       `${API_BASE}/api/services/${encodeURIComponent(id)}`,
       { next: { revalidate: 60 }, signal: controller.signal },
     );
     clearTimeout(timeout);
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error(`[getServiceById] ${endpoint} failed with status ${res.status}`);
+      return null;
+    }
     const data = await res.json();
     return (data.service || null) as ServiceDetail | null;
-  } catch {
+  } catch (e) {
     clearTimeout(timeout);
+    console.error(`[getServiceById] ${endpoint} aborted/failed`, e);
     return null;
   }
 })
 
 export const getServiceReviews = cache(async (targetId: string): Promise<ServiceReviewsResponse> => {  const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
+  const endpoint = `/api/reviews/SERVICE_LISTING/${encodeURIComponent(targetId)}`;
   try {
     const res = await fetch(
       `${API_BASE}/api/reviews/SERVICE_LISTING/${encodeURIComponent(targetId)}`,
       { next: { revalidate: 30 }, signal: controller.signal },
     );
     clearTimeout(timeout);
-    if (!res.ok) return { reviews: [], total: 0 };
+    if (!res.ok) {
+      console.error(`[getServiceReviews] ${endpoint} failed with status ${res.status}`);
+      return { reviews: [], total: 0 };
+    }
     return res.json();
-  } catch {
+  } catch (e) {
     clearTimeout(timeout);
+    console.error(`[getServiceReviews] ${endpoint} aborted/failed`, e);
     return { reviews: [], total: 0 };
   }
 })

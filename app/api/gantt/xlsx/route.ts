@@ -68,9 +68,9 @@ export async function GET() {
     }
     s.getRow(kpiRow).height = 16; s.getRow(kpiRow + 1).height = 28; s.getRow(kpiRow + 2).height = 14;
   }
-  kpiBox(1, "✅ DONE", `${doneCount}`, `${pct}% done`, GREEN_BG, GREEN_TXT);
-  kpiBox(6, "⬜ NOT STARTED", `${notStarted}`, `to begin`, GREY_BG, GREY_TXT);
-  kpiBox(11, "🟡 IN PROGRESS", `${inProgCount}`, `active now`, YELLOW_BG, YELLOW_TXT);
+  kpiBox(1, "DONE", `${doneCount}`, `${pct}% done`, GREEN_BG, GREEN_TXT);
+  kpiBox(6, "NOT STARTED", `${notStarted}`, `to begin`, GREY_BG, GREY_TXT);
+  kpiBox(11, "IN PROGRESS", `${inProgCount}`, `active now`, YELLOW_BG, YELLOW_TXT);
 
   // Progress bar (10 segments)
   const barRow = 9;
@@ -90,10 +90,10 @@ export async function GET() {
   s.getCell("A11").value = "How to read";
   s.getCell("A11").font = { size: 10, bold: true, color: { argb: TEAL } };
   const legend: Array<[string, string, string]> = [
-    ["🟩  Green row", "Done — finished and live", GREEN_BG],
-    ["🟨  Yellow row", "In progress / in review", YELLOW_BG],
-    ["⬜  Grey row", "Not started (planned)", GREY_BG],
-    ["🟥  Red row", "Blocked — needs input", RED_BG],
+    ["Green row", "Done — finished and live", GREEN_BG],
+    ["Yellow row", "In progress / in review", YELLOW_BG],
+    ["Grey row", "Not started (planned)", GREY_BG],
+    ["Red row", "Blocked — needs input", RED_BG],
     ["◆", "Milestone (one-day checkpoint/payment)", GOLD],
   ];
   legend.forEach(([a, b, bg], i) => {
@@ -121,7 +121,7 @@ export async function GET() {
     s.getCell(`A${r}`).value = label; s.getCell(`A${r}`).font = { size: 9 }; s.getCell(`A${r}`).border = thin;
     s.getCell(`B${r}`).value = `${d} / ${tot}`; s.getCell(`B${r}`).font = { size: 9 }; s.getCell(`B${r}`).alignment = { horizontal: "center" }; s.getCell(`B${r}`).border = thin;
     const pctPh = tot ? Math.round((d / tot) * 100) : 0;
-    const status = pctPh === 100 ? "✅ Done" : pctPh === 0 ? "⬜ Not started" : `🟡 ${pctPh}%`;
+    const status = pctPh === 100 ? "Done" : pctPh === 0 ? "Not started" : `${pctPh}%`;
     const sc = s.getCell(`C${r}`); sc.value = status; sc.font = { size: 9, bold: true, color: { argb: pctPh === 100 ? GREEN_TXT : pctPh === 0 ? GREY_TXT : YELLOW_TXT } }; sc.alignment = { horizontal: "center" }; sc.border = thin;
     sc.fill = { type: "pattern", pattern: "solid", fgColor: { argb: pctPh === 100 ? GREEN_BG : pctPh === 0 ? GREY_BG : YELLOW_BG } };
     s.getCell(`A${r}`).fill = { type: "pattern", pattern: "solid", fgColor: { argb: pctPh === 100 ? GREEN_BG : pctPh === 0 ? GREY_BG : YELLOW_BG } };
@@ -140,7 +140,7 @@ export async function GET() {
   // ── Sheet 2: WORK TRACKER (one row per task, status = color) ──
   const w = wb.addWorksheet("Work Tracker", { properties: { tabColor: { argb: GREEN_TXT } } });
   // Title row
-  w.getCell("A1").value = "Work Tracker — ✅ green = done, ⬜ grey = to do · Filter by Status · Edit Status to update";
+  w.getCell("A1").value = "Work Tracker — green = done, grey = to do · Filter by Status · Edit Status to update";
   w.getCell("A1").font = { size: 10, bold: true, color: { argb: TEAL } };
   w.mergeCells("A1:E1");
 
@@ -153,10 +153,10 @@ export async function GET() {
   w.autoFilter = { from: { row: 2, column: 1 }, to: { row: 2, column: headers.length } };
 
   function statusStyle(sv: string) {
-    if (sv === "Done") return { bg: GREEN_BG, fg: GREEN_TXT, label: "✅ Done" };
-    if (sv === "In Progress" || sv === "In Review") return { bg: YELLOW_BG, fg: YELLOW_TXT, label: `🟡 ${sv}` };
-    if (sv === "Blocked") return { bg: RED_BG, fg: "FF991B1B", label: "🟥 Blocked" };
-    return { bg: GREY_BG, fg: GREY_TXT, label: "⬜ Not started" };
+    if (sv === "Done") return { bg: GREEN_BG, fg: GREEN_TXT, label: "Done" };
+    if (sv === "In Progress" || sv === "In Review") return { bg: YELLOW_BG, fg: YELLOW_TXT, label: sv };
+    if (sv === "Blocked") return { bg: RED_BG, fg: "FF991B1B", label: "Blocked" };
+    return { bg: GREY_BG, fg: GREY_TXT, label: "Not started" };
   }
 
   // Emit phase header + tasks grouped
@@ -169,7 +169,7 @@ export async function GET() {
     const phBg = isDone ? GREEN_BG : isNotStarted ? MID_GREY_BG : YELLOW_BG;
     const phFg = isDone ? GREEN_TXT : isNotStarted ? GREY_TXT : YELLOW_TXT;
 
-    const phRow = w.addRow([ph.name.replace("Phase ", ""), `${d}/${tot} done`, isDone ? "✅ Done" : isNotStarted ? "⬜ Not started" : `🟡 ${Math.round((d / tot) * 100)}%`, "", ph.deliverable ?? ""]);
+    const phRow = w.addRow([ph.name.replace("Phase ", ""), `${d}/${tot} done`, isDone ? "Done" : isNotStarted ? "Not started" : `${Math.round((d / tot) * 100)}%`, "", ph.deliverable ?? ""]);
     phRow.eachCell((c) => { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: phBg } }; c.font = { size: 10, bold: true, color: { argb: phFg } }; c.border = thin; c.alignment = { vertical: "middle" }; });
     phRow.height = 18;
 
@@ -181,7 +181,7 @@ export async function GET() {
       const st = statusStyle(sv);
       const row = w.addRow([
         "", // phase col blank for child (grouping via header)
-        isMilestone ? `◆ ${t.name.replace(/^◆\s*/, "")}` : `  ${t.name}`,
+        isMilestone ? `• ${t.name.replace(/^[◆•]\s*/, "")}` : `  ${t.name}`,
         st.label,
         when,
         t.deliverable ?? "",
@@ -195,7 +195,7 @@ export async function GET() {
       // Status dropdown per task row
       // ref by row number
       const rIdx = row.number;
-      w.getCell(`C${rIdx}`).dataValidation = { type: "list", formulae: ['"✅ Done,🟡 In Progress,🟡 In Review,⬜ Not started,🟥 Blocked"'], showErrorMessage: false } as unknown as ExcelJS.DataValidation;
+      w.getCell(`C${rIdx}`).dataValidation = { type: "list", formulae: ['"Done,In Progress,In Review,Not started,Blocked"'], showErrorMessage: false } as unknown as ExcelJS.DataValidation;
     }
   }
 
@@ -223,7 +223,7 @@ export async function GET() {
   for (const d of DELIVERABLES_CHECKLIST) {
     const isDone = d.status === "Done";
     const isOOS = d.status === "Out of Scope";
-    const label = isDone ? "✅ Done" : isOOS ? "— Out of scope" : "⬜ To do";
+    const label = isDone ? "Done" : isOOS ? "— Out of scope" : "To do";
     const bg = isDone ? GREEN_BG : isOOS ? MID_GREY_BG : GREY_BG;
     const fg = isDone ? GREEN_TXT : isOOS ? GREY_TXT : GREY_TXT;
     const r = chk.addRow([d.deliverable, label, d.contract]);
@@ -232,7 +232,7 @@ export async function GET() {
       c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: bg } };
       if (isOOS) c.font = { size: 9, color: { argb: GREY_TXT }, italic: true };
     });
-    r.getCell(2).dataValidation = { type: "list", formulae: ['"✅ Done,⬜ To do,🟡 In progress,— Out of scope"'], showErrorMessage: false } as unknown as ExcelJS.DataValidation;
+    r.getCell(2).dataValidation = { type: "list", formulae: ['"Done,To do,In progress,— Out of scope"'], showErrorMessage: false } as unknown as ExcelJS.DataValidation;
     r.height = 18;
   }
   chk.getColumn(1).width = 68;

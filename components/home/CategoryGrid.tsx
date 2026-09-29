@@ -41,7 +41,7 @@ const categoryConfigs: readonly Omit<Category, "count">[] = [
   },
   {
     title: "Fundis",
-    href: "/fundis",
+    href: "/services?type=FUNDI",
     icon: Wrench,
     desc: "Skilled trades",
   },

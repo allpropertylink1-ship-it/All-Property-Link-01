@@ -53,6 +53,9 @@ const nextConfig = {
     return [
       { source: "/agents", destination: "/aplreps", permanent: true },
       { source: "/agents/:id", destination: "/aplreps/:id", permanent: true },
+      // Option B consolidation: /fundis merged into /services (type=FUNDI).
+      // Incoming query (?category=&city=&search=&page=) is merged automatically.
+      { source: "/fundis", destination: "/services?type=FUNDI", permanent: true },
     ];
   },
 };

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getServiceListings, getServiceCategories } from "@/lib/services/service";
 import type { ServiceCategory, ServiceListingCard } from "@/lib/services/service";
-import { Search, MapPin, Shield, Clock, Briefcase, ArrowRight } from "@/components/ui/icons";
+import { Search, Shield, Clock, Briefcase, ArrowRight } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { siteUrl } from "@/lib/seo";
 import { ServiceCardCompact } from "@/components/browse/ServiceCardCompact";
@@ -126,7 +126,6 @@ export default async function ServicesPage({ searchParams }: Props) {
               />
             </div>
             <div className="relative w-full lg:w-72">
-              <MapPin size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
               <label htmlFor="service-city" className="sr-only">
                 Location
               </label>
@@ -137,7 +136,7 @@ export default async function ServicesPage({ searchParams }: Props) {
                 defaultValue={city || ""}
                 placeholder="All locations"
                 autoComplete="address-level2"
-                className="min-h-touch w-full rounded-lg border border-transparent bg-surface py-3 pl-10 pr-4 text-[16px] text-text-primary placeholder:text-muted focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                className="min-h-touch w-full rounded-lg border border-transparent bg-surface py-3 px-4 text-[16px] text-text-primary placeholder:text-muted focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               />
             </div>
             <div className="flex gap-2">
@@ -161,7 +160,7 @@ export default async function ServicesPage({ searchParams }: Props) {
 
           {/* ─── Category rails ─── */}
           {categories.length > 0 && (
-            <nav aria-label="Service categories" className="flex gap-2 overflow-x-auto pb-1">
+            <nav aria-label="Service categories" className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
               <Link
                 href={categoryHref(undefined)}
                 aria-current={!category ? "page" : undefined}
@@ -197,7 +196,7 @@ export default async function ServicesPage({ searchParams }: Props) {
           )}
 
           {/* ─── Fundi / provider toggle ─── */}
-          <div className="flex gap-2" role="group" aria-label="Provider type">
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Provider type">
             <Link
               href={typeHref(undefined)}
               aria-current={!type ? "page" : undefined}
@@ -239,8 +238,8 @@ export default async function ServicesPage({ searchParams }: Props) {
       </section>
 
       {/* ─── Results ─── */}
-      <section className="mx-auto max-w-7xl px-4 py-8" aria-live="polite">
-        <p className="mb-6 border-b border-border pb-3 text-sm text-text-secondary">
+      <section className="mx-auto max-w-7xl px-4 py-8 pb-24 md:pb-8">
+        <p aria-live="polite" role="status" className="mb-6 border-b border-border pb-3 text-sm text-text-secondary">
           Showing{" "}
           <strong className="text-text-primary">
             {data.services.length} of {data.total}
@@ -294,30 +293,56 @@ export default async function ServicesPage({ searchParams }: Props) {
 
         {data.totalPages > 1 && (
           <nav aria-label="Services pages" className="mt-8 flex flex-wrap items-center justify-center gap-2 border-t border-border pt-6">
-            {Array.from({ length: data.totalPages }, (_, i) => i + 1).map((p) => {
-              const params = new URLSearchParams();
-              if (category) params.set("category", category);
-              if (city) params.set("city", city);
-              if (search) params.set("search", search);
-              if (type) params.set("type", type);
-              params.set("page", String(p));
-              return (
-                <Link
-                  key={p}
-                  href={`/services?${params}`}
-                  aria-current={p === data.page ? "page" : undefined}
-                  aria-label={`Page ${p}`}
-                  className={cn(
-                    "inline-flex min-h-touch min-w-touch items-center justify-center rounded-lg border px-4 py-2 text-sm",
-                    p === data.page
-                      ? "border-primary-600 bg-primary-600 font-bold text-white"
-                      : "border-border text-text-secondary hover:bg-surface-secondary",
-                  )}
-                >
-                  {p}
-                </Link>
-              );
-            })}
+            {(() => {
+              const current = data.page;
+              const totalPages = data.totalPages;
+              const visible: (number | "ellipsis-start" | "ellipsis-end")[] =
+                totalPages <= 7
+                  ? Array.from({ length: totalPages }, (_, i) => i + 1)
+                  : (() => {
+                      const win = [current - 1, current, current + 1].filter(
+                        (p) => p > 1 && p < totalPages,
+                      );
+                      const out: (number | "ellipsis-start" | "ellipsis-end")[] = [1];
+                      if (win.length > 0 && win[0] > 2) out.push("ellipsis-start");
+                      out.push(...win);
+                      if (win.length > 0 && win[win.length - 1] < totalPages - 1)
+                        out.push("ellipsis-end");
+                      out.push(totalPages);
+                      return out;
+                    })();
+              return visible.map((p) => {
+                if (typeof p !== "number") {
+                  return (
+                    <span key={p} aria-hidden="true" className="px-1 text-sm text-text-secondary">
+                      …
+                    </span>
+                  );
+                }
+                const params = new URLSearchParams();
+                if (category) params.set("category", category);
+                if (city) params.set("city", city);
+                if (search) params.set("search", search);
+                if (type) params.set("type", type);
+                params.set("page", String(p));
+                return (
+                  <Link
+                    key={p}
+                    href={`/services?${params}`}
+                    aria-current={p === data.page ? "page" : undefined}
+                    aria-label={`Page ${p}`}
+                    className={cn(
+                      "inline-flex min-h-touch min-w-touch items-center justify-center rounded-lg border px-4 py-2 text-sm",
+                      p === data.page
+                        ? "border-primary-600 bg-primary-600 font-bold text-white"
+                        : "border-border text-text-secondary hover:bg-surface-secondary",
+                    )}
+                  >
+                    {p}
+                  </Link>
+                );
+              });
+            })()}
           </nav>
         )}
       </section>

@@ -9,7 +9,7 @@ import { resolveImageUrl } from "@/lib/images";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
-import { Phone, Mail, Globe, Sparkles, MessageCircle, Star, MapPin, Briefcase } from "@/components/ui/icons";
+import { Phone, Mail, Globe, Sparkles, MessageCircle, Star, Briefcase } from "@/components/ui/icons";
 
 interface Props {
   params: { id: string };
@@ -19,26 +19,32 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const service = await getServiceById(params.id);
   if (!service) return {};
   const description = (service.description || "").replace(/\s+/g, " ").trim().slice(0, 158);
-  const image = Array.isArray(service.images)
+  const rawImage = Array.isArray(service.images)
     ? service.images.find((u): u is string => typeof u === "string")
+    : undefined;
+  const resolved = rawImage ? resolveImageUrl(rawImage) : null;
+  const absoluteImage = resolved
+    ? resolved.startsWith("/")
+      ? `${siteUrl()}${resolved}`
+      : resolved
     : undefined;
   return {
     title: service.title,
     description,
     alternates: { canonical: `/services/${service.id}` },
     openGraph: {
-    title: `${service.title} â€” All Property Link`,
+    title: `${service.title} — All Property Link`,
       description,
       type: "website",
       locale: "en_KE",
       siteName: "All Property Link",
-      images: image ? [{ url: image, alt: service.title }] : undefined,
+      images: absoluteImage ? [{ url: absoluteImage, alt: service.title }] : undefined,
     },
   };
 }
 
 function formatServicePrice(price: number | null | undefined, currency: string, period: string) {
-  if (price == null) return "Price on request";
+  if (price == null) return null;
   const formatted = `${currency} ${Number(price).toLocaleString()}`;
   if (period === "PER_MONTH") return `${formatted}/month`;
   if (period === "PER_NIGHT") return `${formatted}/night`;
@@ -58,6 +64,91 @@ function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
         />
       ))}
     </span>
+  );
+}
+
+function ContactActions({
+  phone,
+  email,
+  title,
+  variant,
+}: {
+  phone?: string | null;
+  email?: string | null;
+  title: string;
+  variant: "compact" | "full";
+}) {
+  if (!phone && !email) return null;
+  const waHref = phone
+    ? `https://wa.me/${phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in ${title}`)}`
+    : null;
+  if (variant === "compact") {
+    return (
+      <div className="flex flex-wrap gap-2">
+        {phone && (
+          <>
+            <a
+              href={waHref as string}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex min-h-touch items-center gap-1.5 rounded-lg bg-whatsapp px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-whatsapp-dark"
+            >
+              <MessageCircle size={14} />
+              WhatsApp
+            </a>
+            <a
+              href={`tel:${phone}`}
+              className="flex min-h-touch items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
+            >
+              <Phone size={14} />
+              Call
+            </a>
+          </>
+        )}
+        {email && (
+          <a
+            href={`mailto:${email}`}
+            className="flex min-h-touch items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
+          >
+            <Mail size={14} />
+            Email
+          </a>
+        )}
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-2.5">
+      {phone && (
+        <>
+          <a
+            href={waHref as string}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex min-h-touch w-full items-center justify-center gap-2 rounded-lg bg-whatsapp px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-whatsapp-dark"
+          >
+            <MessageCircle size={16} />
+            WhatsApp
+          </a>
+          <a
+            href={`tel:${phone}`}
+            className="flex min-h-touch w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
+          >
+            <Phone size={16} className="shrink-0" />
+            {phone}
+          </a>
+        </>
+      )}
+      {email && (
+        <a
+          href={`mailto:${email}`}
+          className="flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
+        >
+          <Mail size={16} className="shrink-0" />
+          {email}
+        </a>
+      )}
+    </div>
   );
 }
 
@@ -84,7 +175,7 @@ export default async function ServiceDetailPage({ params }: Props) {
   const shelfNameOf = (id: string): string =>
     shelves.find((s) => s.id === id)?.name ?? "Shelf";
 
-  // Multi-shelf: one advert may span several sectors â€” show each selected shelf.
+  // Multi-shelf: one advert may span several sectors — show each selected shelf.
   const shelves = (
     Array.isArray(service.categories) && service.categories.length > 0
       ? service.categories
@@ -117,7 +208,7 @@ export default async function ServiceDetailPage({ params }: Props) {
     <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }} />
       <div className="grid gap-6 lg:grid-cols-[240px_1fr_280px] lg:gap-8 xl:grid-cols-[260px_1fr_300px]">
-        {/* â”€â”€â”€ LEFT SIDEBAR: Provider Profile â”€â”€â”€ */}
+        {/* ─── LEFT SIDEBAR: Provider Profile ─── */}
         <aside className="hidden space-y-5 lg:block">
           {service.user && (
             <div className="rounded-xl border border-border bg-surface p-5">
@@ -201,8 +292,7 @@ export default async function ServiceDetailPage({ params }: Props) {
               )}
 
               <div className="mt-3 border-t border-border pt-3">
-                <p className="flex items-center gap-1.5 text-xs text-text-secondary">
-                  <MapPin size={12} className="shrink-0" />
+                <p className="text-xs text-text-secondary">
                   {service.city}
                   {service.region && `, ${service.region}`}
                 </p>
@@ -212,7 +302,7 @@ export default async function ServiceDetailPage({ params }: Props) {
 
         </aside>
 
-        {/* â”€â”€â”€ CENTER: Gallery + Details + Reviews â”€â”€â”€ */}
+        {/* ─── CENTER: Gallery + Details + Reviews ─── */}
         <div className="min-w-0 space-y-5">
           <PropertyGallery images={galleryUrls} title={service.title} />
 
@@ -220,7 +310,7 @@ export default async function ServiceDetailPage({ params }: Props) {
             <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
               {shelves.map((shelf, i) => (
                 <span key={shelf.id} className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-primary-600">
-                  {i > 0 && <span aria-hidden="true" className="text-text-secondary">Â·</span>}
+                  {i > 0 && <span aria-hidden="true" className="text-text-secondary">·</span>}
                   <Link href={`/services?category=${shelf.slug}`} className="hover:text-primary-700">
                     {shelf.name}
                   </Link>
@@ -234,6 +324,7 @@ export default async function ServiceDetailPage({ params }: Props) {
               {service.region && `${service.region}, `}
               {service.city || service.location}
             </p>
+            {service.price != null && (
             <p className="mt-2.5 font-heading text-2xl font-bold text-primary-600 sm:text-3xl">
               {formatServicePrice(
                 service.price != null ? Number(service.price) : null,
@@ -241,6 +332,7 @@ export default async function ServiceDetailPage({ params }: Props) {
                 service.pricePeriod,
               )}
             </p>
+            )}
             {shelfPriceRows.length > 0 && (
               <dl className="mt-3 space-y-1.5 rounded-xl border border-border bg-surface-secondary/40 p-3">
                 {shelfPriceRows.map((row) => (
@@ -285,45 +377,20 @@ export default async function ServiceDetailPage({ params }: Props) {
                     {service.user.companyName || `${service.user.firstName} ${service.user.lastName}`}
                   </p>
                   {shelves.length > 0 && (
-                    <span className="text-xs text-primary-600">{shelves.map((s) => s.name).join(" Â· ")}</span>
+                    <span className="text-xs text-primary-600">{shelves.map((s) => s.name).join(" · ")}</span>
                   )}
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {service.user.phone && (
-                  <>
-                      <a
-                        href={`https://wa.me/${service.user.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in ${service.title}`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex min-h-touch items-center gap-1.5 rounded-lg bg-whatsapp px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-whatsapp-dark"
-                      >
-                        <MessageCircle size={14} />
-                        WhatsApp
-                      </a>
-                      <a
-                        href={`tel:${service.user.phone}`}
-                        className="flex min-h-touch items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
-                      >
-                        <Phone size={14} />
-                        Call
-                      </a>
-                  </>
-                )}
-                {service.user.email && (
-                  <a
-                    href={`mailto:${service.user.email}`}
-                    className="flex min-h-touch items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
-                  >
-                    <Mail size={14} />
-                    Email
-                  </a>
-                )}
-              </div>
+              <ContactActions
+                phone={service.user.phone}
+                email={service.user.email}
+                title={service.title}
+                variant="compact"
+              />
             </div>
           )}
 
-          {/* â”€â”€â”€ Reviews Section (customer reviews of the provider) â”€â”€â”€ */}
+          {/* ─── Reviews Section (customer reviews of the provider) ─── */}
           {reviewData && providerId && (
             <div>
               <h2 className="mb-4 text-sm font-semibold text-text-primary">
@@ -344,43 +411,18 @@ export default async function ServiceDetailPage({ params }: Props) {
           )}
         </div>
 
-        {/* â”€â”€â”€ RIGHT SIDEBAR: Contact + Share â”€â”€â”€ */}
+        {/* ─── RIGHT SIDEBAR: Contact + Share ─── */}
         <aside className="min-w-0 space-y-5">
           {service.user && (
             <>
               <div className="rounded-xl border border-border bg-surface p-5">
                 <h3 className="mb-4 font-heading text-sm font-semibold text-text-primary">Contact</h3>
-                <div className="space-y-2.5">
-                  {service.user.phone && (
-                    <>
-                      <a
-                        href={`https://wa.me/${service.user.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in ${service.title}`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex min-h-touch w-full items-center justify-center gap-2 rounded-lg bg-whatsapp px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-whatsapp-dark"
-                      >
-                        <MessageCircle size={16} />
-                        WhatsApp
-                      </a>
-                      <a
-                        href={`tel:${service.user.phone}`}
-                        className="flex min-h-touch w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
-                      >
-                        <Phone size={16} className="shrink-0" />
-                        {service.user.phone}
-                      </a>
-                    </>
-                  )}
-                  {service.user.email && (
-                      <a
-                        href={`mailto:${service.user.email}`}
-                        className="flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
-                      >
-                        <Mail size={16} className="shrink-0" />
-                        {service.user.email}
-                      </a>
-                  )}
-                </div>
+                <ContactActions
+                  phone={service.user.phone}
+                  email={service.user.email}
+                  title={service.title}
+                  variant="full"
+                />
               </div>
 
               <div className="rounded-xl border border-border bg-surface p-5">
