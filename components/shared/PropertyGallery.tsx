@@ -97,14 +97,15 @@ export function PropertyGallery({ images: rawImages, title }: Props) {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Main image */}
-        <div className="relative overflow-hidden rounded-lg" style={{ aspectRatio: "4 / 3" }}>
+        {/* Main image — 4:3 on mobile, 16:9 on tablet, 21:9 capped on desktop
+            so the viewer stays compact and the full photo stays visible. */}
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg sm:aspect-video lg:aspect-[21/9] lg:max-h-[520px]">
           <div className="relative h-full w-full">
             <button type="button" onClick={() => openLightbox(current)} className="relative block h-full w-full" aria-label="View image full-screen">
               <img
                 src={images[current]}
                 alt={`${title} — image ${current + 1} of ${images.length}`}
-                className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
+                className="absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-300"
                 onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER_GALLERY }}
               />
             </button>
