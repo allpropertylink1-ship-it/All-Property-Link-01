@@ -89,7 +89,7 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
                 </div>
               ))}
             </div>
-            <div className="hidden gap-4 lg:grid lg:grid-cols-2" aria-busy="true" aria-label="Loading latest properties">
+            <div className="hidden gap-4 lg:grid lg:grid-cols-3" aria-busy="true" aria-label="Loading latest properties">
               {Array.from({ length: 6 }).map((_, i) => (
                 <FullSkeleton key={i} />
               ))}
@@ -111,8 +111,8 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
                 </div>
               ))}
             </div>
-            {/* Desktop: 2 columns x 3 rows */}
-            <div className="hidden gap-4 lg:grid lg:grid-cols-2">
+            {/* Desktop: 3 columns x 2 rows — keeps square images compact */}
+            <div className="hidden gap-4 lg:grid lg:grid-cols-3">
               {properties.map((p, i) => (
                 <LatestListCard key={p.slug} item={withPhone(p)} priority={i === 0} />
               ))}
