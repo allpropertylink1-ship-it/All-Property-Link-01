@@ -9,6 +9,7 @@ import { FeaturedFundis } from "@/components/home/FeaturedFundis"
 import { FeaturedProviders } from "@/components/home/FeaturedProviders"
 import { CTASection } from "@/components/home/CTASection"
 import { LatestListCard, type LatestListCardData } from "@/components/home/LatestListCard"
+import { SectionHeading } from "@/components/home/SectionHeading"
 import type { PropertyCard as PropertyCardType } from "@/lib/services/property"
 import type { ProfileRow } from "@/components/home/ProfileCard"
 
@@ -26,9 +27,12 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
     <section aria-labelledby="home-land-heading" className="bg-surface">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <h2 id="home-land-heading" className="font-poppins text-[28px] font-semibold leading-tight tracking-tight text-text-primary sm:text-[32px]">
-            Prime Land &amp; Development Plots
-          </h2>
+          <SectionHeading
+            id="home-land-heading"
+            eyebrow="Own a piece of Kenya"
+            title="Prime Land & Development Plots"
+            subtitle="Titled plots ready to build, farm or hold"
+          />
           <Link
             href="/land"
             className="inline-flex min-h-touch shrink-0 items-center gap-1.5 text-sm font-bold text-primary transition-colors hover:text-accent-600"
@@ -37,10 +41,10 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
             <ArrowRight size={18} aria-hidden="true" />
           </Link>
         </div>
-        {/* Mobile + tablet rail: horizontal snap scroll */}
+        {/* Mobile + tablet rail: one full card per viewport snap */}
         <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide lg:hidden">
           {properties.map((p, i) => (
-                <div key={p.slug} className="w-[78%] shrink-0 snap-start sm:w-[45%]">
+                <div key={p.slug} className="w-full shrink-0 snap-start snap-always sm:w-[calc(50%-8px)]">
                   <LatestListCard item={withPhone(p)} priority={i === 0} />
                 </div>
           ))}
@@ -73,10 +77,10 @@ export function HomePageClient({
     <>
       <HeroSection />
       <FeaturedProperties initialData={saleRent} />
-      <FeaturedLand initialData={land} />
       <FeaturedAirbnbs initialData={airbnbs} />
-      <FeaturedFundis initialData={fundis} servicePills={providers.slice(0, 2)} />
+      <FeaturedLand initialData={land} />
       <FeaturedProviders initialData={providers} />
+      <FeaturedFundis initialData={fundis} servicePills={providers.slice(0, 2)} />
       <CTASection />
     </>
   )

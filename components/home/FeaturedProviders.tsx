@@ -5,6 +5,7 @@ import Link from "next/link"
 import { ArrowRight, MessageCircle, Phone } from "@/components/ui/icons"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { ProfileCard, type ProfileRow } from "./ProfileCard"
+import { SectionHeading } from "./SectionHeading"
 
 function displayName(item: ProfileRow) {
   if (item.user.companyName) return item.user.companyName
@@ -79,11 +80,12 @@ export function FeaturedProviders({ initialData }: { initialData?: ProfileRow[] 
     <section aria-labelledby="home-providers-heading" className="bg-surface">
       <div className="container mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 id="home-providers-heading" className="font-heading text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
-              Service Providers
-            </h2>
-          </div>
+          <SectionHeading
+            id="home-providers-heading"
+            eyebrow="Hire with confidence"
+            title="Service Providers"
+            subtitle="Cleaning, moving, security & more"
+          />
           <Link
             href="/services"
             className="inline-flex min-h-touch shrink-0 items-center gap-1.5 text-sm font-bold text-primary transition-colors hover:text-accent-600"

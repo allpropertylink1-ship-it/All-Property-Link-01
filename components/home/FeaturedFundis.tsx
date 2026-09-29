@@ -5,6 +5,7 @@ import Link from "next/link"
 import { ArrowRight, Briefcase, MessageCircle, Phone } from "@/components/ui/icons"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { ProfileCard, type ProfileRow } from "./ProfileCard"
+import { SectionHeading } from "./SectionHeading"
 import { getTradeLabel } from "@/lib/trade-label"
 
 function displayName(item: ProfileRow) {
@@ -111,11 +112,12 @@ export function FeaturedFundis({
     <section aria-labelledby="home-fundis-heading" className="bg-surface-secondary">
       <div className="container mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 id="home-fundis-heading" className="font-heading text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
-              Verified Fundis &amp; Specialized Technicians
-            </h2>
-          </div>
+          <SectionHeading
+            id="home-fundis-heading"
+            eyebrow="ID-checked pros near you"
+            title="Verified Fundis & Specialized Technicians"
+            subtitle="Plumbers, electricians, masons & more"
+          />
           <Link
             href="/services"
             className="inline-flex min-h-touch shrink-0 items-center gap-1.5 text-sm font-bold text-primary transition-colors hover:text-accent-600"

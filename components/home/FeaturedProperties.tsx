@@ -5,6 +5,7 @@ import Link from "next/link"
 import { ArrowRight } from "@/components/ui/icons"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { LatestListCard, type LatestListCardData } from "@/components/home/LatestListCard"
+import { SectionHeading } from "@/components/home/SectionHeading"
 
 interface ApiProperty extends LatestListCardData {
   currency: string
@@ -31,7 +32,7 @@ function isSaleOrRent(p: ApiProperty) {
 function FullSkeleton() {
   return (
     <div className="animate-pulse overflow-hidden rounded border-[1.25px] border-[#E5E7EB] bg-white">
-      <div className="h-[200px] w-full bg-surface-secondary" />
+      <div className="aspect-square w-full bg-surface-secondary" />
       <div className="space-y-2 p-4">
         <div className="h-4 w-2/3 rounded bg-surface-secondary" />
         <div className="h-3 w-1/2 rounded bg-surface-secondary" />
@@ -65,14 +66,12 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
     <section aria-labelledby="home-latest-heading" className="bg-surface">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 id="home-latest-heading" className="font-poppins text-[28px] font-semibold leading-tight tracking-tight text-text-primary sm:text-[32px]">
-              Latest Properties
-            </h2>
-            <p className="mt-2 font-poppins text-base font-normal leading-6 text-text-secondary">
-              Find Your Dream Property
-            </p>
-          </div>
+          <SectionHeading
+            id="home-latest-heading"
+            eyebrow="Fresh on the market"
+            title="Latest Properties"
+            subtitle="Find Your Dream Property"
+          />
           <Link
             href="/properties"
             className="inline-flex min-h-touch shrink-0 items-center gap-1.5 text-sm font-bold text-primary transition-colors hover:text-accent-600"
@@ -85,7 +84,7 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
           <>
             <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scrollbar-hide lg:hidden" aria-busy="true" aria-label="Loading latest properties">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="w-[78%] shrink-0 snap-start sm:w-[45%]">
+                <div key={i} className="w-full shrink-0 snap-start snap-always sm:w-[calc(50%-8px)]">
                   <FullSkeleton />
                 </div>
               ))}
@@ -104,10 +103,10 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
           </p>
         ) : (
           <>
-            {/* Mobile + tablet rail: horizontal snap scroll */}
+            {/* Mobile + tablet rail: one full card per viewport snap */}
             <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide lg:hidden">
               {properties.map((p, i) => (
-                <div key={p.slug} className="w-[78%] shrink-0 snap-start sm:w-[45%]">
+                <div key={p.slug} className="w-full shrink-0 snap-start snap-always sm:w-[calc(50%-8px)]">
                   <LatestListCard item={withPhone(p)} priority={i === 0} />
                 </div>
               ))}
