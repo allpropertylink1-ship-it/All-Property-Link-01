@@ -97,9 +97,9 @@ export function PropertyGallery({ images: rawImages, title }: Props) {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Main image — 4:3 on mobile, 16:9 on tablet, 21:9 capped on desktop
-            so the viewer stays compact and the full photo stays visible. */}
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg sm:aspect-video lg:aspect-[21/9] lg:max-h-[520px]">
+        {/* Main image — 4:3 on mobile, 16:9 on tablet, compact capped strip on desktop
+            so the viewer stays small and the full photo stays visible. */}
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg sm:aspect-video lg:aspect-auto lg:h-[380px] xl:h-[420px]">
           <div className="relative h-full w-full">
             <button type="button" onClick={() => openLightbox(current)} className="relative block h-full w-full" aria-label="View image full-screen">
               <img
