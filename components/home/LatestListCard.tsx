@@ -3,7 +3,9 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { BedDouble, Bath, Maximize2, MapPin, Phone, Mail, ChevronRight } from "@/components/ui/icons"
+import { MapPin, Phone, Mail, ChevronRight } from "@/components/ui/icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faBed, faBath, faRulerCombined } from "@fortawesome/free-solid-svg-icons"
 import { formatPrice } from "@/lib/utils"
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders"
 import { getCoverImage, getGalleryImages, optimizeImageUrl } from "@/lib/images"
@@ -53,7 +55,13 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
   const [active, setActive] = useState(0)
   const [fav, setFav] = useState(false)
 
-  const isLand = (item.propertyType || "").toUpperCase() === "LAND"
+  const propertyKind = (item.propertyType || "").toUpperCase()
+  const isLand = propertyKind === "LAND"
+  // Beds/baths only make sense for living spaces — hidden for LAND/COMMERCIAL.
+  const isNonLiving = propertyKind === "LAND" || propertyKind === "COMMERCIAL"
+  const hasBeds = item.bedrooms != null && item.bedrooms > 0
+  const hasBaths = item.bathrooms != null && item.bathrooms > 0
+  const hasArea = item.area != null && item.area > 0
   const detailHref = `${isLand ? "/land" : "/properties"}/${slugifyCity(item.city || "kenya")}/${item.slug}`
   const purpose = purposeLabel(item.listingPurpose ?? null)
   const safeActive = Math.min(active, slides.length - 1)
@@ -146,24 +154,43 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
           <h3 className="line-clamp-1 font-poppins text-[14px] font-semibold leading-5">{item.title}</h3>
         </Link>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-poppins text-[14px] font-light leading-5 text-[#4B5569]">
-          {item.bedrooms != null && item.bedrooms > 0 && (
-            <span className="inline-flex items-center gap-1">
-              <BedDouble size={14} aria-hidden="true" />
-              {item.bedrooms} {item.bedrooms === 1 ? "Bed" : "Beds"}
+          {!isNonLiving && (
+            <span
+              className="inline-flex items-center gap-1"
+              aria-label={hasBeds ? `${item.bedrooms} bedrooms` : "Bedrooms not specified"}
+            >
+              <FontAwesomeIcon icon={faBed} aria-hidden="true" />
+              {hasBeds ? (
+                <>{item.bedrooms} {item.bedrooms === 1 ? "Bed" : "Beds"}</>
+              ) : (
+                "_ Beds"
+              )}
             </span>
           )}
-          {item.bathrooms != null && item.bathrooms > 0 && (
-            <span className="inline-flex items-center gap-1">
-              <Bath size={14} aria-hidden="true" />
-              {item.bathrooms} {item.bathrooms === 1 ? "Bath" : "Baths"}
+          {!isNonLiving && (
+            <span
+              className="inline-flex items-center gap-1"
+              aria-label={hasBaths ? `${item.bathrooms} bathrooms` : "Bathrooms not specified"}
+            >
+              <FontAwesomeIcon icon={faBath} aria-hidden="true" />
+              {hasBaths ? (
+                <>{item.bathrooms} {item.bathrooms === 1 ? "Bath" : "Baths"}</>
+              ) : (
+                "_ Baths"
+              )}
             </span>
           )}
-          {item.area != null && item.area > 0 && (
-            <span className="inline-flex items-center gap-1">
-              <Maximize2 size={14} aria-hidden="true" />
-              {item.area.toLocaleString()} Sqft
-            </span>
-          )}
+          <span
+            className="inline-flex items-center gap-1"
+            aria-label={hasArea ? `${item.area?.toLocaleString()} square feet` : "Size not specified"}
+          >
+            <FontAwesomeIcon icon={faRulerCombined} aria-hidden="true" />
+            {hasArea ? (
+              <>{item.area?.toLocaleString()} Sqft</>
+            ) : (
+              "___ Sqft"
+            )}
+          </span>
         </div>
         <p className="flex items-center gap-1 font-poppins text-[14px] font-light leading-5 text-[#4B5569]">
           <MapPin size={14} aria-hidden="true" className="shrink-0" />
