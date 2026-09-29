@@ -290,10 +290,6 @@ export function BrowseResultsGrid({
     <div className="space-y-4">
       <div className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-sm md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col">
-          <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-success-600">
-            <span className="h-2 w-2 rounded-full bg-success-500" aria-hidden="true" />
-            Live Feed Verified
-          </p>
           <p className="mt-1 font-heading text-lg font-bold text-text-primary" aria-live="polite">
             {total} {total === 1 ? itemType : `${itemType}s`} found
             {searchVal ? (

@@ -427,10 +427,6 @@ export default function BrowsePageClient() {
   return (
     <div className="mx-auto max-w-content px-4 py-6">
       <div className="mb-6">
-        <p className="text-xs font-bold uppercase tracking-wider text-success-600">
-          <span className="mr-2 inline-block h-2 w-2 rounded-full bg-success-500" aria-hidden="true" />
-          Live Feed Verified
-        </p>
         <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">Browse All Listings</h1>
         <p className="mt-1 text-sm text-text-secondary">Explore everything available on All Property Link</p>
       </div>

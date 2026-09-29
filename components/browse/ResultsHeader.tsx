@@ -36,7 +36,6 @@ function ListIcon({ className }: { className?: string }) {
 interface ResultsHeaderProps {
   title: string;
   subtitle?: string;
-  liveLabel?: string;
   sort: CatalogSortKey;
   onSortChange: (sort: CatalogSortKey) => void;
   layout: CatalogLayout;
@@ -46,7 +45,6 @@ interface ResultsHeaderProps {
 export function ResultsHeader({
   title,
   subtitle,
-  liveLabel = "Live Feed Verified",
   sort,
   onSortChange,
   layout,
@@ -55,10 +53,6 @@ export function ResultsHeader({
   return (
     <div className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-sm md:flex-row md:items-center md:justify-between">
       <div className="flex flex-col">
-        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-success-600">
-          <span className="h-2 w-2 rounded-full bg-success-500" aria-hidden="true" />
-          {liveLabel}
-        </p>
         <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">
           {title}
         </h1>

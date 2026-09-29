@@ -122,7 +122,6 @@ export function PropertiesPageClient({ searchParams }: Props) {
           <main className="flex flex-col gap-6 lg:col-span-8 xl:col-span-9">
             <ResultsHeader
               title={`${data?.total ?? "…"} Prime ${data?.total === 1 ? "Property" : "Properties"} Available`}
-              subtitle="Residential sanctuaries, investment land, and serviced apartments across Kenya."
               sort={sort}
               onSortChange={pushSort}
               layout={layout}
