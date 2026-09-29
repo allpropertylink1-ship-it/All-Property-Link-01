@@ -3,9 +3,17 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { MapPin, Phone, Mail, ChevronRight } from "@/components/ui/icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faBed, faBath, faRulerCombined } from "@fortawesome/free-solid-svg-icons"
+import {
+  faBed,
+  faBath,
+  faRulerCombined,
+  faLocationDot,
+  faPhone,
+  faEnvelope,
+  faChevronRight,
+  faHeart,
+} from "@fortawesome/free-solid-svg-icons"
 import { formatPrice } from "@/lib/utils"
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders"
 import { getCoverImage, getGalleryImages, optimizeImageUrl } from "@/lib/images"
@@ -33,14 +41,6 @@ function purposeLabel(purpose: string | null | undefined): string | null {
   if (purpose === "FOR_RENT_SHORT_TERM") return "Airbnb"
   if (purpose === "FOR_RENT_LONG_TERM") return "Long Term Rent"
   return "Sale"
-}
-
-function HeartIcon({ filled }: { filled: boolean }) {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-    </svg>
-  )
 }
 
 /**
@@ -101,7 +101,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             onClick={() => setActive((a) => (a + 1) % slides.length)}
             className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-[#374151] transition-colors hover:bg-white"
           >
-            <ChevronRight size={16} />
+            <FontAwesomeIcon icon={faChevronRight} className="text-[16px]" aria-hidden="true" />
           </button>
         )}
         {/* Dots */}
@@ -153,47 +153,47 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
         <Link href={detailHref} className="line-clamp-1 font-poppins text-[14px] font-semibold leading-5 text-[#111827] hover:text-primary">
           <h3 className="line-clamp-1 font-poppins text-[14px] font-semibold leading-5">{item.title}</h3>
         </Link>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-poppins text-[14px] font-light leading-5 text-[#4B5569]">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-poppins text-[14px] font-light leading-5 tabular-nums text-[#4B5569]">
           {!isNonLiving && (
             <span
-              className="inline-flex items-center gap-1"
+              className="inline-flex items-center gap-1.5"
               aria-label={hasBeds ? `${item.bedrooms} bedrooms` : "Bedrooms not specified"}
             >
-              <FontAwesomeIcon icon={faBed} aria-hidden="true" />
+              <FontAwesomeIcon icon={faBed} fixedWidth aria-hidden="true" />
               {hasBeds ? (
                 <>{item.bedrooms} {item.bedrooms === 1 ? "Bed" : "Beds"}</>
               ) : (
-                "_ Beds"
+                <span className="tracking-[0.2em] text-[#9CA3AF]">_ Beds</span>
               )}
             </span>
           )}
           {!isNonLiving && (
             <span
-              className="inline-flex items-center gap-1"
+              className="inline-flex items-center gap-1.5"
               aria-label={hasBaths ? `${item.bathrooms} bathrooms` : "Bathrooms not specified"}
             >
-              <FontAwesomeIcon icon={faBath} aria-hidden="true" />
+              <FontAwesomeIcon icon={faBath} fixedWidth aria-hidden="true" />
               {hasBaths ? (
                 <>{item.bathrooms} {item.bathrooms === 1 ? "Bath" : "Baths"}</>
               ) : (
-                "_ Baths"
+                <span className="tracking-[0.2em] text-[#9CA3AF]">_ Baths</span>
               )}
             </span>
           )}
           <span
-            className="inline-flex items-center gap-1"
+            className="inline-flex items-center gap-1.5"
             aria-label={hasArea ? `${item.area?.toLocaleString()} square feet` : "Size not specified"}
           >
-            <FontAwesomeIcon icon={faRulerCombined} aria-hidden="true" />
+            <FontAwesomeIcon icon={faRulerCombined} fixedWidth aria-hidden="true" />
             {hasArea ? (
               <>{item.area?.toLocaleString()} Sqft</>
             ) : (
-              "___ Sqft"
+              <span className="tracking-[0.2em] text-[#9CA3AF]">___ Sqft</span>
             )}
           </span>
         </div>
-        <p className="flex items-center gap-1 font-poppins text-[14px] font-light leading-5 text-[#4B5569]">
-          <MapPin size={14} aria-hidden="true" className="shrink-0" />
+        <p className="flex items-center gap-1.5 font-poppins text-[14px] font-light leading-5 text-[#4B5569]">
+          <FontAwesomeIcon icon={faLocationDot} fixedWidth aria-hidden="true" className="shrink-0" />
           <span className="truncate">
             {item.city}
             {item.region && item.region !== item.city ? ` - ${item.region}` : ""}
@@ -205,7 +205,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             aria-label={`Call about ${item.title}`}
             className="inline-flex h-[26px] items-center gap-1 rounded border border-[#B3AED5] bg-white px-3 font-poppins text-[12px] font-medium leading-4 text-[#5A5991] transition-colors hover:bg-[#F3F4F6] lg:border-[1.25px]"
           >
-            <Phone size={12} aria-hidden="true" />
+            <FontAwesomeIcon icon={faPhone} className="text-[12px]" aria-hidden="true" />
             Call
           </a>
           <Link
@@ -213,7 +213,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             aria-label={`Email about ${item.title}`}
             className="inline-flex h-[26px] items-center gap-1 rounded border border-[#B3AED5] bg-white px-3 font-poppins text-[12px] font-medium leading-4 text-[#5A5991] transition-colors hover:bg-[#F3F4F6] lg:border-[1.25px]"
           >
-            <Mail size={12} aria-hidden="true" />
+            <FontAwesomeIcon icon={faEnvelope} className="text-[12px]" aria-hidden="true" />
             Email
           </Link>
           <button
@@ -225,7 +225,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
               fav ? "text-rose-600" : "text-[#9CA3AF] hover:text-rose-500"
             }`}
           >
-            <HeartIcon filled={fav} />
+            <FontAwesomeIcon icon={faHeart} className="text-[18px]" aria-hidden="true" />
           </button>
         </div>
       </div>
