@@ -50,9 +50,9 @@ export interface OtpResponse {
 interface AuthContextType {
   user: User | null
   loading: boolean
-  login: (emailOrPhone: string, password: string, rememberMe?: boolean) => Promise<{ error?: string; code?: string; user?: User }>
+  login: (emailOrPhone: string, password: string, rememberMe?: boolean) => Promise<{ error?: string; code?: string; field?: string; user?: User }>
   logout: () => Promise<void>
-  phoneLogin: (phone: string) => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
+  phoneLogin: (phone: string) => Promise<{ error?: string; code?: string; field?: string; data?: { expiresIn: number; retryAfter: number } }>
   signup: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string; recoveryEmail?: string }) => Promise<{ error?: string; code?: string; otp?: OtpResponse }>
   sendOtp: (identifier: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
   verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION", rememberMe?: boolean) => Promise<{ error?: string; code?: string; user?: User }>
@@ -60,7 +60,7 @@ interface AuthContextType {
   refreshUser: () => Promise<User | null | undefined>
   clearSession: () => void
   sendMagicLink: (email: string) => Promise<{ error?: string }>
-  agentLogin: (agentCode: string, password: string, rememberMe?: boolean) => Promise<{ error?: string; requiresPasswordChange?: boolean }>
+  agentLogin: (agentCode: string, password: string, rememberMe?: boolean) => Promise<{ error?: string; code?: string; field?: string; requiresPasswordChange?: boolean }>
   agentForgotPassword: (identifier: string) => Promise<{ error?: string }>
   agentResetPassword: (token: string, password: string) => Promise<{ error?: string }>
   firstPasswordChange: (newPassword: string) => Promise<{ error?: string }>
@@ -164,7 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const payload = m
       ? { phone: `+254${m[1]}`, password, rememberMe }
       : { email: emailOrPhone, password, rememberMe }
-    const { data, error, code } = await api.post<{ user: User }>("/api/auth/login", payload)
+    const { data, error, code, field } = await api.post<{ user: User }>("/api/auth/login", payload)
     if (data?.user) {
       // Confirm the session cookies actually stuck before navigating.
       // Incident 2026-09-17 ("logged in then immediately logged out"): when
@@ -185,7 +185,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     // Phase 2 (2026-09): surface machine-readable verdicts (e.g.
     // PASSWORD_RESET_REQUIRED) so the form can offer recovery.
-    return { error: error || "Login failed", code }
+    // Precise credential errors also carry `field` so the form highlights
+    // the exact input (email vs password vs phone).
+    return { error: error || "Login failed", code, field }
   }, [fetchUser])
 
   const logout = useCallback(async () => {
@@ -224,8 +226,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchUser])
 
   const phoneLogin = useCallback(async (phone: string) => {
-    const { data, error } = await api.post<{ expiresIn: number; retryAfter: number }>("/api/auth/phone-login", { phone })
-    if (error) return { error }
+    const { data, error, code, field } = await api.post<{ expiresIn: number; retryAfter: number }>("/api/auth/phone-login", { phone })
+    if (error) return { error, code, field }
     return { data }
   }, [])
 
@@ -236,12 +238,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const agentLogin = useCallback(async (agentCode: string, password: string, rememberMe = true) => {
-    const { data, error } = await api.post<{ user: User; requiresPasswordChange?: boolean }>("/api/auth/agent-login", { agentCode, password, rememberMe })
+    const { data, error, code, field } = await api.post<{ user: User; requiresPasswordChange?: boolean }>("/api/auth/agent-login", { agentCode, password, rememberMe })
     if (data?.user) {
       setUser({ ...data.user, authMethod: "agent" })
       return { requiresPasswordChange: data.requiresPasswordChange }
     }
-    return { error: error || "Login failed" }
+    return { error: error || "Login failed", code, field }
   }, [])
 
   const agentForgotPassword = useCallback(async (identifier: string) => {

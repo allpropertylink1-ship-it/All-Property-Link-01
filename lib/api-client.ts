@@ -7,6 +7,9 @@ interface ApiResponse<T = unknown> {
   // Phase 2 (2026-09): machine-readable server verdicts (e.g.
   // PASSWORD_RESET_REQUIRED). Propagated on every error path below.
   code?: string
+  // Precise sign-in errors also carry the offending field so forms can
+  // highlight the right input (email vs password vs phone).
+  field?: string
 }
 
 class ApiClient {
@@ -44,11 +47,11 @@ class ApiClient {
       const res = await this.fetchOnce(`${API_BACKEND}${path}`, { ...options, headers }, 30000)
       if (res.status === 401) {
         const body = await res.json().catch(() => ({}))
-        return { error: body.error || "Session expired", code: body.code }
+        return { error: body.error || "Session expired", code: body.code, field: body.field }
       }
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
-        return { error: body.error || `HTTP ${res.status}`, code: body.code }
+        return { error: body.error || `HTTP ${res.status}`, code: body.code, field: body.field }
       }
       const body = await res.json()
       return { data: body as T }
@@ -123,17 +126,17 @@ class ApiClient {
           })
           if (!retryRes.ok) {
             const retryBody = await retryRes.json().catch(() => ({}))
-            return { error: retryBody.error || "Request failed", code: retryBody.code }
+            return { error: retryBody.error || "Request failed", code: retryBody.code, field: retryBody.field }
           }
           const retryBody = await retryRes.json()
           return { data: retryBody as T }
         }
-        return { error: body.error || "Session expired", code: body.code }
+        return { error: body.error || "Session expired", code: body.code, field: body.field }
       }
 
       if (!finalRes.ok) {
         const body = await finalRes.json().catch(() => ({}))
-        return { error: body.error || `HTTP ${finalRes.status}`, code: body.code }
+        return { error: body.error || `HTTP ${finalRes.status}`, code: body.code, field: body.field }
       }
 
       const body = await finalRes.json()

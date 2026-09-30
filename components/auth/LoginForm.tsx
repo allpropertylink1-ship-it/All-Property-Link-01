@@ -15,6 +15,10 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
   const router = useRouter()
   const { login, sendMagicLink, phoneLogin, verifyOtp } = useAuth()
   const [error, setError] = useState("")
+  // Precise sign-in errors: which input the message belongs to (email field
+  // doubles for phone numbers typed into the main form). The banner always
+  // shows the message; the matching input also gets an inline error.
+  const [errorField, setErrorField] = useState<"email" | "password" | null>(null)
   const [loading, setLoading] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
   const [magicEmail, setMagicEmail] = useState("")
@@ -38,18 +42,61 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
     e.preventDefault()
     setLoading(true)
     setError("")
+    setErrorField(null)
 
     const form = new FormData(e.currentTarget)
-    const email = form.get("email") as string
+    const identifier = ((form.get("email") as string) || "").trim()
     const password = form.get("password") as string
 
-    const result = await login(email, password, rememberMe)
+    // Client-side precise checks so typos are flagged without a round-trip.
+    if (!identifier) {
+      setError("Enter your email address or phone number")
+      setErrorField("email")
+      setLoading(false)
+      return
+    }
+    if (!password) {
+      setError("Enter your password")
+      setErrorField("password")
+      setLoading(false)
+      return
+    }
+    if (identifier.includes("@")) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)) {
+        setError("That email address looks invalid. Check for typos and try again.")
+        setErrorField("email")
+        setLoading(false)
+        return
+      }
+    } else if (/^[\d+\s\-()]{7,}$/.test(identifier)) {
+      if (!normalizeKenyanPhoneClient(identifier)) {
+        setError("That phone number looks invalid. Enter a valid Kenyan mobile number.")
+        setErrorField("email")
+        setLoading(false)
+        return
+      }
+    } else {
+      setError("That email address looks invalid. Check for typos and try again.")
+      setErrorField("email")
+      setLoading(false)
+      return
+    }
+
+    const result = await login(identifier, password, rememberMe)
 
     if (result?.error) {
       if (result?.code === "PASSWORD_RESET_REQUIRED") {
         setResetRequired(true)
       }
       setError(result.error)
+      // Backend sends the offending field; fall back to code mapping so
+      // older responses still highlight the right input.
+      const field = result?.field ?? result?.code
+      setErrorField(
+        field === "password" || field === "PASSWORD_REQUIRED" || field === "INCORRECT_PASSWORD" || field === "PASSWORD_NOT_SET"
+          ? "password"
+          : "email"
+      )
       setLoading(false)
       return
     }
@@ -166,21 +213,28 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
         )}
         <div>
           <label htmlFor="email" className="block text-[13px] font-semibold text-text-primary">
-            Email
+            Email or phone
           </label>
           <div className="relative">
             <InputLeadingIcon icon={Mail} />
             <input
               id="email"
               name="email"
-              type="email"
-              autoComplete="email"
+              type="text"
+              inputMode="email"
+              autoComplete="username"
               required
+              aria-invalid={errorField === "email"}
+              aria-describedby={errorField === "email" ? "login-email-error" : undefined}
+              onChange={() => { if (errorField === "email") { setErrorField(null); setError("") } }}
               className={stitchInputWithIconClass}
               style={{ fontSize: "16px" }}
-              placeholder="you@example.co.ke"
+              placeholder="you@example.co.ke or 712345678"
             />
           </div>
+          {errorField === "email" && error && (
+            <p id="login-email-error" className="mt-1 text-xs text-error-500" role="alert">{error}</p>
+          )}
         </div>
         <div>
           <div className="flex items-center justify-between">
@@ -201,7 +255,13 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
               autoComplete="current-password"
               required
               placeholder="Your password"
+              ariaInvalid={errorField === "password"}
+              ariaDescribedBy={errorField === "password" ? "login-password-error" : undefined}
+              onChange={() => { if (errorField === "password") { setErrorField(null); setError("") } }}
             />
+            {errorField === "password" && error && (
+              <p id="login-password-error" className="mt-1 text-xs text-error-500" role="alert">{error}</p>
+            )}
           </div>
         </div>
 
@@ -319,7 +379,7 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
                 <FormBanner variant="error">{phoneError}</FormBanner>
               )}
               <p className="text-center text-[13px] text-text-secondary">
-                If an account exists for <strong className="text-text-primary">{normalizeKenyanPhoneClient(phone) ?? phone}</strong>, a code is on its way.
+                A code is on its way to <strong className="text-text-primary">{normalizeKenyanPhoneClient(phone) ?? phone}</strong>.
               </p>
               <OtpInput
                 value={otpValues.join("")}

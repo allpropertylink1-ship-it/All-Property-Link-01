@@ -15,6 +15,9 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
   const router = useRouter()
   const { agentLogin } = useAuth()
   const [error, setError] = useState("")
+  // Precise sign-in errors: which input the message belongs to. The banner
+  // always shows the message; the matching input also gets an inline error.
+  const [errorField, setErrorField] = useState<"agentCode" | "password" | null>(null)
   const [loading, setLoading] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
 
@@ -22,15 +25,42 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
     e.preventDefault()
     setLoading(true)
     setError("")
+    setErrorField(null)
 
     const form = new FormData(e.currentTarget)
-    const agentCode = form.get("agentCode") as string
+    const agentCode = ((form.get("agentCode") as string) || "").trim()
     const password = form.get("password") as string
+
+    // Client-side precise checks so typos are flagged without a round-trip.
+    if (!agentCode) {
+      setError("Enter your Agent ID or email address")
+      setErrorField("agentCode")
+      setLoading(false)
+      return
+    }
+    if (!password) {
+      setError("Enter your password")
+      setErrorField("password")
+      setLoading(false)
+      return
+    }
+    if (agentCode.includes("@") && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(agentCode)) {
+      setError("That email address looks invalid. Check for typos and try again.")
+      setErrorField("agentCode")
+      setLoading(false)
+      return
+    }
 
     const result = await agentLogin(agentCode, password, rememberMe)
 
     if (result?.error) {
       setError(result.error)
+      const field = result?.field ?? result?.code
+      setErrorField(
+        field === "password" || field === "PASSWORD_REQUIRED" || field === "INCORRECT_PASSWORD"
+          ? "password"
+          : "agentCode"
+      )
       setLoading(false)
       return
     }
@@ -61,12 +91,18 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
               name="agentCode"
               type="text"
               required
-              autoComplete="off"
+              autoComplete="username"
+              aria-invalid={errorField === "agentCode"}
+              aria-describedby={errorField === "agentCode" ? "agent-code-error" : undefined}
+              onChange={() => { if (errorField === "agentCode") { setErrorField(null); setError("") } }}
               className={stitchInputWithIconClass}
               style={{ fontSize: "16px" }}
               placeholder="REP-NAI-4028 or you@example.co.ke"
             />
           </div>
+          {errorField === "agentCode" && error && (
+            <p id="agent-code-error" className="mt-1 text-xs text-error-500" role="alert">{error}</p>
+          )}
         </div>
         <div>
           <label htmlFor="agent-password" className="block text-[13px] font-semibold text-text-primary">
@@ -79,7 +115,13 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
               autoComplete="current-password"
               required
               placeholder="Your password"
+              ariaInvalid={errorField === "password"}
+              ariaDescribedBy={errorField === "password" ? "agent-password-error" : undefined}
+              onChange={() => { if (errorField === "password") { setErrorField(null); setError("") } }}
             />
+            {errorField === "password" && error && (
+              <p id="agent-password-error" className="mt-1 text-xs text-error-500" role="alert">{error}</p>
+            )}
           </div>
         </div>
 

@@ -11,9 +11,11 @@ interface PasswordToggleProps {
   required?: boolean
   minLength?: number
   className?: string
+  ariaInvalid?: boolean
+  ariaDescribedBy?: string
 }
 
-export function PasswordToggle({ id, name, value, onChange, placeholder, autoComplete, required, minLength, className = "" }: PasswordToggleProps) {
+export function PasswordToggle({ id, name, value, onChange, placeholder, autoComplete, required, minLength, className = "", ariaInvalid, ariaDescribedBy }: PasswordToggleProps) {
   const [visible, setVisible] = useState(false)
   return (
     <div className="relative">
@@ -27,6 +29,8 @@ export function PasswordToggle({ id, name, value, onChange, placeholder, autoCom
         autoComplete={autoComplete}
         required={required}
         minLength={minLength}
+        aria-invalid={ariaInvalid}
+        aria-describedby={ariaDescribedBy}
         style={{ fontSize: "16px" }}
         className={`block w-full rounded-lg border border-border bg-surface-secondary px-3 py-2.5 pr-11 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30 ${className}`}
       />
