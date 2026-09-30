@@ -28,16 +28,10 @@ export default async function ServicesPage({ searchParams }: Props) {
 
   const hasFilters = Boolean(search || city || category || type);
 
-  const typeHref = (value?: string) => {
-    const params = new URLSearchParams();
-    if (category) params.set("category", category);
-    if (city) params.set("city", city);
-    if (search) params.set("search", search);
-    if (value) params.set("type", value);
-    const qs = params.toString();
-    return qs ? `/services?${qs}` : "/services";
-  };
-
+  // NOTE (provider merge): no persona toggle — one pool, category rails below
+  // are the discovery surface. Legacy ?type=FUNDI / ?type=SERVICE_PROVIDER
+  // URLs still filter server-side (read alias) and are preserved by the
+  // search form, pagination, and category links.
   const categoryHref = (slug?: string) => {
     const params = new URLSearchParams();
     if (slug) params.set("category", slug);
@@ -195,45 +189,7 @@ export default async function ServicesPage({ searchParams }: Props) {
             </nav>
           )}
 
-          {/* ─── Fundi / provider toggle ─── */}
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Provider type">
-            <Link
-              href={typeHref(undefined)}
-              aria-current={!type ? "page" : undefined}
-              className={cn(
-                "inline-flex min-h-touch items-center rounded-lg px-4 py-2 text-sm font-medium transition-colors",
-                !type
-                  ? "bg-primary-600 text-white"
-                  : "border border-border bg-surface text-text-secondary hover:bg-surface-secondary",
-              )}
-            >
-              All
-            </Link>
-            <Link
-              href={typeHref("FUNDI")}
-              aria-current={type === "FUNDI" ? "page" : undefined}
-              className={cn(
-                "inline-flex min-h-touch items-center rounded-lg px-4 py-2 text-sm font-medium transition-colors",
-                type === "FUNDI"
-                  ? "bg-primary-600 text-white"
-                  : "border border-border bg-surface text-text-secondary hover:bg-surface-secondary",
-              )}
-            >
-              Fundis
-            </Link>
-            <Link
-              href={typeHref("SERVICE_PROVIDER")}
-              aria-current={type === "SERVICE_PROVIDER" ? "page" : undefined}
-              className={cn(
-                "inline-flex min-h-touch items-center rounded-lg px-4 py-2 text-sm font-medium transition-colors",
-                type === "SERVICE_PROVIDER"
-                  ? "bg-primary-600 text-white"
-                  : "border border-border bg-surface text-text-secondary hover:bg-surface-secondary",
-              )}
-            >
-              Service Providers
-            </Link>
-          </div>
+          {/* Category rails above are the discovery surface — no persona toggle (provider merge). */}
         </div>
       </section>
 
