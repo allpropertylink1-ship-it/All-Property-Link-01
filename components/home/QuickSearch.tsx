@@ -9,21 +9,24 @@ interface CityItem { city: string; count: number }
 
 const COLLAPSED_HEIGHT = 68
 
-export function QuickSearch() {
-  const [cities, setCities] = useState<CityItem[]>([])
+export function QuickSearch({ initialCities }: { initialCities?: CityItem[] }) {
+  const [cities, setCities] = useState<CityItem[]>(initialCities ?? [])
   const [expanded, setExpanded] = useState(false)
   const [maxHeight, setMaxHeight] = useState(COLLAPSED_HEIGHT)
   const [needsToggle, setNeedsToggle] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
   const chipsRef = useRef<HTMLDivElement>(null)
 
+  const hasInitialCities = (initialCities?.length ?? 0) > 0
+
   useEffect(() => {
+    if (hasInitialCities) return
     fetchCityCounts()
       .then((cityCounts) =>
         setCities(cityCounts.map((c) => ({ city: c.city, count: c.count })))
       )
       .catch(() => {})
-  }, [])
+  }, [hasInitialCities])
 
   useEffect(() => {
     const recompute = () => {

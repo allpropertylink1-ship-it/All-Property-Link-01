@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { ArrowRight } from "@/components/ui/icons"
 import { HeroSection } from "@/components/home/HeroSection"
+import { QuickSearch } from "@/components/home/QuickSearch"
+import { CategoryGrid, type CategoryInitialCounts } from "@/components/home/CategoryGrid"
 import { FeaturedProperties } from "@/components/home/FeaturedProperties"
 import { FeaturedAirbnbs } from "@/components/home/FeaturedAirbnbs"
 import { FeaturedFundis } from "@/components/home/FeaturedFundis"
@@ -66,16 +68,22 @@ export function HomePageClient({
   land,
   fundis,
   providers,
+  initialCounts,
+  initialCities,
 }: {
   saleRent: PropertyCardType[];
   airbnbs: PropertyCardType[];
   land: PropertyCardType[];
   fundis: ProfileRow[];
   providers: ProfileRow[];
+  initialCounts?: CategoryInitialCounts;
+  initialCities?: { city: string; count: number }[];
 }) {
   return (
     <>
       <HeroSection />
+      <QuickSearch initialCities={initialCities} />
+      <CategoryGrid initialCounts={initialCounts} />
       <FeaturedProperties initialData={saleRent} />
       <FeaturedAirbnbs initialData={airbnbs} />
       <FeaturedLand initialData={land} />

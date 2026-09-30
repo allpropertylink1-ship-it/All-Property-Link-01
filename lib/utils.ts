@@ -6,9 +6,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatPrice(price: number | string | null | undefined | { toString: () => string }, listingPurpose?: string) {
-  if (price == null) return "Price on request"
+  if (price == null) return ""
   const num = typeof price === "object" ? Number(price) : Number(price)
-  if (isNaN(num)) return "Price on request"
+  if (isNaN(num)) return ""
   const formatted = new Intl.NumberFormat("en-KE", { style: "currency", currency: "KES", minimumFractionDigits: 0 }).format(num)
   if (listingPurpose === "FOR_RENT_SHORT_TERM") return `${formatted}/night`
   if (listingPurpose === "FOR_RENT_LONG_TERM") return `${formatted}/month`
@@ -16,8 +16,10 @@ export function formatPrice(price: number | string | null | undefined | { toStri
 }
 
 export function fmtKES(value: number | string | null | undefined) {
-  const num = Number(value ?? 0)
-  return new Intl.NumberFormat("en-KE", { style: "currency", currency: "KES", minimumFractionDigits: 0 }).format(Number.isFinite(num) ? num : 0)
+  if (value == null) return "—"
+  const num = Number(value)
+  if (!Number.isFinite(num)) return "—"
+  return new Intl.NumberFormat("en-KE", { style: "currency", currency: "KES", minimumFractionDigits: 0 }).format(num)
 }
 
 /**

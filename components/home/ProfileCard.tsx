@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link"
-import { MapPin, Wrench, Briefcase, BadgeCheck, ArrowUpRight } from "@/components/ui/icons"
+import { Wrench, Briefcase, BadgeCheck, ArrowUpRight } from "@/components/ui/icons"
 import { AVATAR_POOL } from "@/lib/placeholders"
 import { optimizeImageUrl } from "@/lib/images"
 import { getTradeLabel } from "@/lib/trade-label"
@@ -87,7 +87,7 @@ export function ProfileCard({
     <Link
       href={`/services/${item.id}`}
       aria-label={`View ${displayName}${tradeLabel ? ` — ${tradeLabel}` : ""}`}
-      className="group flex flex-col items-center rounded-lg border border-border bg-surface px-4 py-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:px-5"
+      className="group flex flex-1 flex-col items-center rounded-lg border border-border bg-surface px-4 py-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:px-5"
     >
       {/* Photo with verified badge */}
       <div className="relative mb-3">
@@ -95,7 +95,7 @@ export function ProfileCard({
           {photoSrc ? (
             <img
               src={photoSrc}
-              alt=""
+              alt={`${displayName} profile photo`}
               className="h-full w-full object-cover"
               loading="lazy"
               decoding="async"
@@ -106,7 +106,7 @@ export function ProfileCard({
           ) : (
             <img
               src={fallbackAvatar}
-              alt=""
+              alt={`${displayName} profile photo`}
               className="h-full w-full object-cover"
               loading="lazy"
               decoding="async"
@@ -141,21 +141,24 @@ export function ProfileCard({
 
       {/* Location */}
       {location && (
-        <p className="mt-1.5 flex items-center gap-1 text-xs text-text-secondary">
-          <MapPin size={12} className="shrink-0 text-accent-500" aria-hidden="true" />
+        <p className="mt-1.5 text-xs text-text-secondary">
           <span className="max-w-[150px] truncate">{location}</span>
         </p>
       )}
 
       {/* Rate */}
       {showPrice && (
-        <p className="mt-1.5 text-sm font-bold text-accent-600">
+        <p className="mt-1.5 text-sm font-bold tabular-nums text-accent-600">
           From KES {priceNum.toLocaleString("en-KE")}
         </p>
       )}
 
-      {/* Profile CTA */}
-      <span className="mt-4 inline-flex min-h-touch w-full items-center justify-center gap-1 rounded-lg bg-surface-secondary px-3 py-2 text-xs font-semibold text-text-primary transition-colors group-hover:bg-primary group-hover:text-text-onPrimary">
+      {/* Profile affordance (non-interactive — whole card is the link) */}
+      <span aria-hidden="true" className="min-h-4" />
+      <span
+        aria-hidden="true"
+        className="mt-auto inline-flex min-h-touch w-full items-center justify-center gap-1 rounded-lg bg-surface-secondary px-3 py-2 text-xs font-semibold text-text-primary transition-colors group-hover:bg-primary group-hover:text-text-onPrimary"
+      >
         View Profile
         <ArrowUpRight size={13} aria-hidden="true" />
       </span>

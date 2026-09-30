@@ -33,7 +33,7 @@ function ContactButtons({ phone, label }: { phone: string; label: string }) {
       <a
         href={`tel:${phone}`}
         aria-label={`Call ${label}`}
-        className="inline-flex min-h-touch items-center justify-center gap-1 rounded-lg bg-surface-secondary px-2 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-primary hover:text-text-onPrimary"
+        className="inline-flex min-h-touch w-full items-center justify-center gap-1 rounded-lg bg-surface-secondary px-2 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-primary hover:text-text-onPrimary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       >
         <Phone size={14} aria-hidden="true" />
         Call
@@ -44,13 +44,25 @@ function ContactButtons({ phone, label }: { phone: string; label: string }) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`WhatsApp ${label}`}
-          className="inline-flex min-h-touch items-center justify-center gap-1 rounded-lg bg-whatsapp px-2 py-2 text-xs font-bold text-white transition-colors hover:bg-whatsapp-dark"
+          className="inline-flex min-h-touch w-full items-center justify-center gap-1 rounded-lg bg-whatsapp px-2 py-2 text-xs font-bold text-white transition-colors hover:bg-whatsapp-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           <MessageCircle size={14} aria-hidden="true" />
           WhatsApp
         </a>
       )}
     </div>
+  )
+}
+
+function ProfileFallback({ id, label }: { id: string; label: string }) {
+  return (
+    <Link
+      href={`/services/${id}`}
+      aria-label={`View ${label} details`}
+      className="mt-2 inline-flex min-h-touch w-full items-center justify-center gap-1 rounded-lg bg-surface-secondary px-2 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-primary hover:text-text-onPrimary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+    >
+      View Profile
+    </Link>
   )
 }
 
@@ -88,7 +100,7 @@ export function FeaturedProviders({ initialData }: { initialData?: ProfileRow[] 
           />
           <Link
             href="/services"
-            className="inline-flex min-h-touch shrink-0 items-center gap-1.5 text-sm font-bold text-primary transition-colors hover:text-accent-600"
+            className="inline-flex min-h-touch shrink-0 items-center gap-1.5 text-sm font-bold text-primary transition-colors hover:text-accent-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             View All Providers
             <ArrowRight size={18} aria-hidden="true" />
@@ -111,13 +123,17 @@ export function FeaturedProviders({ initialData }: { initialData?: ProfileRow[] 
             No service providers yet.
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+          <div className="grid grid-cols-2 items-stretch gap-4 md:grid-cols-3 xl:grid-cols-6">
             {services.map((s) => {
               const phone = getPhone(s)
               return (
-                <div key={s.id} className="flex min-w-0 flex-col">
+                <div key={s.id} className="flex min-w-0 flex-1 flex-col items-stretch">
                   <ProfileCard item={s} variant="provider" />
-                  {phone && <ContactButtons phone={phone} label={displayName(s)} />}
+                  {phone ? (
+                    <ContactButtons phone={phone} label={displayName(s)} />
+                  ) : (
+                    <ProfileFallback id={s.id} label={displayName(s)} />
+                  )}
                 </div>
               )
             })}

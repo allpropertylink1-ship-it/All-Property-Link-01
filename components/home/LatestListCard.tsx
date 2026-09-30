@@ -2,18 +2,18 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   IconBed,
   IconBath,
   IconRuler,
   IconMapPin,
   IconPhone,
-  IconMail,
   IconChevronRight,
+  IconChevronLeft,
   IconHeart,
 } from "@tabler/icons-react"
-import { formatPrice } from "@/lib/utils"
+import { cn, formatPrice } from "@/lib/utils"
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders"
 import { getCoverImage, getGalleryImages, optimizeImageUrl } from "@/lib/images"
 import { slugifyCity } from "@/lib/seo"
@@ -29,6 +29,8 @@ export interface LatestListCardData {
   bedrooms?: number | null
   bathrooms?: number | null
   area?: number | null
+  plotSize?: number | string | null
+  plotSizeUnit?: string | null
   images: unknown
   coverImage?: string | null
   agentPhone?: string | null
@@ -42,9 +44,22 @@ function purposeLabel(purpose: string | null | undefined): string | null {
   return "Sale"
 }
 
+const FAV_KEY = "apl-favs"
+
+function readFavSlugs(): Set<string> {
+  try {
+    const raw = localStorage.getItem(FAV_KEY)
+    if (!raw) return new Set()
+    const parsed: unknown = JSON.parse(raw)
+    return new Set(Array.isArray(parsed) ? parsed.filter((s): s is string => typeof s === "string") : [])
+  } catch {
+    return new Set()
+  }
+}
+
 /**
  * PurpleRoof-geometry list card: horizontal (image left + details right) on
- * desktop, vertical (image top) on mobile rails. Cover photo first, arrow +
+ * desktop, vertical (image top) on mobile rails. Cover photo first, arrows +
  * dots + counter carousel, KES-only price, no agent row.
  */
 export function LatestListCard({ item, priority = false }: { item: LatestListCardData; priority?: boolean }) {
@@ -53,6 +68,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
   const slides = (gallery.length > 0 ? gallery : cover ? [cover] : [PLACEHOLDER_PROPERTY]).slice(0, 5)
   const [active, setActive] = useState(0)
   const [fav, setFav] = useState(false)
+  const touchStartX = useRef<number | null>(null)
 
   const propertyKind = (item.propertyType || "").toUpperCase()
   const isLand = propertyKind === "LAND"
@@ -61,15 +77,63 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
   const hasBeds = item.bedrooms != null && item.bedrooms > 0
   const hasBaths = item.bathrooms != null && item.bathrooms > 0
   const hasArea = item.area != null && item.area > 0
+  const plotSizeText = item.plotSize != null && String(item.plotSize).trim() !== "" ? String(item.plotSize).trim() : null
+  const plotLabel = plotSizeText
+    ? item.plotSizeUnit && item.plotSizeUnit.trim() !== ""
+      ? `${plotSizeText} ${item.plotSizeUnit.trim()}`
+      : plotSizeText
+    : null
+  const showSpecs =
+    (!isNonLiving && (hasBeds || hasBaths)) || (!isLand && hasArea) || (isLand && plotLabel != null)
   const detailHref = `${isLand ? "/land" : "/properties"}/${slugifyCity(item.city || "kenya")}/${item.slug}`
   const purpose = purposeLabel(item.listingPurpose ?? null)
   const safeActive = Math.min(active, slides.length - 1)
-  const callHref = item.agentPhone && item.agentPhone.trim() ? `tel:${item.agentPhone.trim()}` : detailHref
+  const phone = item.agentPhone?.trim() ? item.agentPhone.trim() : null
+
+  useEffect(() => {
+    setFav(readFavSlugs().has(item.slug))
+  }, [item.slug])
+
+  function toggleFav() {
+    setFav((prev) => {
+      const next = !prev
+      try {
+        const slugs = readFavSlugs()
+        if (next) slugs.add(item.slug)
+        else slugs.delete(item.slug)
+        localStorage.setItem(FAV_KEY, JSON.stringify(Array.from(slugs)))
+      } catch {
+        // Storage unavailable (private mode) — keep in-memory state only.
+      }
+      return next
+    })
+  }
+
+  function goNext() {
+    setActive((a) => (a + 1) % slides.length)
+  }
+
+  function goPrev() {
+    setActive((a) => (a - 1 + slides.length) % slides.length)
+  }
 
   return (
-    <div className="flex flex-col overflow-hidden rounded border border-[#E5E7EB] bg-white font-body transition-shadow duration-300 hover:shadow-[0_4px_6px_-1px_rgb(0,0,0/0.1),0_2px_4px_-2px_rgb(0,0,0/0.1)] lg:flex-row lg:border-[1.25px]">
+    <div className="flex flex-col overflow-hidden rounded border border-border bg-surface font-body transition-shadow duration-300 hover:shadow-md lg:flex-row">
       {/* Image carousel */}
-      <div className="relative h-[200px] w-full shrink-0 overflow-hidden bg-[#F3F4F6] lg:h-[240px] lg:w-[240px]">
+      <div
+        className="relative h-[200px] w-full shrink-0 overflow-hidden bg-surface-secondary lg:h-[240px] lg:w-[240px]"
+        onTouchStart={(e) => {
+          touchStartX.current = e.touches[0]?.clientX ?? null
+        }}
+        onTouchEnd={(e) => {
+          if (touchStartX.current == null) return
+          const endX = e.changedTouches[0]?.clientX ?? touchStartX.current
+          const dx = endX - touchStartX.current
+          touchStartX.current = null
+          if (dx <= -40) goNext()
+          else if (dx >= 40) goPrev()
+        }}
+      >
         {slides.map((src, i) => (
           <img
             key={`${src}-${i}`}
@@ -83,29 +147,40 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
                 ;(e.target as HTMLImageElement).src = PLACEHOLDER_PROPERTY
               }
             }}
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${
+            className={cn(
+              "absolute inset-0 h-full w-full object-cover transition-opacity duration-300 motion-reduce:transition-none",
               i === safeActive ? "opacity-100" : "opacity-0"
-            }`}
+            )}
           />
         ))}
         {/* Counter */}
         <span className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 font-body text-[12px] font-medium text-white">
           {safeActive + 1} / {slides.length}
         </span>
-        {/* Next arrow */}
+        {/* Prev / Next arrows */}
         {slides.length > 1 && (
-          <button
-            type="button"
-            aria-label="Next image"
-            onClick={() => setActive((a) => (a + 1) % slides.length)}
-            className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-[#374151] transition-colors hover:bg-white"
-          >
-            <IconChevronRight size={16} stroke={1.5} aria-hidden="true" />
-          </button>
+          <>
+            <button
+              type="button"
+              aria-label="Previous image"
+              onClick={goPrev}
+              className="absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface/80 text-text-secondary transition-colors hover:bg-surface"
+            >
+              <IconChevronLeft size={16} stroke={1.5} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              aria-label="Next image"
+              onClick={goNext}
+              className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface/80 text-text-secondary transition-colors hover:bg-surface"
+            >
+              <IconChevronRight size={16} stroke={1.5} aria-hidden="true" />
+            </button>
+          </>
         )}
         {/* Dots */}
         {slides.length > 1 && (
-          <div className="absolute inset-x-0 bottom-2 flex items-center justify-center gap-1.5" role="group" aria-label="Choose image">
+          <div className="absolute inset-x-0 bottom-2 flex items-center justify-center gap-1" role="group" aria-label="Choose image">
             {slides.map((_, i) => (
               <button
                 key={i}
@@ -113,10 +188,16 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
                 aria-label={`Go to image ${i + 1}`}
                 aria-current={i === safeActive ? "true" : undefined}
                 onClick={() => setActive(i)}
-                className={`h-1.5 rounded-full transition-all ${
-                  i === safeActive ? "w-6 bg-white" : "w-1.5 bg-white/60 hover:bg-white/80"
-                }`}
-              />
+                className="flex min-h-[24px] min-w-[24px] items-center justify-center"
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "h-1.5 rounded-full transition-all motion-reduce:transition-none",
+                    i === safeActive ? "w-6 bg-white" : "w-1.5 bg-white/60 hover:bg-white/80"
+                  )}
+                />
+              </button>
             ))}
           </div>
         )}
@@ -125,104 +206,99 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
       {/* Details */}
       <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-3">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="rounded bg-[#F3F4F6] px-3 py-1 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-[#1F2937]">
+          <span className="rounded bg-surface-secondary px-3 py-1 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-text-primary">
             {item.propertyType || ""}
           </span>
           {purpose && (
-            <span className="rounded bg-[#F97316] px-3 py-1 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
+            <span className="rounded bg-accent-500 px-3 py-1 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
               {purpose}
             </span>
           )}
-          {item.listerKind === "OWNER" && (
-            <span className="rounded bg-primary px-3 py-1 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
-              Owner
-            </span>
-          )}
-          {item.listerKind === "AGENT" && (
-            <span className="rounded bg-[#1F2937] px-3 py-1 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
-              Agent
-            </span>
-          )}
         </div>
+        <h3 className="line-clamp-2 text-balance font-body text-[15px] font-semibold leading-6 text-text-primary sm:text-base">
+          <Link href={detailHref} className="transition-colors hover:text-primary">
+            {item.title}
+          </Link>
+        </h3>
         {item.price != null && (
-          <p className="font-body text-[16px] font-bold leading-6 text-primary">
+          <p className="font-body text-base font-bold leading-6 tabular-nums text-primary">
             {formatPrice(item.price, item.listingPurpose ?? undefined)}
           </p>
         )}
-        <Link href={detailHref} className="line-clamp-1 font-body text-[14px] font-semibold leading-5 text-[#111827] hover:text-primary">
-          <h3 className="line-clamp-1 font-body text-[14px] font-semibold leading-5">{item.title}</h3>
-        </Link>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[14px] font-normal leading-5 tabular-nums text-[#4B5569]">
-          {!isNonLiving && (
-            <span
-              className="inline-flex items-center gap-1.5"
-              aria-label={hasBeds ? `${item.bedrooms} bedrooms` : "Bedrooms not specified"}
-            >
-              <IconBed size={16} stroke={1.5} aria-hidden="true" />
-              {hasBeds ? (
-                <>{item.bedrooms} {item.bedrooms === 1 ? "Bed" : "Beds"}</>
-              ) : (
-                <span className="tracking-[0.2em] text-[#9CA3AF]">_ Beds</span>
-              )}
-            </span>
-          )}
-          {!isNonLiving && (
-            <span
-              className="inline-flex items-center gap-1.5"
-              aria-label={hasBaths ? `${item.bathrooms} bathrooms` : "Bathrooms not specified"}
-            >
-              <IconBath size={16} stroke={1.5} aria-hidden="true" />
-              {hasBaths ? (
-                <>{item.bathrooms} {item.bathrooms === 1 ? "Bath" : "Baths"}</>
-              ) : (
-                <span className="tracking-[0.2em] text-[#9CA3AF]">_ Baths</span>
-              )}
-            </span>
-          )}
-          <span
-            className="inline-flex items-center gap-1.5"
-            aria-label={hasArea ? `${item.area?.toLocaleString()} square feet` : "Size not specified"}
-          >
-            <IconRuler size={16} stroke={1.5} aria-hidden="true" />
-            {hasArea ? (
-              <>{item.area?.toLocaleString()} Sqft</>
-            ) : (
-              <span className="tracking-[0.2em] text-[#9CA3AF]">___ Sqft</span>
+        {showSpecs && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[14px] font-normal leading-5 tabular-nums text-text-secondary">
+            {!isNonLiving && hasBeds && (
+              <span className="inline-flex items-center gap-1.5" aria-label={`${item.bedrooms} bedrooms`}>
+                <IconBed size={16} stroke={1.5} aria-hidden="true" />
+                {item.bedrooms} {item.bedrooms === 1 ? "Bed" : "Beds"}
+              </span>
             )}
-          </span>
-        </div>
-        <p className="flex items-center gap-1.5 font-body text-[14px] font-normal leading-5 text-[#4B5569]">
+            {!isNonLiving && hasBaths && (
+              <span className="inline-flex items-center gap-1.5" aria-label={`${item.bathrooms} bathrooms`}>
+                <IconBath size={16} stroke={1.5} aria-hidden="true" />
+                {item.bathrooms} {item.bathrooms === 1 ? "Bath" : "Baths"}
+              </span>
+            )}
+            {isLand ? (
+              plotLabel != null && (
+                <span className="inline-flex items-center gap-1.5" aria-label={`Plot size ${plotLabel}`}>
+                  <IconRuler size={16} stroke={1.5} aria-hidden="true" />
+                  {plotLabel}
+                </span>
+              )
+            ) : (
+              hasArea && (
+                <span
+                  className="inline-flex items-center gap-1.5"
+                  aria-label={`${item.area?.toLocaleString()} square feet`}
+                >
+                  <IconRuler size={16} stroke={1.5} aria-hidden="true" />
+                  {item.area?.toLocaleString()} Sqft
+                </span>
+              )
+            )}
+          </div>
+        )}
+        <p className="flex items-center gap-1.5 font-body text-[14px] font-normal leading-5 text-text-secondary">
           <IconMapPin size={16} stroke={1.5} aria-hidden="true" className="shrink-0" />
           <span className="truncate">
             {item.city}
             {item.region && item.region !== item.city ? ` - ${item.region}` : ""}
           </span>
         </p>
+        {item.listerKind && (
+          <p className="font-body text-xs font-normal leading-4 text-text-secondary">
+            Listed by {item.listerKind === "OWNER" ? "Owner" : "Agent"}
+          </p>
+        )}
         <div className="mt-1 flex items-center justify-end gap-2">
-          <a
-            href={callHref}
-            aria-label={`Call about ${item.title}`}
-            className="inline-flex h-[26px] items-center gap-1 rounded border border-[#B3AED5] bg-white px-3 font-body text-[12px] font-medium leading-4 text-[#5A5991] transition-colors hover:bg-[#F3F4F6] lg:border-[1.25px]"
-          >
-            <IconPhone size={12} stroke={1.5} aria-hidden="true" />
-            Call
-          </a>
+          {phone && (
+            <a
+              href={`tel:${phone}`}
+              aria-label={`Call about ${item.title}`}
+              className="inline-flex min-h-touch min-w-touch items-center justify-center gap-1.5 rounded border border-border bg-surface px-3 font-body text-[12px] font-medium leading-4 text-primary transition-colors hover:bg-surface-secondary"
+            >
+              <IconPhone size={12} stroke={1.5} aria-hidden="true" />
+              Call
+            </a>
+          )}
           <Link
             href={detailHref}
-            aria-label={`Email about ${item.title}`}
-            className="inline-flex h-[26px] items-center gap-1 rounded border border-[#B3AED5] bg-white px-3 font-body text-[12px] font-medium leading-4 text-[#5A5991] transition-colors hover:bg-[#F3F4F6] lg:border-[1.25px]"
+            aria-label={`View details about ${item.title}`}
+            className="inline-flex min-h-touch min-w-touch items-center justify-center gap-1.5 rounded border border-border bg-surface px-3 font-body text-[12px] font-medium leading-4 text-primary transition-colors hover:bg-surface-secondary"
           >
-            <IconMail size={12} stroke={1.5} aria-hidden="true" />
-            Email
+            <IconChevronRight size={12} stroke={1.5} aria-hidden="true" />
+            Details
           </Link>
           <button
             type="button"
-            aria-label="Add to favorites"
+            aria-label={fav ? `Remove ${item.title} from favorites` : `Add ${item.title} to favorites`}
             aria-pressed={fav}
-            onClick={() => setFav((f) => !f)}
-            className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors ${
-              fav ? "text-rose-600" : "text-[#9CA3AF] hover:text-rose-500"
-            }`}
+            onClick={toggleFav}
+            className={cn(
+              "flex min-h-touch min-w-touch items-center justify-center rounded-full transition-colors motion-reduce:transition-none",
+              fav ? "text-error" : "text-text-secondary hover:text-error"
+            )}
           >
             <IconHeart size={18} stroke={1.5} aria-hidden="true" fill={fav ? "currentColor" : "none"} />
           </button>

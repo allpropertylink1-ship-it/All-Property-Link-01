@@ -1,7 +1,8 @@
 ﻿"use client"
 import Image from "next/image"
 import Link from "next/link"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { useAuth } from "@/lib/auth-context"
 
 const AUTO_INTERVAL_MS = 6000
 
@@ -65,15 +66,21 @@ const SLIDES: HeroSlide[] = [
   },
 ]
 
-const HERO_CTAS = [
-  { label: "Advertise Property", href: "/dashboard/listings/new" },
+const HERO_CTAS: { label: string; href: string; authGated?: boolean }[] = [
+  { label: "Advertise Property", href: "/dashboard/listings/new", authGated: true },
   { label: "Search Property", href: "/properties" },
   { label: "Find a Fundi", href: "/services?type=FUNDI" },
 ]
 
+const CROSSFADE_MS = 700
+
 export function HeroSection() {
   const [active, setActive] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [prev, setPrev] = useState<number | null>(null)
+  const { user } = useAuth()
+  const prevActiveRef = useRef(0)
+  const unmountTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const goTo = useCallback((i: number) => {
     setActive(((i % SLIDES.length) + SLIDES.length) % SLIDES.length)
@@ -86,7 +93,26 @@ export function HeroSection() {
     return () => clearInterval(t)
   }, [paused])
 
+  // Keep previous slide mounted for the crossfade duration, then unmount
+  useEffect(() => {
+    const old = prevActiveRef.current
+    if (old !== active) {
+      setPrev(old)
+      if (unmountTimerRef.current) clearTimeout(unmountTimerRef.current)
+      unmountTimerRef.current = setTimeout(() => setPrev(null), CROSSFADE_MS)
+      prevActiveRef.current = active
+    }
+  }, [active])
+
+  useEffect(() => {
+    return () => {
+      if (unmountTimerRef.current) clearTimeout(unmountTimerRef.current)
+    }
+  }, [])
+
   const slide = SLIDES[active]
+  const visibleIndexes = prev !== null && prev !== active ? [prev, active] : [active]
+  const advertiseHref = user ? "/dashboard/listings/new" : "/auth/login?next=/dashboard/listings/new"
 
   return (
     <section
@@ -97,44 +123,48 @@ export function HeroSection() {
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      {/* Slides — crossfade */}
-      <div role="region" aria-roledescription="carousel" aria-label="Property highlights" className="absolute inset-0">
-        {SLIDES.map((s, i) => (
-          <div
-            key={s.desktop}
-            aria-hidden={i === active ? undefined : "true"}
-            className={`absolute inset-0 transition-opacity duration-700 ease-out ${
-              i === active ? "z-10 opacity-100" : "z-0 opacity-0"
-            }`}
-          >
-            <Image
-              src={s.desktop}
-              alt={i === active ? s.alt : ""}
-              fill
-              priority={i === 0}
-              loading={i === 0 ? "eager" : "lazy"}
-              sizes="100vw"
-              className="hidden h-full w-full object-cover md:block"
-            />
-            <Image
-              src={s.mobile}
-              alt=""
-              aria-hidden="true"
-              fill
-              priority={i === 0}
-              loading={i === 0 ? "eager" : "lazy"}
-              sizes="100vw"
-              className="h-full w-full object-cover md:hidden"
-            />
-          </div>
-        ))}
+      {/* Slides — crossfade (CSS opacity only; only active + previous mounted) */}
+      <div role="region" aria-roledescription="carousel" aria-label="Property highlights" aria-live="off" className="absolute inset-0">
+        {visibleIndexes.map((i) => {
+          const s = SLIDES[i]
+          const isActive = i === active
+          return (
+            <div
+              key={s.desktop}
+              aria-hidden={isActive ? undefined : "true"}
+              className={`absolute inset-0 transition-opacity duration-700 ease-out ${
+                isActive ? "z-10 opacity-100" : "z-0 opacity-0"
+              }`}
+            >
+              <Image
+                src={s.desktop}
+                alt={isActive ? s.alt : ""}
+                fill
+                priority={i === 0}
+                loading={i === 0 ? "eager" : "lazy"}
+                sizes="100vw"
+                className="hidden h-full w-full object-cover md:block"
+              />
+              <Image
+                src={s.mobile}
+                alt=""
+                aria-hidden="true"
+                fill
+                priority={i === 0}
+                loading={i === 0 ? "eager" : "lazy"}
+                sizes="100vw"
+                className="h-full w-full object-cover md:hidden"
+              />
+            </div>
+          )
+        })}
         {/* Legibility scrim */}
         <div className="absolute inset-0 z-20 bg-gradient-to-t from-primary-900/80 via-primary-900/25 to-primary-900/40" aria-hidden="true" />
       </div>
 
-      {/* Copy — desktop: left edge matches navbar logo (same max-w-content + px), bottom matches dots (both 32px) */}
+      {/* Copy — h1 rendered once (no key remount); slide changes announced via status region */}
       <div className="absolute inset-0 z-30 mx-auto flex w-full max-w-content flex-col justify-end px-3 pb-24 pt-16 sm:px-4 sm:pb-28 lg:px-6 lg:pb-8">
-        <div key={active} className="max-w-3xl animate-[fadeUp_0.5s_ease-out]">
+        <div className="max-w-3xl">
           <p className="font-heading text-[28px] font-medium uppercase leading-[1.25] text-white sm:text-[37px]">
             {slide.eyebrow}
           </p>
@@ -146,7 +176,7 @@ export function HeroSection() {
             {HERO_CTAS.map((cta) => (
               <Link
                 key={cta.href + cta.label}
-                href={cta.href}
+                href={cta.authGated ? advertiseHref : cta.href}
                 className="inline-flex min-h-touch items-center justify-center rounded border-[1.25px] border-white bg-black/20 px-6 py-3 font-heading text-[16px] font-medium tracking-[0.4px] text-white backdrop-blur-[2px] transition-colors hover:bg-white hover:text-primary sm:w-auto"
               >
                 {cta.label}
@@ -154,22 +184,53 @@ export function HeroSection() {
             ))}
           </div>
         </div>
+        {/* Polite slide-change announcement (visually hidden, never keyed) */}
+        <p role="status" aria-live="polite" className="sr-only">
+          {`Slide ${active + 1} of ${SLIDES.length}: ${slide.eyebrow} ${slide.title}`}
+        </p>
       </div>
 
-      {/* Dots */}
-      <div className="absolute inset-x-0 bottom-8 z-30 flex items-center justify-center gap-3" role="group" aria-label="Choose highlight">
-        {SLIDES.map((s, i) => (
-          <button
-            key={s.desktop}
-            type="button"
-            onClick={() => goTo(i)}
-            aria-label={`Go to slide ${i + 1}: ${s.eyebrow} ${s.title}`}
-            aria-current={i === active ? "true" : undefined}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              i === active ? "w-8 bg-white" : "w-2 bg-white/50 hover:bg-white/70"
-            }`}
-          />
-        ))}
+      {/* Dots + pause/play */}
+      <div className="absolute inset-x-0 bottom-8 z-30 flex items-center justify-center gap-1">
+        <div className="flex items-center" role="group" aria-label="Choose highlight">
+          {SLIDES.map((s, i) => (
+            <button
+              key={s.desktop}
+              type="button"
+              onClick={() => goTo(i)}
+              aria-label={`Go to slide ${i + 1}: ${s.eyebrow} ${s.title}`}
+              aria-current={i === active ? "true" : undefined}
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center p-3"
+            >
+              <span
+                aria-hidden="true"
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === active ? "w-8 bg-white" : "w-2 bg-white/50 hover:bg-white/70"
+                }`}
+              />
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => setPaused((p) => !p)}
+          aria-pressed={paused}
+          aria-label={paused ? "Play slideshow" : "Pause slideshow"}
+          className="ml-2 inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-[1.25px] border-white bg-black/20 p-3 font-heading text-[16px] font-medium text-white backdrop-blur-[2px] transition-colors hover:bg-white hover:text-primary"
+        >
+          <span aria-hidden="true" className="flex w-4 items-center justify-center">
+            {paused ? (
+              <svg width="12" height="14" viewBox="0 0 12 14" fill="currentColor" aria-hidden="true">
+                <path d="M0 0l12 7-12 7z" />
+              </svg>
+            ) : (
+              <svg width="12" height="14" viewBox="0 0 12 14" fill="currentColor" aria-hidden="true">
+                <rect x="0" y="0" width="4" height="14" rx="1" />
+                <rect x="8" y="0" width="4" height="14" rx="1" />
+              </svg>
+            )}
+          </span>
+        </button>
       </div>
     </section>
   )

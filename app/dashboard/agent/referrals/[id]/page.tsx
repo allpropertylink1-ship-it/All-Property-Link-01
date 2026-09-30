@@ -236,7 +236,9 @@ export default function AgentReferralDetailPage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-text-primary">{p.title}</p>
                     <p className="text-xs text-text-secondary">{p.city} &middot; {p.propertyType}</p>
+                    {p.price != null && (
                     <p className="text-sm font-semibold text-text-primary">{fmtKES(p.price)}</p>
+                    )}
                   </div>
                 </Link>
                 <div className="flex w-full shrink-0 flex-row flex-wrap items-center justify-between gap-2 border-t border-border pt-3 sm:w-auto sm:flex-col sm:items-end sm:border-t-0 sm:pt-0">

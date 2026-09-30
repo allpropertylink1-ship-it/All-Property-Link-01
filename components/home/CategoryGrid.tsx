@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Building2, Home, Tent, Trees, Wrench, ConciergeBell, LayoutDashboard } from "@/components/ui/icons"
+import { Building2, Home, Tent, Trees, Wrench, ConciergeBell } from "@/components/ui/icons"
 import { getProperties } from "@/lib/services/property"
 import { getServiceListings } from "@/lib/services/service"
 
@@ -83,8 +83,29 @@ function CategoryPill({
   )
 }
 
-export function CategoryGrid() {
-  const [counts, setCounts] = useState<Record<string, number>>({})
+export interface CategoryInitialCounts {
+  sale?: number
+  rent?: number
+  airbnb?: number
+  land?: number
+  fundi?: number
+  provider?: number
+}
+
+function toCountRecord(initialCounts?: CategoryInitialCounts): Record<string, number> {
+  if (!initialCounts) return {}
+  const record: Record<string, number> = {}
+  if (initialCounts.sale !== undefined) record["For Sale"] = initialCounts.sale
+  if (initialCounts.rent !== undefined) record["For Rent"] = initialCounts.rent
+  if (initialCounts.airbnb !== undefined) record["Airbnbs"] = initialCounts.airbnb
+  if (initialCounts.land !== undefined) record["Plots & Land"] = initialCounts.land
+  if (initialCounts.fundi !== undefined) record["Fundis"] = initialCounts.fundi
+  if (initialCounts.provider !== undefined) record["Services"] = initialCounts.provider
+  return record
+}
+
+export function CategoryGrid({ initialCounts }: { initialCounts?: CategoryInitialCounts }) {
+  const [counts, setCounts] = useState<Record<string, number>>(() => toCountRecord(initialCounts))
 
   useEffect(() => {
     async function fetchCounts() {

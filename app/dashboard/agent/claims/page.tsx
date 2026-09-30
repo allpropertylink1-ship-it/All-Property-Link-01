@@ -280,7 +280,7 @@ export default function AgentClaimsPage() {
               >
                 <option value="">No specific listing</option>
                 {listings.map((l) => (
-                  <option key={l.id} value={l.id}>{l.title} — {l.city} ({l.price == null ? "Price on request" : fmtKES(Number(l.price))})</option>
+                  <option key={l.id} value={l.id}>{l.title} — {l.city}{l.price == null ? "" : ` (${fmtKES(Number(l.price))})`}</option>
                 ))}
               </select>
               {listings.length === 0 && (
