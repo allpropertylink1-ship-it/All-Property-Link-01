@@ -209,11 +209,6 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
           <span className="rounded bg-surface-secondary px-3 py-1 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-text-primary">
             {item.propertyType || ""}
           </span>
-          {purpose && (
-            <span className="rounded bg-accent-500 px-3 py-1 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
-              {purpose}
-            </span>
-          )}
         </div>
         <h3 className="line-clamp-2 text-balance font-body text-[15px] font-semibold leading-6 text-text-primary sm:text-base">
           <Link href={detailHref} className="transition-colors hover:text-primary">
@@ -267,11 +262,29 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
           </span>
         </p>
         {item.listerKind && (
-          <p className="font-body text-xs font-normal leading-4 text-text-secondary">
+          <p className="sr-only">
             Listed by {item.listerKind === "OWNER" ? "Owner" : "Agent"}
           </p>
         )}
-        <div className="mt-1 flex items-center justify-end gap-2">
+        <div className="mt-auto flex min-h-touch flex-wrap items-center justify-between gap-2 pt-1">
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+            {purpose && (
+              <span className="inline-flex min-h-touch items-center justify-center gap-1.5 rounded border border-transparent bg-accent-500 px-3 font-body text-[12px] font-medium leading-4 text-white">
+                {purpose}
+              </span>
+            )}
+            {item.listerKind === "OWNER" && (
+              <span className="inline-flex min-h-touch items-center justify-center gap-1.5 rounded border border-transparent bg-primary px-3 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
+                Owner
+              </span>
+            )}
+            {item.listerKind === "AGENT" && (
+              <span className="inline-flex min-h-touch items-center justify-center gap-1.5 rounded border border-border bg-surface-secondary px-3 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-text-primary">
+                Agent
+              </span>
+            )}
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
           {phone && (
             <a
               href={`tel:${phone}`}
@@ -302,6 +315,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
           >
             <IconHeart size={18} stroke={1.5} aria-hidden="true" fill={fav ? "currentColor" : "none"} />
           </button>
+          </div>
         </div>
       </div>
     </div>
