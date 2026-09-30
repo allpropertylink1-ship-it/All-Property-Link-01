@@ -135,13 +135,13 @@ export function HeroSection() {
       {/* Copy — desktop: left edge matches navbar logo (same max-w-content + px), bottom matches dots (both 32px) */}
       <div className="absolute inset-0 z-30 mx-auto flex w-full max-w-content flex-col justify-end px-3 pb-24 pt-16 sm:px-4 sm:pb-28 lg:px-6 lg:pb-8">
         <div key={active} className="max-w-3xl animate-[fadeUp_0.5s_ease-out]">
-          <p className="font-heading text-[28px] font-light uppercase leading-[1.25] text-white sm:text-[37px]">
+          <p className="font-heading text-[28px] font-medium uppercase leading-[1.25] text-white sm:text-[37px]">
             {slide.eyebrow}
           </p>
-          <h1 className="mt-1 font-heading text-[40px] font-light uppercase leading-[1.25] text-white drop-shadow-md sm:text-[53px]">
+          <h1 className="mt-1 font-heading text-[40px] font-semibold uppercase leading-[1.25] text-white drop-shadow-md sm:text-[53px]">
             {slide.title}
           </h1>
-          <p className="mt-4 max-w-xl font-heading text-[18px] font-light leading-[1.6] text-white sm:text-[20px]">{slide.subtitle}</p>
+          <p className="mt-4 max-w-xl font-heading text-[18px] font-normal leading-[1.6] text-white sm:text-[20px]">{slide.subtitle}</p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             {HERO_CTAS.map((cta) => (
               <Link

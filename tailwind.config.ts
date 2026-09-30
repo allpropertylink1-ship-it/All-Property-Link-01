@@ -81,9 +81,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        heading: ["var(--font-heading)", "system-ui", "sans-serif"],
+        heading: ["var(--font-heading)", "Georgia", "serif"],
         body: ["var(--font-body)", "system-ui", "sans-serif"],
-        poppins: ["var(--font-heading)", "system-ui", "sans-serif"],
+        poppins: ["var(--font-heading)", "Georgia", "serif"],
       },
       fontSize: {
         xs: ["0.75rem", { lineHeight: "1rem" }],

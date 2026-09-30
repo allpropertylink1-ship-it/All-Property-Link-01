@@ -117,7 +117,7 @@ export function Navbar() {
             ) : (
               <Link
                 href="/auth"
-                className={`hidden min-h-touch items-center rounded px-5 py-2 font-body text-[14px] font-light tracking-[0.7px] text-white transition-all duration-300 md:inline-flex ${
+                className={`hidden min-h-touch items-center rounded px-5 py-2 font-body text-[14px] font-normal tracking-[0.7px] text-white transition-all duration-300 md:inline-flex ${
                   overlay ? "bg-transparent" : "bg-primary shadow-sm hover:bg-primary-600"
                 }`}
               >

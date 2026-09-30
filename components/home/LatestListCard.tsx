@@ -152,7 +152,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
         <Link href={detailHref} className="line-clamp-1 font-body text-[14px] font-semibold leading-5 text-[#111827] hover:text-primary">
           <h3 className="line-clamp-1 font-body text-[14px] font-semibold leading-5">{item.title}</h3>
         </Link>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[14px] font-light leading-5 tabular-nums text-[#4B5569]">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[14px] font-normal leading-5 tabular-nums text-[#4B5569]">
           {!isNonLiving && (
             <span
               className="inline-flex items-center gap-1.5"
@@ -191,7 +191,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             )}
           </span>
         </div>
-        <p className="flex items-center gap-1.5 font-body text-[14px] font-light leading-5 text-[#4B5569]">
+        <p className="flex items-center gap-1.5 font-body text-[14px] font-normal leading-5 text-[#4B5569]">
           <IconMapPin size={16} stroke={1.5} aria-hidden="true" className="shrink-0" />
           <span className="truncate">
             {item.city}

@@ -1,7 +1,7 @@
 /**
  * SectionHeading — homepage section titles that echo the hero treatment.
  *
- * Hero language (HeroSection.tsx): Sora, UPPERCASE, light weight,
+ * Hero language (HeroSection.tsx): Roboto Slab, UPPERCASE, semibold weight,
  * eyebrow line + large title + gradient scrim accent. This component
  * translates that to light surfaces: accent eyebrow with hero-dot bar,
  * large light uppercase title in primary ink, optional subtitle.
@@ -27,7 +27,7 @@ export function SectionHeading({ id, eyebrow, title, subtitle }: SectionHeadingP
       </p>
       <h2
         id={id}
-        className="mt-2 font-heading text-[28px] font-light uppercase leading-[1.2] tracking-tight text-primary-900 text-balance sm:text-[32px]"
+        className="mt-2 font-heading text-[28px] font-semibold uppercase leading-[1.2] tracking-tight text-primary-900 text-balance sm:text-[32px]"
       >
         {title}
       </h2>
@@ -36,7 +36,7 @@ export function SectionHeading({ id, eyebrow, title, subtitle }: SectionHeadingP
         className="mt-3 block h-[3px] w-16 rounded-full bg-gradient-to-r from-primary-900/70 via-primary-900/25 to-transparent"
       />
       {subtitle && (
-        <p className="mt-2 font-heading text-base font-light leading-6 text-text-secondary">
+        <p className="mt-2 font-heading text-base font-normal leading-6 text-text-secondary">
           {subtitle}
         </p>
       )}
