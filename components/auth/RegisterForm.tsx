@@ -38,6 +38,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
   const [phone, setPhone] = useState("")
   const [recoveryEmail, setRecoveryEmail] = useState("")
   const [acceptedTerms, setAcceptedTerms] = useState(false)
+  const [accountType, setAccountType] = useState("")
 
   useEffect(() => {
     return () => {
@@ -123,6 +124,12 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
       return
     }
 
+    if (!accountType) {
+      setError("Please select your account type")
+      setLoading(false)
+      return
+    }
+
     if (!acceptedTerms) {
       setError("Please agree to the Terms of Service and Privacy Policy and confirm you are 18+ years old.")
       setLoading(false)
@@ -139,7 +146,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
         firstName: firstNameValue, lastName: lastNameValue,
       })
     } else {
-      result = await signup({ firstName: firstNameValue, lastName: lastNameValue, password, email: emailValue, phone: phoneValue, referralCode: referralCode || undefined, acceptedTerms: true, ageConfirmed: true, recoveryEmail: contactMethod === "phone" && recoveryEmail.trim() ? recoveryEmail.trim() : undefined })
+      result = await signup({ firstName: firstNameValue, lastName: lastNameValue, password, userType: accountType, email: emailValue, phone: phoneValue, referralCode: referralCode || undefined, acceptedTerms: true, ageConfirmed: true, recoveryEmail: contactMethod === "phone" && recoveryEmail.trim() ? recoveryEmail.trim() : undefined })
     }
 
     if (result.error) {
@@ -268,12 +275,14 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
       <RegisterAccountInfo
         contactMethod={contactMethod} password={password} referralCode={referralCode}
         firstName={firstName} lastName={lastName} email={email} phone={phone} recoveryEmail={recoveryEmail}
+        accountType={accountType}
         error={error} loading={loading} acceptedTerms={acceptedTerms} onAcceptedChange={setAcceptedTerms}
         onContactMethodChange={setContactMethod} onPasswordChange={setPassword}
         onReferralCodeChange={setReferralCode} onBack={onSwitchToLogin ? () => onSwitchToLogin() : undefined}
         onFirstNameChange={handleFirstNameChange} onLastNameChange={handleLastNameChange}
         onEmailChange={handleEmailChange} onPhoneChange={handlePhoneChange}
         onRecoveryEmailChange={handleRecoveryEmailChange}
+        onAccountTypeChange={setAccountType}
         onSwitchToLogin={onSwitchToLogin}
       />
     </form>

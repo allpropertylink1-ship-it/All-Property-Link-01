@@ -22,7 +22,7 @@ export const OTHER_SECTOR_ID = "OTHER";
 
 /** Taxonomy revision — bump when sectors/specialties change. Clients use
  *  it to invalidate localStorage drafts saved under an older revision. */
-export const TAXONOMY_VERSION = 1;
+export const TAXONOMY_VERSION = 2;
 
 /** Total + per-sector selection caps (existing API already caps 20 total). */
 export const MAX_SPECIALTIES_TOTAL = 20;
@@ -143,7 +143,7 @@ export const SECTORS: Sector[] = [
   {
     id: "BUILDING_FINISHES",
     name: "Building, Masonry & Finishes",
-    persona: "FUNDI",
+    persona: "BOTH",
     specialties: [
       { code: "BRICKLAYING", label: "Bricklaying" },
       { code: "CABRO_PAVING", label: "Cabro Paving" },
@@ -169,7 +169,7 @@ export const SECTORS: Sector[] = [
   {
     id: "CARPENTRY_METALWORK",
     name: "Carpentry, Furniture & Metalwork",
-    persona: "FUNDI",
+    persona: "BOTH",
     specialties: [
       { code: "CAR_SEATS_UPHOLSTERY", label: "Car Seats Upholstery" },
       { code: "CARPENTRY", label: "Carpentry" },
@@ -227,7 +227,7 @@ export const SECTORS: Sector[] = [
   {
     id: "ELECTRICAL_ENERGY",
     name: "Electrical, Energy & Automation",
-    persona: "FUNDI",
+    persona: "BOTH",
     specialties: [
       { code: "DSTV_INTERNET_WIRING", label: "DSTV & Internet Wiring" },
       { code: "EV_CHARGER", label: "EV Charger" },
@@ -263,7 +263,7 @@ export const SECTORS: Sector[] = [
   {
     id: "HVAC_REFRIGERATION",
     name: "HVAC & Refrigeration",
-    persona: "FUNDI",
+    persona: "BOTH",
     specialties: [
       { code: "AC_REFRIGERATION", label: "AC Refrigeration" },
       { code: "AC_SERVICING", label: "AC Servicing" },
@@ -326,7 +326,7 @@ export const SECTORS: Sector[] = [
   {
     id: "PLUMBING_WATER",
     name: "Plumbing, Water & Sanitation",
-    persona: "FUNDI",
+    persona: "BOTH",
     specialties: [
       { code: "BOREHOLE_DRILLING", label: "Borehole Drilling" },
       { code: "DRAINAGE_SEWAGE", label: "Drainage & Sewage" },

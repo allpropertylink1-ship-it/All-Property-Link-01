@@ -22,13 +22,12 @@ import SectorSpecialtyPicker from "@/components/dashboard/SectorSpecialtyPicker"
 import { isOtherSpecialty } from "@/lib/service-taxonomy";
 
 type Step = "choose" | "advertiser" | "customer-confirm" | "countdown";
-type AdvertiserType = "PROPERTY_OWNER" | "AGENT" | "FUNDI" | "SERVICE_PROVIDER";
+type AdvertiserType = "PROPERTY_OWNER" | "AGENT" | "SERVICE_PROVIDER";
 
 const ADVERTISER_OPTIONS: { value: AdvertiserType; label: string; hint: string }[] = [
   { value: "PROPERTY_OWNER", label: "Property Owner", hint: "List your own property for sale or rent" },
   { value: "AGENT", label: "Agent", hint: "List property on behalf of owners" },
-  { value: "FUNDI", label: "Fundi", hint: "Offer trade services — plumbing, electrical, carpentry" },
-  { value: "SERVICE_PROVIDER", label: "Service Provider", hint: "Offer cleaning, security, management & more" },
+  { value: "SERVICE_PROVIDER", label: "Service Provider", hint: "Offer fundi, trade & professional services" },
 ];
 
 const COUNTDOWN_SECONDS = 8;
@@ -92,8 +91,7 @@ function ChooseRoleInner() {
   }
   if (!isTypeless) return null;
 
-  const needsSpecialties =
-    advertiserType === "FUNDI" || advertiserType === "SERVICE_PROVIDER";
+  const needsSpecialties = advertiserType === "SERVICE_PROVIDER";
   const realSpecialtyCount = specialties.filter((s) => !isOtherSpecialty(s)).length;
 
   async function submitRole(category: string, specs: string[]) {
@@ -337,7 +335,7 @@ function ChooseRoleInner() {
             Advertise a property or service
           </span>
           <span className="mt-1 block text-[13px] leading-relaxed text-text-secondary">
-            Property Owner, Agent, Fundi or Service Provider. Requires ID
+            Property Owner, Agent or Service Provider. Requires ID
             verification (KYC) before you can list.
           </span>
           <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary-600 group-hover:underline">

@@ -17,11 +17,13 @@ interface Props {
   email: string
   phone: string
   recoveryEmail: string
+  accountType: string
   error: string
   loading: boolean
   acceptedTerms: boolean
   onAcceptedChange: (v: boolean) => void
   onContactMethodChange: (m: ContactMethod) => void
+  onAccountTypeChange: (v: string) => void
   onPasswordChange: (v: string) => void
   onReferralCodeChange: (v: string) => void
   onBack?: () => void
@@ -34,12 +36,18 @@ interface Props {
 }
 
 export function RegisterAccountInfo({
-  contactMethod, password, referralCode, firstName, lastName, email, phone, recoveryEmail, error, loading, acceptedTerms, onAcceptedChange,
-  onContactMethodChange, onPasswordChange, onReferralCodeChange,
+  contactMethod, password, referralCode, firstName, lastName, email, phone, recoveryEmail, accountType, error, loading, acceptedTerms, onAcceptedChange,
+  onContactMethodChange, onAccountTypeChange, onPasswordChange, onReferralCodeChange,
   onBack, onFirstNameChange, onLastNameChange, onEmailChange, onPhoneChange, onRecoveryEmailChange,
   onSwitchToLogin,
 }: Props) {
   const goBack = onBack ?? (onSwitchToLogin ? () => onSwitchToLogin() : undefined)
+  const accountOptions = [
+    { value: "PROPERTY_OWNER", label: "Property Owner", hint: "List your own property" },
+    { value: "AGENT", label: "Agent", hint: "List for owners" },
+    { value: "SERVICE_PROVIDER", label: "Service Provider", hint: "Fundi, cleaning, security & more" },
+    { value: "CUSTOMER", label: "Customer", hint: "Rent, buy & browse" },
+  ]
   return (
     <div className="space-y-2.5">
       {goBack && (
@@ -74,6 +82,24 @@ export function RegisterAccountInfo({
               placeholder="Mwangi"
               className={stitchInputClass}
               style={{ fontSize: "16px" }} />
+          </div>
+        </div>
+
+        <div>
+          <span className="mb-1 block text-xs font-semibold text-text-primary" id="account-type-label">I am joining as</span>
+          <div className="grid grid-cols-2 gap-1.5" role="radiogroup" aria-labelledby="account-type-label">
+            {accountOptions.map((opt) => (
+              <button key={opt.value} type="button" role="radio" aria-checked={accountType === opt.value}
+                onClick={() => onAccountTypeChange(opt.value)}
+                className={`rounded-lg border px-2.5 py-2 text-left transition-all ${
+                  accountType === opt.value
+                    ? "border-primary bg-primary/5 shadow-sm"
+                    : "border-border bg-surface-secondary/50 hover:border-primary/50"
+                }`}>
+                <span className={`block text-xs font-semibold ${accountType === opt.value ? "text-primary" : "text-text-primary"}`}>{opt.label}</span>
+                <span className="mt-0.5 block text-[11px] leading-snug text-text-secondary">{opt.hint}</span>
+              </button>
+            ))}
           </div>
         </div>
 

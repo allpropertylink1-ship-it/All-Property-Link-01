@@ -15,8 +15,7 @@ const categories = [
   { value: "CUSTOMER", label: "Customer" },
   { value: "PROPERTY_OWNER", label: "Property Owner" },
   { value: "AGENT", label: "Agent" },
-  { value: "FUNDI", label: "Fundi" },
-  { value: "SERVICE_PROVIDER", label: "Service Provider" },
+  { value: "SERVICE_PROVIDER", label: "Service Provider (Fundi & services)" },
 ];
 
 function OnboardingPageInner() {

@@ -19,8 +19,7 @@ const categories = [
   { value: "CUSTOMER", label: "Customer" },
   { value: "PROPERTY_OWNER", label: "Property Owner" },
   { value: "AGENT", label: "Agent" },
-  { value: "FUNDI", label: "Fundi" },
-  { value: "SERVICE_PROVIDER", label: "Service Provider" },
+  { value: "SERVICE_PROVIDER", label: "Service Provider (Fundi & services)" },
 ]
 
 
@@ -75,10 +74,10 @@ function BusinessProfilePageInner() {
   }
   function authErrorMessage(raw: string): string {
     if (isAccountInactiveError(raw)) {
-      return "Your account is not active yet (pending approval or suspended). Your entries are saved on this device â€” please contact support instead of signing in again."
+      return "Your account is not active yet (pending approval or suspended). Your entries are saved on this device — please contact support instead of signing in again."
     }
     if (isAuthError(raw)) {
-      return "Your session expired â€” please sign in again to save your business profile. Your entries are saved on this device and will be restored after you sign in. If you just verified your email, your browser may have blocked the login cookie; try Chrome with third-party cookies allowed, then sign in again."
+      return "Your session expired — please sign in again to save your business profile. Your entries are saved on this device and will be restored after you sign in. If you just verified your email, your browser may have blocked the login cookie; try Chrome with third-party cookies allowed, then sign in again."
     }
     return raw
   }
@@ -131,7 +130,8 @@ function BusinessProfilePageInner() {
         const next = {
           companyName: u.companyName || "",
           contactPerson: u.contactPerson || "",
-          category: u.category || "",
+          // Legacy alias: old FUNDI rows display as the unified provider type.
+          category: u.category === "FUNDI" ? "SERVICE_PROVIDER" : (u.category || ""),
           specialties: u.specialties || [],
           website: u.website || "",
           location: u.location || "",
@@ -161,7 +161,7 @@ function BusinessProfilePageInner() {
     if (file.size > 10 * 1024 * 1024) { setError("File must be under 10MB"); e.target.value = ""; return }
     e.target.value = ""
     setError("")
-    // Crop step is optional â€” dialog offers Apply crop / Use original.
+    // Crop step is optional — dialog offers Apply crop / Use original.
     setPendingPhoto(file)
   }
 
@@ -194,7 +194,7 @@ function BusinessProfilePageInner() {
     if (file.size > 10 * 1024 * 1024) { setError("File must be under 10MB"); e.target.value = ""; return }
     e.target.value = ""
     setError("")
-    // Crop step is optional â€” dialog offers Apply crop / Use original.
+    // Crop step is optional — dialog offers Apply crop / Use original.
     setPendingLogo(file)
   }
 
@@ -224,7 +224,7 @@ function BusinessProfilePageInner() {
   const showSpecialties = form.category === "FUNDI" || form.category === "SERVICE_PROVIDER"
 
   const isDirty = initialForm ? JSON.stringify(form) !== JSON.stringify(initialForm) : false
-  // Account type is locked after onboarding â€” the API rejects changes with a 403.
+  // Account type is locked after onboarding — the API rejects changes with a 403.
   const isCategoryLocked = !!initialForm?.category
 
   async function handleSave(e: React.FormEvent) {
@@ -240,16 +240,16 @@ function BusinessProfilePageInner() {
       const me = await api.get<{ user: unknown }>("/api/auth/me")
       if (me.error || !me.data?.user) {
         saveDraft(form)
-        setError(authErrorMessage(me.error || "Session expired â€” please sign in again."))
+        setError(authErrorMessage(me.error || "Session expired — please sign in again."))
         redirectToLogin()
         return
       }
-      // AGENT, PROPERTY_OWNER and CUSTOMER have no specialties â€” clear any stale values.
+      // AGENT, PROPERTY_OWNER and CUSTOMER have no specialties — clear any stale values.
       const normalized =
         form.category === "AGENT" || form.category === "PROPERTY_OWNER" || form.category === "CUSTOMER"
           ? { ...form, specialties: [] as string[] }
           : form
-      // Account type is locked after onboarding â€” never resend an unchanged
+      // Account type is locked after onboarding — never resend an unchanged
       // category or the API rejects the whole save with a 403.
       const categoryChanged = initialForm ? normalized.category !== initialForm.category : true
       const payload: Record<string, unknown> = { ...normalized }
@@ -431,7 +431,7 @@ function BusinessProfilePageInner() {
             <span className="block text-sm font-medium text-text-primary" id="bizCategoryLabel">
               Category <span className="text-error-500">*</span>
               {isCategoryLocked && (
-                <span className="ml-2 text-xs font-normal text-text-secondary">(locked after onboarding â€” contact support to change)</span>
+                <span className="ml-2 text-xs font-normal text-text-secondary">(locked after onboarding — contact support to change)</span>
               )}
             </span>
             <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2" role="group" aria-labelledby="bizCategoryLabel">
@@ -441,7 +441,7 @@ function BusinessProfilePageInner() {
                   type="button"
                   aria-pressed={form.category === cat.value}
                   disabled={isCategoryLocked}
-                  title={isCategoryLocked ? "Account type is locked after onboarding â€” contact support to change" : undefined}
+                  title={isCategoryLocked ? "Account type is locked after onboarding — contact support to change" : undefined}
                   onClick={() => {
                     updateField("category", cat.value)
                     setForm((prev) => ({ ...prev, specialties: [] }))
@@ -536,7 +536,7 @@ function BusinessProfilePageInner() {
         <ImageCropDialog
           sourceFile={pendingPhoto}
           label="Profile photo"
-          guidance="This photo appears on your public profile â€” center yourself clearly."
+          guidance="This photo appears on your public profile — center yourself clearly."
           context="business-photo"
           onComplete={(blob) => finishPhotoUpload(cropBlobToFile(blob, pendingPhoto.name))}
           onSkip={() => finishPhotoUpload(pendingPhoto)}
@@ -547,7 +547,7 @@ function BusinessProfilePageInner() {
         <ImageCropDialog
           sourceFile={pendingLogo}
           label="Business logo"
-          guidance="Keep all brand text inside the crop â€” this logo appears on your listings and services."
+          guidance="Keep all brand text inside the crop — this logo appears on your listings and services."
           context="business-logo"
           onComplete={(blob) => finishLogoUpload(cropBlobToFile(blob, pendingLogo.name))}
           onSkip={() => finishLogoUpload(pendingLogo)}
