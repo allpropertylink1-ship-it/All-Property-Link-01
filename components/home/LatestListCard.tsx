@@ -121,7 +121,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
     <div className="flex flex-col overflow-hidden rounded border border-border bg-surface font-body transition-shadow duration-300 hover:shadow-md lg:flex-row">
       {/* Image carousel */}
       <div
-        className="relative h-[200px] w-full shrink-0 overflow-hidden bg-surface-secondary lg:h-[240px] lg:w-[240px]"
+        className="relative h-[168px] w-full shrink-0 overflow-hidden bg-surface-secondary lg:h-[190px] lg:w-[200px]"
         onTouchStart={(e) => {
           touchStartX.current = e.touches[0]?.clientX ?? null
         }}
@@ -204,24 +204,24 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
       </div>
 
       {/* Details */}
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-3">
+      <div className="flex min-w-0 flex-1 flex-col gap-1 p-2.5">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="rounded bg-surface-secondary px-3 py-1 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-text-primary">
             {item.propertyType || ""}
           </span>
         </div>
-        <h3 className="line-clamp-2 text-balance font-body text-[15px] font-semibold leading-6 text-text-primary sm:text-base">
+        <h3 className="line-clamp-1 font-body text-sm font-semibold leading-5 text-text-primary">
           <Link href={detailHref} className="transition-colors hover:text-primary">
             {item.title}
           </Link>
         </h3>
         {item.price != null && (
-          <p className="font-body text-base font-bold leading-6 tabular-nums text-primary">
+          <p className="font-body text-[15px] font-bold leading-5 tabular-nums text-primary">
             {formatPrice(item.price, item.listingPurpose ?? undefined)}
           </p>
         )}
         {showSpecs && (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[14px] font-normal leading-5 tabular-nums text-text-secondary">
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 font-body text-[13px] font-normal leading-5 tabular-nums text-text-secondary">
             {!isNonLiving && hasBeds && (
               <span className="inline-flex items-center gap-1.5" aria-label={`${item.bedrooms} bedrooms`}>
                 <IconBed size={16} stroke={1.5} aria-hidden="true" />
@@ -254,7 +254,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             )}
           </div>
         )}
-        <p className="flex items-center gap-1.5 font-body text-[14px] font-normal leading-5 text-text-secondary">
+        <p className="flex items-center gap-1.5 font-body text-[13px] font-normal leading-5 text-text-secondary">
           <IconMapPin size={16} stroke={1.5} aria-hidden="true" className="shrink-0" />
           <span className="truncate">
             {item.city}
@@ -266,20 +266,20 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             Listed by {item.listerKind === "OWNER" ? "Owner" : "Agent"}
           </p>
         )}
-        <div className="mt-auto flex min-h-touch flex-nowrap items-center justify-between gap-2 pt-1">
+        <div className="mt-auto flex flex-nowrap items-center justify-between gap-2 pt-0.5">
           <div className="flex min-w-0 flex-nowrap items-center gap-1.5 overflow-hidden">
             {purpose && (
-              <span className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 truncate rounded border border-transparent bg-accent-500 px-3 font-body text-[12px] font-medium leading-4 text-white">
+              <span className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 truncate rounded border border-transparent bg-accent-500 px-2.5 font-body text-[11px] font-medium leading-4 text-white">
                 {purpose}
               </span>
             )}
             {item.listerKind === "OWNER" && (
-              <span className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded border border-transparent bg-primary px-3 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
+              <span className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded border border-transparent bg-primary px-2.5 font-body text-[11px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
                 Owner
               </span>
             )}
             {item.listerKind === "AGENT" && (
-              <span className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded border border-border bg-surface-secondary px-3 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-text-primary">
+              <span className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded border border-border bg-surface-secondary px-2.5 font-body text-[11px] font-medium uppercase leading-4 tracking-[0.12em] text-text-primary">
                 Agent
               </span>
             )}
@@ -289,7 +289,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             <a
               href={`tel:${phone}`}
               aria-label={`Call about ${item.title}`}
-              className="inline-flex h-11 min-w-touch items-center justify-center gap-1.5 rounded border border-border bg-surface px-3 font-body text-[12px] font-medium leading-4 text-primary transition-colors hover:bg-surface-secondary"
+              className="inline-flex h-9 min-w-[64px] items-center justify-center gap-1.5 rounded border border-border bg-surface px-2.5 font-body text-[11px] font-medium leading-4 text-primary transition-colors hover:bg-surface-secondary"
             >
               <IconPhone size={12} stroke={1.5} aria-hidden="true" />
               Call
@@ -309,7 +309,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             aria-pressed={fav}
             onClick={toggleFav}
             className={cn(
-              "flex min-h-touch min-w-touch items-center justify-center rounded-full transition-colors motion-reduce:transition-none",
+              "flex h-9 w-9 items-center justify-center rounded-full transition-colors motion-reduce:transition-none",
               fav ? "text-error" : "text-text-secondary hover:text-error"
             )}
           >
