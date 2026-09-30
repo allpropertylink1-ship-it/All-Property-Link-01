@@ -266,20 +266,20 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             Listed by {item.listerKind === "OWNER" ? "Owner" : "Agent"}
           </p>
         )}
-        <div className="mt-auto flex min-h-touch flex-wrap items-center justify-between gap-2 pt-1">
-          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+        <div className="mt-auto flex min-h-touch flex-nowrap items-center justify-between gap-2 pt-1">
+          <div className="flex min-w-0 flex-nowrap items-center gap-1.5 overflow-hidden">
             {purpose && (
-              <span className="inline-flex min-h-touch items-center justify-center gap-1.5 rounded border border-transparent bg-accent-500 px-3 font-body text-[12px] font-medium leading-4 text-white">
+              <span className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 truncate rounded border border-transparent bg-accent-500 px-3 font-body text-[12px] font-medium leading-4 text-white">
                 {purpose}
               </span>
             )}
             {item.listerKind === "OWNER" && (
-              <span className="inline-flex min-h-touch items-center justify-center gap-1.5 rounded border border-transparent bg-primary px-3 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
+              <span className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded border border-transparent bg-primary px-3 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
                 Owner
               </span>
             )}
             {item.listerKind === "AGENT" && (
-              <span className="inline-flex min-h-touch items-center justify-center gap-1.5 rounded border border-border bg-surface-secondary px-3 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-text-primary">
+              <span className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded border border-border bg-surface-secondary px-3 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-text-primary">
                 Agent
               </span>
             )}
@@ -289,7 +289,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             <a
               href={`tel:${phone}`}
               aria-label={`Call about ${item.title}`}
-              className="inline-flex min-h-touch min-w-touch items-center justify-center gap-1.5 rounded border border-border bg-surface px-3 font-body text-[12px] font-medium leading-4 text-primary transition-colors hover:bg-surface-secondary"
+              className="inline-flex h-11 min-w-touch items-center justify-center gap-1.5 rounded border border-border bg-surface px-3 font-body text-[12px] font-medium leading-4 text-primary transition-colors hover:bg-surface-secondary"
             >
               <IconPhone size={12} stroke={1.5} aria-hidden="true" />
               Call
@@ -298,7 +298,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
           <Link
             href={detailHref}
             aria-label={`View details about ${item.title}`}
-            className="inline-flex min-h-touch min-w-touch items-center justify-center gap-1.5 rounded border border-border bg-surface px-3 font-body text-[12px] font-medium leading-4 text-primary transition-colors hover:bg-surface-secondary"
+            className="inline-flex h-11 min-w-touch items-center justify-center gap-1.5 rounded border border-border bg-surface px-3 font-body text-[12px] font-medium leading-4 text-primary transition-colors hover:bg-surface-secondary"
           >
             <IconChevronRight size={12} stroke={1.5} aria-hidden="true" />
             Details
