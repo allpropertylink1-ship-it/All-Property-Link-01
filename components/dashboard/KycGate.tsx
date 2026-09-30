@@ -17,12 +17,16 @@ export function KycGate({ children, kycStatus, isAgent, authMethod, primaryUserT
   const pathname = usePathname()
   const isKycPage = pathname === "/dashboard/kyc" || pathname.startsWith("/dashboard/kyc/")
   const isOnboardingPage = pathname === "/dashboard/onboarding" || pathname.startsWith("/dashboard/onboarding")
+  const isChooseRolePage = pathname === "/dashboard/choose-role" || pathname.startsWith("/dashboard/choose-role")
 
   // APL Representatives never do KYC; customers are exempt from verification.
   if (isAgent || authMethod === "agent") return <>{children}</>
   if (primaryUserType === "CUSTOMER") return <>{children}</>
   if (kycStatus === "VERIFIED") return <>{children}</>
   if (isKycPage) return <>{children}</>
+  // Role choice precedes everything: typeless users must pass through
+  // /dashboard/choose-role before KYC or onboarding gates apply.
+  if (isChooseRolePage) return <>{children}</>
   // Account type is chosen AFTER KYC now: typeless users must complete KYC before onboarding
   const isTypeless = !primaryUserType && (!userTypes || userTypes.length === 0)
   if (isTypeless && isOnboardingPage && kycStatus !== "VERIFIED") {

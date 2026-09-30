@@ -62,15 +62,11 @@ export default async function DashboardPage() {
     redirect(personaTarget)
   }
 
-  // New flow: KYC before account type. Typeless users must verify first, then choose type.
+  // Role choice comes first: typeless users pick Customer vs Advertiser on
+  // /dashboard/choose-role before ever seeing KYC or onboarding.
   const isTypeless = !user.primaryUserType && (!user.userTypes || user.userTypes.length === 0)
   if (isTypeless) {
-    if (user.kycStatus === "NONE" || user.kycStatus === "REJECTED" || user.kycStatus === "PENDING") {
-      redirect("/dashboard/kyc")
-    }
-    if (user.onboardingComplete === false || user.onboardingComplete === null || user.onboardingComplete === undefined) {
-      redirect("/dashboard/onboarding")
-    }
+    redirect("/dashboard/choose-role")
   } else {
     if (user.kycStatus === "NONE" || user.kycStatus === "REJECTED") {
       redirect("/dashboard/kyc")

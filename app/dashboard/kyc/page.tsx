@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import { uploadImage, uploadPdf, IMAGE_PRESETS, HEIC_HINT, isHeicFile } from "@/lib/image-client";
 import { Shield, CheckCircle, Clock, XCircle, Loader2 } from "@/components/ui/icons"
 import { api } from "@/lib/api-client"
@@ -47,7 +48,18 @@ function Badge({ status }: { status: string }) {
 }
 
 function KycPageInner() {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
+  const router = useRouter()
+  // Role choice precedes KYC: typeless users must pass through
+  // /dashboard/choose-role first (customers never reach KYC at all —
+  // PersonaGate bounces them home and the API rejects their submissions).
+  const isTypeless =
+    !user?.primaryUserType && (!user?.userTypes || user.userTypes.length === 0)
+  useEffect(() => {
+    if (!loading && user && isTypeless) {
+      router.replace("/dashboard/choose-role")
+    }
+  }, [loading, user, isTypeless, router])
   const [data, setData] = useState<KycData | null>(null)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -300,6 +312,10 @@ function KycPageInner() {
       bioPhone: setBioPhone, bioEmail: setBioEmail,
     }
     setters[field]?.(value)
+  }
+
+  if (!loading && isTypeless) {
+    return null
   }
 
   return (

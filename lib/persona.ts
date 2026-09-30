@@ -49,12 +49,15 @@ export function personaRedirectTarget(
  * signed-in guard on /auth entry points.
  * - APL Rep (authMethod "agent") → /dashboard/agent
  * - Customer (primaryUserType CUSTOMER) → / (marketplace home)
- * - Everyone else (owners, intermediary agents, fundis, providers,
- *   typeless/new) → /dashboard (KYC/onboarding gates forward as needed)
+ * - Typeless/new (no role chosen yet) → /dashboard/choose-role
+ * - Everyone else (owners, intermediary agents, fundis, providers) →
+ *   /dashboard (KYC/onboarding gates forward as needed)
  */
 export function personaHomeTarget(user: PersonaUser | null | undefined): string {
   if (isRep(user)) return "/dashboard/agent"
   if (isCustomer(user)) return "/"
+  const held = user?.userTypes ?? []
+  if (!user?.primaryUserType && held.length === 0) return "/dashboard/choose-role"
   return "/dashboard"
 }
 

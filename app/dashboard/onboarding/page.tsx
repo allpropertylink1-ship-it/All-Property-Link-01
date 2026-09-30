@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Check } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
@@ -21,10 +21,33 @@ const categories = [
 
 function OnboardingPageInner() {
   const router = useRouter();
-  const { refreshUser } = useAuth();
+  const { user, loading: authLoading, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
+  const chosenType = user?.primaryUserType ?? null;
+  const isTypelessUser =
+    !chosenType && (!user?.userTypes || user.userTypes.length === 0);
+  // Role choice happens on /dashboard/choose-role before this form. Typeless
+  // users who land here directly are sent back to choose first.
+  useEffect(() => {
+    if (!authLoading && user && isTypelessUser) {
+      router.replace("/dashboard/choose-role");
+    }
+  }, [authLoading, user, isTypelessUser, router]);
+  // Advertisers already picked their type on choose-role: preset it and hide
+  // the Customer option so the choice stays consistent.
+  const visibleCategories =
+    chosenType && chosenType !== "CUSTOMER"
+      ? categories.filter((c) => c.value !== "CUSTOMER")
+      : categories;
+  useEffect(() => {
+    if (chosenType && chosenType !== "CUSTOMER") {
+      setForm((prev) => (prev.category ? prev : { ...prev, category: chosenType }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chosenType]);
 
   const [form, setForm] = useState({
     companyName: "",
@@ -55,7 +78,7 @@ function OnboardingPageInner() {
     }
 
     try {
-      // AGENT, PROPERTY_OWNER, CUSTOMER have no specialties â€” never submit stale values.
+      // AGENT, PROPERTY_OWNER, CUSTOMER have no specialties — never submit stale values.
       const payload =
         form.category === "AGENT" || form.category === "PROPERTY_OWNER" || form.category === "CUSTOMER"
           ? { ...form, specialties: [] as string[] }
@@ -75,7 +98,7 @@ function OnboardingPageInner() {
       }
 
       setSuccess(true);
-      // Hydrate (onboarding sets primaryUserType) then route by persona â€”
+      // Hydrate (onboarding sets primaryUserType) then route by persona —
       // customers land on home, businesses on the dashboard.
       const u = await refreshUser().catch(() => null);
       setTimeout(() => router.push(personaHomeTarget(u ?? null)), 2000);
@@ -102,6 +125,10 @@ function OnboardingPageInner() {
     );
   }
 
+  if (!authLoading && isTypelessUser) {
+    return null;
+  }
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <section aria-labelledby="onboarding-heading" className="rounded-xl border border-border bg-surface p-5 text-center sm:p-6">
@@ -110,7 +137,7 @@ function OnboardingPageInner() {
         </p>
           <h1 id="onboarding-heading" className="mt-1 font-heading text-2xl font-bold tracking-tight text-text-primary">Choose Your Account Type</h1>
         <p className="mt-1 text-sm text-text-secondary">
-          Select how you'll use All Property Link. {form.category === "CUSTOMER" ? "Customers can browse and review â€” no business setup needed." : "Business profiles require approval."}
+          Select how you'll use All Property Link. {form.category === "CUSTOMER" ? "Customers can browse and review — no business setup needed." : "Business profiles require approval."}
         </p>
       </section>
 
@@ -201,7 +228,7 @@ function OnboardingPageInner() {
             Category <span className="text-error-500">*</span>
           </span>
           <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2" role="group" aria-labelledby="onboarding-category-label">
-            {categories.map((cat) => (
+            {visibleCategories.map((cat) => (
               <button
                 key={cat.value}
                 type="button"

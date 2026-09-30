@@ -20,7 +20,7 @@ interface ListingRow {
 }
 
 function formatPrice(listing: ListingRow) {
-  if (listing.price == null) return "Price on request";
+  if (listing.price == null) return "—";
   const suffix = listing.listingPurpose === "FOR_RENT_SHORT_TERM" ? "/night" : listing.listingPurpose === "FOR_RENT_LONG_TERM" ? "/month" : "";
   return `${listing.currency} ${Number(listing.price).toLocaleString()}${suffix}`;
 }
@@ -40,9 +40,9 @@ export default async function ListingsPage({ searchParams }: { searchParams?: { 
           <Building2 size={48} className="text-muted mb-4" />
           <h2 className="font-heading text-xl font-bold text-text-primary mb-2">Complete Your Setup</h2>
           <p className="text-text-secondary mb-6 max-w-md">
-            Please complete identity verification to manage property listings.
+            Please choose your account type to manage property listings.
           </p>
-          <Link href="/dashboard/kyc" className="touch-target inline-flex min-h-[44px] items-center rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white hover:bg-primary-700">
+          <Link href="/dashboard/choose-role" className="touch-target inline-flex min-h-[44px] items-center rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white hover:bg-primary-700">
             Continue Setup
           </Link>
         </div>
