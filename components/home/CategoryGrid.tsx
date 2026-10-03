@@ -74,7 +74,9 @@ function CategoryPill({
     >
       <Icon size={16} className="text-primary" aria-hidden="true" />
       <span>{title}</span>
-      {count !== undefined && (
+      {/* Zero means "unknown" (API unreachable) or genuinely empty — either
+          way a 0 badge is noise, so only show positive counts. */}
+      {count !== undefined && count > 0 && (
         <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary-700">
           {count}
         </span>
