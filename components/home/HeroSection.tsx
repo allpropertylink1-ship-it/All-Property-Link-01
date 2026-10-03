@@ -163,7 +163,7 @@ export function HeroSection() {
       </div>
 
       {/* Copy — h1 rendered once (no key remount); slide changes announced via status region */}
-      <div className="absolute inset-0 z-30 mx-auto flex w-full max-w-content flex-col justify-end px-3 pb-24 pt-16 sm:px-4 sm:pb-28 lg:px-6 lg:pb-8">
+      <div className="absolute inset-0 z-30 mx-auto flex w-full max-w-content flex-col justify-end px-3 pb-24 pt-16 sm:px-4 sm:pb-28 lg:px-6 lg:pb-24">
         <div className="max-w-3xl">
           <p className="font-heading text-[28px] font-medium uppercase leading-[1.25] text-white sm:text-[37px]">
             {slide.eyebrow}
@@ -190,8 +190,8 @@ export function HeroSection() {
         </p>
       </div>
 
-      {/* Dots + pause/play */}
-      <div className="absolute inset-x-0 bottom-8 z-30 flex items-center justify-center gap-1">
+      {/* Dots + pause/play — desktop: docked right to clear the CTA row; mobile: centered below copy */}
+      <div className="absolute inset-x-0 bottom-6 z-30 mx-auto flex w-full max-w-content items-center justify-center px-3 sm:px-4 lg:justify-end lg:px-6">
         <div className="flex items-center" role="group" aria-label="Choose highlight">
           {SLIDES.map((s, i) => (
             <button
