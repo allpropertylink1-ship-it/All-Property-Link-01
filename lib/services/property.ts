@@ -95,9 +95,10 @@ export const getOtherPropertiesByAgent = cache(async (agentId: string, currentPr
 });
 
 export const getCities = cache(async (): Promise<{ city: string; _count: { city: number } }[]> => {
+  const { cleanCityCounts } = await import("@/lib/cities-client");
   const direct = await fetchApi<{ cities: { city: string; count: number }[] }>("/api/properties/cities");
   const legacy = direct?.cities ? null : await fetchApi<{ cities: { city: string; count: number }[] }>("/api/properties?limit=1");
-  return ((direct ?? legacy)?.cities || []).map(c => ({ city: c.city, _count: { city: c.count } }));
+  return cleanCityCounts((direct ?? legacy)?.cities || []).map(c => ({ city: c.city, _count: { city: c.count } }));
 });
 
 type MutateResult<T = undefined> = { success: boolean; error?: string; data?: T };
