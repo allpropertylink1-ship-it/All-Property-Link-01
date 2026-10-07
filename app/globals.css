@@ -12,6 +12,7 @@
     -webkit-tap-highlight-color: transparent;
     max-width: 100%;
     overflow-x: clip;
+    touch-action: pan-x pan-y;
   }
 
   body {
