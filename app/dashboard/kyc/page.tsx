@@ -373,7 +373,7 @@ function KycPageInner() {
               </div>
             ) : (
               <div className="flex flex-wrap items-end gap-3">
-                <div className="flex-1 min-w-[200px]">
+                <div className="min-w-0 flex-1 basis-48 sm:min-w-[200px]">
                   <label className="mb-1 block text-sm font-medium text-text-primary" htmlFor="agentCode">APL Representative Code</label>
                   <input id="agentCode" value={agentCode} onChange={e => setAgentCode(e.target.value.toUpperCase())} placeholder="e.g. APL-JOE-001-07/26"
                     className="block min-h-[44px] w-full rounded-lg border border-border bg-surface px-3 py-2 text-base uppercase font-mono focus:outline-none focus:ring-2 focus:ring-primary-600/20" />

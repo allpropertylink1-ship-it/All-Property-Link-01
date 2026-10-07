@@ -42,7 +42,7 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
           </Link>
         </div>
         {/* Mobile + tablet rail: one full card per viewport snap */}
-        <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide lg:hidden">
+        <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:hidden">
           {properties.map((p, i) => (
                 <div key={p.slug} className="w-full shrink-0 snap-start snap-always sm:w-[calc(50%-8px)]">
                   <LatestListCard item={withPhone(p)} priority={i === 0} />

@@ -58,6 +58,10 @@
   input, textarea, select { font-family: inherit; font-size: 16px; }
   ul { list-style: none; }
   img { max-width: 100%; height: auto; display: block; image-orientation: from-image; }
+  video, canvas, iframe { max-width: 100%; }
+  iframe { display: block; }
+  pre, code { overflow-wrap: anywhere; word-break: break-word; }
+  :where(main, section) { min-width: 0; }
 
   :focus-visible {
     outline: 2px solid var(--color-primary);

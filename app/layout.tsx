@@ -70,7 +70,7 @@ export default async function RootLayout({
       <body className={`${heading.variable} ${body.variable} flex min-h-[100dvh] flex-col antialiased`}>
         <AuthProvider>
           <Navbar />
-          <main className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6">{inMaintenance ? <MaintenanceNotice title={status?.maintenanceTitle} message={status?.maintenanceMessage} /> : children}</main>
+          <main className="min-w-0 max-w-full flex-1 overflow-x-clip pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6">{inMaintenance ? <MaintenanceNotice title={status?.maintenanceTitle} message={status?.maintenanceMessage} /> : children}</main>
           <CookieConsent />
           <BottomNav />
           <ConditionalFooter />
