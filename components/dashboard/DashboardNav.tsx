@@ -118,6 +118,13 @@ function NavSections({ onNavigate }: { onNavigate?: () => void }) {
       </>
     )
   }
+  // Advertisers without approved KYC only see KYC Verification — the KycGate
+  // blocks every other section until verification is approved.
+  if (user?.kycStatus !== "VERIFIED") {
+    return (
+      <NavGroup links={[{ href: "/dashboard/kyc", label: "KYC Verification", icon: Shield }]} section="primary" onNavigate={onNavigate} />
+    )
+  }
   return (
     <>
       <NavGroup links={primary} section="primary" onNavigate={onNavigate} />
