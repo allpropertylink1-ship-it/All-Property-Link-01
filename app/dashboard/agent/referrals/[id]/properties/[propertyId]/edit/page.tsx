@@ -27,6 +27,14 @@ interface EditableProperty {
   coverImage?: string | null
   latitude?: number | null
   longitude?: number | null
+  hasMultipleUnits?: boolean
+  unitMixDescription?: string | null
+  units?: {
+    id?: string; configuration: string; label?: string | null;
+    bedrooms?: number | null; bathrooms?: number | null; area?: number | null;
+    price?: number | string | null; listingPurpose?: "FOR_SALE" | "FOR_RENT_LONG_TERM" | "FOR_RENT_SHORT_TERM" | null;
+    totalUnits?: number | null; availableUnits?: number | null;
+  }[]
 }
 
 export default function AgentEditReferralPropertyPage() {
@@ -107,6 +115,9 @@ export default function AgentEditReferralPropertyPage() {
             coverImage: (property.coverImage as string | null) ?? (property.images?.[0] as string | null) ?? null,
             latitude: property.latitude ?? undefined,
             longitude: property.longitude ?? undefined,
+            hasMultipleUnits: property.hasMultipleUnits ?? false,
+            unitMixDescription: property.unitMixDescription ?? null,
+            units: property.units,
           }}
         />
       </div>

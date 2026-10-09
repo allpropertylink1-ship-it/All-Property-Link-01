@@ -12,6 +12,8 @@ export interface SeoSuggestionInput {
   price?: number | null
   pricePeriod?: string
   description?: string
+  hasMultipleUnits?: boolean
+  unitMixDescription?: string
 }
 
 // Phase 3 (2026-09): advisory SEO suggestion (Use / Edit / Keep mine).

@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/icons";
 import { getGalleryImages, optimizeImageUrl } from "@/lib/images";
 import { slugifyCity } from "@/lib/seo";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, formatFromPrice, unitBedRange } from "@/lib/utils";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import type { ReviewItem } from "@/lib/services/review";
 import { resolveImageUrl } from "@/lib/images";
@@ -65,6 +65,23 @@ interface AgentInfo {
   primaryUserType?: string | null;
 }
 
+interface DetailUnit {
+  id: string;
+  configuration: string;
+  label?: string | null;
+  floor?: number | null;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  area?: number | null;
+  areaUnit?: string | null;
+  price?: number | string | null;
+  pricePeriod?: string | null;
+  listingPurpose?: string | null;
+  totalUnits?: number | null;
+  availableUnits?: number | null;
+  status?: string | null;
+}
+
 interface PropertyData {
   id: string;
   slug: string;
@@ -88,6 +105,9 @@ interface PropertyData {
   features: string[];
   images: unknown;
   coverImage?: string | null;
+  hasMultipleUnits?: boolean;
+  unitMixDescription?: string | null;
+  units?: DetailUnit[];
   agent?: AgentInfo | null;
 }
 
@@ -106,6 +126,9 @@ interface OtherProperty {
   images: unknown;
   coverImage?: string | null;
   listingPurpose?: string | null;
+  hasMultipleUnits?: boolean;
+  unitMixDescription?: string | null;
+  units?: { price: number | string | null | undefined; listingPurpose?: string | null; bedrooms?: number | string | null }[];
 }
 
 function listerRole(agent: AgentInfo): string | null {
@@ -214,8 +237,16 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
     ? property.agent.companyName || `${property.agent.firstName} ${property.agent.lastName}`
     : null;
   const agentPhoneDigits = property.agent?.phone ? property.agent.phone.replace(/[^0-9]/g, "") : "";
-  const priceLabel = property.price == null ? null : formatPrice(property.price, property.listingPurpose ?? undefined);
-  const hasPrice = property.price != null;
+  const multiUnits = property.hasMultipleUnits === true && Array.isArray(property.units) && property.units.length > 0;
+  const fromPrice = multiUnits ? formatFromPrice(property.units, property.listingPurpose) : "";
+  const bedRange = multiUnits ? unitBedRange(property.units) : null;
+  const priceLabel = multiUnits
+    ? (fromPrice || (property.price == null ? null : formatPrice(property.price, property.listingPurpose ?? undefined)))
+    : (property.price == null ? null : formatPrice(property.price, property.listingPurpose ?? undefined));
+  const hasPrice = priceLabel != null;
+  const priceCaption = multiUnits
+    ? "Starting from"
+    : (property.listingPurpose === "FOR_SALE" || !property.listingPurpose ? "Guide Sale Price" : "Asking Price");
   const locationLine = `${property.region ? `${property.region}, ` : ""}${property.city}, ${property.country}`;
   const subTypeLabel = prettySubType(property.subType);
 
@@ -237,6 +268,11 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
             <span className="inline-flex items-center rounded-full bg-surface-secondary px-3 py-1 text-xs font-semibold capitalize text-text-secondary">
               {property.propertyType.toLowerCase()}
             </span>
+            {property.hasMultipleUnits === true && (
+              <span className="inline-flex items-center rounded-full bg-purple-500 px-3 py-1 text-xs font-semibold text-white">
+                Multiple Units
+              </span>
+            )}
             {subTypeLabel && (
               <span className="inline-flex items-center rounded-full bg-surface-secondary px-3 py-1 text-xs font-semibold text-text-secondary">
                 {subTypeLabel}
@@ -254,7 +290,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
         {hasPrice && (
         <div className="shrink-0 lg:pb-1 lg:text-right">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">
-            {property.listingPurpose === "FOR_SALE" || !property.listingPurpose ? "Guide Sale Price" : "Asking Price"}
+            {priceCaption}
           </p>
           <p className="mt-0.5 break-words font-heading text-2xl font-bold tabular-nums text-text-primary [overflow-wrap:anywhere] sm:text-3xl">
             {priceLabel}
@@ -284,10 +320,18 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
           {/* ─── Discovery content ─── */}
           <div className="order-3 flex min-w-0 flex-col gap-6">
           {/* Key metrics strip */}
-          {(property.bedrooms || property.bathrooms || property.area || property.plotSize) && (
+          {(property.bedrooms || property.bathrooms || property.area || property.plotSize || bedRange) && (
             <section aria-label="Key specifications" className="rounded-xl border border-border bg-surface p-3 shadow-sm sm:p-4">
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-                {property.bedrooms ? (
+                {bedRange ? (
+                  <div className="flex flex-col items-center justify-center rounded-lg bg-surface-secondary p-3 text-center">
+                    <Bed size={20} className="mb-1 shrink-0 text-primary-500" aria-hidden />
+                    <p className="font-heading text-base font-bold tabular-nums text-text-primary">
+                      {bedRange.min === bedRange.max ? bedRange.max : `${bedRange.min}–${bedRange.max}`}
+                    </p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Bedrooms</p>
+                  </div>
+                ) : property.bedrooms ? (
                   <div className="flex flex-col items-center justify-center rounded-lg bg-surface-secondary p-3 text-center">
                     <Bed size={20} className="mb-1 shrink-0 text-primary-500" aria-hidden />
                     <p className="font-heading text-base font-bold tabular-nums text-text-primary">{property.bedrooms}</p>
@@ -329,6 +373,53 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                   </p>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Listing</p>
                 </div>
+              </div>
+            </section>
+          )}
+
+          {/* Unit configurations — each type in the block with its own specs and price */}
+          {multiUnits && (
+            <section aria-labelledby="units-heading" className="rounded-xl border border-border bg-surface p-5 shadow-sm sm:p-6">
+              <h2 id="units-heading" className="font-heading text-lg font-bold text-text-primary">Unit Configurations</h2>
+              {property.unitMixDescription && (
+                <p className="mt-1 text-sm text-text-secondary">{property.unitMixDescription}</p>
+              )}
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full min-w-[560px] border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-[11px] font-semibold uppercase tracking-wider text-text-secondary">
+                      <th scope="col" className="py-2 pr-3">Configuration</th>
+                      <th scope="col" className="py-2 pr-3">Beds</th>
+                      <th scope="col" className="py-2 pr-3">Baths</th>
+                      <th scope="col" className="py-2 pr-3">Size</th>
+                      <th scope="col" className="py-2 pr-3">Price</th>
+                      <th scope="col" className="py-2">Availability</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(property.units ?? []).map((u) => (
+                      <tr key={u.id} className="border-b border-border last:border-0">
+                        <td className="py-2.5 pr-3 font-semibold text-text-primary">
+                          {prettySubType(u.configuration)}
+                          {u.label && <span className="block text-xs font-normal text-text-secondary">{u.label}</span>}
+                        </td>
+                        <td className="py-2.5 pr-3 tabular-nums text-text-secondary">{u.bedrooms ?? "—"}</td>
+                        <td className="py-2.5 pr-3 tabular-nums text-text-secondary">{u.bathrooms ?? "—"}</td>
+                        <td className="py-2.5 pr-3 tabular-nums text-text-secondary">
+                          {u.area != null ? `${Number(u.area).toLocaleString()} ${u.areaUnit === "SQFT" ? "sqft" : "sq m"}` : "—"}
+                        </td>
+                        <td className="py-2.5 pr-3 font-semibold tabular-nums text-text-primary">
+                          {u.price != null ? formatPrice(u.price, (u.listingPurpose ?? property.listingPurpose) ?? undefined) : "—"}
+                        </td>
+                        <td className="py-2.5 text-text-secondary">
+                          {u.availableUnits != null && u.totalUnits != null
+                            ? `${u.availableUnits} of ${u.totalUnits} available`
+                            : (u.status ?? "—")}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </section>
           )}
@@ -687,6 +778,9 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                 images={op.images}
                 coverImage={op.coverImage}
                 isFeatured={false}
+                hasMultipleUnits={op.hasMultipleUnits}
+                unitMixDescription={op.unitMixDescription}
+                units={op.units}
                 variant="compact"
               />
             ))}

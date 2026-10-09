@@ -25,6 +25,9 @@ interface Prop {
   bathrooms: number | null; area: number | null; images: unknown;
   coverImage?: string | null;
   isFeatured: boolean; createdAt: Date | string;
+  hasMultipleUnits?: boolean;
+  unitMixDescription?: string | null;
+  units?: { price: number | string | null | undefined; listingPurpose?: string | null; bedrooms?: number | string | null }[];
 }
 
 interface City { city: string; _count: { city: number } }

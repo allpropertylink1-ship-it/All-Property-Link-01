@@ -224,8 +224,8 @@ export function PropertyFilters({
       </div>
 
       <fieldset>
-        <legend className={sectionLabel}>Bedrooms</legend>
-        <div className="flex items-center gap-1" role="group" aria-label="Minimum bedrooms">
+        <legend className={sectionLabel}>Bedrooms <span className="font-normal normal-case">(matches any unit)</span></legend>
+        <div className="flex items-center gap-1" role="group" aria-label="Minimum bedrooms, matches any unit configuration">
           {BEDROOM_OPTIONS.map((b) => {
             const active = beds === b;
             return (

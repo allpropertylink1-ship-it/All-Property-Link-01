@@ -25,6 +25,11 @@ function parseForm(formData: FormData) {
   if (typeof raw.images === "string") { try { raw.images = JSON.parse(raw.images); } catch { raw.images = []; } }
   if (raw.listingPurpose === "") raw.listingPurpose = undefined;
   if (raw.subType === "") raw.subType = undefined;
+  // Unit configurations arrive as a JSON string from the unit-rows editor.
+  if (typeof raw.units === "string") { try { raw.units = JSON.parse(raw.units); } catch { raw.units = []; } }
+  if (raw.hasMultipleUnits === "true" || raw.hasMultipleUnits === "1") raw.hasMultipleUnits = true;
+  else if (raw.hasMultipleUnits === "false" || raw.hasMultipleUnits === "0" || raw.hasMultipleUnits === "") raw.hasMultipleUnits = undefined;
+  if (typeof raw.unitMixDescription === "string" && raw.unitMixDescription.trim() === "") raw.unitMixDescription = undefined;
   return raw;
 }
 

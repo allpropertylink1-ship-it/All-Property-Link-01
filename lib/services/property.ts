@@ -13,6 +13,16 @@ export interface PropertyFilters {
   page?: number;
   pageSize?: number;
   agentId?: string;
+  unitType?: string;
+  hasMultipleUnits?: boolean;
+}
+
+export interface PropertyUnit {
+  id: string; configuration: string; label?: string | null; floor?: number | null;
+  bedrooms: number | null; bathrooms: number | null; area: number | null; areaUnit?: string | null;
+  price: number | null; pricePeriod?: string | null; listingPurpose?: string | null;
+  features?: string[]; images?: unknown; totalUnits?: number | null; availableUnits?: number | null;
+  status?: string | null;
 }
 
 export interface PropertyCard {
@@ -23,6 +33,7 @@ export interface PropertyCard {
   images: unknown; coverImage?: string | null; thumbUrl?: string | null; isFeatured: boolean; createdAt: Date;
   hasMultipleUnits?: boolean;
   unitMixDescription?: string | null;
+  units?: PropertyUnit[];
 }
 
 interface PropertyDetailAgent {
@@ -40,6 +51,9 @@ export interface PropertyDetail {
   plotSize: number | string | null; plotSizeUnit: string | null;
   latitude: unknown; longitude: unknown; images: unknown; coverImage?: string | null; features: string[];
   isFeatured: boolean; createdAt: Date;
+  hasMultipleUnits?: boolean;
+  unitMixDescription?: string | null;
+  units?: PropertyUnit[];
   agent: PropertyDetailAgent | null;
 }
 
@@ -78,6 +92,8 @@ export const getProperties = cache(async (filters: PropertyFilters = {}): Promis
   if (filters.page) params.set("page", String(filters.page));
   if (filters.pageSize) params.set("limit", String(filters.pageSize));
   if (filters.agentId) params.set("agentId", filters.agentId);
+  if (filters.unitType) params.set("unitType", filters.unitType);
+  if (filters.hasMultipleUnits !== undefined) params.set("hasMultipleUnits", filters.hasMultipleUnits ? "1" : "0");
   params.set("limit", String(filters.pageSize || 20));
 
   const data = await fetchApi<{ properties: PropertyCard[]; total: number; page: number; pageSize: number; totalPages: number; cities?: { city: string; count: number }[] }>(`/api/properties?${params}`);

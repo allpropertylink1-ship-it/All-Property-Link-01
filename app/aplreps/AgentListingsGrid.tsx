@@ -26,6 +26,9 @@ export function AgentListingsGrid({ listings }: Props) {
           area={p.area}
           images={p.images}
           isFeatured={p.isFeatured}
+          hasMultipleUnits={p.hasMultipleUnits}
+          unitMixDescription={p.unitMixDescription}
+          units={p.units}
         />
       ))}
     </div>

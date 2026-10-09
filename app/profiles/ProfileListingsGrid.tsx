@@ -25,7 +25,11 @@ export function ProfileListingsGrid({ listings }: Props) {
           bathrooms={p.bathrooms}
           area={p.area}
           images={p.images}
+          coverImage={p.coverImage}
           isFeatured={p.isFeatured}
+          hasMultipleUnits={p.hasMultipleUnits}
+          unitMixDescription={p.unitMixDescription}
+          units={p.units}
         />
       ))}
     </div>

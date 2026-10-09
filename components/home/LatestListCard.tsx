@@ -13,7 +13,7 @@ import {
   IconChevronLeft,
   IconHeart,
 } from "@tabler/icons-react"
-import { cn, formatPrice } from "@/lib/utils"
+import { cn, formatPrice, formatFromPrice } from "@/lib/utils"
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders"
 import { getCoverImage, getGalleryImages, optimizeImageUrl } from "@/lib/images"
 import { slugifyCity } from "@/lib/seo"
@@ -35,6 +35,8 @@ export interface LatestListCardData {
   coverImage?: string | null
   agentPhone?: string | null
   listerKind?: "OWNER" | "AGENT" | null
+  hasMultipleUnits?: boolean
+  units?: { price: number | string | null | undefined; listingPurpose?: string | null }[]
 }
 
 function purposeLabel(purpose: string | null | undefined): string | null {
@@ -87,6 +89,8 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
     (!isNonLiving && (hasBeds || hasBaths)) || (!isLand && hasArea) || (isLand && plotLabel != null)
   const detailHref = `${isLand ? "/land" : "/properties"}/${slugifyCity(item.city || "kenya")}/${item.slug}`
   const purpose = purposeLabel(item.listingPurpose ?? null)
+  const multiPrice = item.hasMultipleUnits === true ? formatFromPrice(item.units, item.listingPurpose) : ""
+  const displayPrice = multiPrice || (item.price != null ? formatPrice(item.price, item.listingPurpose ?? undefined) : null)
   const safeActive = Math.min(active, slides.length - 1)
   const phone = item.agentPhone?.trim() ? item.agentPhone.trim() : null
 
@@ -215,9 +219,9 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             {item.title}
           </Link>
         </h3>
-        {item.price != null && (
+        {displayPrice != null && (
           <p className="font-body text-[15px] font-bold leading-5 tabular-nums text-primary">
-            {formatPrice(item.price, item.listingPurpose ?? undefined)}
+            {displayPrice}
           </p>
         )}
         {showSpecs && (

@@ -67,8 +67,21 @@ export default async function EditListingPage({ params }: { params: { id: string
             bedrooms: property.bedrooms ?? undefined,
             bathrooms: property.bathrooms ?? undefined,
             area: property.area ?? undefined,
+            plotSize: property.plotSize == null ? null : Number(property.plotSize),
+            plotSizeUnit: (property.plotSizeUnit as "SQFT" | "SQM" | "ACRE" | "HECTARE" | null) ?? null,
             features: (property.features as string[]) ?? undefined,
             images: (property.images as string[]) ?? undefined,
+            coverImage: (property.coverImage as string | null) ?? null,
+            latitude: property.latitude == null ? null : Number(property.latitude),
+            longitude: property.longitude == null ? null : Number(property.longitude),
+            hasMultipleUnits: property.hasMultipleUnits ?? false,
+            unitMixDescription: (property.unitMixDescription as string | null) ?? null,
+            units: (property.units as {
+              id?: string; configuration: string; label?: string | null; floor?: number | null;
+              bedrooms?: number | null; bathrooms?: number | null; area?: number | null;
+              price?: number | string | null; listingPurpose?: "FOR_SALE" | "FOR_RENT_LONG_TERM" | "FOR_RENT_SHORT_TERM" | null;
+              totalUnits?: number | null; availableUnits?: number | null;
+            }[] | undefined),
           }}
         />
       </div>

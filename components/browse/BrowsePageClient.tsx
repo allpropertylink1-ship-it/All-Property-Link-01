@@ -27,6 +27,9 @@ interface BrowseProperty {
   images: unknown;
   isFeatured: boolean;
   createdAt: string;
+  hasMultipleUnits?: boolean;
+  unitMixDescription?: string | null;
+  units?: { price: number | string | null | undefined; listingPurpose?: string | null; bedrooms?: number | string | null }[];
 }
 
 interface BrowseService {

@@ -304,11 +304,11 @@ export function BrowseFilterRail({
         </div>
       )}
 
-      {/* 6 — Bedrooms */}
+      {/* 6 — Bedrooms (matches headline or any unit configuration) */}
       {isProperties && (
         <fieldset>
-          <legend className={sectionLabel}>Bedrooms</legend>
-          <div className="flex items-center gap-1" role="group" aria-label="Minimum bedrooms">
+          <legend className={sectionLabel}>Bedrooms <span className="font-normal normal-case">(any unit)</span></legend>
+          <div className="flex items-center gap-1" role="group" aria-label="Minimum bedrooms, matches any unit configuration">
             {BEDROOM_OPTIONS.map((b) => {
               const active = bedrooms === b;
               return (

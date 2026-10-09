@@ -50,6 +50,9 @@ interface BrowseProperty {
   thumbUrl?: string | null;
   isFeatured: boolean;
   createdAt: string;
+  hasMultipleUnits?: boolean;
+  unitMixDescription?: string | null;
+  units?: { price: number | string | null | undefined; listingPurpose?: string | null; bedrooms?: number | string | null }[];
 }
 
 interface BrowseService {
@@ -394,6 +397,9 @@ export function BrowseResultsGrid({
                 coverImage={item.coverImage ?? null}
                 thumbUrl={item.thumbUrl ?? null}
                 isFeatured={item.isFeatured}
+                hasMultipleUnits={item.hasMultipleUnits}
+                unitMixDescription={item.unitMixDescription}
+                units={item.units}
                 variant="compact"
               />
             ))
@@ -436,6 +442,9 @@ export function BrowseResultsGrid({
                 coverImage={item.coverImage ?? null}
                 thumbUrl={item.thumbUrl ?? null}
                 isFeatured={item.isFeatured}
+                hasMultipleUnits={item.hasMultipleUnits}
+                unitMixDescription={item.unitMixDescription}
+                units={item.units}
               />
             ))
           ) : (

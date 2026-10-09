@@ -22,7 +22,7 @@ import { FormBanner } from "@/components/shared/FormFeedback";
 const listingSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  price: z.coerce.number().positive("Price must be positive"),
+  price: z.coerce.number().positive("Price must be positive").optional(),
   propertyType: z.enum(["APARTMENT", "HOUSE", "LAND", "COMMERCIAL"]),
   listingPurpose: z.enum(["FOR_SALE", "FOR_RENT_LONG_TERM", "FOR_RENT_SHORT_TERM"]).optional(),
   subType: z.string().optional(),
@@ -40,9 +40,47 @@ const listingSchema = z.object({
   features: z.string().optional(),
   latitude: z.coerce.number().optional(),
   longitude: z.coerce.number().optional(),
+  hasMultipleUnits: z.boolean().optional(),
+  unitMixDescription: z.string().optional(),
+  units: z.array(z.object({
+    configuration: z.string().min(1),
+    label: z.string().optional(),
+    bedrooms: z.coerce.number().int().min(0).optional(),
+    bathrooms: z.coerce.number().int().min(0).optional(),
+    area: z.coerce.number().int().min(0).optional(),
+    price: z.coerce.number().positive().optional(),
+    listingPurpose: z.enum(["FOR_SALE", "FOR_RENT_LONG_TERM", "FOR_RENT_SHORT_TERM"]).optional(),
+    totalUnits: z.coerce.number().int().min(1).optional(),
+    availableUnits: z.coerce.number().int().min(0).optional(),
+  })).max(20).optional(),
+}).superRefine((data, ctx) => {
+  // Price is required for single listings; multi-unit buildings derive the
+  // headline from the cheapest unit. Unit rows live in component state and
+  // are gated in onSubmit (with visible UI) — not here, since RHF never
+  // populates `units` and a refine would block every multi-unit submit.
+  if (!data.hasMultipleUnits && data.price === undefined) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["price"], message: "Price must be positive" });
+  }
 });
 
 type ListingFormData = z.infer<typeof listingSchema>;
+
+interface UnitRow {
+  configuration: string;
+  label: string;
+  bedrooms: string;
+  bathrooms: string;
+  area: string;
+  price: string;
+  listingPurpose: string;
+  totalUnits: string;
+  availableUnits: string;
+}
+
+const EMPTY_UNIT: UnitRow = {
+  configuration: "", label: "", bedrooms: "", bathrooms: "",
+  area: "", price: "", listingPurpose: "", totalUnits: "", availableUnits: "",
+};
 
 /**
  * Optional override for non-owner submits (e.g. APL reps posting on behalf
@@ -93,10 +131,13 @@ export function ListingForm({ submitOverride, redirectTo }: {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [imagesDirty, setImagesDirty] = useState(false);
+  const [units, setUnits] = useState<UnitRow[]>([]);
+  const [unitsError, setUnitsError] = useState("");
   const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting, isDirty } } = useForm<ListingFormData>({
     resolver: zodResolver(listingSchema),
   });
   const selectedType = watch("propertyType");
+  const multiUnits = watch("hasMultipleUnits");
   const subTypeOptions = subTypeOptionsFor(selectedType);
 
   const handleLocationChange = useCallback((loc: { lat: number; lng: number; address: string; city: string; region: string }) => {
@@ -113,10 +154,49 @@ export function ListingForm({ submitOverride, redirectTo }: {
     return deduped;
   }, [coverUrl, imageUrls]);
 
+  const updateUnit = useCallback((index: number, patch: Partial<UnitRow>) => {
+    setUnits((prev) => prev.map((u, i) => (i === index ? { ...u, ...patch } : u)));
+    setImagesDirty(true);
+  }, []);
+
+  const addUnit = useCallback(() => {
+    setUnits((prev) => (prev.length >= 20 ? prev : [...prev, { ...EMPTY_UNIT }]));
+    setImagesDirty(true);
+  }, []);
+
+  const removeUnit = useCallback((index: number) => {
+    setUnits((prev) => prev.filter((_, i) => i !== index));
+    setImagesDirty(true);
+  }, []);
+
+  /** Serialize unit rows: drop empties, coerce numerics, omit blanks. */
+  const buildUnitsPayload = useCallback(() => {
+    return units
+      .filter((u) => u.configuration !== "")
+      .map((u) => {
+        const out: Record<string, unknown> = { configuration: u.configuration };
+        if (u.label.trim()) out.label = u.label.trim();
+        if (u.bedrooms !== "") out.bedrooms = Number(u.bedrooms);
+        if (u.bathrooms !== "") out.bathrooms = Number(u.bathrooms);
+        if (u.area !== "") out.area = Number(u.area);
+        if (u.price !== "") out.price = Number(u.price);
+        if (u.listingPurpose) out.listingPurpose = u.listingPurpose;
+        if (u.totalUnits !== "") out.totalUnits = Number(u.totalUnits);
+        if (u.availableUnits !== "") out.availableUnits = Number(u.availableUnits);
+        return out;
+      });
+  }, [units]);
+
   async function onSubmit(data: ListingFormData) {
     setError("");
+    setUnitsError("");
     if (!coverUrl) {
       setError("Please add a cover photo");
+      return;
+    }
+    const unitsPayload = buildUnitsPayload();
+    if (data.hasMultipleUnits && unitsPayload.length === 0) {
+      setUnitsError("Add at least one unit configuration (e.g. Bedsitter, 1 Bedroom) with its price and specs.");
       return;
     }
     const images = buildImagesPayload();
@@ -131,6 +211,12 @@ export function ListingForm({ submitOverride, redirectTo }: {
         }
         payload.images = images;
         payload.coverImage = coverUrl;
+        if (data.hasMultipleUnits) {
+          payload.units = unitsPayload;
+          if (typeof payload.unitMixDescription === "string" && payload.unitMixDescription.trim() === "") {
+            delete payload.unitMixDescription;
+          }
+        }
         const result = await submitOverride(payload);
         if (!result.success) { setError(result.error || "Failed to create listing"); return }
       } catch (err) {
@@ -146,6 +232,9 @@ export function ListingForm({ submitOverride, redirectTo }: {
     });
     formData.append("images", JSON.stringify(images));
     formData.append("coverImage", coverUrl);
+    if (data.hasMultipleUnits) {
+      formData.append("units", JSON.stringify(unitsPayload));
+    }
     try {
       const result = await createProperty(formData);
       if (result && !result.success) { setError(result.error); return }
@@ -223,6 +312,30 @@ export function ListingForm({ submitOverride, redirectTo }: {
               ))}
             </select>
           </div>
+          {(selectedType === "APARTMENT" || selectedType === "HOUSE" || selectedType === "COMMERCIAL") && (
+            <div className="space-y-2 sm:col-span-2">
+              <div className="flex min-h-[44px] items-center gap-3">
+                <input
+                  id="hasMultipleUnits"
+                  type="checkbox"
+                  className="h-5 w-5 shrink-0 accent-primary-600"
+                  {...register("hasMultipleUnits")}
+                />
+                <Label htmlFor="hasMultipleUnits" className="cursor-pointer">
+                  This building has multiple unit configurations
+                  <span className="block text-xs font-normal text-text-secondary">
+                    e.g. bedsitters, 1-bedrooms and penthouses in one block — each with its own price, beds, baths and size
+                  </span>
+                </Label>
+              </div>
+            </div>
+          )}
+          {multiUnits && (
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="unitMixDescription">Unit mix summary <span className="font-normal text-text-secondary">(optional — shown to buyers)</span></Label>
+              <Input id="unitMixDescription" placeholder="e.g. 4 bedsitters, 6 one-bedrooms, 2 penthouses" {...register("unitMixDescription")} />
+            </div>
+          )}
         </div>
       </section>
 
@@ -241,7 +354,7 @@ export function ListingForm({ submitOverride, redirectTo }: {
             {errors.description && <p className="text-xs text-error-500">{errors.description.message}</p>}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="price">Price</Label>
+            <Label htmlFor="price">Price {multiUnits && <span className="font-normal text-text-secondary">(optional — cheapest unit is used when blank)</span>}</Label>
             <Input id="price" type="number" step="0.01" {...register("price")} />
             {errors.price && <p className="text-xs text-error-500">{errors.price.message}</p>}
           </div>
@@ -287,6 +400,131 @@ export function ListingForm({ submitOverride, redirectTo }: {
           </div>
         </div>
       </section>
+
+      {/* Unit configurations — one row per bedsitter / studio / bedroom type in the block */}
+      {multiUnits && (
+        <section aria-labelledby="listing-units" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+          <StepHeader n={2} title="Unit configurations" hint="Each type gets its own beds, baths, size and price" />
+          <div id="listing-units" className="space-y-4">
+            {unitsError && <FormBanner variant="error">{unitsError}</FormBanner>}
+            {units.map((unit, i) => (
+              <fieldset key={i} className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-3">
+                <legend className="px-1 text-sm font-semibold text-text-primary">Unit {i + 1}</legend>
+                <div className="space-y-2">
+                  <Label htmlFor={`unit-${i}-configuration`}>Configuration</Label>
+                  <select
+                    id={`unit-${i}-configuration`}
+                    className={selectClass}
+                    value={unit.configuration}
+                    onChange={(e) => updateUnit(i, { configuration: e.target.value })}
+                  >
+                    <option value="">Select type</option>
+                    {subTypeOptions.map((s) => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`unit-${i}-label`}>Label <span className="font-normal text-text-secondary">(optional)</span></Label>
+                  <Input
+                    id={`unit-${i}-label`}
+                    placeholder="e.g. Block A"
+                    value={unit.label}
+                    onChange={(e) => updateUnit(i, { label: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`unit-${i}-purpose`}>Purpose <span className="font-normal text-text-secondary">(optional)</span></Label>
+                  <select
+                    id={`unit-${i}-purpose`}
+                    className={selectClass}
+                    value={unit.listingPurpose}
+                    onChange={(e) => updateUnit(i, { listingPurpose: e.target.value })}
+                  >
+                    <option value="">Same as listing</option>
+                    <option value="FOR_SALE">For Sale</option>
+                    <option value="FOR_RENT_LONG_TERM">For Rent (long-term)</option>
+                    <option value="FOR_RENT_SHORT_TERM">For Rent (short-term / Airbnb)</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`unit-${i}-price`}>Price</Label>
+                  <Input
+                    id={`unit-${i}-price`}
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={unit.price}
+                    onChange={(e) => updateUnit(i, { price: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`unit-${i}-bedrooms`}>Bedrooms</Label>
+                  <Input
+                    id={`unit-${i}-bedrooms`}
+                    type="number"
+                    min="0"
+                    value={unit.bedrooms}
+                    onChange={(e) => updateUnit(i, { bedrooms: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`unit-${i}-bathrooms`}>Bathrooms</Label>
+                  <Input
+                    id={`unit-${i}-bathrooms`}
+                    type="number"
+                    min="0"
+                    value={unit.bathrooms}
+                    onChange={(e) => updateUnit(i, { bathrooms: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`unit-${i}-area`}>Size (sq m)</Label>
+                  <Input
+                    id={`unit-${i}-area`}
+                    type="number"
+                    min="0"
+                    value={unit.area}
+                    onChange={(e) => updateUnit(i, { area: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`unit-${i}-total`}>Total units <span className="font-normal text-text-secondary">(optional)</span></Label>
+                  <Input
+                    id={`unit-${i}-total`}
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 6"
+                    value={unit.totalUnits}
+                    onChange={(e) => updateUnit(i, { totalUnits: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`unit-${i}-available`}>Available <span className="font-normal text-text-secondary">(optional)</span></Label>
+                  <Input
+                    id={`unit-${i}-available`}
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 2"
+                    value={unit.availableUnits}
+                    onChange={(e) => updateUnit(i, { availableUnits: e.target.value })}
+                  />
+                </div>
+                <div className="flex items-end sm:col-span-3">
+                  <Button type="button" variant="outline" onClick={() => removeUnit(i)} aria-label={`Remove unit ${i + 1}`}>
+                    Remove unit
+                  </Button>
+                </div>
+              </fieldset>
+            ))}
+            {units.length < 20 && (
+              <Button type="button" variant="outline" onClick={addUnit}>
+                {units.length === 0 ? "Add first unit configuration" : "Add another configuration"}
+              </Button>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Step 3 — Photos & Amenities */}
       <section aria-labelledby="listing-step-3" className="rounded-xl border border-border bg-surface p-5 sm:p-6">

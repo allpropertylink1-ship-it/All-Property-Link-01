@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { isHiddenRep } from "@/lib/reps";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.allpropertylink.co.ke";
 
@@ -33,6 +34,9 @@ export interface AgentListing {
   images: unknown;
   isFeatured: boolean;
   createdAt: Date;
+  hasMultipleUnits?: boolean;
+  unitMixDescription?: string | null;
+  units?: { price: number | string | null | undefined; listingPurpose?: string | null; bedrooms?: number | string | null }[];
 }
 
 const fetchApi = cache(async <T>(path: string): Promise<T | null> => {
@@ -45,12 +49,14 @@ const fetchApi = cache(async <T>(path: string): Promise<T | null> => {
 
 export const getAgents = cache(async (): Promise<AgentSummary[]> => {
   const data = await fetchApi<{ agents: AgentSummary[] }>("/api/apl-agents");
-  return data?.agents || [];
+  return (data?.agents || []).filter((a) => !isHiddenRep(a));
 });
 
 export const getAgentById = cache(async (id: string): Promise<AgentSummary | null> => {
   const agents = await getAgents();
-  return agents.find((a) => a.id === id) || null;
+  const agent = agents.find((a) => a.id === id) || null;
+  if (agent && isHiddenRep(agent)) return null;
+  return agent;
 });
 
 export const getAgentListings = cache(async (id: string): Promise<AgentListing[]> => {

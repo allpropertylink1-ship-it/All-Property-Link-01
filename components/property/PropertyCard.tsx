@@ -1,11 +1,17 @@
 ﻿/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, formatFromPrice, unitBedRange } from "@/lib/utils";
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders";
 import { getCoverImage } from "@/lib/images";
 import { slugifyCity } from "@/lib/seo";
 
 type PropertyCardVariant = "default" | "compact";
+
+interface CardUnit {
+  price: number | string | null | undefined;
+  listingPurpose?: string | null;
+  bedrooms?: number | string | null;
+}
 
 interface PropertyCardProps {
   slug: string;
@@ -29,6 +35,7 @@ interface PropertyCardProps {
   variant?: PropertyCardVariant;
   hasMultipleUnits?: boolean;
   unitMixDescription?: string | null;
+  units?: CardUnit[];
 }
 
 function FlashIcon() {
@@ -77,6 +84,7 @@ export function PropertyCard({
   variant = "default",
   hasMultipleUnits = false,
   unitMixDescription = null,
+  units = [],
   currency = "KES",
 }: PropertyCardProps) {
   const rawImage = getCoverImage({ coverImage, images }) ?? ""
@@ -94,7 +102,7 @@ export function PropertyCard({
     const bg = purpose === "FOR_RENT_SHORT_TERM" ? "bg-accent-500" : purpose === "FOR_RENT_LONG_TERM" ? "bg-primary-600" : "bg-primary-500"
     const label = purpose === "FOR_RENT_SHORT_TERM" ? "Airbnb" : purpose === "FOR_RENT_LONG_TERM" ? "Rent" : "Sale"
     return (
-      <span className={`absolute left-1.5 top-1.5 z-10 rounded-md px-2 py-0.5 text-[10px] font-semibold text-white ${bg}`}>
+      <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold text-white ${bg}`}>
         {label}
       </span>
     )
@@ -103,7 +111,7 @@ export function PropertyCard({
   function landBadge() {
     if (!isLand) return null
     return (
-      <span className="absolute left-1.5 top-1.5 z-10 rounded-md px-2 py-0.5 text-[10px] font-semibold text-white bg-teal-500">
+      <span className="rounded-md px-2 py-0.5 text-[10px] font-semibold text-white bg-teal-500">
         Land & Plots
       </span>
     )
@@ -112,11 +120,27 @@ export function PropertyCard({
   function multiUnitBadge() {
     if (!hasMultipleUnits) return null
     return (
-      <span className="absolute left-1.5 top-1.5 z-10 rounded-md px-2 py-0.5 text-[10px] font-semibold text-white bg-purple-500">
+      <span className="rounded-md px-2 py-0.5 text-[10px] font-semibold text-white bg-purple-500">
         Multiple Units
       </span>
     )
   }
+
+  function cardBadges() {
+    if (!hasMultipleUnits && !listingPurpose && !isLand) return null
+    return (
+      <span className="absolute left-1.5 top-1.5 z-10 flex flex-wrap gap-1">
+        {multiUnitBadge()}
+        {purposeBadge(listingPurpose)}
+        {landBadge()}
+      </span>
+    )
+  }
+
+  // Multi-unit price: split rent/sale intents so neither is hidden.
+  // Falls back to headline price, then to the free-text mix description.
+  const multiPrice = hasMultipleUnits ? formatFromPrice(units, listingPurpose) : "";
+  const bedRange = hasMultipleUnits ? unitBedRange(units) : null;
 
   if (isCompact) {
     return (
@@ -141,9 +165,7 @@ export function PropertyCard({
               if (img.src !== PLACEHOLDER_PROPERTY) img.src = PLACEHOLDER_PROPERTY
             }}
           />
-          {multiUnitBadge()}
-          {purposeBadge(listingPurpose)}
-          {landBadge()}
+          {cardBadges()}
           {urgencyText && (
             <span className="absolute right-1.5 top-1.5 z-10 flex items-center gap-1 rounded-md bg-white/90 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-primary-600 shadow-sm backdrop-blur-sm">
               <FlashIcon />
@@ -163,13 +185,23 @@ export function PropertyCard({
             <span className="truncate">{region}, {city}</span>
           </div>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-secondary">
-            {bedrooms != null && bedrooms > 0 && <span>{bedrooms} bed</span>}
+            {bedRange ? (
+              <span>{bedRange.min === bedRange.max ? `${bedRange.max} bed${bedRange.max === 1 ? "" : "s"}` : `${bedRange.min}–${bedRange.max} beds`}</span>
+            ) : bedrooms != null && bedrooms > 0 ? (
+              <span>{bedrooms} bed</span>
+            ) : null}
             {bathrooms != null && bathrooms > 0 && <span>{bathrooms} bath</span>}
             {area != null && area > 0 && <span>{area.toLocaleString()} sqft</span>}
             <span className="capitalize">{propertyType.toLowerCase()}</span>
           </div>
           {hasMultipleUnits ? (
-            <p className="font-heading text-base font-semibold text-primary-600 truncate">{unitMixDescription || "Multiple unit types"}</p>
+            multiPrice ? (
+              <p className="font-heading text-base font-semibold text-primary-600 truncate">{multiPrice}</p>
+            ) : price != null ? (
+              <p className="font-heading text-base font-semibold text-primary-600">{formatPrice(price, listingPurpose ?? undefined)}</p>
+            ) : (
+              <p className="font-heading text-base font-semibold text-primary-600 truncate">{unitMixDescription || "Multiple unit types"}</p>
+            )
           ) : price != null ? (
             <p className="font-heading text-base font-semibold text-primary-600">{formatPrice(price, listingPurpose ?? undefined)}</p>
           ) : null}
@@ -208,9 +240,7 @@ export function PropertyCard({
               if (img.src !== PLACEHOLDER_PROPERTY) img.src = PLACEHOLDER_PROPERTY
             }}
           />
-          {multiUnitBadge()}
-          {purposeBadge(listingPurpose)}
-          {landBadge()}
+          {cardBadges()}
           {urgencyText && (
             <span className="absolute right-2 top-2 z-10 flex items-center gap-1 rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-600 shadow-sm backdrop-blur-sm">
               <FlashIcon />
@@ -232,7 +262,15 @@ export function PropertyCard({
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 p-3.5 sm:p-4">
         {hasMultipleUnits ? (
-          <p className="font-heading text-base font-semibold text-primary-600 truncate">{unitMixDescription || "Multiple unit types"}</p>
+          multiPrice ? (
+            <p className="font-heading text-base font-semibold text-primary-600 truncate">{multiPrice}</p>
+          ) : price != null ? (
+            <p className="break-words font-heading text-base font-bold tracking-tight text-text-primary sm:text-lg">
+              {formatPrice(price, listingPurpose ?? undefined)}
+            </p>
+          ) : (
+            <p className="font-heading text-base font-semibold text-primary-600 truncate">{unitMixDescription || "Multiple unit types"}</p>
+          )
         ) : price != null ? (
           <p className="break-words font-heading text-base font-bold tracking-tight text-text-primary sm:text-lg">
             {formatPrice(price, listingPurpose ?? undefined)}
@@ -242,12 +280,19 @@ export function PropertyCard({
           {title}
         </h3>
         <div className="grid grid-cols-3 gap-1 rounded-lg bg-surface-secondary py-1 text-center text-xs text-text-secondary">
-          {bedrooms != null && bedrooms > 0 && (
+          {bedRange ? (
+            <div>
+              <span className="block text-[10px] font-semibold uppercase tracking-wide">Beds</span>
+              <span className="font-heading text-[13px] font-bold text-text-primary">
+                {bedRange.min === bedRange.max ? bedRange.max : `${bedRange.min}–${bedRange.max}`}
+              </span>
+            </div>
+          ) : bedrooms != null && bedrooms > 0 ? (
             <div>
               <span className="block text-[10px] font-semibold uppercase tracking-wide">Beds</span>
               <span className="font-heading text-[13px] font-bold text-text-primary">{bedrooms}</span>
             </div>
-          )}
+          ) : null}
           {bathrooms != null && bathrooms > 0 && (
             <div>
               <span className="block text-[10px] font-semibold uppercase tracking-wide">Baths</span>

@@ -21,6 +21,9 @@ interface PropertyGridProps {
     createdAt: Date | string;
     urgencyText?: "Trending" | "Just listed" | "Popular";
     isVerified?: boolean;
+    hasMultipleUnits?: boolean;
+    unitMixDescription?: string | null;
+    units?: { price: number | string | null | undefined; listingPurpose?: string | null; bedrooms?: number | string | null }[];
   }[];
   viewToggle?: "grid" | "list";
   /** "sidebar" when rendered beside the sticky filter rail (3-col max), "full" otherwise (4-col max) */

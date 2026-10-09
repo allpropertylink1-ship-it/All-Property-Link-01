@@ -24,7 +24,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!property) return {};
 
   const canonical = `${siteUrl()}/properties/${slugifyCity(property.city)}/${property.slug}`;
-  const description = excerpt(property.description || "");
+  const mixSuffix = property.hasMultipleUnits && property.unitMixDescription
+    ? ` Units: ${property.unitMixDescription}.`
+    : "";
+  const description = excerpt(`${property.description || ""}${mixSuffix}`);
   const image = firstImage(property as { coverImage?: string | null; images?: unknown });
 
   return {
@@ -84,6 +87,29 @@ export default async function PropertyDetailPage({ params }: Props) {
     ...(property.bedrooms ? { numberOfBedrooms: property.bedrooms } : {}),
     ...(property.bathrooms ? { numberOfBathrooms: property.bathrooms } : {}),
     ...(property.area ? { floorSize: { "@type": "QuantitativeValue", value: property.area, unitCode: "SQFT" } } : {}),
+    // Multi-unit buildings: one canonical URL, units as contained places —
+    // Google sees every configuration, no per-unit URLs are emitted.
+    ...((property.hasMultipleUnits && property.units && property.units.length > 0) ? {
+      numberOfAvailableAccommodationUnits: property.units.length,
+      containsPlace: property.units.map((u: {
+        configuration: string; label?: string | null; bedrooms?: number | null;
+        bathrooms?: number | null; area?: number | null; price?: number | string | null;
+      }) => ({
+        "@type": "Apartment",
+        name: [u.configuration.replace(/_/g, " "), u.label].filter(Boolean).join(" — "),
+        ...(u.bedrooms != null ? { numberOfBedrooms: u.bedrooms } : {}),
+        ...(u.bathrooms != null ? { numberOfBathrooms: u.bathrooms } : {}),
+        ...(u.area != null ? { floorSize: { "@type": "QuantitativeValue", value: u.area, unitCode: "MTK" } } : {}),
+        ...(u.price != null ? {
+          offers: {
+            "@type": "Offer",
+            price: Number(u.price),
+            priceCurrency: property.currency,
+            availability: "https://schema.org/InStock",
+          },
+        } : {}),
+      })),
+    } : {}),
     address: {
       "@type": "PostalAddress",
       addressLocality: property.city,
