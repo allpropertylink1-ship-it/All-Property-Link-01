@@ -29,3 +29,40 @@ export function kenyanPhoneError(input: string): string | null {
   }
   return null
 }
+
+// Option A disposable-email quick-list (frontend mirror of the backend
+// blocklist's most-abused domains). Full file lives server-side; this
+// local copy exists only for instant pre-submit feedback. Suffix-match
+// so subdomains (e.g. x.temp-mail.org) also match.
+const DISPOSABLE_EMAIL_DOMAINS = [
+  "tempmail.com",
+  "temp-mail.org",
+  "temp-mail.io",
+  "10minutemail.com",
+  "10minutemail.net",
+  "mailinator.com",
+  "guerrillamail.com",
+  "yopmail.com",
+  "trashmail.com",
+  "throwawaymail.com",
+  "fakemail.net",
+  "sharklasers.com",
+  "privaterelay.appleid.com",
+  "relay.firefox.com",
+  "mozmail.com",
+  "duck.com",
+]
+
+export const DISPOSABLE_EMAIL_MESSAGE =
+  "Please use a permanent email address. Temporary inboxes are not allowed."
+
+export function isDisposableEmailClient(input: string): boolean {
+  const email = (input || "").trim().toLowerCase()
+  const at = email.lastIndexOf("@")
+  if (at < 0) return false
+  const domain = email.slice(at + 1)
+  if (!domain) return false
+  return DISPOSABLE_EMAIL_DOMAINS.some(
+    (blocked) => domain === blocked || domain.endsWith(`.${blocked}`)
+  )
+}

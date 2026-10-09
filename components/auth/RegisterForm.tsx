@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useAuth, type OtpResponse } from "@/lib/auth-context"
 import { OtpInput } from "./OtpInput"
 import { RegisterAccountInfo } from "./RegisterAccountInfo"
-import { formatTime, kenyanPhoneError } from "./RegisterForm.utils"
+import { formatTime, kenyanPhoneError, isDisposableEmailClient, DISPOSABLE_EMAIL_MESSAGE } from "./RegisterForm.utils"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { resolvePostAuthTarget } from "@/lib/persona"
 
@@ -17,6 +17,8 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
   const { signup, sendOtp, verifyOtp, updateRegistration } = useAuth()
   const [step, setStep] = useState<Step>("form")
   const [error, setError] = useState("")
+  // Which email input a disposable-email error belongs to (highlights it).
+  const [errorField, setErrorField] = useState<"email" | "recoveryEmail" | null>(null)
   const [loading, setLoading] = useState(false)
   const [contactMethod, setContactMethod] = useState<ContactMethod>("email")
   const [password, setPassword] = useState("")
@@ -79,6 +81,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
     e.preventDefault()
     setLoading(true)
     setError("")
+    setErrorField(null)
 
     const form = new FormData(e.currentTarget)
     const confirmPassword = form.get("confirmPassword") as string
@@ -116,6 +119,20 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
         setLoading(false)
         return
       }
+      // Instant local check (Option A quick-list) — no request sent.
+      if (isDisposableEmailClient(emailValue)) {
+        setError(DISPOSABLE_EMAIL_MESSAGE)
+        setErrorField("email")
+        setLoading(false)
+        return
+      }
+    }
+
+    if (contactMethod === "phone" && recoveryEmail.trim() && isDisposableEmailClient(recoveryEmail)) {
+      setError(DISPOSABLE_EMAIL_MESSAGE)
+      setErrorField("recoveryEmail")
+      setLoading(false)
+      return
     }
 
     if (!firstNameValue || !lastNameValue) {
@@ -136,7 +153,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
       return
     }
 
-    let result: { error?: string; otp?: OtpResponse }
+    let result: { error?: string; code?: string; field?: string; otp?: OtpResponse }
 
     if (otpIdentifier) {
       result = await updateRegistration({
@@ -150,7 +167,14 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
     }
 
     if (result.error) {
-      setError(result.error)
+      // Backend disposable-email block (400 DISPOSABLE_EMAIL): stay on the
+      // form, show the same banner, highlight the email input — never OTP.
+      if (result.code === "DISPOSABLE_EMAIL") {
+        setError(DISPOSABLE_EMAIL_MESSAGE)
+        setErrorField(result.field === "recoveryEmail" ? "recoveryEmail" : "email")
+      } else {
+        setError(result.error)
+      }
       setLoading(false)
       return
     }
@@ -266,9 +290,15 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
   // Wrapper functions to convert ChangeEvent to string for setState
   const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)
   const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value)
+    if (errorField === "email") { setErrorField(null); setError("") }
+  }
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)
-  const handleRecoveryEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => setRecoveryEmail(e.target.value)
+  const handleRecoveryEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRecoveryEmail(e.target.value)
+    if (errorField === "recoveryEmail") { setErrorField(null); setError("") }
+  }
 
   return (
     <form onSubmit={handleSubmit}>
@@ -276,7 +306,7 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
         contactMethod={contactMethod} password={password} referralCode={referralCode}
         firstName={firstName} lastName={lastName} email={email} phone={phone} recoveryEmail={recoveryEmail}
         accountType={accountType}
-        error={error} loading={loading} acceptedTerms={acceptedTerms} onAcceptedChange={setAcceptedTerms}
+        error={error} errorField={errorField} loading={loading} acceptedTerms={acceptedTerms} onAcceptedChange={setAcceptedTerms}
         onContactMethodChange={setContactMethod} onPasswordChange={setPassword}
         onReferralCodeChange={setReferralCode} onBack={onSwitchToLogin ? () => onSwitchToLogin() : undefined}
         onFirstNameChange={handleFirstNameChange} onLastNameChange={handleLastNameChange}

@@ -53,10 +53,10 @@ interface AuthContextType {
   login: (emailOrPhone: string, password: string, rememberMe?: boolean) => Promise<{ error?: string; code?: string; field?: string; user?: User }>
   logout: () => Promise<void>
   phoneLogin: (phone: string) => Promise<{ error?: string; code?: string; field?: string; data?: { expiresIn: number; retryAfter: number } }>
-  signup: (data: { email: string; password: string; firstName: string; lastName: string; userType: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string; recoveryEmail?: string }) => Promise<{ error?: string; code?: string; otp?: OtpResponse }>
+  signup: (data: { email: string; password: string; firstName: string; lastName: string; userType: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string; recoveryEmail?: string }) => Promise<{ error?: string; code?: string; field?: string; otp?: OtpResponse }>
   sendOtp: (identifier: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
   verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION", rememberMe?: boolean) => Promise<{ error?: string; code?: string; user?: User }>
-  updateRegistration: (data: { oldIdentifier: string; email?: string; phone?: string; firstName?: string; lastName?: string }) => Promise<{ error?: string; otp?: OtpResponse }>
+  updateRegistration: (data: { oldIdentifier: string; email?: string; phone?: string; firstName?: string; lastName?: string }) => Promise<{ error?: string; code?: string; field?: string; otp?: OtpResponse }>
   refreshUser: () => Promise<User | null | undefined>
   clearSession: () => void
   sendMagicLink: (email: string) => Promise<{ error?: string }>
@@ -129,6 +129,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!res) return undefined
       if (res.ok) {
         const data = await res.json()
+        // Admin cookies (Domain=.allpropertylink.co.ke) are visible to the
+        // main site too. An admin session must NOT render the main site as
+        // "signed in" — that phantom session is what looked like a random
+        // login on unknown devices. Admins sign in via the admin panel only.
+        if (data?.user?.authMethod === "admin") {
+          setUser(null)
+          return null
+        }
         if (data?.user) {
           setUser(data.user)
           return data.user as User
@@ -197,8 +205,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signup = useCallback(async (data: { email: string; password: string; firstName: string; lastName: string; userType: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string; recoveryEmail?: string }) => {
     const payload = { ...data, termsVersion: data.termsVersion || CURRENT_TERMS_VERSION }
-    const { data: result, error } = await api.post<OtpResponse & { code?: string }>("/api/auth/register", payload)
-    if (error) return { error, code: (result as unknown as { code?: string })?.code }
+    // Pass code/field through: the register form needs DISPOSABLE_EMAIL +
+    // the offending field to highlight the right input.
+    const { data: result, error, code, field } = await api.post<OtpResponse>("/api/auth/register", payload)
+    if (error) return { error, code, field }
     return { otp: result }
   }, [])
 
@@ -276,8 +286,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchUser])
 
   const updateRegistration = useCallback(async (data: { oldIdentifier: string; email?: string; phone?: string; firstName?: string; lastName?: string }) => {
-    const { data: result, error } = await api.post<OtpResponse>("/api/auth/update-registration", data)
-    if (error) return { error }
+    // Pass code/field through (same DISPOSABLE_EMAIL handling as signup).
+    const { data: result, error, code, field } = await api.post<OtpResponse>("/api/auth/update-registration", data)
+    if (error) return { error, code, field }
     return { otp: result }
   }, [])
 

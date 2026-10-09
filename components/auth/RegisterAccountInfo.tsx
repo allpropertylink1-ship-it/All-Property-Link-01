@@ -19,6 +19,7 @@ interface Props {
   recoveryEmail: string
   accountType: string
   error: string
+  errorField?: "email" | "recoveryEmail" | null
   loading: boolean
   acceptedTerms: boolean
   onAcceptedChange: (v: boolean) => void
@@ -36,7 +37,7 @@ interface Props {
 }
 
 export function RegisterAccountInfo({
-  contactMethod, password, referralCode, firstName, lastName, email, phone, recoveryEmail, accountType, error, loading, acceptedTerms, onAcceptedChange,
+  contactMethod, password, referralCode, firstName, lastName, email, phone, recoveryEmail, accountType, error, errorField = null, loading, acceptedTerms, onAcceptedChange,
   onContactMethodChange, onAccountTypeChange, onPasswordChange, onReferralCodeChange,
   onBack, onFirstNameChange, onLastNameChange, onEmailChange, onPhoneChange, onRecoveryEmailChange,
   onSwitchToLogin,
@@ -128,8 +129,13 @@ export function RegisterAccountInfo({
             <label htmlFor="email" className="block text-xs font-semibold text-text-primary">Email</label>
             <input id="email" name="email" type="email" autoComplete="email" required
               value={email} onChange={onEmailChange}
-              className={stitchInputClass}
+              aria-invalid={errorField === "email"}
+              aria-describedby={errorField === "email" ? "register-email-error" : undefined}
+              className={`${stitchInputClass}${errorField === "email" ? " border-error-500 focus:border-error-500 focus:ring-error-500/30" : ""}`}
               style={{ fontSize: "16px" }} placeholder="you@example.co.ke" />
+            {errorField === "email" && error && (
+              <p id="register-email-error" className="mt-1 text-xs text-error-500" role="alert">{error}</p>
+            )}
           </div>
         ) : (
           <>
@@ -149,8 +155,13 @@ export function RegisterAccountInfo({
               </label>
               <input id="recoveryEmail" name="recoveryEmail" type="email" autoComplete="email"
                 value={recoveryEmail} onChange={onRecoveryEmailChange}
-                className={stitchInputClass}
+                aria-invalid={errorField === "recoveryEmail"}
+                aria-describedby={errorField === "recoveryEmail" ? "register-recovery-email-error" : undefined}
+                className={`${stitchInputClass}${errorField === "recoveryEmail" ? " border-error-500 focus:border-error-500 focus:ring-error-500/30" : ""}`}
                 style={{ fontSize: "16px" }} placeholder="you@example.co.ke" />
+              {errorField === "recoveryEmail" && error && (
+                <p id="register-recovery-email-error" className="mt-1 text-xs text-error-500" role="alert">{error}</p>
+              )}
             </div>
           </>
         )}
