@@ -794,7 +794,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
             {hasPrice && (
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Total Valuation</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">{priceCaption}</p>
               <p className="truncate font-heading text-base font-bold tabular-nums text-text-primary">{priceLabel}</p>
             </div>
             )}

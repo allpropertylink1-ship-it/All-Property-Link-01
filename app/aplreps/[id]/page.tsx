@@ -80,7 +80,7 @@ export default async function AgentDetailPage({ params }: Props) {
 
       <section className="profile-hero py-14 text-center sm:py-20">
         <div className="mx-auto max-w-7xl px-4">
-          <div className="relative mx-auto mb-4 h-22 w-22">
+          <div className="relative mx-auto mb-4 h-[88px] w-[88px]">
             <div className="absolute -inset-1.5 rounded-full bg-accent-500/25 blur-md" aria-hidden />
             <div className="relative h-full w-full overflow-hidden rounded-full ring-2 ring-accent-200/80">
               {avatarUrl ? (
