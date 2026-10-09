@@ -31,24 +31,44 @@ async function proxy(req: NextRequest, key: string) {
     if (buf.byteLength > 0) body = buf
   }
 
-  let upstream: Response
-  const controller = new AbortController()
-  const t = setTimeout(() => controller.abort(), 8000)
-  try {
-    upstream = await fetch(target, {
-      method,
-      headers,
-      body,
-      signal: controller.signal,
-      // Use Next cache only for public GETs; other requests bypass cache
-      ...(method === "GET" && isPublicPath(key) ? { next: { revalidate: 60 } } : { cache: "no-store" }),
-    })
-  } catch (e) {
-    clearTimeout(t)
-    console.error(`[proxy] upstream failed ${method} ${key} -> ${target}:`, e instanceof Error ? e.message : e)
-    return NextResponse.json({ error: "Upstream unavailable" }, { status: 502 })
-  } finally {
-    clearTimeout(t)
+  // Passenger sleep/wake: one 8s attempt often dies on cold start.
+  // Two 4s attempts (total ~8.3s incl. 300ms gap) stay inside the Vercel
+  // Hobby 10s function limit while giving the just-woken backend a 2nd chance.
+  let upstream: Response | null = null
+  const ATTEMPTS = 2
+  const ATTEMPT_TIMEOUT_MS = 4000
+  for (let attempt = 1; attempt <= ATTEMPTS; attempt += 1) {
+    const controller = new AbortController()
+    const t = setTimeout(() => controller.abort(), ATTEMPT_TIMEOUT_MS)
+    try {
+      upstream = await fetch(target, {
+        method,
+        headers,
+        body,
+        signal: controller.signal,
+        // Use Next cache only for public GETs; other requests bypass cache
+        ...(method === "GET" && isPublicPath(key) ? { next: { revalidate: 60 } } : { cache: "no-store" }),
+      })
+      clearTimeout(t)
+      break
+    } catch (e) {
+      clearTimeout(t)
+      console.error(`[proxy] upstream failed ${method} ${key} -> ${target} (attempt ${attempt}/${ATTEMPTS}):`, e instanceof Error ? e.message : e)
+      if (attempt < ATTEMPTS) await new Promise((r) => setTimeout(r, 300))
+    }
+  }
+  if (!upstream) {
+    // Public GETs get a 503 + Retry-After so clients retry politely;
+    // mutations keep the historic 502 shape plus a retryable flag.
+    const warmingUp = method === "GET" && isPublicPath(key)
+    return NextResponse.json(
+      {
+        error: warmingUp ? "Service warming up — retrying..." : "Upstream unavailable",
+        retryable: true,
+        retryAfter: 3,
+      },
+      { status: warmingUp ? 503 : 502, headers: { "Retry-After": "3" } }
+    )
   }
 
   const respBody = await upstream.arrayBuffer()

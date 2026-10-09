@@ -30,6 +30,10 @@ interface ApiResponse<T = unknown> {
   // Precise sign-in errors also carry the offending field so forms can
   // highlight the right input (email vs password vs phone).
   field?: string
+  // Sleep/wake resilience (2026-10): proxy marks cold-start failures
+  // retryable so forms show "Trying again..." instead of raw errors.
+  retryable?: boolean
+  retryAfter?: number
 }
 
 class ApiClient {
@@ -71,13 +75,22 @@ class ApiClient {
       }
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
+        if (this.isRetriableStatus(res.status)) {
+          return {
+            error: body.error || "Service warming up — please try again in a few seconds.",
+            code: body.code,
+            field: body.field,
+            retryable: true,
+            retryAfter: body.retryAfter,
+          }
+        }
         return { error: body.error || `HTTP ${res.status}`, code: body.code, field: body.field }
       }
       const body = await res.json()
       return { data: body as T }
     } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") return { error: "Request timed out" }
-      return { error: err instanceof Error ? err.message : "Network error" }
+      if (err instanceof DOMException && err.name === "AbortError") return { error: "Request timed out — trying again...", retryable: true }
+      return { error: err instanceof Error ? err.message : "Network error", retryable: true }
     }
   }
 
@@ -105,10 +118,11 @@ class ApiClient {
       // Transient Passenger/Vercel-proxy blips (502/503/504, timeouts) are
       // retried with backoff: GETs are idempotent (2 retries); mutations get
       // a single retry (a duplicate login only leaves an extra refresh-token
-      // row, pruned by the 3-session cap). After retries, fall back direct
-      // to origin to bypass Vercel edge -> origin ROUTER_EXTERNAL_TARGET
-      // failures (e.g. cpt1 edge blocked by host firewall).
-      const maxAttempts = method === "GET" ? 3 : 2
+      // row, pruned by the 3-session cap). Session paths (/api/auth, /api/user)
+      // retry the proxy 3x too — they just never fall back direct (cookies).
+      // After retries, fall back direct to origin to bypass Vercel edge ->
+      // origin ROUTER_EXTERNAL_TARGET failures (e.g. cpt1 edge blocked).
+      const maxAttempts = isSessionPath ? 3 : method === "GET" ? 3 : 2
       let res: Response | null = null
       let attempt = 0
       let lastError: unknown = null
@@ -162,6 +176,28 @@ class ApiClient {
 
       if (!finalRes.ok) {
         const body = await finalRes.json().catch(() => ({}))
+        // Cold-start leftovers surface as 502/503 even after retries
+        // (e.g. session paths with no direct fallback). Translate to
+        // friendly words + retryable flag so forms show "Trying again..."
+        // instead of raw "Upstream unavailable" / "HTTP 502".
+        if (this.isRetriableStatus(finalRes.status)) {
+          return {
+            error: body.error || "Service warming up — please try again in a few seconds.",
+            code: body.code,
+            field: body.field,
+            retryable: true,
+            retryAfter: body.retryAfter,
+          }
+        }
+        // 429 (shared mobile IPs hit one bucket): surface the wait plainly.
+        if (finalRes.status === 429) {
+          return {
+            error: body.error || "Too many tries — please wait a few seconds and try again.",
+            code: body.code,
+            field: body.field,
+            retryAfter: body.retryAfter,
+          }
+        }
         return { error: body.error || `HTTP ${finalRes.status}`, code: body.code, field: body.field }
       }
 
@@ -169,9 +205,9 @@ class ApiClient {
       return { data: body as T }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
-        return { error: "Request timed out" }
+        return { error: "Request timed out — trying again...", retryable: true }
       }
-      return { error: err instanceof Error ? err.message : "Network error" }
+      return { error: err instanceof Error ? err.message : "Network error", retryable: true }
     }
   }
 
