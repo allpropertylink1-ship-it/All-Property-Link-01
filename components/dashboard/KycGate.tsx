@@ -7,20 +7,23 @@ import { Shield, ShieldX, Clock } from "@/components/ui/icons"
 interface KycGateProps {
   children: React.ReactNode
   kycStatus: string | null | undefined
-  isAgent?: boolean
   authMethod?: string
   primaryUserType?: string | null
   userTypes?: string[]
 }
 
-export function KycGate({ children, kycStatus, isAgent, authMethod, primaryUserType, userTypes }: KycGateProps) {
+export function KycGate({ children, kycStatus, authMethod, primaryUserType, userTypes }: KycGateProps) {
   const pathname = usePathname()
   const isKycPage = pathname === "/dashboard/kyc" || pathname.startsWith("/dashboard/kyc/")
   const isOnboardingPage = pathname === "/dashboard/onboarding" || pathname.startsWith("/dashboard/onboarding")
   const isChooseRolePage = pathname === "/dashboard/choose-role" || pathname.startsWith("/dashboard/choose-role")
 
-  // APL Representatives never do KYC; customers are exempt from verification.
-  if (isAgent || authMethod === "agent") return <>{children}</>
+  // Only true APL Representative sessions skip KYC (authMethod === "agent").
+  // NOTE: the session `isAgent` flag is NOT sufficient — the backend sets it
+  // for any user linked to a rep (aplAgentId != null), so referred-but-
+  // unverified advertisers must still pass through the gates below.
+  // Customers are exempt from verification (limited pages only).
+  if (authMethod === "agent") return <>{children}</>
   if (primaryUserType === "CUSTOMER") return <>{children}</>
   if (kycStatus === "VERIFIED") return <>{children}</>
   if (isKycPage) return <>{children}</>

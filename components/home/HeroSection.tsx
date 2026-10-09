@@ -2,6 +2,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { ChevronDown } from "@/components/ui/icons"
 import { useAuth } from "@/lib/auth-context"
 
 const AUTO_INTERVAL_MS = 6000
@@ -66,10 +67,17 @@ const SLIDES: HeroSlide[] = [
   },
 ]
 
-const HERO_CTAS: { label: string; href: string; authGated?: boolean }[] = [
-  { label: "List Property", href: "/dashboard/listings/new", authGated: true },
-  { label: "Search Property", href: "/properties" },
-  { label: "Find a Fundi", href: "/services?type=FUNDI" },
+// Split-button dropdown menus: the main half keeps the original destination,
+// the chevron half opens instant category shortcuts.
+const SEARCH_MENU: { label: string; href: string }[] = [
+  { label: "Property", href: "/properties" },
+  { label: "AirBnB", href: "/airbnbs" },
+  { label: "Land", href: "/land" },
+]
+
+const FIND_MENU: { label: string; href: string }[] = [
+  { label: "Fundi", href: "/services?type=FUNDI" },
+  { label: "Service Provider", href: "/services?type=SERVICE_PROVIDER" },
 ]
 
 const CROSSFADE_MS = 700
@@ -78,6 +86,11 @@ export function HeroSection() {
   const [active, setActive] = useState(0)
   const [paused, setPaused] = useState(false)
   const [prev, setPrev] = useState<number | null>(null)
+  const [openMenu, setOpenMenu] = useState<"search" | "find" | null>(null)
+  const searchRef = useRef<HTMLDivElement>(null)
+  const findRef = useRef<HTMLDivElement>(null)
+  const searchToggleRef = useRef<HTMLButtonElement>(null)
+  const findToggleRef = useRef<HTMLButtonElement>(null)
   const { user } = useAuth()
   const prevActiveRef = useRef(0)
   const unmountTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -109,6 +122,27 @@ export function HeroSection() {
       if (unmountTimerRef.current) clearTimeout(unmountTimerRef.current)
     }
   }, [])
+
+  // Close the open dropdown on outside tap or Escape (returning focus to its chevron)
+  useEffect(() => {
+    if (!openMenu) return
+    const onPointerDown = (e: PointerEvent) => {
+      const el = openMenu === "search" ? searchRef.current : findRef.current
+      if (el && !el.contains(e.target as Node)) setOpenMenu(null)
+    }
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpenMenu(null)
+        ;(openMenu === "search" ? searchToggleRef.current : findToggleRef.current)?.focus()
+      }
+    }
+    document.addEventListener("pointerdown", onPointerDown)
+    document.addEventListener("keydown", onKeyDown)
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown)
+      document.removeEventListener("keydown", onKeyDown)
+    }
+  }, [openMenu])
 
   const slide = SLIDES[active]
   const visibleIndexes = prev !== null && prev !== active ? [prev, active] : [active]
@@ -173,15 +207,101 @@ export function HeroSection() {
           </h1>
           <p className="mt-4 max-w-xl font-heading text-[18px] font-normal leading-[1.6] text-white sm:text-[20px]">{slide.subtitle}</p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            {HERO_CTAS.map((cta) => (
+            {/* 1 — List Property: original button, untouched */}
+            <Link
+              href={advertiseHref}
+              className="inline-flex min-h-touch items-center justify-center rounded border-[1.25px] border-white bg-black/20 px-6 py-3 font-heading text-[16px] font-medium tracking-[0.4px] text-white backdrop-blur-[2px] transition-colors hover:bg-white hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:w-auto"
+            >
+              List Property
+            </Link>
+
+            {/* 2 — Search Property split button: main half navigates, chevron opens categories */}
+            <div ref={searchRef} className="relative flex flex-col sm:w-auto">
+              <div className="inline-flex items-stretch">
               <Link
-                key={cta.href + cta.label}
-                href={cta.authGated ? advertiseHref : cta.href}
-                className="inline-flex min-h-touch items-center justify-center rounded border-[1.25px] border-white bg-black/20 px-6 py-3 font-heading text-[16px] font-medium tracking-[0.4px] text-white backdrop-blur-[2px] transition-colors hover:bg-white hover:text-primary sm:w-auto"
+                href="/properties"
+                className={`inline-flex min-h-touch flex-1 items-center justify-center rounded-l border-[1.25px] border-r-0 border-white bg-black/20 px-6 py-3 font-heading text-[16px] font-medium tracking-[0.4px] text-white backdrop-blur-[2px] transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white${openMenu === "search" ? " max-sm:rounded-bl-none sm:rounded-tl-none" : ""}`}
               >
-                {cta.label}
+                Search Property
               </Link>
-            ))}
+              <button
+                ref={searchToggleRef}
+                type="button"
+                aria-haspopup="true"
+                aria-expanded={openMenu === "search"}
+                aria-label="More search options: property, Airbnb, land"
+                onClick={() => setOpenMenu((m) => (m === "search" ? null : "search"))}
+                className={`inline-flex min-h-touch w-touch items-center justify-center rounded-r border-[1.25px] border-l-white/40 border-white bg-black/20 font-heading text-white backdrop-blur-[2px] transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white${openMenu === "search" ? " max-sm:rounded-br-none sm:rounded-tr-none" : ""}`}
+              >
+                <ChevronDown
+                  size={18}
+                  className={`transition-transform duration-200 ${openMenu === "search" ? "rotate-180" : ""}`}
+                />
+              </button>
+              </div>
+              {openMenu === "search" && (
+                <ul
+                  aria-label="Search categories"
+                  className="z-40 overflow-hidden rounded-md border border-white bg-black/60 py-1 shadow-lg backdrop-blur-md max-sm:static max-sm:-mt-[1.25px] max-sm:rounded-t-none sm:absolute sm:inset-x-0 sm:bottom-full sm:-mb-[1.25px] sm:rounded-b-none"
+                >
+                  {SEARCH_MENU.map((item) => (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onClick={() => setOpenMenu(null)}
+                        className="flex min-h-touch items-center px-4 font-heading text-[16px] font-medium tracking-[0.4px] text-white transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* 3 — Find split button: main half navigates, chevron opens categories */}
+            <div ref={findRef} className="relative flex flex-col sm:w-auto">
+              <div className="inline-flex items-stretch">
+              <Link
+                href="/services?type=FUNDI"
+                className={`inline-flex min-h-touch flex-1 items-center justify-center rounded-l border-[1.25px] border-r-0 border-white bg-black/20 px-6 py-3 font-heading text-[16px] font-medium tracking-[0.4px] text-white backdrop-blur-[2px] transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white${openMenu === "find" ? " max-sm:rounded-bl-none sm:rounded-tl-none" : ""}`}
+              >
+                Find a Fundi
+              </Link>
+              <button
+                ref={findToggleRef}
+                type="button"
+                aria-haspopup="true"
+                aria-expanded={openMenu === "find"}
+                aria-label="More options: fundi, service provider"
+                onClick={() => setOpenMenu((m) => (m === "find" ? null : "find"))}
+                className={`inline-flex min-h-touch w-touch items-center justify-center rounded-r border-[1.25px] border-l-white/40 border-white bg-black/20 font-heading text-white backdrop-blur-[2px] transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white${openMenu === "find" ? " max-sm:rounded-br-none sm:rounded-tr-none" : ""}`}
+              >
+                <ChevronDown
+                  size={18}
+                  className={`transition-transform duration-200 ${openMenu === "find" ? "rotate-180" : ""}`}
+                />
+              </button>
+              </div>
+              {openMenu === "find" && (
+                <ul
+                  aria-label="Service categories"
+                  className="z-40 overflow-hidden rounded-md border border-white bg-black/60 py-1 shadow-lg backdrop-blur-md max-sm:static max-sm:-mt-[1.25px] max-sm:rounded-t-none sm:absolute sm:inset-x-0 sm:bottom-full sm:-mb-[1.25px] sm:rounded-b-none"
+                >
+                  {FIND_MENU.map((item) => (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onClick={() => setOpenMenu(null)}
+                        className="flex min-h-touch items-center px-4 font-heading text-[16px] font-medium tracking-[0.4px] text-white transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         </div>
         {/* Polite slide-change announcement (visually hidden, never keyed) */}

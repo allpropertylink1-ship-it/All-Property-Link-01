@@ -38,13 +38,11 @@ export default async function DashboardLayout({
             accountStatus={user.accountStatus ?? ""}
             onboardingComplete={user.onboardingComplete ?? false}
             kycStatus={user.kycStatus ?? "NONE"}
-            isAgent={user.isAgent}
             authMethod={user.authMethod}
             primaryUserType={user.primaryUserType}
           />
           <KycGate
             kycStatus={user.kycStatus}
-            isAgent={user.isAgent}
             authMethod={user.authMethod}
             primaryUserType={user.primaryUserType}
             userTypes={user.userTypes}

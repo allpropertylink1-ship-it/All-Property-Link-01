@@ -5,13 +5,14 @@ interface DashboardBannerProps {
   accountStatus: string;
   onboardingComplete: boolean;
   kycStatus: string;
-  isAgent?: boolean;
   authMethod?: string;
   primaryUserType?: string | null;
 }
 
-export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, isAgent, authMethod, primaryUserType }: DashboardBannerProps) {
-  if (isAgent || authMethod === "agent") return null;
+export function DashboardBanner({ accountStatus, onboardingComplete, kycStatus, authMethod, primaryUserType }: DashboardBannerProps) {
+  // Same rule as KycGate: only true rep sessions (authMethod === "agent")
+  // skip — a merely-referred user (session isAgent) still sees the banners.
+  if (authMethod === "agent") return null;
   if (primaryUserType === "CUSTOMER") return null;
   if (kycStatus === "VERIFIED" && accountStatus === "ACTIVE" && onboardingComplete) return null;
   if (kycStatus === "PENDING" && !primaryUserType) return null; // typeless pending shows KycGate status instead
