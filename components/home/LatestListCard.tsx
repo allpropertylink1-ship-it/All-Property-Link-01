@@ -266,42 +266,42 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             Listed by {item.listerKind === "OWNER" ? "Owner" : "Agent"}
           </p>
         )}
-        <div className="mt-auto flex flex-nowrap items-center justify-between gap-2 pt-0.5">
-          <div className="flex min-w-0 flex-nowrap items-center gap-1.5 overflow-hidden">
+        <div className="mt-auto flex flex-col gap-2 pt-1">
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
             {purpose && (
-              <span className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 truncate rounded border border-transparent bg-accent-500 px-2.5 font-body text-[11px] font-medium leading-4 text-white">
+              <span className="inline-flex h-6 shrink-0 items-center justify-center whitespace-nowrap rounded border border-transparent bg-accent-500 px-2.5 font-body text-[11px] font-medium leading-4 text-white">
                 {purpose}
               </span>
             )}
             {item.listerKind === "OWNER" && (
-              <span className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded border border-transparent bg-primary px-2.5 font-body text-[11px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
+              <span className="inline-flex h-6 shrink-0 items-center justify-center whitespace-nowrap rounded border border-transparent bg-primary px-2.5 font-body text-[11px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
                 Owner
               </span>
             )}
             {item.listerKind === "AGENT" && (
-              <span className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded border border-border bg-surface-secondary px-2.5 font-body text-[11px] font-medium uppercase leading-4 tracking-[0.12em] text-text-primary">
+              <span className="inline-flex h-6 shrink-0 items-center justify-center whitespace-nowrap rounded border border-border bg-surface-secondary px-2.5 font-body text-[11px] font-medium uppercase leading-4 tracking-[0.12em] text-text-primary">
                 Agent
               </span>
             )}
           </div>
-          <div className="flex shrink-0 items-center gap-2">
+          <div className={cn("grid w-full items-center gap-2", phone ? "grid-cols-[1fr_1fr_auto]" : "grid-cols-[1fr_auto]")}>
           {phone && (
             <a
               href={`tel:${phone}`}
               aria-label={`Call about ${item.title}`}
-              className="inline-flex h-9 min-w-[64px] items-center justify-center gap-1.5 rounded border border-border bg-surface px-2.5 font-body text-[11px] font-medium leading-4 text-primary transition-colors hover:bg-surface-secondary"
+              className="inline-flex h-11 min-h-touch w-full min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded border border-border bg-surface px-2.5 font-body text-[12px] font-medium leading-4 text-primary transition-colors hover:bg-surface-secondary"
             >
-              <IconPhone size={12} stroke={1.5} aria-hidden="true" />
-              Call
+              <IconPhone size={12} stroke={1.5} aria-hidden="true" className="shrink-0" />
+              <span className="truncate">Call</span>
             </a>
           )}
           <Link
             href={detailHref}
             aria-label={`View details about ${item.title}`}
-            className="inline-flex h-11 min-w-touch items-center justify-center gap-1.5 rounded border border-border bg-surface px-3 font-body text-[12px] font-medium leading-4 text-primary transition-colors hover:bg-surface-secondary"
+            className="inline-flex h-11 min-h-touch w-full min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded border border-border bg-surface px-3 font-body text-[12px] font-medium leading-4 text-primary transition-colors hover:bg-surface-secondary"
           >
-            <IconChevronRight size={12} stroke={1.5} aria-hidden="true" />
-            Details
+            <IconChevronRight size={12} stroke={1.5} aria-hidden="true" className="shrink-0" />
+            <span className="truncate">Details</span>
           </Link>
           <button
             type="button"
@@ -309,7 +309,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             aria-pressed={fav}
             onClick={toggleFav}
             className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-full transition-colors motion-reduce:transition-none",
+              "flex h-11 min-h-touch w-11 min-w-touch shrink-0 items-center justify-center rounded-full transition-colors motion-reduce:transition-none",
               fav ? "text-error" : "text-text-secondary hover:text-error"
             )}
           >
