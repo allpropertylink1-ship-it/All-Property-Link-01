@@ -1,6 +1,7 @@
 import { getProperties } from "@/lib/services/property";
 import { getServiceListings } from "@/lib/services/service";
 import { siteUrl, slugifyCity } from "@/lib/seo";
+import { isHiddenRep } from "@/lib/reps";
 import type { MetadataRoute } from "next";
 
 export const revalidate = 3600;
@@ -132,8 +133,8 @@ async function agentPages(base: string): Promise<MetadataRoute.Sitemap> {
       next: { revalidate: 3600 },
     });
     if (!res.ok) return [];
-    const data: { agents: { id: string; _count: { users: number } }[] } = await res.json();
-    return (data.agents || []).map((agent) => ({
+    const data: { agents: { id: string; fullName?: string; agentCode?: string; _count: { users: number } }[] } = await res.json();
+    return (data.agents || []).filter((agent) => !isHiddenRep(agent)).map((agent) => ({
       url: `${base}/aplreps/${agent.id}`,
       lastModified: new Date(),
       changeFrequency: "monthly",

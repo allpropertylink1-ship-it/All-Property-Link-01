@@ -5,6 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { api } from "@/lib/api-client"
 import { resolveImageUrl } from "@/lib/images"
+import { isHiddenRep } from "@/lib/reps"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { Loader2, Phone, Mail, CitiesCovered, ExternalLink, Search, Shield } from "@/components/ui/icons"
 
@@ -77,7 +78,7 @@ export function AgentsDirectory() {
   useEffect(() => {
     setLoading(true)
     api.get<{ agents: Agent[] }>("/api/apl-agents").then(({ data, error }) => {
-      if (data) setAgents(data.agents)
+      if (data) setAgents(data.agents.filter((a) => !isHiddenRep(a)))
       else setError(error || "Failed to load representatives")
       setLoading(false)
     })
