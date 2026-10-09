@@ -67,7 +67,7 @@ const SLIDES: HeroSlide[] = [
 ]
 
 const HERO_CTAS: { label: string; href: string; authGated?: boolean }[] = [
-  { label: "Advertise Property", href: "/dashboard/listings/new", authGated: true },
+  { label: "List Property", href: "/dashboard/listings/new", authGated: true },
   { label: "Search Property", href: "/properties" },
   { label: "Find a Fundi", href: "/services?type=FUNDI" },
 ]
