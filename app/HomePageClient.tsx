@@ -8,6 +8,7 @@ import { FeaturedAirbnbs } from "@/components/home/FeaturedAirbnbs"
 import { FeaturedFundis } from "@/components/home/FeaturedFundis"
 import { FeaturedProviders } from "@/components/home/FeaturedProviders"
 import { CTASection } from "@/components/home/CTASection"
+import { ProviderCTASection } from "@/components/home/ProviderCTASection"
 import { LatestListCard, type LatestListCardData } from "@/components/home/LatestListCard"
 import { SectionHeading } from "@/components/home/SectionHeading"
 import type { PropertyCard as PropertyCardType } from "@/lib/services/property"
@@ -66,12 +67,18 @@ export function HomePageClient({
   land,
   fundis,
   providers,
+  fundiCount,
+  providerCount,
+  propertyCount,
 }: {
   saleRent: PropertyCardType[];
   airbnbs: PropertyCardType[];
   land: PropertyCardType[];
   fundis: ProfileRow[];
   providers: ProfileRow[];
+  fundiCount: number;
+  providerCount: number;
+  propertyCount: number;
 }) {
   return (
     <>
@@ -81,6 +88,11 @@ export function HomePageClient({
       <FeaturedLand initialData={land} />
       <FeaturedProviders initialData={providers} />
       <FeaturedFundis initialData={fundis} servicePills={providers.slice(0, 2)} />
+      <ProviderCTASection
+        fundiCount={fundiCount}
+        providerCount={providerCount}
+        propertyCount={propertyCount}
+      />
       <CTASection />
     </>
   )

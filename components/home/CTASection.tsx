@@ -22,10 +22,10 @@ export function CTASection() {
           <div className="relative z-10 grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
             <div className="lg:col-span-8">
               <h2 id="home-cta-heading" className="font-heading text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-                Are You a Property Owner, Developer, or Certified Fundi?
+                Are You a Property Owner, Developer, or Agent?
               </h2>
               <p className="mt-2 max-w-2xl text-sm text-white/75 sm:text-base">
-                List your rental units, land plots, or technical trade services directly to thousands of
+                List your rental units, land plots, or for sale properties directly to thousands of
                 active buyers and tenants across Kenya.
               </p>
               <ul className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white/80">

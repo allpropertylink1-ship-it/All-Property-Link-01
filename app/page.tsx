@@ -36,6 +36,9 @@ export default async function HomePage() {
       land={land.properties}
       fundis={toProfileRows(fundis.services)}
       providers={toProfileRows(providers.services)}
+      fundiCount={fundis.total}
+      providerCount={providers.total}
+      propertyCount={saleRent.total + airbnbs.total + land.total}
     />
   )
 }
