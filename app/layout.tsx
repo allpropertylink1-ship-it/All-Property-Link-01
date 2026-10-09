@@ -10,6 +10,8 @@ import { getSiteStatus } from "@/lib/services/status";
 import MaintenanceNotice from "@/components/shared/MaintenanceNotice";
 import { headers } from "next/headers";
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
+import { PWARegister } from "@/components/pwa/PWARegister";
+import OfflineBadge from "@/components/shared/OfflineBadge";
 import "./globals.css";
 
 const heading = Roboto_Slab({
@@ -32,6 +34,7 @@ export const viewport: Viewport = {
   userScalable: false,
   viewportFit: "cover",
   interactiveWidget: "resizes-visual",
+  themeColor: "#286255",
 };
 
 export const metadata: Metadata = {
@@ -62,13 +65,15 @@ export default async function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://api.allpropertylink.co.ke" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
-        <meta name="theme-color" content="#1E3A40" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="theme-color" content="#286255" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="All Property Link" />
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" href="/icons/icon-180x180.png" />
       </head>
       <body className={`${heading.variable} ${body.variable} flex min-h-[100dvh] flex-col antialiased`}>
+        <OfflineBadge />
+        <PWARegister />
         <AuthProvider>
           <Navbar />
           <main className="min-w-0 max-w-full flex-1 overflow-x-clip pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6">{inMaintenance ? <MaintenanceNotice title={status?.maintenanceTitle} message={status?.maintenanceMessage} /> : children}</main>

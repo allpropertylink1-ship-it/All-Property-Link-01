@@ -1,6 +1,26 @@
 const API_BASE = ""
 const API_BACKEND = (typeof process !== "undefined" && (process.env.NEXT_PUBLIC_API_URL as string | undefined)) || "https://api.allpropertylink.co.ke"
 
+// Lane D (offline-honest, v1): no queue, no IDB, no background-sync.
+// Helpers below only report browser connectivity; mutations fail fast
+// when offline instead of hanging through retry + timeout.
+export function isOnline(): boolean {
+  if (typeof navigator === "undefined") return true
+  return navigator.onLine
+}
+
+export function subscribeOnlineStatus(cb: (online: boolean) => void): () => void {
+  if (typeof window === "undefined") return () => {}
+  const onOnline = () => cb(true)
+  const onOffline = () => cb(false)
+  window.addEventListener("online", onOnline)
+  window.addEventListener("offline", onOffline)
+  return () => {
+    window.removeEventListener("online", onOnline)
+    window.removeEventListener("offline", onOffline)
+  }
+}
+
 interface ApiResponse<T = unknown> {
   data?: T
   error?: string
@@ -67,6 +87,12 @@ class ApiClient {
   ): Promise<ApiResponse<T>> {
     try {
       const method = options.method || "GET"
+      // Lane D (offline-honest, v1): mutations fail fast when offline.
+      // Never queue — including auth/session paths (/api/auth, /api/user).
+      // GETs still attempt the network (proxy → direct fallback → error).
+      if (method !== "GET" && typeof navigator !== "undefined" && navigator.onLine === false) {
+        return { error: "You're offline. Try again when connected." }
+      }
       // Session reads must never be cached: a stale pre-consent /me bounces
       // users between /dashboard and /auth/consent after they accept Terms.
       const isSessionPath = path.startsWith("/api/auth") || path.startsWith("/api/user")
