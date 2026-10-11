@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-const API_BACKEND = process.env.API_BACKEND_URL || "https://api.allpropertylink.co.ke"
-
 // --- SEO-safe 503 maintenance gate ---
 // Session 22 constraint: edge runtime -> cPanel origin fetches TIME OUT
 // (host-level IP filtering), while serverless -> origin succeeds. So the
@@ -49,19 +47,13 @@ export default async function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set("x-pathname", pathname)
 
-  if (pathname.startsWith("/uploads/")) {
-    // Images live on the cPanel origin, which is unreachable from some
-    // user networks (host-level IP filtering on :80/:443). Serve them
-    // same-origin through the Vercel proxy so <img> tags never depend on
-    // a direct browser -> origin connection.
-    const url = new URL(request.url)
-    url.host = new URL(API_BACKEND).host
-    url.protocol = "https"
-    url.port = ""
-    const res = NextResponse.rewrite(url.toString())
-    res.headers.set("x-pathname", pathname)
-    return res
-  }
+  // NOTE: /uploads/* is intentionally NOT rewritten here. Image bytes are
+  // served same-origin by the serverless route in app/uploads/[...path],
+  // which fetches the cPanel origin. Edge rewrites to
+  // api.allpropertylink.co.ke fail with ROUTER_EXTERNAL_TARGET_CONNECTION_ERROR
+  // due to host-level IP filtering on Vercel edge -> origin (same Session 22
+  // incident that moved /api/* to the serverless proxy), while
+  // serverless -> origin succeeds. Never rewrite /uploads/* to the origin.
 
   // NOTE: /api/* is intentionally NOT rewritten here. All API traffic is
   // proxied via app/api/[...path]/route.ts (serverless) which forwards
@@ -74,7 +66,7 @@ export default async function middleware(request: NextRequest) {
   // keeps status checks / mutations / login reachable during maintenance).
   // Auth must stay reachable for *all* user types even when site is in maintenance,
   // otherwise "Failed to fetch" on login is mistaken for backend outage.
-  if (pathname.startsWith("/api/") || pathname.startsWith("/maintenance") || pathname.startsWith("/auth")) {
+  if (pathname.startsWith("/api/") || pathname.startsWith("/uploads/") || pathname.startsWith("/maintenance") || pathname.startsWith("/auth")) {
     return NextResponse.next({ request: { headers: requestHeaders } })
   }
 

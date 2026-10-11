@@ -1,7 +1,7 @@
 export function optimizeImageUrl(url: string, width: number): string {
   if (!url) return url
   // Local uploads: keep relative so the browser loads them same-origin
-  // through the /uploads middleware proxy (the cPanel origin is not
+  // through the serverless /uploads proxy route (the cPanel origin is not
   // directly reachable from all user networks).
   if (url.startsWith("/uploads/")) {
     return url
@@ -35,7 +35,7 @@ export function resolveImageUrl(url: string | null | undefined): string | null {
   }
   if (trimmed.startsWith("uploads/")) return `/${trimmed}`
   // Local uploads: keep relative so the browser loads them same-origin
-  // through the /uploads middleware proxy (the cPanel origin is not
+  // through the serverless /uploads proxy route (the cPanel origin is not
   // directly reachable from all user networks).
   if (trimmed.startsWith("/uploads/")) {
     return trimmed
