@@ -1,5 +1,6 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { DashboardBanner } from "@/components/dashboard/DashboardBanner";
 import { KycGate } from "@/components/dashboard/KycGate";
@@ -26,7 +27,16 @@ export default async function DashboardLayout({
   };
 
   if (!user.acceptedTermsAt || user.termsVersion !== CURRENT_TERMS_VERSION) {
-    redirect("/auth/consent");
+    // Keep the deep link so accepting the Terms lands the user where they
+    // were headed (e.g. Business Profile) instead of stranding them at the
+    // persona home and feeling like a bounce loop. x-pathname is set by
+    // middleware on every request.
+    const pathname = (await headers()).get("x-pathname");
+    redirect(
+      pathname && pathname.startsWith("/dashboard")
+        ? `/auth/consent?return=${encodeURIComponent(pathname)}`
+        : "/auth/consent"
+    );
   }
 
   return (

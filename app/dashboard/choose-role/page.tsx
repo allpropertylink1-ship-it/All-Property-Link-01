@@ -89,7 +89,17 @@ function ChooseRoleInner() {
       </div>
     );
   }
-  if (!isTypeless) return null;
+  if (!isTypeless) {
+    // Already-roled accounts are forwarded by the effect above — render
+    // progress, never a blank page (a bare null here plus a server bounce
+    // read as a permanent empty screen).
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-16 text-center" role="status" aria-label="Taking you to your dashboard">
+        <Loader2 size={24} className="mx-auto animate-spin text-primary-600" />
+        <p className="mt-3 text-sm text-text-secondary">Taking you to your dashboard…</p>
+      </div>
+    );
+  }
 
   const needsSpecialties = advertiserType === "SERVICE_PROVIDER";
   const realSpecialtyCount = specialties.filter((s) => !isOtherSpecialty(s)).length;

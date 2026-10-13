@@ -111,7 +111,20 @@ export async function requireAuth(): Promise<{ user: SessionUser }> {
   const session = await getSession();
   if (!session) {
     const { redirect } = await import("next/navigation");
-    redirect("/auth");
+    // Preserve the deep link (same contract as the middleware gate): after
+    // signing in the user lands where they were headed instead of bouncing
+    // between /auth and the dashboard. x-pathname is set by middleware.
+    let target = "/auth";
+    try {
+      const { headers } = await import("next/headers");
+      const pathname = (await headers()).get("x-pathname");
+      if (pathname && pathname.startsWith("/dashboard")) {
+        target = `/auth?return=${encodeURIComponent(pathname)}`;
+      }
+    } catch {
+      // Headers unavailable (tests): fall back to bare /auth.
+    }
+    redirect(target);
     throw new Error("unreachable")
   }
   return session

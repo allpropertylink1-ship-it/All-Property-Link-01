@@ -29,15 +29,37 @@ function ConsentInner() {
   const [confirming, setConfirming] = useState(false)
   const [error, setError] = useState("")
   const didRedirect = useRef(false)
+  // Bounce-loop guard: this page auto-forwards when the CLIENT thinks the
+  // user already consented. If the SERVER disagrees, the dashboard layout
+  // bounces straight back here — an invisible spinner loop. Count recent
+  // mounts; on the 3rd visit inside 60s, stop auto-forwarding and say so.
+  const [loopStuck, setLoopStuck] = useState(false)
+  useEffect(() => {
+    try {
+      const key = "apl-consent-visits"
+      const now = Date.now()
+      const raw = sessionStorage.getItem(key)
+      const parsed: unknown = raw ? JSON.parse(raw) : []
+      const visits = (Array.isArray(parsed) ? parsed : []).filter(
+        (t): t is number => typeof t === "number" && now - t < 60_000
+      )
+      const recent = [...visits, now].slice(-5)
+      sessionStorage.setItem(key, JSON.stringify(recent))
+      if (recent.length >= 3) setLoopStuck(true)
+    } catch {
+      // Storage unavailable: no guard, existing behavior.
+    }
+  }, [])
 
   const needsConsent = !loading && (!user || !isFreshlyConsented(user))
 
   useEffect(() => {
+    if (loopStuck) return
     if (!loading && user && !needsConsent && !didRedirect.current) {
       didRedirect.current = true
       router.replace(resolvePostAuthTarget(user, returnUrl))
     }
-  }, [loading, user, needsConsent, router, returnUrl])
+  }, [loading, user, needsConsent, router, returnUrl, loopStuck])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -58,6 +80,7 @@ function ConsentInner() {
     // stale pre-consent context user (that fallback caused the bounce loop).
     if (isFreshlyConsented(result.user)) {
       didRedirect.current = true
+      try { sessionStorage.removeItem("apl-consent-visits") } catch {}
       router.refresh()
       router.replace(resolvePostAuthTarget(result.user, returnUrl))
       return
@@ -79,6 +102,7 @@ function ConsentInner() {
     setConfirming(false)
     if (isFreshlyConsented(fresh)) {
       didRedirect.current = true
+      try { sessionStorage.removeItem("apl-consent-visits") } catch {}
       router.refresh()
       router.replace(resolvePostAuthTarget(fresh, returnUrl))
       return
@@ -108,6 +132,36 @@ function ConsentInner() {
   }
 
   if (!needsConsent) {
+    if (loopStuck) {
+      return (
+        <div className="flex min-h-[100dvh] items-center justify-center bg-surface-secondary px-4 py-10">
+          <div className="w-full max-w-md rounded-2xl bg-surface p-6 text-center shadow-sm">
+            <h1 className="font-heading text-xl font-bold text-text-primary">Your session is out of sync</h1>
+            <p className="mt-2 text-sm leading-relaxed text-text-secondary">
+              Your sign-in looks valid on this device, but the server keeps asking
+              for consent. Refresh to re-check, or sign out and sign back in to
+              sync your session.
+            </p>
+            <div className="mt-5 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => { try { sessionStorage.removeItem("apl-consent-visits") } catch {} window.location.reload() }}
+                className="touch-target inline-flex min-h-[44px] items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white"
+              >
+                Refresh and re-check
+              </button>
+              <Link
+                href="/auth"
+                onClick={() => { try { sessionStorage.removeItem("apl-consent-visits") } catch {} }}
+                className="touch-target inline-flex min-h-[44px] items-center justify-center rounded-xl border border-border px-6 py-3 text-sm font-medium text-text-secondary"
+              >
+                Back to sign in
+              </Link>
+            </div>
+          </div>
+        </div>
+      )
+    }
     return (
       <div className="flex min-h-[100dvh] items-center justify-center bg-surface-secondary">
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" aria-label="Redirecting" />

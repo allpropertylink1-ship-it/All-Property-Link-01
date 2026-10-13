@@ -178,7 +178,7 @@ function WelcomeContent({
 export function AuthCard({ referralCode }: Props) {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { user, loading, refreshUser, clearSession } = useAuth()
+  const { user, loading, refreshUser } = useAuth()
   const returnParam = searchParams.get("return")
   const returnUrl = isSafeReturnUrl(returnParam) ? (returnParam as string) : undefined
   // Client-side net for in-app navigation to /auth while signed in (server
@@ -197,6 +197,7 @@ export function AuthCard({ referralCode }: Props) {
   // take the UNKNOWN branch, never an unverified redirect.
   const signedIn = !loading && !!user
   const [sessionChecked, setSessionChecked] = useState<null | "confirmed" | "denied" | "unknown">(null)
+  const [verifyRound, setVerifyRound] = useState(0)
   useEffect(() => {
     if (!signedIn || sessionChecked) return
     let cancelled = false
@@ -214,19 +215,23 @@ export function AuthCard({ referralCode }: Props) {
       cancelled = true
       clearTimeout(timeout)
     }
-  }, [signedIn, sessionChecked, refreshUser])
+  }, [signedIn, sessionChecked, verifyRound, refreshUser])
   useEffect(() => {
     if (!signedIn || !sessionChecked) return
     if (sessionChecked === "confirmed" && user) {
       router.replace(resolvePostAuthTarget(user, returnUrl))
-    } else if (sessionChecked === "unknown") {
-      // Server unreachable: drop the stale client state (it may disagree
-      // with the server) and let the server decide the destination.
-      clearSession()
-      router.replace(returnUrl ?? "/dashboard")
     }
     // "denied": refreshUser already cleared the user; render the form.
-  }, [signedIn, sessionChecked, user, router, returnUrl, clearSession])
+    // "unknown": the server could not be reached. The client session is
+    // kept untouched (it may be perfectly valid — wiping it and pushing
+    // into /dashboard is what trapped users in an auth bounce loop), and
+    // the UI below offers an explicit retry instead of auto-navigating.
+  }, [signedIn, sessionChecked, user, router, returnUrl])
+
+  function retryVerification() {
+    setSessionChecked(null)
+    setVerifyRound((r) => r + 1)
+  }
 
   const [view, setView] = useState<"login" | "register">(
     referralCode ? "register" : "login"
@@ -286,10 +291,51 @@ export function AuthCard({ referralCode }: Props) {
     setShowAgentForgot(false)
   }
 
-  // Render nothing while the signed-in redirect above fires (avoids flashing
-  // login/signup to authed users who navigate here in-app).
-  if (signedIn) {
-    return null
+  // Signed-in users never see the forms: while the session is being
+  // confirmed we show progress (never a blank page — a bare `null` here
+  // left users staring at an empty /auth?return=... URL), and when the
+  // server cannot be reached we say so with an explicit retry instead of
+  // silently bouncing into /dashboard (which bounced straight back here).
+  if (signedIn && sessionChecked !== "denied") {
+    if (sessionChecked === "unknown") {
+      return (
+        <div className="rounded-xl border border-border bg-surface p-6 text-center shadow-md sm:p-8">
+          <h2 className="font-heading text-xl font-bold tracking-tight text-text-primary">
+            Still signing you in…
+          </h2>
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-text-secondary">
+            We couldn&apos;t reach the server to confirm your session. Your sign-in
+            may still be valid — check your connection, then try again.
+          </p>
+          <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
+            <button
+              type="button"
+              onClick={retryVerification}
+              className="touch-target inline-flex min-h-[44px] items-center justify-center rounded-lg bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+            >
+              Try again
+            </button>
+            <button
+              type="button"
+              onClick={() => router.replace(returnUrl ?? "/dashboard")}
+              className="touch-target inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-6 py-3 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
+            >
+              Continue anyway
+            </button>
+          </div>
+        </div>
+      )
+    }
+    return (
+      <div
+        className="flex min-h-[40dvh] flex-col items-center justify-center gap-3 rounded-xl border border-border bg-surface p-6 text-center shadow-md"
+        role="status"
+        aria-label="Signing you in"
+      >
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary-500" />
+        <p className="text-sm font-medium text-text-secondary">Signing you in…</p>
+      </div>
+    )
   }
 
   return (
