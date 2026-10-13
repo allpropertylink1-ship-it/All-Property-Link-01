@@ -9,7 +9,8 @@ import { resolveImageUrl } from "@/lib/images";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
-import { Phone, Mail, Globe, Sparkles, MessageCircle, Star, Briefcase } from "@/components/ui/icons";
+import { GatedContact } from "@/components/services/GatedContact";
+import { Globe, Sparkles, Star, Briefcase, BadgeCheck } from "@/components/ui/icons";
 
 interface Props {
   params: { id: string };
@@ -55,7 +56,7 @@ function formatServicePrice(price: number | null | undefined, currency: string, 
 
 function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
   return (
-    <span className="inline-flex items-center gap-0.5">
+    <span role="img" aria-label={`Rated ${rating} out of 5 stars`} className="inline-flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
@@ -64,91 +65,6 @@ function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
         />
       ))}
     </span>
-  );
-}
-
-function ContactActions({
-  phone,
-  email,
-  title,
-  variant,
-}: {
-  phone?: string | null;
-  email?: string | null;
-  title: string;
-  variant: "compact" | "full";
-}) {
-  if (!phone && !email) return null;
-  const waHref = phone
-    ? `https://wa.me/${phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in ${title}`)}`
-    : null;
-  if (variant === "compact") {
-    return (
-      <div className="flex flex-wrap gap-2">
-        {phone && (
-          <>
-            <a
-              href={waHref as string}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex min-h-touch items-center gap-1.5 rounded-lg bg-whatsapp px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-whatsapp-dark"
-            >
-              <MessageCircle size={14} />
-              WhatsApp
-            </a>
-            <a
-              href={`tel:${phone}`}
-              className="flex min-h-touch items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
-            >
-              <Phone size={14} />
-              Call
-            </a>
-          </>
-        )}
-        {email && (
-          <a
-            href={`mailto:${email}`}
-            className="flex min-h-touch items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
-          >
-            <Mail size={14} />
-            Email
-          </a>
-        )}
-      </div>
-    );
-  }
-  return (
-    <div className="space-y-2.5">
-      {phone && (
-        <>
-          <a
-            href={waHref as string}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex min-h-touch w-full items-center justify-center gap-2 rounded-lg bg-whatsapp px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-whatsapp-dark"
-          >
-            <MessageCircle size={16} />
-            WhatsApp
-          </a>
-          <a
-            href={`tel:${phone}`}
-            className="flex min-h-touch w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
-          >
-            <Phone size={16} className="shrink-0" />
-            {phone}
-          </a>
-        </>
-      )}
-      {email && (
-        <a
-          href={`mailto:${email}`}
-          className="flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
-        >
-          <Mail size={16} className="shrink-0" />
-          {email}
-        </a>
-      )}
-    </div>
   );
 }
 
@@ -197,8 +113,7 @@ export default async function ServiceDetailPage({ params }: Props) {
     provider: {
       "@type": service.user?.companyName ? "Organization" : "Person",
       name: service.user?.companyName || `${service.user?.firstName || ""} ${service.user?.lastName || ""}`.trim(),
-      ...(service.user?.phone ? { telephone: service.user.phone } : {}),
-      ...(service.user?.email ? { email: service.user.email } : {}),
+      // Contact is gated behind login via the client island — never in markup.
       ...(service.user?.website ? { url: service.user.website } : {}),
     },
     ...(service.city ? { areaServed: service.city } : {}),
@@ -213,7 +128,7 @@ export default async function ServiceDetailPage({ params }: Props) {
           {service.user && (
             <div className="rounded-xl border border-border bg-surface p-5">
               <div className="mb-4 flex items-center gap-3.5">
-                <div className="relative shrink-0">
+                <div className="shrink-0">
                   {service.user.businessLogo ? (
                     <Image
                       src={resolveImageUrl(service.user.businessLogo) as string} unoptimized
@@ -227,21 +142,20 @@ export default async function ServiceDetailPage({ params }: Props) {
                       <Briefcase size={20} className="text-primary-500" />
                     </div>
                   )}
-                  <span
-                    aria-hidden
-                    className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent-500 text-white"
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                      <polyline points="9,12 11,14 15,10" />
-                    </svg>
-                  </span>
                 </div>
               </div>
 
               <div className="mb-3 min-w-0 space-y-0.5">
-                <p className="truncate font-heading text-sm font-semibold text-text-primary">
-                  {service.user.companyName || `${service.user.firstName} ${service.user.lastName}`}
+                <p className="flex items-center gap-1.5 truncate font-heading text-sm font-semibold text-text-primary">
+                  <span className="min-w-0 truncate">
+                    {service.user.companyName || `${service.user.firstName} ${service.user.lastName}`}
+                  </span>
+                  {service.isKycVerified && (
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary">
+                      <BadgeCheck size={12} aria-hidden="true" />
+                      ID-checked
+                    </span>
+                  )}
                 </p>
                 {service.user.companyName && (
                   <p className="truncate text-xs text-text-secondary">
@@ -345,7 +259,7 @@ export default async function ServiceDetailPage({ params }: Props) {
                 ))}
               </dl>
             )}
-            {service.avgRating && (
+            {service.avgRating != null && service.avgRating > 0 ? (
               <div className="mt-2 flex items-center gap-2">
                 <StarRating rating={Math.round(service.avgRating)} />
                 <span className="text-sm text-text-secondary">
@@ -353,6 +267,10 @@ export default async function ServiceDetailPage({ params }: Props) {
                   {(service.reviewCount || 0) === 1 ? "review" : "reviews"})
                 </span>
               </div>
+            ) : (
+              <p role="status" className="mt-2 text-sm text-text-secondary">
+                No reviews yet — be the first to review this pro.
+              </p>
             )}
           </div>
 
@@ -373,17 +291,24 @@ export default async function ServiceDetailPage({ params }: Props) {
                   <Briefcase size={18} className="text-primary-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-text-primary">
-                    {service.user.companyName || `${service.user.firstName} ${service.user.lastName}`}
+                  <p className="flex items-center gap-1.5 truncate text-sm font-semibold text-text-primary">
+                    <span className="min-w-0 truncate">
+                      {service.user.companyName || `${service.user.firstName} ${service.user.lastName}`}
+                    </span>
+                    {service.isKycVerified && (
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary">
+                        <BadgeCheck size={12} aria-hidden="true" />
+                        ID-checked
+                      </span>
+                    )}
                   </p>
                   {shelves.length > 0 && (
                     <span className="text-xs text-primary-600">{shelves.map((s) => s.name).join(" · ")}</span>
                   )}
                 </div>
               </div>
-              <ContactActions
-                phone={service.user.phone}
-                email={service.user.email}
+              <GatedContact
+                serviceId={service.id}
                 title={service.title}
                 variant="compact"
               />
@@ -391,20 +316,20 @@ export default async function ServiceDetailPage({ params }: Props) {
           )}
 
           {/* ─── Reviews Section (customer reviews of the provider) ─── */}
-          {reviewData && providerId && (
+          {providerId && (
             <div>
               <h2 className="mb-4 text-sm font-semibold text-text-primary">
-                Reviews {reviewData.total > 0 && `(${reviewData.total})`}
+                Reviews {reviewData && reviewData.total > 0 && `(${reviewData.total})`}
               </h2>
               <ReviewSection
                 targetId={providerId}
                 initialSummary={{
-                  avgRating: reviewData.avgRating,
-                  total: reviewData.total,
-                  distribution: [...reviewData.distribution] as [number, number, number, number, number],
+                  avgRating: reviewData?.avgRating ?? null,
+                  total: reviewData?.total ?? 0,
+                  distribution: [...(reviewData?.distribution ?? [0, 0, 0, 0, 0])] as [number, number, number, number, number],
                 }}
-                initialReviews={reviewData.reviews}
-                initialTotalPages={reviewData.totalPages}
+                initialReviews={reviewData?.reviews ?? []}
+                initialTotalPages={reviewData?.totalPages ?? 0}
                 emptyMessage="No customer reviews for this provider yet."
               />
             </div>
@@ -417,9 +342,8 @@ export default async function ServiceDetailPage({ params }: Props) {
             <>
               <div className="rounded-xl border border-border bg-surface p-5">
                 <h3 className="mb-4 font-heading text-sm font-semibold text-text-primary">Contact</h3>
-                <ContactActions
-                  phone={service.user.phone}
-                  email={service.user.email}
+                <GatedContact
+                  serviceId={service.id}
                   title={service.title}
                   variant="full"
                 />

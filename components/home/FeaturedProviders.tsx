@@ -7,9 +7,26 @@ import { FormBanner } from "@/components/shared/FormFeedback"
 import { ProfileCard, type ProfileRow } from "./ProfileCard"
 import { SectionHeading } from "./SectionHeading"
 
+function toTitleCase(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ")
+}
+
 function displayName(item: ProfileRow) {
-  if (item.user.companyName) return item.user.companyName
-  return `${item.user.firstName} ${item.user.lastName}`
+  const raw = item.user.companyName
+    ? item.user.companyName
+    : `${item.user.firstName} ${item.user.lastName}`
+  return toTitleCase(raw)
+}
+
+function isPrivateProfile(item: ProfileRow): boolean {
+  const name = displayName(item).toLowerCase()
+  const title = (item.title || "").trim().toLowerCase()
+  return name === "private" || title === "private"
 }
 
 /** Real phone only — never invented. Returns trimmed source or null. */
@@ -54,20 +71,10 @@ function ContactButtons({ phone, label }: { phone: string; label: string }) {
   )
 }
 
-function ProfileFallback({ id, label }: { id: string; label: string }) {
-  return (
-    <Link
-      href={`/services/${id}`}
-      aria-label={`View ${label} details`}
-      className="mt-2 inline-flex min-h-touch w-full items-center justify-center gap-1 rounded-lg bg-surface-secondary px-2 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-primary hover:text-text-onPrimary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-    >
-      View Profile
-    </Link>
-  )
-}
-
 export function FeaturedProviders({ initialData }: { initialData?: ProfileRow[] }) {
-  const [services, setServices] = useState<ProfileRow[]>(initialData || [])
+  const [services, setServices] = useState<ProfileRow[]>(() =>
+    (initialData || []).filter((s) => s.user && !isPrivateProfile(s))
+  )
   const [loading, setLoading] = useState(!initialData)
   const [error, setError] = useState<string | null>(null)
 
@@ -79,7 +86,7 @@ export function FeaturedProviders({ initialData }: { initialData?: ProfileRow[] 
         return r.json()
       })
       .then((data: { services: ProfileRow[] }) => {
-        setServices((data.services || []).filter((s) => s.user))
+        setServices((data.services || []).filter((s) => s.user && !isPrivateProfile(s)))
         setLoading(false)
       })
       .catch((e) => {
@@ -94,12 +101,12 @@ export function FeaturedProviders({ initialData }: { initialData?: ProfileRow[] 
         <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <SectionHeading
             id="home-providers-heading"
-            eyebrow="Hire with confidence"
+            eyebrow="Home and business services"
             title="Service Providers"
             subtitle="Cleaning, moving, security & more"
           />
           <Link
-            href="/services"
+            href="/services?type=SERVICE_PROVIDER"
             className="inline-flex min-h-touch shrink-0 items-center gap-1.5 text-sm font-bold text-primary transition-colors hover:text-accent-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             View All Providers
@@ -129,10 +136,8 @@ export function FeaturedProviders({ initialData }: { initialData?: ProfileRow[] 
               return (
                 <div key={s.id} className="flex min-w-0 flex-1 flex-col items-stretch">
                   <ProfileCard item={s} variant="provider" />
-                  {phone ? (
+                  {phone && (
                     <ContactButtons phone={phone} label={displayName(s)} />
-                  ) : (
-                    <ProfileFallback id={s.id} label={displayName(s)} />
                   )}
                 </div>
               )

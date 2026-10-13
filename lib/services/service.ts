@@ -34,6 +34,7 @@ export interface ServiceListingUser {
   email: string | null;
   specialties: string[];
   website: string | null;
+  kycStatus?: string | null;
 }
 
 export interface ServiceListingCard {
@@ -53,7 +54,7 @@ export interface ServiceListingCard {
   createdAt: string;
   tags?: string[];
   user: (ServiceListingUser & { userTypes?: string[] | null }) | null;
-  category: { id: string; name: string; slug: string; icon: string | null } | null;
+  category: { id: string; name: string; slug: string; icon: string | null; type?: string | null } | null;
 }
 
 export interface ServiceListingsResponse {
@@ -73,6 +74,7 @@ export interface ServiceDetailUser {
   email: string | null;
   specialties: string[];
   website: string | null;
+  kycStatus?: string | null;
 }
 export interface ServiceDetail {
   id: string;
@@ -94,6 +96,8 @@ export interface ServiceDetail {
   coverImage?: string | null;
   avgRating: number | null;
   reviewCount: number;
+  isKycVerified?: boolean | null;
+  contactGated?: boolean | null;
 }
 
 export interface ServiceReview {

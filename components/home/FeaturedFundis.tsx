@@ -2,15 +2,31 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Briefcase, MessageCircle, Phone } from "@/components/ui/icons"
+import { ArrowRight, MessageCircle, Phone } from "@/components/ui/icons"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { ProfileCard, type ProfileRow } from "./ProfileCard"
 import { SectionHeading } from "./SectionHeading"
-import { getTradeLabel } from "@/lib/trade-label"
+
+function toTitleCase(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ")
+}
 
 function displayName(item: ProfileRow) {
-  if (item.user.companyName) return item.user.companyName
-  return `${item.user.firstName} ${item.user.lastName}`
+  const raw = item.user.companyName
+    ? item.user.companyName
+    : `${item.user.firstName} ${item.user.lastName}`
+  return toTitleCase(raw)
+}
+
+function isPrivateProfile(item: ProfileRow): boolean {
+  const name = displayName(item).toLowerCase()
+  const title = (item.title || "").trim().toLowerCase()
+  return name === "private" || title === "private"
 }
 
 /** Real phone only — never invented. Returns trimmed digits source or null. */
@@ -55,51 +71,14 @@ function ContactButtons({ phone, label }: { phone: string; label: string }) {
   )
 }
 
-function ProfileFallback({ id, label }: { id: string; label: string }) {
-  return (
-    <Link
-      href={`/services/${id}`}
-      aria-label={`View ${label} details`}
-      className="mt-2 inline-flex min-h-touch w-full items-center justify-center gap-1 rounded-lg bg-surface-secondary px-2 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-primary hover:text-text-onPrimary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-    >
-      View Profile
-    </Link>
-  )
-}
-
-function ServicePill({ item }: { item: ProfileRow }) {
-  const name = displayName(item)
-  const tradeLabel = getTradeLabel(item.category, item.title)
-  // Never repeat the name in the subtitle line.
-  const subtitle =
-    tradeLabel && tradeLabel.toLowerCase() !== name.toLowerCase() ? tradeLabel : null
-  return (
-    <Link
-      href={`/services/${item.id}`}
-      aria-label={`View ${name}${subtitle ? ` — ${subtitle}` : ""}`}
-      className="flex min-h-touch items-center gap-2 rounded-xl bg-surface-secondary p-3 transition-colors hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-    >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface text-primary shadow-sm" aria-hidden="true">
-        <Briefcase size={18} />
-      </span>
-      <span className="min-w-0">
-        <span className="block truncate text-xs font-bold text-text-primary">{name}</span>
-        {subtitle && (
-          <span className="block truncate text-xs text-text-secondary">{subtitle}</span>
-        )}
-      </span>
-    </Link>
-  )
-}
-
 export function FeaturedFundis({
   initialData,
-  servicePills,
 }: {
   initialData?: ProfileRow[]
-  servicePills?: ProfileRow[]
 }) {
-  const [services, setServices] = useState<ProfileRow[]>(initialData || [])
+  const [services, setServices] = useState<ProfileRow[]>(() =>
+    (initialData || []).filter((s) => s.user && !isPrivateProfile(s))
+  )
   const [loading, setLoading] = useState(!initialData)
   const [error, setError] = useState<string | null>(null)
 
@@ -111,7 +90,7 @@ export function FeaturedFundis({
         return r.json()
       })
       .then((data: { services: ProfileRow[] }) => {
-        setServices((data.services || []).filter((s) => s.user))
+        setServices((data.services || []).filter((s) => s.user && !isPrivateProfile(s)))
         setLoading(false)
       })
       .catch((e) => {
@@ -126,12 +105,12 @@ export function FeaturedFundis({
         <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <SectionHeading
             id="home-fundis-heading"
-            eyebrow="ID-checked pros near you"
-            title="Verified Fundis & Specialized Technicians"
+            eyebrow="Pros near you"
+            title="Fundis & Specialized Technicians"
             subtitle="Plumbers, electricians, masons & more"
           />
           <Link
-            href="/services"
+            href="/services?type=FUNDI"
             className="inline-flex min-h-touch shrink-0 items-center gap-1.5 text-sm font-bold text-primary transition-colors hover:text-accent-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             View All Fundis
@@ -139,7 +118,7 @@ export function FeaturedFundis({
           </Link>
         </div>
         {loading ? (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6" aria-busy="true" aria-label="Loading verified fundis">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6" aria-busy="true" aria-label="Loading fundis">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="flex animate-pulse flex-col items-center rounded-lg border border-border bg-surface px-4 py-6">
                 <div className="mb-4 h-20 w-20 rounded-full bg-surface-secondary" />
@@ -149,39 +128,25 @@ export function FeaturedFundis({
             ))}
           </div>
         ) : error ? (
-          <FormBanner variant="error">Could not load verified fundis: {error}</FormBanner>
+          <FormBanner variant="error">Could not load fundis: {error}</FormBanner>
         ) : services.length === 0 ? (
           <p role="status" className="py-8 text-center text-sm text-text-secondary">
             No fundis listed yet.
           </p>
         ) : (
-          <>
             <div className="grid grid-cols-2 items-stretch gap-4 md:grid-cols-3 xl:grid-cols-6">
               {services.map((s) => {
                 const phone = getPhone(s)
                 return (
                   <div key={s.id} className="flex min-w-0 flex-1 flex-col items-stretch">
                     <ProfileCard item={s} variant="fundi" />
-                    {phone ? (
+                    {phone && (
                       <ContactButtons phone={phone} label={displayName(s)} />
-                    ) : (
-                      <ProfileFallback id={s.id} label={displayName(s)} />
                     )}
                   </div>
                 )
               })}
             </div>
-            {servicePills && servicePills.length > 0 && (
-              <div className="mt-4 grid grid-cols-2 gap-4 md:hidden" aria-label="More professional services">
-                {servicePills
-                  .filter((p) => !services.some((s) => s.id === p.id))
-                  .slice(0, 2)
-                  .map((s) => (
-                    <ServicePill key={s.id} item={s} />
-                  ))}
-              </div>
-            )}
-          </>
         )}
       </div>
     </section>

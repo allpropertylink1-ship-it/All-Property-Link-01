@@ -29,13 +29,19 @@ export default async function HomePage() {
     getServiceListings({ type: "SERVICE_PROVIDER", limit: "6" }),
   ])
 
+  const fundiRows = toProfileRows(fundis.services);
+  const fundiIds = new Set(fundiRows.map((s) => s.id));
+  // BOTH-type shelves match both rails — drop cross-rail duplicates so the
+  // same pro never appears twice on the homepage.
+  const providerRows = toProfileRows(providers.services).filter((s) => !fundiIds.has(s.id));
+
   return (
     <HomePageClient
       saleRent={saleRent.properties}
       airbnbs={airbnbs.properties}
       land={land.properties}
-      fundis={toProfileRows(fundis.services)}
-      providers={toProfileRows(providers.services)}
+      fundis={fundiRows}
+      providers={providerRows}
       fundiCount={fundis.total}
       providerCount={providers.total}
       propertyCount={saleRent.total + airbnbs.total + land.total}

@@ -1,8 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link"
-import { Wrench, Briefcase, BadgeCheck, ArrowUpRight } from "@/components/ui/icons"
+import { Wrench, Briefcase, ArrowUpRight, BadgeCheck } from "@/components/ui/icons"
 import { AVATAR_POOL } from "@/lib/placeholders"
-import { optimizeImageUrl } from "@/lib/images"
+import { optimizeImageUrl, resolveImageUrl } from "@/lib/images"
 import { getTradeLabel } from "@/lib/trade-label"
 
 export interface ProfileRow {
@@ -15,7 +15,7 @@ export interface ProfileRow {
   images: unknown
   userId: string
   categoryId: string
-  category: { id: string; name: string; slug?: string } | null
+  category: { id: string; name: string; slug?: string; type?: string | null } | null
   user: {
     id: string
     firstName: string
@@ -24,6 +24,7 @@ export interface ProfileRow {
     businessLogo?: string | null
     companyName?: string | null
     city?: string | null
+    kycStatus?: string | null
   }
 }
 
@@ -40,13 +41,24 @@ function pickAvatar(seed: string): string {
   return AVATAR_POOL[idx]
 }
 
+function toTitleCase(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ")
+}
+
 function getDisplayName(user: ProfileRow["user"]) {
-  if (user.companyName) return user.companyName
-  return `${user.firstName} ${user.lastName}`
+  const raw = user.companyName
+    ? user.companyName
+    : `${user.firstName} ${user.lastName}`
+  return toTitleCase(raw)
 }
 
 function getSubtitle(user: ProfileRow["user"]) {
-  if (user.companyName) return `${user.firstName} ${user.lastName}`
+  if (user.companyName) return toTitleCase(`${user.firstName} ${user.lastName}`)
   return null
 }
 
@@ -72,11 +84,23 @@ export function ProfileCard({
   variant?: "fundi" | "provider"
 }) {
   const photoUrl = getPhotoUrl(item)
-  const photoSrc = photoUrl ? optimizeImageUrl(photoUrl, 600) : null
+  const resolvedPhoto = photoUrl ? resolveImageUrl(photoUrl) || photoUrl : null
+  const photoSrc = resolvedPhoto ? optimizeImageUrl(resolvedPhoto, 600) : null
   const fallbackAvatar = pickAvatar(item.id)
   const displayName = getDisplayName(item.user)
   const subtitle = getSubtitle(item.user)
-  const location = [item.city, item.user.city].filter(Boolean).join(", ")
+  const locationParts = [item.city, item.user.city]
+    .filter((c): c is string => typeof c === "string" && !!c.trim())
+    .map((c) => c.trim())
+  const dedupedLocation = Array.from(
+    new Map(locationParts.map((c) => [c.toLowerCase(), c])).values()
+  )
+  const locationJoined = dedupedLocation.join(", ")
+  // Country-only ("Kenya") carries no signal for "near you" — hide it.
+  const location =
+    locationJoined && locationJoined.toLowerCase() !== "kenya"
+      ? locationJoined
+      : null
   const Icon = variant === "fundi" ? Wrench : Briefcase
   const priceNum = item.price == null ? null : Number(item.price)
   const showPrice = priceNum != null && !Number.isNaN(priceNum) && priceNum > 0
@@ -89,7 +113,7 @@ export function ProfileCard({
       aria-label={`View ${displayName}${tradeLabel ? ` — ${tradeLabel}` : ""}`}
       className="group flex flex-1 flex-col items-center rounded-lg border border-border bg-surface px-4 py-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:px-5"
     >
-      {/* Photo with verified badge */}
+      {/* Photo */}
       <div className="relative mb-3">
         <div className="h-20 w-20 overflow-hidden rounded-full border-2 border-primary/20 bg-surface-secondary shadow-sm sm:h-24 sm:w-24">
           {photoSrc ? (
@@ -116,9 +140,6 @@ export function ProfileCard({
             />
           )}
         </div>
-        <span className="absolute -bottom-0.5 -right-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-text-onPrimary" title="Verified">
-          <BadgeCheck size={14} aria-hidden="true" />
-        </span>
       </div>
 
       {/* Trade pill (providers only — fundi cards omit it entirely) */}
@@ -133,6 +154,14 @@ export function ProfileCard({
       <h3 className="font-heading text-sm font-bold leading-tight text-text-primary transition-colors group-hover:text-accent-600 sm:text-base">
         {displayName}
       </h3>
+
+      {/* Real KYC only — no badge unless the backend confirms VERIFIED. */}
+      {item.user.kycStatus === "VERIFIED" && (
+        <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary">
+          <BadgeCheck size={12} aria-hidden="true" />
+          ID-checked
+        </span>
+      )}
 
       {/* Subtitle (company owner name) */}
       {subtitle && (

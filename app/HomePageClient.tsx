@@ -87,7 +87,7 @@ export function HomePageClient({
       <FeaturedAirbnbs initialData={airbnbs} />
       <FeaturedLand initialData={land} />
       <FeaturedProviders initialData={providers} />
-      <FeaturedFundis initialData={fundis} servicePills={providers.slice(0, 2)} />
+      <FeaturedFundis initialData={fundis} />
       <ProviderCTASection
         fundiCount={fundiCount}
         providerCount={providerCount}

@@ -108,7 +108,7 @@ class ApiClient {
       }
       // Session reads must never be cached: a stale pre-consent /me bounces
       // users between /dashboard and /auth/consent after they accept Terms.
-      const isSessionPath = path.startsWith("/api/auth") || path.startsWith("/api/user")
+      const isSessionPath = path.startsWith("/api/auth") || path.startsWith("/api/user") || (path.includes("/api/services/") && path.includes("contact"))
       const cacheControl = method === "GET" && !isSessionPath ? "max-age=30, stale-while-revalidate=120" : "no-store"
       const headers = {
         "Content-Type": "application/json",

@@ -6,7 +6,7 @@ import { CheckCircle, ArrowRight } from "@/components/ui/icons"
 
 const CHECKLIST = [
   "Free profile — list your first property or service at no cost",
-  "Reach thousands of verified customers across Kenya",
+  "Reach thousands of customers across Kenya",
   "Featured listings get 5× more visibility",
 ]
 
@@ -31,8 +31,8 @@ export function ProviderCTASection({
   const ctaHref = user ? "/dashboard/listings/new" : "/auth/login?next=/dashboard/listings/new"
 
   const stats = [
-    { value: fundiCount, label: "Active fundis" },
-    { value: providerCount, label: "Service providers" },
+    { value: fundiCount, label: "Trade listings" },
+    { value: providerCount, label: "Service listings" },
     { value: propertyCount, label: "Properties listed" },
   ].filter((s) => s.value > 0)
 
@@ -55,13 +55,13 @@ export function ProviderCTASection({
                   Join{" "}
                   {fundiCount > 0 && (
                     <strong className="font-semibold text-text-primary">
-                      {formatCount(fundiCount)} fundi{fundiCount === 1 ? "" : "s"}
+                      {formatCount(fundiCount)} trade listing{fundiCount === 1 ? "" : "s"}
                     </strong>
                   )}
                   {fundiCount > 0 && providerCount > 0 && " and "}
                   {providerCount > 0 && (
                     <strong className="font-semibold text-text-primary">
-                      {formatCount(providerCount)} service provider{providerCount === 1 ? "" : "s"}
+                      {formatCount(providerCount)} service listing{providerCount === 1 ? "" : "s"}
                     </strong>
                   )}{" "}
                   on All Property Link and get hired fast.
