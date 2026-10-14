@@ -13,8 +13,7 @@ export function Footer() {
             <span className="text-accent-600">Link</span>
           </Link>
           <p className="mt-2 max-w-md text-sm text-secondary">
-            Kenya&apos;s marketplace for properties, stays, fundis, and service
-            providers.
+            Properties, stays, fundis, and service providers across Kenya.
           </p>
         </div>
 

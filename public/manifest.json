@@ -1,7 +1,7 @@
 {
   "name": "All Property Link",
   "short_name": "APL",
-  "description": "Kenya's most reliable marketplace for properties, short-term stays, fundis, and service providers.",
+  "description": "Properties, land, short-term stays, fundis, and service providers across Kenya.",
   "id": "/",
   "scope": "/",
   "start_url": "/?utm_source=homescreen",

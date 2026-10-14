@@ -44,7 +44,7 @@ export default function TermsPage() {
                 <h2 id="definitions">2. Definitions</h2>
                 <dl className="space-y-3">
                   <dt className="font-semibold">"Platform"</dt>
-                  <dd className="ml-4">All Property Link Kenya's online marketplace for real estate listings, including the website, mobile applications, APIs, and related services.</dd>
+                  <dd className="ml-4">All Property Link — an online platform for real estate listings in Kenya, including the website, mobile applications, APIs, and related services.</dd>
 
                   <dt className="font-semibold">"User" or "You"</dt>
                   <dd className="ml-4">Any individual or entity that accesses or uses the Platform, including visitors, registered users, property seekers, agents, agencies, and developers.</dd>

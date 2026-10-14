@@ -38,12 +38,12 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: { default: "All Property Link — Kenya's Marketplace", template: "%s | All Property Link" },
-  description: "Kenya's most reliable marketplace connecting you to properties, short-term stays, trusted fundis, and service providers across the country.",
+  title: { default: "All Property Link", template: "%s | All Property Link" },
+  description: "Find properties, land, short-term stays, fundis, and service providers across Kenya. Verified listings, checked by APL representatives.",
   metadataBase: new URL(siteUrl()),
   openGraph: {
-    title: "All Property Link — Kenya's Marketplace",
-    description: "Kenya's most reliable marketplace connecting you to properties, short-term stays, trusted fundis, and service providers across the country.",
+    title: "All Property Link",
+    description: "Find properties, land, short-term stays, fundis, and service providers across Kenya. Verified listings, checked by APL representatives.",
     type: "website",
     locale: "en_KE",
     siteName: "All Property Link",
@@ -91,7 +91,7 @@ export default async function RootLayout({
               name: "All Property Link",
               url: siteUrl(),
               logo: `${siteUrl()}/favicon.ico`,
-              description: "Kenya's most reliable marketplace connecting you to properties, short-term stays, trusted fundis, and service providers across the country.",
+              description: "Find properties, land, short-term stays, fundis, and service providers across Kenya. Verified listings, checked by APL representatives.",
               contactPoint: {
                 "@type": "ContactPoint",
                 contactType: "customer service",

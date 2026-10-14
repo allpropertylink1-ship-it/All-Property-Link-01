@@ -87,7 +87,7 @@ export function ProviderCTASection({
             </Link>
           </div>
           {stats.length > 0 && (
-            <div className="grid grid-cols-3 gap-3 sm:gap-4" role="list" aria-label="Marketplace totals">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4" role="list" aria-label="Platform totals">
               {stats.map((s) => (
                 <div
                   key={s.label}

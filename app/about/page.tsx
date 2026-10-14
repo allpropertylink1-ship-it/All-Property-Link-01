@@ -5,7 +5,7 @@ export const revalidate = 3600;
 export const metadata = {
   title: "About Us",
   description:
-    "All Property Link - Kenya's trusted marketplace for properties, short stays, fundis, and service providers. Verified listings, checked by APL representatives.",
+    "All Property Link - properties, short stays, fundis, and service providers in Kenya. Verified listings, checked by APL representatives.",
   alternates: { canonical: "/about" },
 };
 
@@ -47,7 +47,7 @@ export default function AboutPage() {
       <div className="min-h-[calc(100dvh-80px)] bg-surface">
         <section className="bg-gradient-to-br from-primary-800 via-primary-700 to-primary-600 px-4 py-20 text-center text-text-on-primary">
           <h1 className="mx-auto max-w-4xl font-heading text-4xl font-bold leading-tight sm:text-5xl">
-            Kenya&apos;s Property &amp; Services Marketplace
+            Property, Fundis &amp; Services in Kenya
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-primary-100">
             One platform for four needs &mdash; buy or rent property, book a short stay, hire a fundi, or find a

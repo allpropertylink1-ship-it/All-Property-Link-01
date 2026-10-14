@@ -52,7 +52,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="font-heading text-2xl font-semibold text-text-primary">3. How We Use Your Information</h2>
               <ul className="mt-2 space-y-1.5 list-disc list-inside">
-                <li>Provide, maintain, and improve our property marketplace platform</li>
+                <li>Provide, maintain, and improve our property listings platform</li>
                 <li>Process property listings and agent communications</li>
                 <li>Send transactional emails via Resend (inquiries, confirmations, notifications)</li>
                 <li>Enable WhatsApp Business API communication for property listings</li>

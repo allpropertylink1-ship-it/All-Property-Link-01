@@ -171,7 +171,7 @@ export default function FAQPage() {
             Frequently Asked Questions
           </h1>
           <p className="mx-auto max-w-2xl text-balance text-lg text-primary-100 sm:text-xl">
-            Find answers to common questions about buying, selling, renting, and listing properties on Kenya&apos;s trusted real estate marketplace.
+            Find answers to common questions about buying, selling, renting, and listing properties on All Property Link.
           </p>
         </div>
       </section>

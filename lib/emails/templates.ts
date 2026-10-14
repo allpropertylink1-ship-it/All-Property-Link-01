@@ -16,7 +16,7 @@ function baseHtml(content: string) {
           ${content}
         </td></tr>
         <tr><td style="padding:0 32px 32px;text-align:center;color:#64748B;font-size:12px">
-          <p style="margin:0">All Property Link &mdash; Kenya&rsquo;s Marketplace</p>
+          <p style="margin:0">All Property Link</p>
           <p style="margin:8px 0 0">You received this email because you have an account with us.</p>
         </td></tr>
       </table>
@@ -29,7 +29,7 @@ function baseHtml(content: string) {
 export function welcomeEmail(name: string) {
   return baseHtml(`
     <h2 style="margin:0 0 12px;font-family:Plus Jakarta Sans,Inter,sans-serif;font-size:18px;font-weight:600;color:#1E3A40">Welcome to All Property Link, ${name}!</h2>
-    <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#111827">We&rsquo;re excited to have you join Kenya&rsquo;s most reliable marketplace. Whether you&rsquo;re looking for your dream home, a short-term stay, or trusted service providers, you&rsquo;re in the right place.</p>
+    <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#111827">We&rsquo;re excited to have you join All Property Link. Whether you&rsquo;re looking for your dream home, a short-term stay, or trusted service providers, you&rsquo;re in the right place.</p>
     <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#111827">Here&rsquo;s what you can do now:</p>
     <ul style="margin:0 0 20px;padding-left:20px;font-size:14px;line-height:1.8;color:#111827">
       <li>Browse properties across Kenya</li>
