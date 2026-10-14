@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 export default function LandPage() {
   return (
     <PropertiesPageClient
+      basePath="/land"
       searchParams={{
         propertyType: "LAND",
         limit: "20",

@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 export default function AirbnbsPage() {
   return (
     <PropertiesPageClient
+      basePath="/airbnbs"
       searchParams={{
         purpose: "FOR_RENT_SHORT_TERM",
         limit: "20",

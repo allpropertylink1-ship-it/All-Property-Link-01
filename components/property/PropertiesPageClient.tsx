@@ -34,9 +34,45 @@ interface City { city: string; _count: { city: number } }
 
 interface Props {
   searchParams: Record<string, string | undefined>
+  /** Canonical section path — keeps filters, hotspots + pagination inside the section (e.g. "/airbnbs", "/land"). */
+  basePath?: string
 }
 
-export function PropertiesPageClient({ searchParams }: Props) {
+function catalogTitle(total: number | undefined, purpose?: string, propertyType?: string): string {
+  const count = total ?? "…"
+  const isLand = propertyType === "LAND"
+  if (purpose === "FOR_RENT_SHORT_TERM") {
+    return `${count} ${total === 1 ? "Airbnb" : "Airbnbs"} Available`
+  }
+  if (isLand) {
+    return `${count} ${total === 1 ? "Plot" : "Plots"} Available`
+  }
+  if (purpose === "FOR_SALE") {
+    return `${count} ${total === 1 ? "Property" : "Properties"} for Sale`
+  }
+  if (purpose === "FOR_RENT_LONG_TERM") {
+    return `${count} ${total === 1 ? "Property" : "Properties"} for Rent`
+  }
+  return `${count} ${total === 1 ? "Property" : "Properties"} Available`
+}
+
+function catalogSubtitle(purpose?: string, propertyType?: string): string {
+  if (purpose === "FOR_RENT_SHORT_TERM") {
+    return "Verified short-term stays and vacation rentals across Kenya — book by the night."
+  }
+  if (propertyType === "LAND") {
+    return "Verified plots and land for sale across Kenya."
+  }
+  if (purpose === "FOR_SALE") {
+    return "Verified houses and apartments for sale across Kenya."
+  }
+  if (purpose === "FOR_RENT_LONG_TERM") {
+    return "Verified houses and apartments for rent across Kenya."
+  }
+  return "Verified houses and apartments for sale, rent, and short stays across Kenya."
+}
+
+export function PropertiesPageClient({ searchParams, basePath = "/properties" }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const [data, setData] = useState<{ properties: Prop[]; total: number; page: number; totalPages: number } | null>(null)
@@ -66,7 +102,7 @@ export function PropertiesPageClient({ searchParams }: Props) {
     setError(null)
     Promise.all([
       fetch(`/api/properties?${params}`).then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json() }),
-      fetchCityCounts(),
+      fetchCityCounts(propertyType === "LAND" ? "LAND" : undefined),
     ]).then(([propData, cityCounts]) => {
       setData(propData)
       setCities((cityCounts || []).map((c: { city: string; count: number }) => ({ city: c.city, _count: { city: c.count } })))
@@ -76,14 +112,14 @@ export function PropertiesPageClient({ searchParams }: Props) {
   const hotspots: Hotspot[] = useMemo(() => {
     const top = [...cities].sort((a, b) => b._count.city - a._count.city).slice(0, 5)
     return [
-      { label: "All Hubs", href: "/properties", active: !city },
+      { label: "All Hubs", href: basePath, active: !city },
       ...top.map((c) => ({
         label: c.city,
-        href: `/properties/${slugifyCity(c.city)}`,
+        href: basePath === "/properties" ? `/properties/${slugifyCity(c.city)}` : `${basePath}?city=${encodeURIComponent(c.city)}`,
         active: city === c.city,
       })),
     ]
-  }, [cities, city])
+  }, [cities, city, basePath])
 
   const pushSort = (next: CatalogSortKey) => {
     const params = new URLSearchParams()
@@ -117,14 +153,15 @@ export function PropertiesPageClient({ searchParams }: Props) {
                 bedrooms={bedrooms}
                 searchDefault={search}
                 hotspots={hotspots}
-                basePath="/properties"
+                basePath={basePath}
               />
             </FilterPanel>
           </div>
 
           <main className="flex flex-col gap-6 lg:col-span-8 xl:col-span-9">
             <ResultsHeader
-              title={`${data?.total ?? "…"} Prime ${data?.total === 1 ? "Property" : "Properties"} Available`}
+              title={catalogTitle(data?.total, purpose, propertyType)}
+              subtitle={catalogSubtitle(purpose, propertyType)}
               sort={sort}
               onSortChange={pushSort}
               layout={layout}
@@ -150,7 +187,7 @@ export function PropertiesPageClient({ searchParams }: Props) {
                 <Pagination
                   currentPage={data.page}
                   totalPages={data.totalPages}
-                  basePath="/properties"
+                  basePath={basePath}
                   searchParams={paginationParams}
                 />
               </>

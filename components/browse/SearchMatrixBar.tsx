@@ -32,7 +32,7 @@ const DEFAULT_TYPE_OPTIONS = [
   { value: "", label: "All Categories" },
   { value: "HOUSE", label: "Houses & Villas" },
   { value: "APARTMENT", label: "Apartments" },
-  { value: "LAND", label: "Land & Prime Plots" },
+  { value: "LAND", label: "Land & Plots" },
   { value: "COMMERCIAL", label: "Commercial" },
 ];
 

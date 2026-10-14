@@ -51,6 +51,33 @@ interface PropertiesData {
   cities?: { city: string; count: number }[];
 }
 
+function cityTitle(total: number | undefined, city: string, purpose?: string): string {
+  const count = total ?? 0
+  if (purpose === "FOR_RENT_SHORT_TERM") {
+    return `${count} ${count === 1 ? "Airbnb" : "Airbnbs"} in ${city}`
+  }
+  if (purpose === "FOR_SALE") {
+    return `${count} ${count === 1 ? "Property" : "Properties"} for Sale in ${city}`
+  }
+  if (purpose === "FOR_RENT_LONG_TERM") {
+    return `${count} ${count === 1 ? "Property" : "Properties"} for Rent in ${city}`
+  }
+  return `${count} ${count === 1 ? "Property" : "Properties"} in ${city}`
+}
+
+function citySubtitle(city: string, purpose?: string): string {
+  if (purpose === "FOR_RENT_SHORT_TERM") {
+    return `Verified short-term stays and vacation rentals in ${city} — book by the night.`
+  }
+  if (purpose === "FOR_SALE") {
+    return `Verified houses and apartments for sale in ${city}.`
+  }
+  if (purpose === "FOR_RENT_LONG_TERM") {
+    return `Verified houses and apartments for rent in ${city}.`
+  }
+  return `Verified houses and apartments for sale, rent, and short stays in ${city}.`
+}
+
 export default function CityPageClient({
   city,
   searchParams,
@@ -197,8 +224,8 @@ export default function CityPageClient({
 
           <main className="flex flex-col gap-6 lg:col-span-8 xl:col-span-9">
             <ResultsHeader
-              title={`${data?.total ?? 0} Prime ${data?.total === 1 ? "Property" : "Properties"} in ${resolvedCity}`}
-              subtitle={`Verified houses, apartments, and land for sale, rent, and short stays in ${resolvedCity}.`}
+              title={cityTitle(data?.total, resolvedCity, purpose)}
+              subtitle={citySubtitle(resolvedCity, purpose)}
               sort={sort}
               onSortChange={pushSort}
               layout={layout}
