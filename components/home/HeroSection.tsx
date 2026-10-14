@@ -3,7 +3,6 @@ import Image from "next/image"
 import Link from "next/link"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { ChevronDown } from "@/components/ui/icons"
-import { useAuth } from "@/lib/auth-context"
 
 const AUTO_INTERVAL_MS = 6000
 
@@ -91,7 +90,6 @@ export function HeroSection() {
   const findRef = useRef<HTMLDivElement>(null)
   const searchToggleRef = useRef<HTMLButtonElement>(null)
   const findToggleRef = useRef<HTMLButtonElement>(null)
-  const { user } = useAuth()
   const prevActiveRef = useRef(0)
   const unmountTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -146,7 +144,6 @@ export function HeroSection() {
 
   const slide = SLIDES[active]
   const visibleIndexes = prev !== null && prev !== active ? [prev, active] : [active]
-  const advertiseHref = user ? "/dashboard/listings/new" : "/auth/login?next=/dashboard/listings/new"
 
   return (
     <section
@@ -207,12 +204,12 @@ export function HeroSection() {
           </h1>
           <p className="mt-4 max-w-xl font-heading text-[18px] font-normal leading-[1.6] text-white sm:text-[20px]">{slide.subtitle}</p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            {/* 1 — List Property: original button, untouched */}
+            {/* 1 — Find Airbnb: short-stay discovery entry point */}
             <Link
-              href={advertiseHref}
+              href="/airbnbs"
               className="inline-flex min-h-touch items-center justify-center rounded border-[1.25px] border-white bg-black/20 px-6 py-3 font-heading text-[16px] font-medium tracking-[0.4px] text-white backdrop-blur-[2px] transition-colors hover:bg-white hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:w-auto"
             >
-              List Property
+              Find Airbnb
             </Link>
 
             {/* 2 — Search Property split button: main half navigates, chevron opens categories */}
