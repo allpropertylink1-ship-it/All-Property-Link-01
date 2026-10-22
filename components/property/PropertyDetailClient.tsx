@@ -151,6 +151,14 @@ function prettySubType(subType?: string | null): string | null {
   return subType.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/** wa.me needs full international digits; 0-prefixed Kenyan numbers become 254…. */
+function whatsappDigits(phone?: string | null): string {
+  if (!phone) return "";
+  let digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("0")) digits = `254${digits.slice(1)}`;
+  return digits.length >= 12 ? digits : "";
+}
+
 export default function PropertyDetailClient({ slug, initial, sellerReviews }: { slug: string; initial?: PropertyData; sellerReviews?: SellerReviewsData }) {
   const [property, setProperty] = useState<PropertyData | null>(initial ?? null);
   const [otherProperties, setOtherProperties] = useState<OtherProperty[]>([]);
@@ -236,7 +244,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
   const agentName = property.agent
     ? property.agent.companyName || `${property.agent.firstName} ${property.agent.lastName}`
     : null;
-  const agentPhoneDigits = property.agent?.phone ? property.agent.phone.replace(/[^0-9]/g, "") : "";
+  const agentWhatsApp = whatsappDigits(property.agent?.phone);
   const multiUnits = property.hasMultipleUnits === true && Array.isArray(property.units) && property.units.length > 0;
   const fromPrice = multiUnits ? formatFromPrice(property.units, property.listingPurpose) : "";
   const bedRange = multiUnits ? unitBedRange(property.units) : null;
@@ -521,25 +529,34 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                   )}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-2">
                 {property.agent.phone && (
                   <a
                     href={`tel:${property.agent.phone}`}
-                    className="touch-target flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-3 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
+                    className="touch-target flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-3 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
                   >
-                    <Phone size={16} aria-hidden />
-                    Call Agent
+                    <Phone size={16} className="shrink-0" aria-hidden />
+                    {property.agent.phone}
                   </a>
                 )}
-                {agentPhoneDigits && (
+                {agentWhatsApp && (
                   <a
-                    href={`https://wa.me/${agentPhoneDigits}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
+                    href={`https://wa.me/${agentWhatsApp}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="touch-target flex items-center justify-center gap-2 rounded-lg bg-whatsapp px-3 py-3 text-sm font-semibold text-white transition-colors hover:bg-whatsapp-dark"
+                    className="touch-target flex w-full items-center justify-center gap-2 rounded-lg bg-whatsapp px-3 py-3 text-sm font-semibold text-white transition-colors hover:bg-whatsapp-dark"
                   >
                     <MessageCircle size={16} aria-hidden />
                     WhatsApp
+                  </a>
+                )}
+                {property.agent.email && (
+                  <a
+                    href={`mailto:${property.agent.email}`}
+                    className="touch-target flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-3 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
+                  >
+                    <Mail size={16} className="shrink-0" aria-hidden />
+                    {property.agent.email}
                   </a>
                 )}
               </div>
@@ -678,9 +695,9 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
 
                 {/* Direct CTAs: Call + WhatsApp */}
                 <div className="mt-4 space-y-2.5">
-                  {agentPhoneDigits && (
+                  {agentWhatsApp && (
                     <a
-                      href={`https://wa.me/${agentPhoneDigits}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
+                      href={`https://wa.me/${agentWhatsApp}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="touch-target flex w-full items-center justify-center gap-2 rounded-lg bg-whatsapp px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-whatsapp-dark"
@@ -695,7 +712,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                       className="touch-target flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
                     >
                       <Phone size={16} className="shrink-0" aria-hidden />
-                      Call Agent
+                      {property.agent.phone}
                     </a>
                   )}
                   {property.agent.email && (
@@ -704,7 +721,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                       className="touch-target flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
                     >
                       <Mail size={16} className="shrink-0" aria-hidden />
-                      Email Agent
+                      {property.agent.email}
                     </a>
                   )}
                   {property.agent.website && (
@@ -789,8 +806,8 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
       )}
 
       {/* ─── Mobile persistent action bar (Stitch mobile) ─── */}
-      {property.agent?.phone && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+      {property.agent && (property.agent.phone || property.agent.email) && (
+        <div className="fixed inset-x-0 bottom-[calc(var(--nav-h)+env(safe-area-inset-bottom))] z-40 border-t border-border bg-surface md:bottom-0 md:pb-[env(safe-area-inset-bottom)] lg:hidden">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
             {hasPrice && (
             <div className="min-w-0">
@@ -799,17 +816,19 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
             </div>
             )}
             <div className="flex shrink-0 items-center gap-2">
-              <a
-                href={`tel:${property.agent.phone}`}
-                aria-label="Call agent"
-                className="touch-target flex h-12 items-center justify-center gap-2 rounded-lg border border-border px-4 text-sm font-semibold text-text-primary"
-              >
-                <Phone size={18} aria-hidden />
-                <span>Call Agent</span>
-              </a>
-              {agentPhoneDigits && (
+              {property.agent.phone && (
                 <a
-                  href={`https://wa.me/${agentPhoneDigits}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
+                  href={`tel:${property.agent.phone}`}
+                  aria-label="Call agent"
+                  className="touch-target flex h-12 items-center justify-center gap-2 rounded-lg border border-border px-4 text-sm font-semibold text-text-primary"
+                >
+                  <Phone size={18} aria-hidden />
+                  <span>Call Agent</span>
+                </a>
+              )}
+              {agentWhatsApp && (
+                <a
+                  href={`https://wa.me/${agentWhatsApp}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Chat on WhatsApp"
@@ -817,6 +836,16 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                 >
                   <MessageCircle size={18} aria-hidden />
                   <span>WhatsApp</span>
+                </a>
+              )}
+              {!property.agent.phone && property.agent.email && (
+                <a
+                  href={`mailto:${property.agent.email}`}
+                  aria-label="Email agent"
+                  className="touch-target flex h-12 items-center justify-center gap-2 rounded-lg border border-border px-4 text-sm font-semibold text-text-primary"
+                >
+                  <Mail size={18} aria-hidden />
+                  <span>Email Agent</span>
                 </a>
               )}
             </div>

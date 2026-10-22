@@ -106,11 +106,11 @@ export function BottomNav() {
 
   return (
     <>
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] md:hidden" role="navigation" aria-label="Bottom navigation">
-        <div className="flex items-center justify-around">
+      <nav className="fixed inset-x-0 bottom-0 z-50 h-[calc(var(--nav-h)+env(safe-area-inset-bottom))] border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] md:hidden" role="navigation" aria-label="Bottom navigation">
+        <div className="flex h-full items-stretch justify-around">
           <Link
             href="/"
-            className="touch-target flex flex-col items-center gap-0.5 py-3 flex-1"
+            className="touch-target flex flex-1 flex-col items-center justify-center gap-0.5"
             aria-current={homeActive ? "page" : undefined}
           >
             <div className={`flex h-7 w-7 items-center justify-center ${homeActive ? "text-primary-600" : "text-text-secondary"}`}>
@@ -124,7 +124,7 @@ export function BottomNav() {
           <button
             type="button"
             onClick={() => setBrowseOpen(true)}
-            className="touch-target flex flex-col items-center gap-0.5 py-3 flex-1"
+            className="touch-target flex flex-1 flex-col items-center justify-center gap-0.5"
             aria-label="Browse categories"
             aria-expanded={browseOpen}
             aria-controls="browse-modal"
@@ -145,7 +145,7 @@ export function BottomNav() {
 
           <Link
             href={profileHref}
-            className="touch-target flex flex-col items-center gap-0.5 py-3 flex-1"
+            className="touch-target flex flex-1 flex-col items-center justify-center gap-0.5"
           >
             <div className={`flex h-7 w-7 items-center justify-center ${user && profileActive ? "text-primary-600" : "text-text-secondary"}`}>
               <UserIcon />
