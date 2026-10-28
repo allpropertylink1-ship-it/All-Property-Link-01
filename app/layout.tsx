@@ -3,7 +3,7 @@ import { Open_Sans, Roboto_Slab } from "next/font/google";
 import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { CookieConsent } from "@/components/shared/CookieConsent";
-import { ConditionalFooter } from "@/components/layout/ConditionalFooter";
+import { Footer } from "@/components/layout/Footer";
 import { AuthProvider } from "@/lib/auth-context";
 import { siteUrl } from "@/lib/seo";
 import { getSiteStatus } from "@/lib/services/status";
@@ -33,8 +33,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  interactiveWidget: "resizes-visual",
-  themeColor: "#286255",
+  themeColor: "#1E3A40",
 };
 
 export const metadata: Metadata = {
@@ -59,13 +58,20 @@ export default async function RootLayout({
   const pathname = headers().get("x-pathname") || ""
   const isAuthRoute = pathname.startsWith("/auth")
   const inMaintenance = status?.maintenanceMode === true && status?.preview !== true && !isAuthRoute;
+  const isAppSurface = isAuthRoute || pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
+  const isChromeless =
+    pathname.startsWith("/offline") ||
+    pathname.startsWith("/maintenance") ||
+    pathname.startsWith("/gantt") ||
+    pathname.startsWith("/pwa-splash-demo") ||
+    pathname.startsWith("/uploads");
   return (
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://api.allpropertylink.co.ke" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
-        <meta name="theme-color" content="#286255" />
+        <meta name="theme-color" content="#1E3A40" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="All Property Link" />
@@ -79,7 +85,7 @@ export default async function RootLayout({
           <main className="min-w-0 max-w-full flex-1 overflow-x-clip pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6">{inMaintenance ? <MaintenanceNotice title={status?.maintenanceTitle} message={status?.maintenanceMessage} /> : children}</main>
           <CookieConsent />
           <BottomNav />
-          <ConditionalFooter />
+          {!isChromeless && <Footer variant={isAppSurface ? "legal" : "full"} />}
         </AuthProvider>
         <PWAInstallPrompt />
         <script
@@ -92,15 +98,24 @@ export default async function RootLayout({
               url: siteUrl(),
               logo: `${siteUrl()}/favicon.ico`,
               description: "Find properties, land, short-term stays, fundis, and service providers across Kenya. Verified listings, checked by APL representatives.",
+              email: "info@allpropertylink.com",
+              telephone: "+254743634581",
+              address: {
+                "@type": "PostalAddress",
+                streetAddress: "Embassy House, 4th Floor, Harambee Avenue",
+                addressLocality: "Nairobi",
+                addressCountry: "KE",
+              },
               contactPoint: {
                 "@type": "ContactPoint",
                 contactType: "customer service",
                 email: "info@allpropertylink.com",
+                telephone: "+254743634581",
+                areaServed: "KE",
               },
               sameAs: [
-                "https://facebook.com/allpropertylink",
-                "https://twitter.com/allpropertylink",
-                "https://instagram.com/allpropertylink",
+                "https://www.facebook.com/profile.php?id=61593598572272",
+                "https://www.instagram.com/allproperty.link/",
               ],
             }),
           }}

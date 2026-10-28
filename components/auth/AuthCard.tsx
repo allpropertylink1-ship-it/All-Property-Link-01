@@ -233,11 +233,12 @@ export function AuthCard({ referralCode }: Props) {
     setVerifyRound((r) => r + 1)
   }
 
+  const startOnRegister = !!referralCode || searchParams.get("view") === "register"
   const [view, setView] = useState<"login" | "register">(
-    referralCode ? "register" : "login"
+    startOnRegister ? "register" : "login"
   )
   const [settledView, setSettledView] = useState<"login" | "register">(
-    referralCode ? "register" : "login"
+    startOnRegister ? "register" : "login"
   )
   const sweepTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const loginPaneRef = useRef<HTMLDivElement>(null)
@@ -390,6 +391,7 @@ export function AuthCard({ referralCode }: Props) {
           <div className="mt-0">
             <RegisterForm
               referralCode={referralCode}
+              initialRole={searchParams.get("role") ?? undefined}
               onSwitchToLogin={() => toggleView("login")}
               returnUrl={returnUrl}
             />

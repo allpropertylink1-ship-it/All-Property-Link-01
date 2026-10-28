@@ -26,7 +26,7 @@ export function ProfileButton() {
       <div className="hidden items-center gap-2 md:flex">
         <Link
           href="/auth/login"
-          className="touch-target inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-secondary transition-colors hover:text-primary"
+          className="touch-target inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:text-primary"
         >
           Log in
         </Link>
@@ -50,7 +50,7 @@ export function ProfileButton() {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="touch-target flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-secondary transition-colors hover:bg-surface-secondary hover:text-primary sm:px-3"
+        className="touch-target flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-secondary hover:text-primary sm:px-3"
         aria-label="User menu"
         aria-expanded={open}
         aria-haspopup="true"

@@ -120,7 +120,7 @@ export default function PrivacyPage() {
 
             <section>
               <h2 className="font-heading text-2xl font-semibold text-text-primary">8. Cookies and Tracking Technologies</h2>
-              <p className="mt-2">We use cookies and similar technologies for essential functionality, analytics, and marketing. See our <a href="/cookies" className="text-primary-600 hover:underline">Cookie Policy</a> for details on cookie types, purposes, and how to manage preferences.</p>
+              <p className="mt-2">We use cookies and similar technologies for essential functionality, analytics, and marketing. Manage your preferences at any time via the cookie consent banner and your account settings.</p>
             </section>
 
             <section>

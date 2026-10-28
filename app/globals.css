@@ -81,6 +81,15 @@
     min-width: 44px;
   }
 
+  /* `text-secondary` is a silent typo for `text-text-secondary` — the config
+     key colors.text.secondary generates the doubled utility name. Tailwind
+     emits NOTHING for unmatched classes, so the bare form no-ops with no
+     build error. Aliased here so it can never silently drop to inherited
+     color again. Prefer `text-text-secondary` in new code. */
+  .text-secondary {
+    color: var(--color-muted);
+  }
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;

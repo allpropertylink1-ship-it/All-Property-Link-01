@@ -12,7 +12,9 @@ import { resolvePostAuthTarget } from "@/lib/persona"
 type ContactMethod = "email" | "phone"
 type Step = "form" | "otp"
 
-export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogin, returnUrl }: { referralCode?: string; onSwitchToLogin?: () => void; returnUrl?: string }) {
+const REGISTER_ROLES = ["PROPERTY_OWNER", "AGENT", "SERVICE_PROVIDER", "CUSTOMER"] as const
+
+export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogin, returnUrl, initialRole }: { referralCode?: string; onSwitchToLogin?: () => void; returnUrl?: string; initialRole?: string }) {
   const router = useRouter()
   const { signup, sendOtp, verifyOtp, updateRegistration } = useAuth()
   const [step, setStep] = useState<Step>("form")
@@ -40,7 +42,9 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
   const [phone, setPhone] = useState("")
   const [recoveryEmail, setRecoveryEmail] = useState("")
   const [acceptedTerms, setAcceptedTerms] = useState(false)
-  const [accountType, setAccountType] = useState("")
+  const [accountType, setAccountType] = useState<string>(
+    initialRole && (REGISTER_ROLES as readonly string[]).includes(initialRole) ? initialRole : "",
+  )
 
   useEffect(() => {
     return () => {
