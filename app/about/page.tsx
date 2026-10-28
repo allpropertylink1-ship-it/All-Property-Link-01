@@ -46,7 +46,7 @@ export default function AboutPage() {
     <>
       <div className="min-h-[calc(100dvh-80px)] bg-surface">
         <section className="bg-gradient-to-br from-primary-800 via-primary-700 to-primary-600 px-4 py-20 text-center text-text-on-primary">
-          <h1 className="mx-auto max-w-4xl font-heading text-4xl font-bold leading-tight sm:text-5xl">
+          <h1 className="mx-auto max-w-4xl font-display text-4xl font-bold leading-tight tracking-h1 sm:text-5xl">
             Property, Fundis &amp; Services in Kenya
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-primary-100">
@@ -57,7 +57,7 @@ export default function AboutPage() {
 
         <section className="mx-auto max-w-7xl px-4 py-16">
           <div className="mb-12 text-center">
-            <h2 className="font-heading text-3xl font-bold text-text-primary">One Market, Four Doors</h2>
+            <h2 className="font-display text-3xl font-bold tracking-h2 text-text-primary">One Market, Four Doors</h2>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-text-secondary">
               All Property Link is built for everyone in the property journey &mdash; not just buyers.
             </p>
@@ -132,19 +132,19 @@ export default function AboutPage() {
 
           <div className="mb-16 grid gap-8 lg:grid-cols-4">
             <div className="rounded-lg border border-border bg-surface p-8 text-center">
-              <div className="mb-2 font-heading text-4xl font-bold text-primary-500">237+</div>
+              <div className="mb-2 font-display text-4xl font-bold tracking-h1 tabular-nums text-primary-500">237+</div>
               <div className="text-text-secondary">Properties Listed</div>
             </div>
             <div className="rounded-lg border border-border bg-surface p-8 text-center">
-              <div className="mb-2 font-heading text-4xl font-bold text-primary-500">164</div>
+              <div className="mb-2 font-display text-4xl font-bold tracking-h1 tabular-nums text-primary-500">164</div>
               <div className="text-text-secondary">Fundis &amp; Service Providers</div>
             </div>
             <div className="rounded-lg border border-border bg-surface p-8 text-center">
-              <div className="mb-2 font-heading text-4xl font-bold text-primary-500">45+</div>
+              <div className="mb-2 font-display text-4xl font-bold tracking-h1 tabular-nums text-primary-500">45+</div>
               <div className="text-text-secondary">Towns Covered</div>
             </div>
             <div className="rounded-lg border border-border bg-surface p-8 text-center">
-              <div className="mb-2 font-heading text-4xl font-bold text-primary-500">10</div>
+              <div className="mb-2 font-display text-4xl font-bold tracking-h1 tabular-nums text-primary-500">10</div>
               <div className="text-text-secondary">APL Representatives</div>
             </div>
           </div>

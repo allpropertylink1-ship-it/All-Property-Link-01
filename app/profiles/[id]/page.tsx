@@ -152,7 +152,7 @@ export default async function ProfilePage({ params }: Props) {
                 <p className="mb-2 flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-accent-200 lg:justify-start">
                   {profile.primaryUserType ? TYPE_LABEL[profile.primaryUserType] : "Member"}
                 </p>
-                <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">{name}</h1>
+                <h1 className="font-display text-3xl font-bold tracking-h1 sm:text-4xl">{name}</h1>
                 <p className="mt-2 text-sm text-white/75">
                   {[
                     profile.category,

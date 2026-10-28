@@ -53,7 +53,7 @@ export function LandPageClient({ searchParams }: Props) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <h1 className="mb-2 font-heading text-3xl font-bold text-text-primary">
+      <h1 className="mb-2 font-display text-3xl font-bold tracking-h1 text-text-primary">
         Land & plots for sale in Kenya
       </h1>
       <p className="mb-8 text-text-secondary">

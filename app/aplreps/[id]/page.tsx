@@ -93,7 +93,7 @@ export default async function AgentDetailPage({ params }: Props) {
               )}
             </div>
           </div>
-          <h1 className="mb-2 font-heading text-3xl font-bold tracking-tight sm:text-4xl">{agent.fullName}</h1>
+          <h1 className="mb-2 font-display text-3xl font-bold tracking-h1 sm:text-4xl">{agent.fullName}</h1>
           <p className="text-sm text-white/75">APL Representative · {agent.agentCode}</p>
           {agent.regions.length > 0 && (
             <div className="mt-4 flex flex-wrap justify-center gap-2">

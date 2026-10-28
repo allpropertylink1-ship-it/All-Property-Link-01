@@ -74,7 +74,7 @@ export default async function ServicesPage({ searchParams }: Props) {
                 <span aria-hidden className="text-text-secondary">/</span>
                 <span className="text-text-secondary">Directory Desk</span>
               </p>
-              <h1 className="font-heading text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
+              <h1 className="font-display text-3xl font-bold tracking-h1 text-text-primary sm:text-4xl">
                 Verified Fundis &amp; Trade Specialists
               </h1>
               <p className="mt-2 text-sm leading-relaxed text-text-secondary sm:text-base">

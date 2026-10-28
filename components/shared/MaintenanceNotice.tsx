@@ -24,7 +24,7 @@ export default function MaintenanceNotice({
       <div className="mt-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50 text-primary-600">
         <Wrench size={28} />
       </div>
-      <h1 className="mt-6 mb-2 font-heading text-3xl font-bold text-text-primary">{heading}</h1>
+      <h1 className="mt-6 mb-2 font-display text-3xl font-bold tracking-h1 text-text-primary">{heading}</h1>
       <p className="mb-2 text-text-secondary">{body}</p>
       {showThanks && <p className="mb-8 text-sm text-text-secondary">{THANKS_LINE}</p>}
       {!showThanks && <div className="mb-8" />}

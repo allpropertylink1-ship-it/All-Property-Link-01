@@ -6,7 +6,7 @@ export default function NotFound() {
       <p className="font-heading text-lg font-bold tracking-tight text-primary">
         All Property <span className="text-accent-600">Link</span>
       </p>
-      <h2 className="mt-6 mb-2 font-heading text-3xl font-bold text-text-primary">Page not found</h2>
+      <h2 className="mt-6 mb-2 font-display text-3xl font-bold tracking-h2 text-text-primary">Page not found</h2>
       <p className="mb-8 text-text-secondary">
         The page you&apos;re looking for doesn&apos;t exist or has been moved.
       </p>

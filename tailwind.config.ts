@@ -81,8 +81,15 @@ const config: Config = {
         },
       },
       fontFamily: {
-        heading: ["var(--apl-heading)", "system-ui", "sans-serif"],
-        body: ["var(--apl-body)", "system-ui", "sans-serif"],
+        heading: ["var(--apl-text)", "system-ui", "sans-serif"],
+        body: ["var(--apl-text)", "system-ui", "sans-serif"],
+        display: ["var(--apl-display)", "system-ui", "sans-serif"],
+      },
+      letterSpacing: {
+        display: "-0.03em",
+        h1: "-0.02em",
+        h2: "-0.015em",
+        hero: "0.01em",
       },
       fontSize: {
         xs: ["0.75rem", { lineHeight: "1rem" }],

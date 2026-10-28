@@ -17,18 +17,18 @@ import { AnalyticsProvider } from "@/components/shared/AnalyticsProvider";
 import { FooterTracking } from "@/components/layout/FooterTracking";
 import "./globals.css";
 
-const heading = Noto_Sans_Display({
+const display = Noto_Sans_Display({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
   display: "swap",
-  variable: "--apl-heading",
+  variable: "--apl-display",
 });
 
-const body = Noto_Sans({
+const text = Noto_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
-  variable: "--apl-body",
+  variable: "--apl-text",
 });
 
 export const viewport: Viewport = {
@@ -82,7 +82,7 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-title" content="All Property Link" />
         <link rel="apple-touch-icon" href="/icons/icon-180x180.png" />
       </head>
-      <body className={`${heading.variable} ${body.variable} flex min-h-[100dvh] flex-col antialiased`}>
+      <body className={`${display.variable} ${text.variable} flex min-h-[100dvh] flex-col antialiased`}>
         <OfflineBadge />
         <PWARegister />
         <AnalyticsProvider />

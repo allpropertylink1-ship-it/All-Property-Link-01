@@ -26,7 +26,7 @@ export default async function AdminDashboard() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-heading text-3xl font-bold text-text-primary">Admin Dashboard</h1>
+          <h1 className="font-display text-3xl font-bold tracking-h1 text-text-primary">Admin Dashboard</h1>
           <p className="text-text-secondary">Overview of platform activity</p>
         </div>
       </div>
@@ -37,7 +37,7 @@ export default async function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-text-secondary">{stat.label}</p>
-                <p className="mt-1 font-heading text-3xl font-bold text-text-primary">{stat.value}</p>
+                <p className="mt-1 font-display text-3xl font-bold tracking-h1 tabular-nums text-text-primary">{stat.value}</p>
               </div>
               <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-surface-secondary text-xs font-bold text-text-secondary">{stat.icon}</span>
             </div>

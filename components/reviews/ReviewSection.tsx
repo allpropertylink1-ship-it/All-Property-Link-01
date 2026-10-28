@@ -225,7 +225,7 @@ export function ReviewSection({
       <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
         <div className="grid gap-8 sm:grid-cols-[auto_1fr] sm:gap-10">
           <div className="flex flex-row items-center gap-5 sm:flex-col sm:items-center sm:gap-2">
-            <p className="font-heading text-6xl font-bold leading-none tracking-tight text-text-primary tabular-nums">
+            <p className="font-display text-6xl font-bold leading-none tracking-display text-text-primary tabular-nums">
               {displayAvg !== null ? displayAvg.toFixed(1) : "--"}
             </p>
             <div className="flex flex-col items-start gap-1.5 sm:items-center">

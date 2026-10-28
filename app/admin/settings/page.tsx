@@ -7,7 +7,7 @@ export default async function AdminSettingsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-heading text-3xl font-bold text-text-primary">
+          <h1 className="font-display text-3xl font-bold tracking-h1 text-text-primary">
             Admin Settings
           </h1>
           <p className="text-text-secondary">

@@ -16,7 +16,7 @@
   }
 
   body {
-    font-family: var(--apl-body), system-ui, sans-serif;
+    font-family: var(--apl-text), system-ui, sans-serif;
     font-size: 15px;
     line-height: 1.5;
     color: var(--color-text);
@@ -26,8 +26,8 @@
   }
 
   :root {
-    --apl-heading: "Noto Sans Display", system-ui, sans-serif;
-    --apl-body: "Noto Sans", system-ui, sans-serif;
+    --apl-display: "Noto Sans Display", system-ui, sans-serif;
+    --apl-text: "Noto Sans", system-ui, sans-serif;
 
     --color-bg: #FAFAFA;
     --color-surface: #FFFFFF;
@@ -114,7 +114,7 @@
   }
 
   .section-header__eyebrow {
-    font-family: var(--apl-heading), system-ui, sans-serif;
+    font-family: var(--apl-text), system-ui, sans-serif;
     font-size: 0.625rem;
     font-weight: 600;
     letter-spacing: 0.12em;
@@ -124,7 +124,7 @@
   }
 
   .section-header__title {
-    font-family: var(--apl-heading), system-ui, sans-serif;
+    font-family: var(--apl-text), system-ui, sans-serif;
     font-size: 1.25rem;
     font-weight: 600;
     line-height: 1.2;
