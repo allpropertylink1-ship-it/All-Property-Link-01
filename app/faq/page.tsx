@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FaqSearch } from "@/components/faq/FaqSearch";
 
-export const revalidate = 3600;
+export const revalidate = 60;
 
 export const metadata = {
   title: "Frequently Asked Questions",

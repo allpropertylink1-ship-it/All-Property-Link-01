@@ -217,7 +217,6 @@ export default function TermsPage() {
                   <li>Fees are payable in advance unless otherwise agreed in writing.</li>
                   <li>Fees are settled using the payment method confirmed in writing when the fee is agreed.</li>
                   <li>Failed payments may result in listing suspension until payment is cleared.</li>
-                  <li>Refunds are provided in accordance with our Refund Policy and the Consumer Protection Act 2012.</li>
                 </ul>
 
                 <h3>8.3 Commission Disputes</h3>
