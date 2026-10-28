@@ -279,6 +279,9 @@ export default function BrowsePageClient() {
       else if (rawSort === "popular") { params.set("sort", "viewCount"); params.set("order", "desc"); }
       else if (rawSort) { params.set("sort", rawSort); }
       params.set("limit", "20");
+      // Paid placement: featured listings lead the newest-first default. The
+      // backend ignores this as soon as an explicit sort is in play.
+      if (activeTab === "properties") params.set("featuredFirst", "1");
 
       const endpoint = activeTab === "properties" ? "/api/properties" : "/api/services";
 

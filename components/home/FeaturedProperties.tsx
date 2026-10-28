@@ -51,9 +51,9 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
 
   useEffect(() => {
     if (initialData) return
-    // Source HOUSE directly: unfiltered fetch returns mostly LAND, which this
-    // section filters out (leaving a near-empty grid). 632 HOUSE live.
-    fetch("/api/properties?type=HOUSE&limit=12")
+    // Newest across all types; `isSaleOrRent` drops LAND + short-term below.
+    // 24 rows so the 6 slots still fill after filtering (~72% survive).
+    fetch("/api/properties?limit=24")
       .then((r) => { if (!r.ok) throw new Error(`Status ${r.status}`); return r.json() })
       .then((data: { properties: ApiProperty[] }) => {
         setProperties((data.properties || []).filter(isSaleOrRent).slice(0, 6))

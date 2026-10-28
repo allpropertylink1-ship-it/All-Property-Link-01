@@ -5,6 +5,7 @@ import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders";
 import { getCoverImage } from "@/lib/images";
 import { slugifyCity } from "@/lib/seo";
 import { FavoriteButton } from "@/components/shared/FavoriteButton";
+import { Star } from "@/components/ui/icons";
 
 type PropertyCardVariant = "default" | "compact";
 
@@ -77,7 +78,7 @@ export function PropertyCard({
   images,
   coverImage,
   thumbUrl,
-  isFeatured: _isFeatured,
+  isFeatured,
   listingPurpose,
   urgencyText,
   isVerified = true,
@@ -127,10 +128,21 @@ export function PropertyCard({
     )
   }
 
+  function featuredBadge() {
+    if (!isFeatured) return null
+    return (
+      <span className="inline-flex items-center gap-1 rounded-md bg-accent-500 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+        <Star size={10} />
+        Featured
+      </span>
+    )
+  }
+
   function cardBadges() {
-    if (!hasMultipleUnits && !listingPurpose && !isLand) return null
+    if (!isFeatured && !hasMultipleUnits && !listingPurpose && !isLand) return null
     return (
       <span className="absolute left-1.5 top-1.5 z-10 flex flex-wrap gap-1">
+        {featuredBadge()}
         {multiUnitBadge()}
         {purposeBadge(listingPurpose)}
         {landBadge()}

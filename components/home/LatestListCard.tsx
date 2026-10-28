@@ -12,6 +12,7 @@ import {
   IconChevronRight,
   IconChevronLeft,
   IconHeart,
+  IconStar,
 } from "@tabler/icons-react"
 import { cn, formatPrice, formatFromPrice } from "@/lib/utils"
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders"
@@ -38,6 +39,8 @@ export interface LatestListCardData {
   listerKind?: "OWNER" | "AGENT" | null
   hasMultipleUnits?: boolean
   units?: { price: number | string | null | undefined; listingPurpose?: string | null }[]
+  /** Paid-featured placement (unexpired `featuredUntil`). */
+  isFeatured?: boolean
 }
 
 function purposeLabel(purpose: string | null | undefined): string | null {
@@ -140,6 +143,14 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
         <span className="absolute left-2 top-2 z-10 rounded-full bg-black/60 px-2 py-0.5 font-body text-[12px] font-medium text-white">
           {safeActive + 1} / {slides.length}
         </span>
+        {/* Featured placement — top-right is free (counter sits top-left, arrows
+            are vertically centred). Only ever rendered for an unexpired window. */}
+        {item.isFeatured && (
+          <span className="absolute right-2 top-2 z-10 inline-flex items-center gap-1 rounded-full bg-accent-500 px-2 py-0.5 font-body text-[11px] font-bold uppercase leading-4 tracking-[0.08em] text-white shadow-sm">
+            <IconStar size={11} stroke={2} fill="currentColor" aria-hidden="true" />
+            Featured
+          </span>
+        )}
         {/* Prev / Next arrows */}
         {slides.length > 1 && (
           <>

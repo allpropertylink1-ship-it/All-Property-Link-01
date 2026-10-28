@@ -37,6 +37,7 @@ export function LandPageClient({ searchParams }: Props) {
     if (maxPrice) params.set("maxPrice", maxPrice)
     if (page) params.set("page", page)
     params.set("limit", "20")
+    params.set("featuredFirst", "1")
 
     Promise.all([
       fetch(`/api/properties?${params}`).then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json() }),

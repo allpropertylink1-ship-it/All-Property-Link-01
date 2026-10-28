@@ -21,6 +21,43 @@ function withPhone(p: PropertyCardType): LatestListCardData {
   return { ...p, agentPhone: agent?.phone ?? null, listerKind }
 }
 
+/**
+ * Paid-featured placement. Fed by `?featured=1`, which the API already bounds
+ * on an unexpired `featuredUntil`, so this is a pure render — no client
+ * fallback fetch. Renders nothing when the platform has no live placement
+ * (the flag is admin-set, so that is the normal state at launch).
+ */
+function FeaturedStrip({ initialData }: { initialData?: PropertyCardType[] }) {
+  const properties = (initialData || []).filter((p) => p.isFeatured).slice(0, 6)
+  if (properties.length === 0) return null
+  return (
+    <section aria-labelledby="home-featured-heading" className="bg-surface">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        <SectionHeading
+          id="home-featured-heading"
+          eyebrow="Promoted"
+          title="Featured Listings"
+          subtitle="Premium placements selected by the All Property Link team"
+        />
+        {/* Mobile + tablet rail: one full card per viewport snap */}
+        <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:hidden">
+          {properties.map((p, i) => (
+            <div key={p.slug} className="w-full shrink-0 snap-start snap-always sm:w-[calc(50%-8px)]">
+              <LatestListCard item={withPhone(p)} priority={i === 0} />
+            </div>
+          ))}
+        </div>
+        {/* Desktop: 2 columns x 3 rows */}
+        <div className="mt-4 hidden gap-4 lg:grid lg:grid-cols-2">
+          {properties.map((p, i) => (
+            <LatestListCard key={p.slug} item={withPhone(p)} priority={i === 0} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
   const properties = (initialData || []).slice(0, 6)
   if (properties.length === 0) return null
@@ -62,7 +99,8 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
 }
 
 export function HomePageClient({
-  saleRent,
+  featured,
+  latest,
   airbnbs,
   land,
   fundis,
@@ -71,7 +109,8 @@ export function HomePageClient({
   providerCount,
   propertyCount,
 }: {
-  saleRent: PropertyCardType[];
+  featured: PropertyCardType[];
+  latest: PropertyCardType[];
   airbnbs: PropertyCardType[];
   land: PropertyCardType[];
   fundis: ProfileRow[];
@@ -83,7 +122,8 @@ export function HomePageClient({
   return (
     <>
       <HeroSection />
-      <FeaturedProperties initialData={saleRent} />
+      <FeaturedStrip initialData={featured} />
+      <FeaturedProperties initialData={latest} />
       <FeaturedAirbnbs initialData={airbnbs} />
       <FeaturedLand initialData={land} />
       <FeaturedProviders initialData={providers} />

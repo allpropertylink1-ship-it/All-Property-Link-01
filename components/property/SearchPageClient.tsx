@@ -92,6 +92,7 @@ export default function SearchPageClient({
       params.set("order", api.order);
       params.set("page", String(currentPage));
       params.set("limit", "20");
+      params.set("featuredFirst", "1");
       fetches.push(
         fetch(`/api/properties?${params.toString()}`)
           .then((r) => {

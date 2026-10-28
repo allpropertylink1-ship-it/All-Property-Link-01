@@ -15,6 +15,10 @@ export interface PropertyFilters {
   agentId?: string;
   unitType?: string;
   hasMultipleUnits?: boolean;
+  /** Only listings with an unexpired paid-featured window. */
+  featured?: boolean;
+  /** Featured listings first, then the normal ordering (browse/search ranking). */
+  featuredFirst?: boolean;
 }
 
 export interface PropertyUnit {
@@ -96,6 +100,8 @@ export const getProperties = cache(async (filters: PropertyFilters = {}): Promis
   if (filters.agentId) params.set("agentId", filters.agentId);
   if (filters.unitType) params.set("unitType", filters.unitType);
   if (filters.hasMultipleUnits !== undefined) params.set("hasMultipleUnits", filters.hasMultipleUnits ? "1" : "0");
+  if (filters.featured) params.set("featured", "1");
+  if (filters.featuredFirst) params.set("featuredFirst", "1");
   params.set("limit", String(filters.pageSize || 20));
 
   const data = await fetchApi<{ properties: PropertyCard[]; total: number; page: number; pageSize: number; totalPages: number; cities?: { city: string; count: number }[] }>(`/api/properties?${params}`);

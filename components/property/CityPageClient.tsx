@@ -115,6 +115,7 @@ export default function CityPageClient({
     params.set("sort", api.sort);
     params.set("order", api.order);
     params.set("limit", "20");
+    params.set("featuredFirst", "1");
 
     fetchCityCounts()
       .then(async (cityCounts) => {

@@ -97,6 +97,7 @@ export function PropertiesPageClient({ searchParams, basePath = "/properties" }:
     params.set("sort", api.sort)
     params.set("order", api.order)
     params.set("limit", "20")
+    params.set("featuredFirst", "1")
 
     setData(null)
     setError(null)

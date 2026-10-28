@@ -19,12 +19,20 @@ function toProfileRows(services: ServiceListingCard[]): ProfileRow[] {
 export default async function HomePage() {
   // Server-side fetches cached by ISR (revalidate: 60) — embedded in HTML so
   // the browser renders cards immediately instead of a client-side waterfall.
-  const [saleRent, airbnbs, land, fundis, providers] = await Promise.all([
-    // NOTE: unfiltered fetch returns mostly LAND (seed-heavy), which this
-    // section filters out — so source HOUSE directly (632 live) to fill 2 rows.
-    getProperties({ propertyType: "HOUSE", pageSize: 12 }),
+  const [latest, airbnbs, land, featured, fundis, providers] = await Promise.all([
+    // Newest across ALL property types. The shelf's own `isSaleOrRent` filter
+    // drops LAND (~12% of stock) and short-term stays, so roughly 72% of a page
+    // survives — 24 rows reliably fills the 6 slots. This used to be narrowed to
+    // type=HOUSE on the theory that an unfiltered fetch "returns mostly LAND",
+    // which is no longer true: apartments are now the largest category on the
+    // platform (679 apartments vs 642 houses), so narrowing to HOUSE hid the
+    // majority of everything users were newly listing.
+    getProperties({ pageSize: 24 }),
     getProperties({ purpose: "FOR_RENT_SHORT_TERM", pageSize: 8 }),
     getProperties({ propertyType: "LAND", pageSize: 8 }),
+    // Paid placement. `?featured=1` is already bounded on an unexpired
+    // featuredUntil server-side, so no client-side decay check is needed here.
+    getProperties({ featured: true, pageSize: 6 }),
     getServiceListings({ type: "FUNDI", limit: "6" }),
     getServiceListings({ type: "SERVICE_PROVIDER", limit: "6" }),
   ])
@@ -37,14 +45,19 @@ export default async function HomePage() {
 
   return (
     <HomePageClient
-      saleRent={saleRent.properties}
+      featured={featured.properties}
+      latest={latest.properties}
       airbnbs={airbnbs.properties}
       land={land.properties}
       fundis={fundiRows}
       providers={providerRows}
       fundiCount={fundis.total}
       providerCount={providers.total}
-      propertyCount={saleRent.total + airbnbs.total + land.total}
+      // `latest` is the unfiltered query, so its total IS the platform-wide
+      // published count. Summing the shelf totals (the old
+      // saleRent + airbnbs + land) double-counted every LAND and short-term
+      // listing, which each appear in `latest` *and* in their own shelf.
+      propertyCount={latest.total}
     />
   )
 }
