@@ -1,8 +1,9 @@
 /**
  * SectionHeading — homepage section titles that echo the hero treatment.
  *
- * Hero language (HeroSection.tsx): Roboto Slab, UPPERCASE, semibold weight,
- * eyebrow line + large title + gradient scrim accent. This component
+ * Hero language (HeroSection.tsx): heading font (`--apl-heading`), UPPERCASE,
+ * semibold weight, eyebrow line + large title + gradient scrim accent.
+ * This component
  * translates that to light surfaces: accent eyebrow with hero-dot bar,
  * large light uppercase title in primary ink, optional subtitle.
  * Keeps the aria-labelledby contract: pass the same id the section
