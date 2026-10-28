@@ -41,6 +41,8 @@ interface PropertyDetailAgent {
   avatar: string | null; businessLogo: string | null; companyName: string | null;
   category: string | null; specialties: string[]; website: string | null;
   userTypes: string[] | null; primaryUserType: string | null;
+  listingCount?: number | null;
+  totalViews?: number | null;
 }
 
 export interface PropertyDetail {

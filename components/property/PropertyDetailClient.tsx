@@ -26,6 +26,7 @@ import {
   Home,
   Key,
   Camera,
+  Eye,
   Globe,
   Sparkles,
 } from "@/components/ui/icons";
@@ -58,6 +59,8 @@ interface AgentInfo {
   companyName?: string | null;
   category?: string | null;
   specialties?: string[];
+  listingCount?: number | null;
+  totalViews?: number | null;
   phone?: string | null;
   email?: string | null;
   website?: string | null;
@@ -157,6 +160,17 @@ function whatsappDigits(phone?: string | null): string {
   let digits = phone.replace(/\D/g, "");
   if (digits.startsWith("0")) digits = `254${digits.slice(1)}`;
   return digits.length >= 12 ? digits : "";
+}
+
+/** Listing counts / view totals stay compact once they pass 1k ("12.4k", "1.2M"). */
+function formatCompactCount(n: number): string {
+  if (n >= 1_000_000) {
+    return `${(n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1)}M`;
+  }
+  if (n >= 1_000) {
+    return `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}k`;
+  }
+  return new Intl.NumberFormat("en-KE").format(n);
 }
 
 export default function PropertyDetailClient({ slug, initial, sellerReviews }: { slug: string; initial?: PropertyData; sellerReviews?: SellerReviewsData }) {
@@ -529,6 +543,32 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                   )}
                 </div>
               </div>
+              {property.agent.listingCount != null && property.agent.totalViews != null && (
+                <div className="mb-3 grid grid-cols-2 gap-2">
+                  <div className="flex items-center gap-2.5 rounded-lg border border-border bg-surface-secondary/60 px-2.5 py-2">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-50">
+                      <Building2 size={16} className="text-primary-600" aria-hidden />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-heading text-sm font-bold leading-tight tabular-nums text-text-primary">
+                        {formatCompactCount(property.agent.listingCount)}
+                      </p>
+                      <p className="text-[10px] leading-tight text-text-secondary">Listings</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5 rounded-lg border border-border bg-surface-secondary/60 px-2.5 py-2">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-50">
+                      <Eye size={16} className="text-primary-600" aria-hidden />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-heading text-sm font-bold leading-tight tabular-nums text-text-primary">
+                        {formatCompactCount(property.agent.totalViews)}
+                      </p>
+                      <p className="text-[10px] leading-tight text-text-secondary">Total views</p>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="space-y-2">
                 {property.agent.phone && (
                   <a
@@ -653,6 +693,34 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                       height={40}
                       className="h-10 w-auto max-w-[110px] rounded border border-border bg-surface-secondary object-contain"
                     />
+                  </div>
+                )}
+
+                {/* Seller activity: live listings + combined views across all their listings */}
+                {property.agent.listingCount != null && property.agent.totalViews != null && (
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <div className="flex items-center gap-2.5 rounded-lg border border-border bg-surface-secondary/60 px-3 py-2.5">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-50">
+                        <Building2 size={18} className="text-primary-600" aria-hidden />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-heading text-base font-bold leading-tight tabular-nums text-text-primary">
+                          {formatCompactCount(property.agent.listingCount)}
+                        </p>
+                        <p className="text-[11px] leading-tight text-text-secondary">Listings</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5 rounded-lg border border-border bg-surface-secondary/60 px-3 py-2.5">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-50">
+                        <Eye size={18} className="text-primary-600" aria-hidden />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-heading text-base font-bold leading-tight tabular-nums text-text-primary">
+                          {formatCompactCount(property.agent.totalViews)}
+                        </p>
+                        <p className="text-[11px] leading-tight text-text-secondary">Total views</p>
+                      </div>
+                    </div>
                   </div>
                 )}
 
