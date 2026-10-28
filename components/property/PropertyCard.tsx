@@ -4,6 +4,7 @@ import { formatPrice, formatFromPrice, unitBedRange } from "@/lib/utils";
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders";
 import { getCoverImage } from "@/lib/images";
 import { slugifyCity } from "@/lib/seo";
+import { FavoriteButton } from "@/components/shared/FavoriteButton";
 
 type PropertyCardVariant = "default" | "compact";
 
@@ -179,7 +180,10 @@ export function PropertyCard({
           )}
         </div>
         <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
-          <h3 className="line-clamp-1 font-heading text-sm font-semibold text-text-primary">{title}</h3>
+          <div className="flex items-start justify-between gap-1.5">
+            <h3 className="line-clamp-1 font-heading text-sm font-semibold text-text-primary">{title}</h3>
+            <FavoriteButton type="PROPERTY" refId={slug} label={title} variant="plain" size={17} className="-mr-1 -mt-0.5 shrink-0" />
+          </div>
           <div className="flex items-center gap-1 text-xs text-text-secondary">
             <MapPinIcon className="h-3 w-3 shrink-0" />
             <span className="truncate">{region}, {city}</span>
@@ -276,9 +280,12 @@ export function PropertyCard({
             {formatPrice(price, listingPurpose ?? undefined)}
           </p>
         ) : null}
-        <h3 className="line-clamp-2 min-w-0 break-words font-heading text-sm font-semibold leading-snug text-text-primary transition-colors group-hover:text-accent-600 sm:text-[15px]">
-          {title}
-        </h3>
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="line-clamp-2 min-w-0 flex-1 break-words font-heading text-sm font-semibold leading-snug text-text-primary transition-colors group-hover:text-accent-600 sm:text-[15px]">
+            {title}
+          </h3>
+          <FavoriteButton type="PROPERTY" refId={slug} label={title} variant="plain" className="-mr-1 -mt-0.5 shrink-0" />
+        </div>
         <div className="grid grid-cols-3 gap-1 rounded-lg bg-surface-secondary py-1 text-center text-xs text-text-secondary">
           {bedRange ? (
             <div>

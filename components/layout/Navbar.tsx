@@ -5,7 +5,10 @@ import Link from "next/link"
 import Image from "next/image"
 import { useAuth } from "@/lib/auth-context"
 import { usePathname } from "next/navigation"
+import { IconBell, IconHeart } from "@tabler/icons-react"
 import { Briefcase, Menu, X } from "@/components/ui/icons"
+import { api } from "@/lib/api-client"
+import { useFavorites } from "@/lib/favorites-context"
 import dynamic from "next/dynamic"
 
 const ClientProfileButton = dynamic(() => import("./ProfileButton").then(mod => mod.ProfileButton), { ssr: false })
@@ -23,17 +26,32 @@ const navLinks = [
 
 export function Navbar() {
   const { user } = useAuth()
+  const { counts } = useFavorites()
   const pathname = usePathname()
   const isActive = (href: string) => !href.includes("?") && pathname === href
   const isHome = pathname === "/"
   const isAgent = user?.authMethod === "agent"
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [unread, setUnread] = useState(0)
+  const favCount = counts.PROPERTY + counts.SERVICE + counts.AGENT
   // Transparent overlay at the very top of the homepage; solid white once scrolled.
   const [scrolled, setScrolled] = useState(false)
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : ""
     return () => { document.body.style.overflow = "" }
   }, [mobileOpen])
+
+  useEffect(() => {
+    if (user?.authMethod !== "user") {
+      setUnread(0)
+      return
+    }
+    let active = true
+    api.get<{ unreadNotifications: number }>("/api/user/badges").then(({ data }) => {
+      if (active) setUnread(data?.unreadNotifications ?? 0)
+    })
+    return () => { active = false }
+  }, [user])
 
   useEffect(() => {
     if (!isHome) {
@@ -112,6 +130,36 @@ export function Navbar() {
           </div>
 
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+            <Link
+              href="/favorites"
+              aria-label={`Saved listings${favCount > 0 ? ` (${favCount})` : ""}`}
+              className={`relative inline-flex h-11 w-11 items-center justify-center rounded-lg transition-colors ${
+                overlay ? "text-white hover:bg-white/10" : "text-text-secondary hover:bg-surface-secondary hover:text-text-primary"
+              }`}
+            >
+              <IconHeart size={21} stroke={1.5} aria-hidden="true" />
+              {favCount > 0 && (
+                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold text-white">
+                  {favCount > 99 ? "99+" : favCount}
+                </span>
+              )}
+            </Link>
+            {user?.authMethod === "user" && (
+              <Link
+                href="/dashboard/notifications"
+                aria-label={`Notifications${unread > 0 ? ` (${unread} unread)` : ""}`}
+                className={`relative inline-flex h-11 w-11 items-center justify-center rounded-lg transition-colors ${
+                  overlay ? "text-white hover:bg-white/10" : "text-text-secondary hover:bg-surface-secondary hover:text-text-primary"
+                }`}
+              >
+                <IconBell size={21} stroke={1.5} aria-hidden="true" />
+                {unread > 0 && (
+                  <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold text-white">
+                    {unread > 99 ? "99+" : unread}
+                  </span>
+                )}
+              </Link>
+            )}
             {user ? (
               <ClientProfileButton />
             ) : (
@@ -188,6 +236,24 @@ export function Navbar() {
                   className="mt-2 flex items-center justify-center gap-2 rounded bg-primary px-3 py-3 font-body text-[15px] font-bold text-white shadow-sm"
                 >
                   Log in / Join APL
+                </Link>
+              )}
+              <Link
+                href="/favorites"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-semibold text-foreground transition-colors hover:bg-surface-secondary"
+              >
+                <IconHeart size={18} stroke={1.5} />
+                Saved listings{favCount > 0 ? ` (${favCount})` : ""}
+              </Link>
+              {user?.authMethod === "user" && (
+                <Link
+                  href="/dashboard/notifications"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-semibold text-foreground transition-colors hover:bg-surface-secondary"
+                >
+                  <IconBell size={18} stroke={1.5} />
+                  Notifications{unread > 0 ? ` (${unread})` : ""}
                 </Link>
               )}
             </nav>

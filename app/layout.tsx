@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { CookieConsent } from "@/components/shared/CookieConsent";
 import { Footer } from "@/components/layout/Footer";
 import { AuthProvider } from "@/lib/auth-context";
+import { FavoritesProvider } from "@/lib/favorites-context";
 import { siteUrl } from "@/lib/seo";
 import { getSiteStatus } from "@/lib/services/status";
 import MaintenanceNotice from "@/components/shared/MaintenanceNotice";
@@ -81,11 +82,13 @@ export default async function RootLayout({
         <OfflineBadge />
         <PWARegister />
         <AuthProvider>
-          <Navbar />
-          <main className="min-w-0 max-w-full flex-1 overflow-x-clip pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6">{inMaintenance ? <MaintenanceNotice title={status?.maintenanceTitle} message={status?.maintenanceMessage} /> : children}</main>
-          <CookieConsent />
-          <BottomNav />
-          {!isChromeless && <Footer variant={isAppSurface ? "legal" : "full"} />}
+          <FavoritesProvider>
+            <Navbar />
+            <main className="min-w-0 max-w-full flex-1 overflow-x-clip pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6">{inMaintenance ? <MaintenanceNotice title={status?.maintenanceTitle} message={status?.maintenanceMessage} /> : children}</main>
+            <CookieConsent />
+            <BottomNav />
+            {!isChromeless && <Footer variant={isAppSurface ? "legal" : "full"} />}
+          </FavoritesProvider>
         </AuthProvider>
         <PWAInstallPrompt />
         <script

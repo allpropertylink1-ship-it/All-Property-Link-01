@@ -31,13 +31,13 @@ export default function PrivacyPage() {
                 <li>Name, email address, phone number, and WhatsApp number</li>
                 <li>Account credentials (encrypted password)</li>
                 <li>Profile information (profile photo, bio, location preferences)</li>
-                <li>Property preferences and saved searches</li>
+                <li>Property preferences, saved searches, and saved listings (favorites)</li>
                 <li>Communications with agents</li>
               </ul>
               <h3 className="mt-3 font-heading text-lg font-semibold text-text-primary">Property Listing Data</h3>
               <ul className="mt-2 space-y-1 list-disc list-inside">
                 <li>Property details (type, location, price, features, descriptions)</li>
-                <li>Property images and media uploaded via Cloudinary</li>
+                <li>Property images and media stored on our secure servers</li>
                 <li>Location data (county, city, neighborhood, coordinates for Google Maps)</li>
               </ul>
               <h3 className="mt-3 font-heading text-lg font-semibold text-text-primary">Automatically Collected Data</h3>
@@ -54,10 +54,11 @@ export default function PrivacyPage() {
               <ul className="mt-2 space-y-1.5 list-disc list-inside">
                 <li>Provide, maintain, and improve our property listings platform</li>
                 <li>Process property listings and agent communications</li>
-                <li>Send transactional emails via Resend (inquiries, confirmations, notifications)</li>
+                <li>Send transactional emails via Brevo (inquiries, confirmations, notifications)</li>
                 <li>Enable WhatsApp Business API communication for property listings</li>
+                <li>Send WhatsApp alert messages (price drops, new matching listings) only when you opt in and have a verified phone number</li>
                 <li>Display property locations on Google Maps</li>
-                <li>Store and optimize property images via Cloudinary</li>
+                <li>Store and optimize property images on our secure servers</li>
                 <li>Personalize user experience and property recommendations</li>
                 <li>Send marketing communications (with consent, opt-out available)</li>
                 <li>Comply with legal obligations under Kenya Data Protection Act, 2019</li>
@@ -70,10 +71,11 @@ export default function PrivacyPage() {
               <p className="mt-2">We use the following third-party service providers who process data on our behalf:</p>
               <ul className="mt-2 space-y-2 list-disc list-inside">
                 <li><strong className="text-text-primary">Cloudinary</strong> — Image/video management, optimization, and delivery for property media</li>
-                <li><strong className="text-text-primary">Resend</strong> — Transactional email delivery (contact notifications, account emails, password resets)</li>
+                <li><strong className="text-text-primary">Brevo</strong> — Transactional email delivery (contact notifications, account emails, password resets)</li>
                 <li><strong className="text-text-primary">Google Maps Platform</strong> — Maps, geocoding, and places API for property location display and search</li>
                 <li><strong className="text-text-primary">WhatsApp Business API (Meta)</strong> — Direct agent communication via WhatsApp</li>
-                <li><strong className="text-text-primary">Supabase (PostgreSQL, Auth, Storage)</strong> — Database, authentication, and file storage backend</li>
+                <li><strong className="text-text-primary">MobileSasa</strong> — SMS delivery for OTP codes and alert notifications</li>
+                <li><strong className="text-text-primary">cPanel PostgreSQL</strong> — Database backend</li>
                 <li><strong className="text-text-primary">Vercel</strong> — Hosting and edge network</li>
               </ul>
               <p className="mt-2">Each provider processes data per their privacy policies and data processing agreements. We ensure appropriate DPAs are in place.</p>

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Phone, Mail, MapPin, ArrowRight } from "@/components/ui/icons";
+import { FavoriteButton } from "@/components/shared/FavoriteButton";
 import { AgentListingsGrid } from "@/app/aplreps/AgentListingsGrid";
 import { getAgentById, getAgentListings } from "@/lib/services/agent";
 import { siteUrl } from "@/lib/seo";
@@ -151,6 +152,7 @@ export default async function AgentDetailPage({ params }: Props) {
                   <Mail size={15} /> Email
                 </a>
               )}
+              <FavoriteButton type="AGENT" refId={agent.id} label={agent.fullName} variant="circle" />
             </div>
           </div>
 

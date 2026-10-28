@@ -50,7 +50,7 @@ const faqCategories: FAQCategory[] = [
       },
       {
         question: "Can I save searches and get alerts for new listings?",
-        answer: "Yes! After creating an account, save any search to get email or WhatsApp alerts when new matching properties are listed. Manage alerts from your dashboard.",
+        answer: "Yes! After creating an account, save any search to get email, SMS, or WhatsApp alerts when new matching properties are listed. You can also save individual properties, services, and representatives with the heart icon. Manage all alerts from your dashboard.",
       },
       {
         question: "How do I contact a property agent?",
@@ -100,7 +100,7 @@ const faqCategories: FAQCategory[] = [
       },
       {
         question: "How do I update my profile or notification preferences?",
-        answer: "Go to your dashboard and click 'Profile' to update personal details, or 'Notifications' to manage email, SMS, and WhatsApp preferences for alerts.",
+        answer: "Go to your dashboard and click 'Profile' to update personal details, or 'Saved Searches' to manage the searches you're alerted about and choose email, SMS, or WhatsApp channels for each one.",
       },
       {
         question: "What payment methods are accepted for featured listings?",

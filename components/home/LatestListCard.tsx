@@ -17,6 +17,7 @@ import { cn, formatPrice, formatFromPrice } from "@/lib/utils"
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders"
 import { getCoverImage, getGalleryImages, optimizeImageUrl } from "@/lib/images"
 import { slugifyCity } from "@/lib/seo"
+import { useFavorites } from "@/lib/favorites-context"
 
 export interface LatestListCardData {
   slug: string
@@ -46,19 +47,6 @@ function purposeLabel(purpose: string | null | undefined): string | null {
   return "Sale"
 }
 
-const FAV_KEY = "apl-favs"
-
-function readFavSlugs(): Set<string> {
-  try {
-    const raw = localStorage.getItem(FAV_KEY)
-    if (!raw) return new Set()
-    const parsed: unknown = JSON.parse(raw)
-    return new Set(Array.isArray(parsed) ? parsed.filter((s): s is string => typeof s === "string") : [])
-  } catch {
-    return new Set()
-  }
-}
-
 /**
  * PurpleRoof-geometry list card: horizontal (image left + details right) on
  * desktop, vertical (image top) on mobile rails. Cover photo first, arrows +
@@ -69,8 +57,10 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
   const cover = getCoverImage({ coverImage: item.coverImage, images: item.images })
   const slides = (gallery.length > 0 ? gallery : cover ? [cover] : [PLACEHOLDER_PROPERTY]).slice(0, 5)
   const [active, setActive] = useState(0)
-  const [fav, setFav] = useState(false)
   const touchStartX = useRef<number | null>(null)
+
+  const { isSaved, toggle } = useFavorites()
+  const fav = isSaved("PROPERTY", item.slug)
 
   const propertyKind = (item.propertyType || "").toUpperCase()
   const isLand = propertyKind === "LAND"
@@ -95,22 +85,11 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
   const phone = item.agentPhone?.trim() ? item.agentPhone.trim() : null
 
   useEffect(() => {
-    setFav(readFavSlugs().has(item.slug))
+    setActive(0)
   }, [item.slug])
 
   function toggleFav() {
-    setFav((prev) => {
-      const next = !prev
-      try {
-        const slugs = readFavSlugs()
-        if (next) slugs.add(item.slug)
-        else slugs.delete(item.slug)
-        localStorage.setItem(FAV_KEY, JSON.stringify(Array.from(slugs)))
-      } catch {
-        // Storage unavailable (private mode) — keep in-memory state only.
-      }
-      return next
-    })
+    void toggle("PROPERTY", item.slug)
   }
 
   function goNext() {

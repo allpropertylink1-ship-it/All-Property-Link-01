@@ -8,6 +8,7 @@ import { resolveImageUrl } from "@/lib/images"
 import { isHiddenRep } from "@/lib/reps"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { Loader2, Phone, Mail, CitiesCovered, ExternalLink, Search, Shield } from "@/components/ui/icons"
+import { FavoriteButton } from "@/components/shared/FavoriteButton"
 
 interface Agent {
   id: string
@@ -130,7 +131,8 @@ export function AgentsDirectory() {
           {filtered.map((agent) => {
             const cities = agent.specificArea ? [...agent.regions, agent.specificArea] : agent.regions
             return (
-              <div key={agent.id} role="listitem" className="flex min-w-0 flex-col rounded-3xl border-2 border-accent-500/60 bg-surface p-5 sm:p-6">
+              <div key={agent.id} role="listitem" className="relative flex min-w-0 flex-col rounded-3xl border-2 border-accent-500/60 bg-surface p-5 sm:p-6">
+                <FavoriteButton type="AGENT" refId={agent.id} label={agent.fullName} variant="circle" className="absolute right-4 top-4" />
                 {/* ===== Mobile layout ===== */}
                 <div className="lg:hidden">
                   <AgentPhoto agent={agent} sizeClass="mx-auto h-[130px] w-[130px]" />

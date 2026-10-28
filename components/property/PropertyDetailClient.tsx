@@ -8,6 +8,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
+import { FavoriteButton } from "@/components/shared/FavoriteButton";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import {
   Building2,
@@ -301,9 +302,12 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
               </span>
             )}
           </div>
-          <h1 className="break-words font-heading text-2xl font-bold leading-tight text-text-primary [overflow-wrap:anywhere] sm:text-3xl">
-            {property.title}
-          </h1>
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="min-w-0 flex-1 break-words font-heading text-2xl font-bold leading-tight text-text-primary [overflow-wrap:anywhere] sm:text-3xl">
+              {property.title}
+            </h1>
+            <FavoriteButton type="PROPERTY" refId={property.slug} label={property.title} variant="circle" className="mt-1 shrink-0" />
+          </div>
           <p className="flex items-center gap-1.5 text-sm text-text-secondary">
             <MapPin size={16} className="shrink-0 text-primary-500" aria-hidden />
             <span>{locationLine}</span>

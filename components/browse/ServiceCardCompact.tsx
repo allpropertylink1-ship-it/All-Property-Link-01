@@ -5,6 +5,7 @@ import { resolveImageUrl } from "@/lib/images";
 import { PLACEHOLDER_SERVICE } from "@/lib/placeholders";
 import { fmtKES } from "@/lib/utils";
 import { BadgeCheck, MessageCircle, Phone, Star } from "@/components/ui/icons";
+import { FavoriteButton } from "@/components/shared/FavoriteButton";
 
 interface ServiceCardCompactProps {
   id: string;
@@ -148,6 +149,7 @@ export function ServiceCardCompact({
                 )}
               </span>
             )}
+            <FavoriteButton type="SERVICE" refId={id} label={title} variant="circle" size={17} className="h-8 w-8" />
           </div>
           <p className="mt-0.5 line-clamp-1 text-sm text-text-secondary">{providerName}</p>
           <p className="mt-1 text-sm text-text-secondary">

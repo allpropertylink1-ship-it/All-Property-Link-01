@@ -25,6 +25,7 @@ const browseLinks = [
   { href: "/land", label: "Plots & Land" },
   { href: "/services?type=FUNDI", label: "Fundis" },
   { href: "/services?type=SERVICE_PROVIDER", label: "Services" },
+  { href: "/favorites", label: "Saved listings" },
 ];
 
 const partnerLinks = [

@@ -5,6 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { useFavorites } from "@/lib/favorites-context";
+import { IconHeart } from "@tabler/icons-react";
 
 const GOLD = "#E27A23";
 
@@ -89,9 +91,12 @@ const UserIcon = () => (
 export function BottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const { counts } = useFavorites();
+  const favCount = counts.PROPERTY + counts.SERVICE + counts.AGENT;
   const [browseOpen, setBrowseOpen] = useState(false);
 
   const homeActive = pathname === "/";
+  const favActive = pathname === "/favorites";
   // Profile tab stays distinct from Home: reps → agent console, customers →
   // notifications inbox (their hub), businesses → dashboard. (Login landing
   // for customers is still "/" per personaHomeTarget.)
@@ -142,6 +147,25 @@ export function BottomNav() {
               Browse
             </span>
           </button>
+
+          <Link
+            href="/favorites"
+            className="touch-target flex flex-1 flex-col items-center justify-center gap-0.5"
+            aria-label={`Saved listings${favCount > 0 ? ` (${favCount})` : ""}`}
+            aria-current={favActive ? "page" : undefined}
+          >
+            <div className={`relative flex h-7 w-7 items-center justify-center ${favActive ? "text-primary-600" : "text-text-secondary"}`}>
+              <IconHeart size={24} stroke={1.5} />
+              {favCount > 0 && (
+                <span className="absolute -right-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[9px] font-bold text-white">
+                  {favCount > 99 ? "99+" : favCount}
+                </span>
+              )}
+            </div>
+            <span className={`text-[10px] font-medium ${favActive ? "text-primary-600" : "text-text-secondary"}`}>
+              Saved
+            </span>
+          </Link>
 
           <Link
             href={profileHref}
