@@ -129,7 +129,7 @@ function ServiceCardGrid({ item }: { item: BrowseService }) {
           onError={(e) => { (e.target as HTMLImageElement).src = fallback }}
         />
         {item.category && (
-          <span className="absolute left-2 top-2 z-10 rounded-md bg-primary-500 px-2.5 py-1 text-xs font-semibold text-white">
+          <span className="absolute left-2 top-2 z-10 max-w-[calc(100%-16px)] truncate rounded-md bg-primary-500 px-2.5 py-1 text-xs font-semibold text-white">
             {item.category.name}
           </span>
         )}

@@ -111,7 +111,7 @@ export function ProfileCard({
     <Link
       href={`/services/${item.id}`}
       aria-label={`View ${displayName}${tradeLabel ? ` — ${tradeLabel}` : ""}`}
-      className="group flex flex-1 flex-col items-center rounded-lg border border-border bg-surface px-4 py-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:px-5"
+      className="group flex flex-1 flex-col items-center overflow-hidden rounded-lg border border-border bg-surface px-4 py-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:px-5"
     >
       {/* Photo */}
       <div className="relative mb-3">
@@ -144,14 +144,14 @@ export function ProfileCard({
 
       {/* Trade pill (providers only — fundi cards omit it entirely) */}
       {tradeLabel && (
-        <span className="mb-1.5 inline-flex items-center gap-1 rounded-full bg-primary/5 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-primary">
+        <span className="mb-1.5 inline-flex min-w-0 max-w-full items-center gap-1 rounded-full bg-primary/5 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-primary">
           <Icon size={12} className="shrink-0" aria-hidden="true" />
-          <span className="max-w-[140px] truncate">{tradeLabel}</span>
+          <span className="min-w-0 truncate" title={tradeLabel}>{tradeLabel}</span>
         </span>
       )}
 
       {/* Name */}
-      <h3 className="font-heading text-sm font-bold leading-tight text-text-primary transition-colors group-hover:text-accent-600 sm:text-base">
+      <h3 className="min-w-0 break-words font-heading text-sm font-bold leading-tight text-text-primary transition-colors group-hover:text-accent-600 sm:text-base">
         {displayName}
       </h3>
 
@@ -170,9 +170,7 @@ export function ProfileCard({
 
       {/* Location */}
       {location && (
-        <p className="mt-1.5 text-xs text-text-secondary">
-          <span className="max-w-[150px] truncate">{location}</span>
-        </p>
+        <p className="mt-1.5 min-w-0 max-w-full truncate text-xs text-text-secondary" title={location}>{location}</p>
       )}
 
       {/* Rate */}
