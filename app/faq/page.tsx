@@ -83,7 +83,7 @@ const faqCategories: FAQCategory[] = [
       },
       {
         question: "Can I feature my listings for more visibility?",
-        answer: "Yes. Featured placement puts your listing at the top of search results and in a dedicated section on the homepage. It is arranged with our team directly rather than managed from your dashboard — get in touch through the contact page and we will confirm cost and availability in writing before anything is booked.",
+        answer: "Yes. Featured placement puts your listing at the top of search results and in a dedicated section on the homepage. It is arranged with our team directly rather than managed from your dashboard — get in touch through the contact page.",
       },
       {
         question: "What are the agent verification requirements?",
@@ -92,7 +92,7 @@ const faqCategories: FAQCategory[] = [
     ],
   },
   {
-    category: "Account & Billing",
+    category: "Account & Settings",
     faqs: [
       {
         question: "How do I reset my password?",
@@ -101,14 +101,6 @@ const faqCategories: FAQCategory[] = [
       {
         question: "How do I update my profile or notification preferences?",
         answer: "Go to your dashboard and click 'Profile' to update personal details, or 'Saved Searches' to manage the searches you're alerted about and choose email, SMS, or WhatsApp channels for each one.",
-      },
-      {
-        question: "What payment methods are accepted for featured listings?",
-        answer: "Placement fees, where they apply, are billed manually by our team. We confirm the amount, the payment details, and the start and end dates in writing before anything is charged.",
-      },
-      {
-        question: "Can I get a refund for a featured listing?",
-        answer: "Because placement is booked and billed manually, refund terms are agreed in writing at the time of booking. Contact support if your circumstances change and we will work it out with you.",
       },
       {
         question: "How do I upgrade to an agency account?",
