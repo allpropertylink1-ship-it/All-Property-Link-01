@@ -31,7 +31,7 @@ function isSaleOrRent(p: ApiProperty) {
 
 function FullSkeleton() {
   return (
-    <div className="animate-pulse overflow-hidden rounded border-[1.25px] border-[#E5E7EB] bg-white">
+    <div className="animate-pulse overflow-hidden rounded-lg border-[1.25px] border-[#E5E7EB] bg-white">
       <div className="h-[200px] w-full bg-surface-secondary" />
       <div className="space-y-2 p-4">
         <div className="h-4 w-2/3 rounded bg-surface-secondary" />

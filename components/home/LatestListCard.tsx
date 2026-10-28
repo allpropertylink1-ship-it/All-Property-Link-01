@@ -122,7 +122,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
   }
 
   return (
-    <div className="relative flex flex-col overflow-hidden rounded border border-border bg-surface font-body transition-shadow duration-300 hover:shadow-md lg:flex-row">
+    <div className="relative flex flex-col overflow-hidden rounded-lg border border-border bg-surface font-body transition-all duration-300 hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 lg:flex-row">
       {/* Image carousel */}
       <div
         className="relative h-[168px] w-full shrink-0 overflow-hidden bg-surface-secondary lg:h-[190px] lg:w-[200px]"
