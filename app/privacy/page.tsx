@@ -70,7 +70,6 @@ export default function PrivacyPage() {
               <h2 className="font-heading text-2xl font-semibold text-text-primary">4. Third-Party Services</h2>
               <p className="mt-2">We use the following third-party service providers who process data on our behalf:</p>
               <ul className="mt-2 space-y-2 list-disc list-inside">
-                <li><strong className="text-text-primary">Cloudinary</strong> — Image/video management, optimization, and delivery for property media</li>
                 <li><strong className="text-text-primary">Brevo</strong> — Transactional email delivery (contact notifications, account emails, password resets)</li>
                 <li><strong className="text-text-primary">Google Maps Platform</strong> — Maps, geocoding, and places API for property location display and search</li>
                 <li><strong className="text-text-primary">WhatsApp Business API (Meta)</strong> — Direct agent communication via WhatsApp</li>
@@ -127,12 +126,12 @@ export default function PrivacyPage() {
 
             <section>
               <h2 className="font-heading text-2xl font-semibold text-text-primary">9. International Data Transfers</h2>
-              <p className="mt-2">Some third-party providers (Cloudinary, Resend, Google, Meta, Vercel) may process data outside Kenya. We ensure appropriate safeguards through Standard Contractual Clauses, adequacy decisions, or other lawful transfer mechanisms under the Kenya Data Protection Act, 2019.</p>
+              <p className="mt-2">Some third-party providers (Brevo, Google, Meta, Vercel) may process data outside Kenya. We ensure appropriate safeguards through Standard Contractual Clauses, adequacy decisions, or other lawful transfer mechanisms under the Kenya Data Protection Act, 2019.</p>
             </section>
 
             <section>
               <h2 className="font-heading text-2xl font-semibold text-text-primary">10. Data Security</h2>
-              <p className="mt-2">We implement appropriate technical and organizational measures: encryption at rest (Supabase/AWS), encryption in transit (TLS 1.2+), access controls, regular security assessments, and staff training. However, no internet transmission is 100% secure.</p>
+              <p className="mt-2">We implement appropriate technical and organizational measures: encryption at rest (cPanel PostgreSQL), encryption in transit (TLS 1.2+), access controls, regular security assessments, and staff training. However, no internet transmission is 100% secure.</p>
             </section>
 
             <section>
