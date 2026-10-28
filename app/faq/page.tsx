@@ -83,7 +83,7 @@ const faqCategories: FAQCategory[] = [
       },
       {
         question: "Can I feature my listings for more visibility?",
-        answer: "Yes! Featured listings appear at the top of search results and on the homepage. Pricing: KES 5,000/week for featured placement. Premium agency packages include featured listings. Manage from your dashboard.",
+        answer: "Yes. Featured placement puts your listing at the top of search results and in a dedicated section on the homepage. It is arranged with our team directly rather than managed from your dashboard — get in touch through the contact page and we will confirm cost and availability in writing before anything is booked.",
       },
       {
         question: "What are the agent verification requirements?",
@@ -104,11 +104,11 @@ const faqCategories: FAQCategory[] = [
       },
       {
         question: "What payment methods are accepted for featured listings?",
-        answer: "We accept M-Pesa (Paybill 400200), credit/debit cards (Visa, Mastercard), and bank transfers. M-Pesa payments are instant; card payments process within minutes. Invoices are generated automatically.",
+        answer: "Placement fees, where they apply, are billed manually by our team. We confirm the amount, the payment details, and the start and end dates in writing before anything is charged.",
       },
       {
         question: "Can I get a refund for a featured listing?",
-        answer: "Featured listing fees are non-refundable once the listing goes live. If you cancel before publication, a full refund is issued within 3-5 business days. Contact support for exceptional circumstances.",
+        answer: "Because placement is booked and billed manually, refund terms are agreed in writing at the time of booking. Contact support if your circumstances change and we will work it out with you.",
       },
       {
         question: "How do I upgrade to an agency account?",

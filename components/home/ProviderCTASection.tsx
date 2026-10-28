@@ -7,7 +7,7 @@ import { CheckCircle, ArrowRight } from "@/components/ui/icons"
 const CHECKLIST = [
   "Free profile — list your first property or service at no cost",
   "Reach thousands of customers across Kenya",
-  "Featured listings get 5× more visibility",
+  "Featured listings appear at the top of search and on the homepage",
 ]
 
 function formatCount(n: number): string {

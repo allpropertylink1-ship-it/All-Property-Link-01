@@ -209,13 +209,13 @@ export default function TermsPage() {
 
                 <h3>8.1 Listing Fees</h3>
                 <p>
-                  Agents and agencies may be charged fees for premium listings, featured placements, and additional services. Current fee schedules are available on the Platform. Fees are quoted in Kenyan Shillings (KES) and are inclusive of applicable VAT.
+                  Agents and agencies may be charged fees for premium listings, featured placements, and additional services. Any such fees are agreed in writing before they apply. Fees are quoted in Kenyan Shillings (KES) and are inclusive of applicable VAT.
                 </p>
 
                 <h3>8.2 Payment Terms</h3>
                 <ul>
                   <li>Fees are payable in advance unless otherwise agreed in writing.</li>
-                  <li>We accept payments via M-Pesa, bank transfer, credit/debit card, and other approved payment methods.</li>
+                  <li>Fees are settled using the payment method confirmed in writing when the fee is agreed.</li>
                   <li>Failed payments may result in listing suspension until payment is cleared.</li>
                   <li>Refunds are provided in accordance with our Refund Policy and the Consumer Protection Act 2012.</li>
                 </ul>
