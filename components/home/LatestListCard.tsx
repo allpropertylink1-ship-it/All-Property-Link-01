@@ -122,7 +122,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
   }
 
   return (
-    <div className="flex flex-col overflow-hidden rounded border border-border bg-surface font-body transition-shadow duration-300 hover:shadow-md lg:flex-row">
+    <div className="relative flex flex-col overflow-hidden rounded border border-border bg-surface font-body transition-shadow duration-300 hover:shadow-md lg:flex-row">
       {/* Image carousel */}
       <div
         className="relative h-[168px] w-full shrink-0 overflow-hidden bg-surface-secondary lg:h-[190px] lg:w-[200px]"
@@ -158,7 +158,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
           />
         ))}
         {/* Counter */}
-        <span className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 font-body text-[12px] font-medium text-white">
+        <span className="absolute left-2 top-2 z-10 rounded-full bg-black/60 px-2 py-0.5 font-body text-[12px] font-medium text-white">
           {safeActive + 1} / {slides.length}
         </span>
         {/* Prev / Next arrows */}
@@ -168,7 +168,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
               type="button"
               aria-label="Previous image"
               onClick={goPrev}
-              className="absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface/80 text-text-secondary transition-colors hover:bg-surface"
+              className="absolute left-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface/80 text-text-secondary transition-colors hover:bg-surface"
             >
               <IconChevronLeft size={16} stroke={1.5} aria-hidden="true" />
             </button>
@@ -176,7 +176,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
               type="button"
               aria-label="Next image"
               onClick={goNext}
-              className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface/80 text-text-secondary transition-colors hover:bg-surface"
+              className="absolute right-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface/80 text-text-secondary transition-colors hover:bg-surface"
             >
               <IconChevronRight size={16} stroke={1.5} aria-hidden="true" />
             </button>
@@ -184,7 +184,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
         )}
         {/* Dots */}
         {slides.length > 1 && (
-          <div className="absolute inset-x-0 bottom-2 flex items-center justify-center gap-1" role="group" aria-label="Choose image">
+          <div className="absolute inset-x-0 bottom-2 z-10 flex items-center justify-center gap-1" role="group" aria-label="Choose image">
             {slides.map((_, i) => (
               <button
                 key={i}
@@ -215,7 +215,7 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
           </span>
         </div>
         <h3 className="line-clamp-1 font-body text-sm font-semibold leading-5 text-text-primary">
-          <Link href={detailHref} className="transition-colors hover:text-primary">
+          <Link href={detailHref} className="after:absolute after:inset-0 transition-colors hover:text-primary">
             {item.title}
           </Link>
         </h3>
@@ -293,27 +293,19 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             <a
               href={`tel:${phone}`}
               aria-label={`Call about ${item.title}`}
-              className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded border border-border bg-surface px-2 font-body text-[11px] font-medium leading-4 text-primary transition-colors hover:bg-surface-secondary"
+              className="relative z-10 inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded border border-border bg-surface px-2 font-body text-[11px] font-medium leading-4 text-primary transition-colors hover:bg-surface-secondary"
             >
               <IconPhone size={12} stroke={1.5} aria-hidden="true" className="shrink-0" />
               Call
             </a>
           )}
-          <Link
-            href={detailHref}
-            aria-label={`View details about ${item.title}`}
-            className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded border border-border bg-surface px-2 font-body text-[11px] font-medium leading-4 text-primary transition-colors hover:bg-surface-secondary"
-          >
-            <IconChevronRight size={12} stroke={1.5} aria-hidden="true" className="shrink-0" />
-            Details
-          </Link>
           <button
             type="button"
             aria-label={fav ? `Remove ${item.title} from favorites` : `Add ${item.title} to favorites`}
             aria-pressed={fav}
             onClick={toggleFav}
             className={cn(
-              "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors motion-reduce:transition-none",
+              "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors motion-reduce:transition-none",
               fav ? "text-error" : "text-text-secondary hover:text-error"
             )}
           >

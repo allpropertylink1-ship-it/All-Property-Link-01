@@ -96,7 +96,7 @@ export function ServiceCardCompact({
   return (
     <article
       aria-labelledby={`service-card-${id}`}
-      className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 shadow-sm transition-shadow hover:shadow-lg"
+      className="relative flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 shadow-sm transition-shadow hover:shadow-lg"
     >
       {/* Craftsman header: avatar + verification tick, name, discipline, rating */}
       <div className="flex items-start gap-3.5">
@@ -132,7 +132,7 @@ export function ServiceCardCompact({
               id={`service-card-${id}`}
               className="truncate font-heading text-base font-bold text-text-primary"
             >
-              <Link href={`/services/${id}`} className="hover:text-primary-600">
+              <Link href={`/services/${id}`} className="after:absolute after:inset-0 hover:text-primary-600">
                 {title}
               </Link>
             </h3>
@@ -176,7 +176,7 @@ export function ServiceCardCompact({
           <Link
             href={`/services?category=${category.slug}`}
             aria-label={`More ${category.name} services`}
-            className="shrink-0 rounded-md bg-surface px-2.5 py-1 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-50"
+            className="relative z-10 shrink-0 rounded-md bg-surface px-2.5 py-1 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-50"
           >
             More {category.name}
           </Link>
@@ -188,7 +188,7 @@ export function ServiceCardCompact({
         <div className="grid grid-cols-2 gap-2 pt-1">
           <a
             href={`tel:${phone}`}
-            className="inline-flex min-h-touch items-center justify-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary"
+            className="relative z-10 inline-flex min-h-touch items-center justify-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary"
           >
             <Phone size={16} className="text-primary-600" />
             Call
@@ -197,20 +197,13 @@ export function ServiceCardCompact({
             href={waHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-touch items-center justify-center gap-1.5 rounded-lg bg-whatsapp px-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-whatsapp-dark"
+            className="relative z-10 inline-flex min-h-touch items-center justify-center gap-1.5 rounded-lg bg-whatsapp px-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-whatsapp-dark"
           >
             <MessageCircle size={16} />
             WhatsApp
           </a>
         </div>
-      ) : (
-        <Link
-          href={`/services/${id}`}
-          className="inline-flex min-h-touch items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-50"
-        >
-          View details
-        </Link>
-      )}
+      ) : null}
     </article>
   );
 }
