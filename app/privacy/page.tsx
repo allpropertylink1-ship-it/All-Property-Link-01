@@ -75,7 +75,7 @@ export default function PrivacyPage() {
                 <li><strong className="text-text-primary">WhatsApp Business API (Meta)</strong> — Direct agent communication via WhatsApp</li>
                 <li><strong className="text-text-primary">MobileSasa</strong> — SMS delivery for OTP codes and alert notifications</li>
                 <li><strong className="text-text-primary">cPanel PostgreSQL</strong> — Database backend</li>
-                <li><strong className="text-text-primary">Vercel</strong> — Hosting and edge network</li>
+                <li><strong className="text-text-primary">Vercel</strong> — Hosting, edge network, and cookieless aggregated site analytics</li>
               </ul>
               <p className="mt-2">Each provider processes data per their privacy policies and data processing agreements. We ensure appropriate DPAs are in place.</p>
             </section>

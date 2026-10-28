@@ -70,12 +70,14 @@ const cityAllowList = new Set(
 function Column({
   title,
   links,
+  section,
 }: {
   title: string;
   links: { href: string; label: string }[];
+  section: string;
 }) {
   return (
-    <div>
+    <div data-footer-section={section}>
       <h2 className="mb-4 font-heading text-base font-semibold text-text-primary">
         {title}
       </h2>
@@ -119,7 +121,7 @@ function SocialLink({
 
 function TrustBlock() {
   return (
-    <div className="space-y-3 text-base text-text-secondary">
+    <div className="space-y-3 text-base text-text-secondary" data-footer-section="trust">
       <address className="flex items-start gap-2.5 not-italic">
         <MapPin size={16} className="mt-1 shrink-0 text-primary-400" />
         <span>Embassy House, 4th Floor, Harambee Avenue, Nairobi, Kenya</span>
@@ -170,6 +172,7 @@ async function CitiesBand() {
   return (
     <nav
       aria-label="Popular cities"
+      data-footer-section="cities"
       className="mt-10 border-t border-border pt-8"
     >
       <h2 className="mb-4 flex items-center gap-2 font-heading text-base font-semibold text-text-primary">
@@ -245,7 +248,7 @@ export function Footer({ variant = "full" }: { variant?: "full" | "legal" }) {
     <footer className="border-t border-border bg-surface">
       <div className="mx-auto max-w-content px-4 pt-10 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:pt-12 md:pt-16 md:pb-16">
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-          <div>
+          <div data-footer-section="brand">
             <Link
               href="/"
               className="font-heading text-lg font-bold tracking-tight text-primary sm:text-xl"
@@ -271,10 +274,10 @@ export function Footer({ variant = "full" }: { variant?: "full" | "legal" }) {
           aria-label="Footer navigation"
           className="mt-10 grid gap-8 border-t border-border pt-10 sm:grid-cols-2 lg:grid-cols-4 sm:gap-8"
         >
-          <Column title="Browse" links={browseLinks} />
-          <Column title="Partner with us" links={partnerLinks} />
-          <Column title="Company" links={companyLinks} />
-          <Column title="Legal" links={legalLinks} />
+          <Column title="Browse" links={browseLinks} section="browse" />
+          <Column title="Partner with us" links={partnerLinks} section="partner" />
+          <Column title="Company" links={companyLinks} section="company" />
+          <Column title="Legal" links={legalLinks} section="legal" />
         </nav>
 
         <Suspense fallback={null}>

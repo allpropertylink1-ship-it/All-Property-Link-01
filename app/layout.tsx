@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Open_Sans, Roboto_Slab } from "next/font/google";
+import { Noto_Sans, Noto_Sans_Display } from "next/font/google";
 import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { CookieConsent } from "@/components/shared/CookieConsent";
@@ -13,18 +13,22 @@ import { headers } from "next/headers";
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 import { PWARegister } from "@/components/pwa/PWARegister";
 import OfflineBadge from "@/components/shared/OfflineBadge";
+import { AnalyticsProvider } from "@/components/shared/AnalyticsProvider";
+import { FooterTracking } from "@/components/layout/FooterTracking";
 import "./globals.css";
 
-const heading = Roboto_Slab({
+const heading = Noto_Sans_Display({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-heading",
+  display: "swap",
+  variable: "--apl-heading",
 });
 
-const body = Open_Sans({
+const body = Noto_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-body",
+  display: "swap",
+  variable: "--apl-body",
 });
 
 export const viewport: Viewport = {
@@ -81,13 +85,19 @@ export default async function RootLayout({
       <body className={`${heading.variable} ${body.variable} flex min-h-[100dvh] flex-col antialiased`}>
         <OfflineBadge />
         <PWARegister />
+        <AnalyticsProvider />
         <AuthProvider>
           <FavoritesProvider>
             <Navbar />
             <main className="min-w-0 max-w-full flex-1 overflow-x-clip pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6">{inMaintenance ? <MaintenanceNotice title={status?.maintenanceTitle} message={status?.maintenanceMessage} /> : children}</main>
             <CookieConsent />
             <BottomNav />
-            {!isChromeless && <Footer variant={isAppSurface ? "legal" : "full"} />}
+            {!isChromeless && (
+            <>
+              <Footer variant={isAppSurface ? "legal" : "full"} />
+              <FooterTracking />
+            </>
+          )}
           </FavoritesProvider>
         </AuthProvider>
         <PWAInstallPrompt />
