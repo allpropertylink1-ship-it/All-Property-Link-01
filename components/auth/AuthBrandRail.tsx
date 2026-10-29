@@ -58,7 +58,7 @@ export function AuthBrandRail({ view, backgroundImage }: AuthBrandRailProps) {
         fill
         priority
         sizes="100vw"
-        className="absolute inset-0 -z-10 object-cover rounded-xl"
+        className="absolute inset-0 z-0 object-cover rounded-xl"
         aria-hidden="true"
       />
       {/* Dark overlay for text readability - darker at TOP where headline/subtitle are, lighter at bottom for background visibility */}
