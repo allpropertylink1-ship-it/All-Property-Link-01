@@ -23,7 +23,6 @@ export function AuthShell({ children, railView }: AuthShellProps) {
   const { user, loading, refreshUser } = useAuth()
   const returnParam = searchParams.get("return")
   const returnUrl = isSafeReturnUrl(returnParam) ? (returnParam as string) : undefined
-  const isDev = process.env.NEXT_PUBLIC_SHOW_TEST_ACCOUNTS === "true"
 
   // Client-side net for in-app navigation to /auth while signed in (server
   // guard in app/auth/login/page.tsx and app/auth/register/page.tsx covers
@@ -110,12 +109,7 @@ export function AuthShell({ children, railView }: AuthShellProps) {
   const backgroundImage = AUTH_BACKGROUND_IMAGES[railView]
 
   return (
-    <div className={`flex min-h-[100dvh] items-center justify-center bg-surface-secondary px-4 py-6 ${isDev ? "pt-14" : ""}`}>
-      {isDev && (
-        <div className="fixed left-0 top-0 z-50 w-full bg-primary px-4 py-1.5 text-center text-xs font-medium text-white">
-          Test accounts available &mdash; use password <strong>Test@123</strong>
-        </div>
-      )}
+    <div className="flex min-h-[100dvh] items-center justify-center bg-surface-secondary px-4 py-6">
       <div className="w-full max-w-3xl">
         <div className="relative overflow-hidden rounded-xl border border-border bg-surface shadow-md">
           <div className="grid overflow-hidden rounded-xl border bg-surface shadow-md lg:grid-cols-[minmax(0,42%)_1fr]">
