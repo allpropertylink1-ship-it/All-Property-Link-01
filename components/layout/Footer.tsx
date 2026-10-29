@@ -23,6 +23,7 @@ const browseLinks = [
   { href: "/properties", label: "Properties" },
   { href: "/airbnbs", label: "Airbnbs" },
   { href: "/land", label: "Plots & Land" },
+  { href: "/archive", label: "Archive / Sold" },
   { href: "/services?type=FUNDI", label: "Fundis" },
   { href: "/services?type=SERVICE_PROVIDER", label: "Services" },
   { href: "/favorites", label: "Saved listings" },

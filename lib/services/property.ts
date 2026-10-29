@@ -31,10 +31,11 @@ export interface PropertyUnit {
 
 export interface PropertyCard {
   id: string; slug: string; title: string; price: number | null; currency: string;
-  propertyType: string; listingPurpose: string | null;
+  propertyType: string; listingPurpose: string | null; status?: string;
   city: string; region: string; bedrooms: number | null; bathrooms: number | null;
   area: number | null; plotSize?: number | string | null; plotSizeUnit?: string | null;
   images: unknown; coverImage?: string | null; thumbUrl?: string | null; isFeatured: boolean; createdAt: Date;
+  soldAt?: Date | null;
   hasMultipleUnits?: boolean;
   unitMixDescription?: string | null;
   units?: PropertyUnit[];
@@ -64,6 +65,7 @@ export interface PropertyDetail {
   plotSize: number | string | null; plotSizeUnit: string | null;
   latitude: unknown; longitude: unknown; images: unknown; coverImage?: string | null; features: string[];
   isFeatured: boolean; createdAt: Date;
+  soldAt?: Date | null;
   hasMultipleUnits?: boolean;
   unitMixDescription?: string | null;
   units?: PropertyUnit[];
@@ -118,6 +120,19 @@ export const getProperties = cache(async (filters: PropertyFilters = {}): Promis
 export const getPropertyBySlug = cache(async (slug: string): Promise<PropertyDetail | null> => {
   const data = await fetchApi<{ property: PropertyDetail | null }>(`/api/properties/${encodeURIComponent(slug)}`);
   return data?.property ?? null;
+});
+
+/** Sold / rented ("no longer available") archive. Backed by ?archive=1 which the
+ * property route resolves to status IN (SOLD, RENTED) behind the
+ * listing_lifecycle_filter feature flag. */
+export const getArchiveProperties = cache(async (): Promise<{
+  properties: PropertyCard[];
+  total: number; page: number; pageSize: number; totalPages: number;
+}> => {
+  const data = await fetchApi<{ properties: PropertyCard[]; total: number; page: number; pageSize: number; totalPages: number }>(
+    "/api/properties?archive=1&limit=50"
+  );
+  return data || { properties: [], total: 0, page: 1, pageSize: 50, totalPages: 0 };
 });
 
 export const getOtherPropertiesByAgent = cache(async (agentId: string, currentPropertyId: string): Promise<OtherProperty[]> => {

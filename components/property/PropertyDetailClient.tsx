@@ -109,6 +109,8 @@ interface PropertyData {
   features: string[];
   images: unknown;
   coverImage?: string | null;
+  status: string;
+  soldAt?: Date | null;
   hasMultipleUnits?: boolean;
   unitMixDescription?: string | null;
   units?: DetailUnit[];
@@ -150,6 +152,15 @@ function purposeLabel(purpose?: string | null): string {
   return "For Sale";
 }
 
+function formatSoldAt(d: Date | string | null | undefined): string | null {
+  if (!d) return null
+  try {
+    return new Date(d).toLocaleDateString("en-KE", {
+      day: "numeric", month: "short", year: "numeric",
+    })
+  } catch { return null }
+}
+
 function prettySubType(subType?: string | null): string | null {
   if (!subType) return null;
   return subType.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
@@ -174,11 +185,13 @@ function formatCompactCount(n: number): string {
   return new Intl.NumberFormat("en-KE").format(n);
 }
 
-export default function PropertyDetailClient({ slug, initial, sellerReviews }: { slug: string; initial?: PropertyData; sellerReviews?: SellerReviewsData }) {
+export default function PropertyDetailClient({ slug, initial, sellerReviews, isArchived: isArchivedProp }: { slug: string; initial?: PropertyData; sellerReviews?: SellerReviewsData; isArchived?: boolean }) {
   const [property, setProperty] = useState<PropertyData | null>(initial ?? null);
   const [otherProperties, setOtherProperties] = useState<OtherProperty[]>([]);
   const [loading, setLoading] = useState(!initial);
   const [error, setError] = useState(false);
+
+  const isArchived = isArchivedProp ?? (property?.status === "SOLD" || property?.status === "RENTED");
 
   useEffect(() => {
     if (!slug) return;
@@ -308,11 +321,26 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
             </h1>
             <FavoriteButton type="PROPERTY" refId={property.slug} label={property.title} variant="circle" className="mt-1 shrink-0" />
           </div>
-          <p className="flex items-center gap-1.5 text-sm text-text-secondary">
-            <MapPin size={16} className="shrink-0 text-primary-500" aria-hidden />
-            <span>{locationLine}</span>
-          </p>
-        </div>
+            <p className="flex items-center gap-1.5 text-sm text-text-secondary">
+              <MapPin size={16} className="shrink-0 text-primary-500" aria-hidden />
+              <span>{locationLine}</span>
+            </p>
+            {isArchived && (
+              <section aria-label="Listing status" className="mt-4 rounded-lg border border-border bg-surface-secondary p-4">
+                <div className="flex items-center gap-2">
+                  <span className={`inline-flex items-center rounded-md px-3 py-1 text-[11px] font-semibold uppercase tracking-wider ${property.status === "SOLD" ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700"}`}>
+                    {property.status === "SOLD" ? "Sold" : "Rented"}
+                  </span>
+                  {property.soldAt && (
+                    <span className="text-xs text-text-secondary">
+                      · {property.status === "SOLD" ? "Sold" : "Rented"} on {formatSoldAt(property.soldAt)}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1.5 text-sm text-text-secondary">This property is no longer available.</p>
+              </section>
+            )}
+          </div>
         {hasPrice && (
         <div className="shrink-0 lg:pb-1 lg:text-right">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">
@@ -766,48 +794,56 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
                 )}
 
                 {/* Direct CTAs: Call + WhatsApp */}
-                <div className="mt-4 space-y-2.5">
-                  {agentWhatsApp && (
-                    <a
-                      href={`https://wa.me/${agentWhatsApp}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="touch-target flex w-full items-center justify-center gap-2 rounded-lg bg-whatsapp px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-whatsapp-dark"
-                    >
-                      <MessageCircle size={16} aria-hidden />
-                      Chat on WhatsApp
-                    </a>
-                  )}
-                  {property.agent.phone && (
-                    <a
-                      href={`tel:${property.agent.phone}`}
-                      className="touch-target flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
-                    >
-                      <Phone size={16} className="shrink-0" aria-hidden />
-                      {property.agent.phone}
-                    </a>
-                  )}
-                  {property.agent.email && (
-                    <a
-                      href={`mailto:${property.agent.email}`}
-                      className="touch-target flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
-                    >
-                      <Mail size={16} className="shrink-0" aria-hidden />
-                      {property.agent.email}
-                    </a>
-                  )}
-                  {property.agent.website && (
-                    <a
-                      href={property.agent.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-medium text-primary-600 transition-colors hover:text-primary-700"
-                    >
-                      <Globe size={12} aria-hidden />
-                      {property.agent.website.replace(/^https?:\/\//, "")}
-                    </a>
-                  )}
-                </div>
+                {isArchived ? (
+                  <div className="mt-4 rounded-lg border border-border bg-surface-secondary p-3">
+                    <p className="text-sm text-text-secondary">
+                      This property is {property.status === "SOLD" ? "sold" : "rented"} and is no longer available for new inquiries.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-4 space-y-2.5">
+                    {agentWhatsApp && (
+                      <a
+                        href={`https://wa.me/${agentWhatsApp}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="touch-target flex w-full items-center justify-center gap-2 rounded-lg bg-whatsapp px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-whatsapp-dark"
+                      >
+                        <MessageCircle size={16} aria-hidden />
+                        Chat on WhatsApp
+                      </a>
+                    )}
+                    {property.agent.phone && (
+                      <a
+                        href={`tel:${property.agent.phone}`}
+                        className="touch-target flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
+                      >
+                        <Phone size={16} className="shrink-0" aria-hidden />
+                        {property.agent.phone}
+                      </a>
+                    )}
+                    {property.agent.email && (
+                      <a
+                        href={`mailto:${property.agent.email}`}
+                        className="touch-target flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
+                      >
+                        <Mail size={16} className="shrink-0" aria-hidden />
+                        {property.agent.email}
+                      </a>
+                    )}
+                    {property.agent.website && (
+                      <a
+                        href={property.agent.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-medium text-primary-600 transition-colors hover:text-primary-700"
+                      >
+                        <Globe size={12} aria-hidden />
+                        {property.agent.website.replace(/^https?:\/\//, "")}
+                      </a>
+                    )}
+                  </div>
+                )}
 
                 {/* Trust shield */}
                 <div className="mt-4 flex items-start gap-2 rounded-lg bg-surface-secondary p-3">
@@ -878,7 +914,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews }: {
       )}
 
       {/* ─── Mobile persistent action bar (Stitch mobile) ─── */}
-      {property.agent && (property.agent.phone || property.agent.email) && (
+      {!isArchived && property.agent && (property.agent.phone || property.agent.email) && (
         <div className="fixed inset-x-0 bottom-[calc(var(--nav-h)+env(safe-area-inset-bottom))] z-40 border-t border-border bg-surface md:bottom-0 md:pb-[env(safe-area-inset-bottom)] lg:hidden">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
             {hasPrice && (

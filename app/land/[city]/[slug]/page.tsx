@@ -23,6 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const property = await getPropertyBySlug(params.slug);
   if (!property || property.propertyType !== "LAND") return {};
 
+  const isArchived = property.status === "SOLD" || property.status === "RENTED";
   const canonical = `${siteUrl()}/land/${slugifyCity(property.city)}/${property.slug}`;
   const description = excerpt(property.description || "");
   const image = firstImage(property as { coverImage?: string | null; images?: unknown });
@@ -31,6 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: property.title,
     description,
     alternates: { canonical },
+    ...(isArchived ? { robots: { index: false, follow: false } } : {}),
     openGraph: {
       title: `${property.title} — All Property Link`,
       description,
@@ -64,6 +66,8 @@ export default async function LandDetailPage({ params }: Props) {
   const canonical = `${siteUrl()}/land/${canonicalCity}/${property.slug}`;
   const coverForLd = getCoverImage(property as { coverImage?: string | null; images?: unknown });
 
+  const isArchived = property.status === "SOLD" || property.status === "RENTED";
+
   // Seller review summary (ISR-cached) for sidebar badge + top-3 block
   const sellerReviews = property.agent?.id ? await getUserReviews(property.agent.id) : undefined;
 
@@ -79,7 +83,7 @@ export default async function LandDetailPage({ params }: Props) {
       "@type": "Offer",
       price: property.price == null ? undefined : Number(property.price),
       priceCurrency: property.currency,
-      availability: "https://schema.org/InStock",
+      availability: isArchived ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
     },
     ...(property.area ? { floorSize: { "@type": "QuantitativeValue", value: property.area, unitCode: "SQFT" } } : {}),
     address: {
@@ -106,7 +110,7 @@ export default async function LandDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(listingJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <PropertyBreadcrumbs city={property.city} title={property.title} basePath="/land" baseLabel="Land & Plots" />
-      <PropertyDetailClient slug={params.slug} initial={property} sellerReviews={sellerReviews} />
+      <PropertyDetailClient slug={params.slug} initial={property} sellerReviews={sellerReviews} isArchived={isArchived} />
     </>
   );
 }

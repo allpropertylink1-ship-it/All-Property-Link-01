@@ -23,6 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const property = await getPropertyBySlug(params.slug);
   if (!property) return {};
 
+  const isArchived = property.status === "SOLD" || property.status === "RENTED";
   const canonical = `${siteUrl()}/properties/${slugifyCity(property.city)}/${property.slug}`;
   const mixSuffix = property.hasMultipleUnits && property.unitMixDescription
     ? ` Units: ${property.unitMixDescription}.`
@@ -34,6 +35,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: property.title,
     description,
     alternates: { canonical },
+    // De-index unavailable listings so search engines stop surfacing sold/rented homes.
+    ...(isArchived ? { robots: { index: false, follow: false } } : {}),
     openGraph: {
       title: `${property.title} — All Property Link`,
       description,
@@ -67,6 +70,8 @@ export default async function PropertyDetailPage({ params }: Props) {
   const canonical = `${siteUrl()}/properties/${canonicalCity}/${property.slug}`;
   const coverForLd = getCoverImage(property as { coverImage?: string | null; images?: unknown });
 
+  const isArchived = property.status === "SOLD" || property.status === "RENTED";
+
   // Seller review summary (ISR-cached) for sidebar badge + top-3 block
   const sellerReviews = property.agent?.id ? await getUserReviews(property.agent.id) : undefined;
 
@@ -82,7 +87,8 @@ export default async function PropertyDetailPage({ params }: Props) {
       "@type": "Offer",
       price: property.price == null ? undefined : Number(property.price),
       priceCurrency: property.currency,
-      availability: "https://schema.org/InStock",
+      // Sold/rented listings are no longer available to purchase.
+      availability: isArchived ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
     },
     ...(property.bedrooms ? { numberOfBedrooms: property.bedrooms } : {}),
     ...(property.bathrooms ? { numberOfBathrooms: property.bathrooms } : {}),
@@ -105,7 +111,7 @@ export default async function PropertyDetailPage({ params }: Props) {
             "@type": "Offer",
             price: Number(u.price),
             priceCurrency: property.currency,
-            availability: "https://schema.org/InStock",
+            availability: isArchived ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
           },
         } : {}),
       })),
@@ -134,7 +140,7 @@ export default async function PropertyDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(listingJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <PropertyBreadcrumbs city={property.city} title={property.title} />
-      <PropertyDetailClient slug={params.slug} initial={property} sellerReviews={sellerReviews} />
+      <PropertyDetailClient slug={params.slug} initial={property} sellerReviews={sellerReviews} isArchived={isArchived} />
     </>
   );
 }

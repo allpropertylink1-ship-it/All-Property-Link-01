@@ -21,6 +21,8 @@ interface PropertyCardProps {
   price: number | null;
   currency: string;
   propertyType: string;
+  status?: string;
+  soldAt?: Date | null;
   listingPurpose?: string | null;
   city: string;
   region: string;
