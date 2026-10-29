@@ -124,6 +124,7 @@ export function RegisterAccountInfo({
             autoComplete="new-password"
             required
             minLength={8}
+            asTrailingIcon
           />
         }
       />
@@ -144,6 +145,7 @@ export function RegisterAccountInfo({
             autoComplete="new-password"
             required
             minLength={8}
+            asTrailingIcon
           />
         }
       />

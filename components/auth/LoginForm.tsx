@@ -235,6 +235,7 @@ export function LoginForm({ returnUrl }: { returnUrl?: string }) {
               placeholder="Your password"
               ariaInvalid={errorField === "password"}
               ariaDescribedBy={errorField === "password" ? "login-password-error" : undefined}
+              asTrailingIcon
               onChange={() => { if (errorField === "password") { setErrorField(null); setError("") } }}
             />
           }
