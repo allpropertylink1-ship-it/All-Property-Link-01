@@ -23,7 +23,7 @@ export function AuthShell({ children, railView }: AuthShellProps) {
   const { user, loading, refreshUser } = useAuth()
   const returnParam = searchParams.get("return")
   const returnUrl = isSafeReturnUrl(returnParam) ? (returnParam as string) : undefined
-  const isDev = process.env.VERCEL_ENV !== "production"
+  const isDev = process.env.NEXT_PUBLIC_SHOW_TEST_ACCOUNTS === "true"
 
   // Client-side net for in-app navigation to /auth while signed in (server
   // guard in app/auth/login/page.tsx and app/auth/register/page.tsx covers
