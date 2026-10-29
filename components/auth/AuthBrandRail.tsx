@@ -49,8 +49,8 @@ export function AuthBrandRail({ view, backgroundImage }: AuthBrandRailProps) {
         backgroundRepeat: "no-repeat",
       }}
     >
-      {/* Dark overlay for text readability - matches HeroSection gradient */}
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-primary-900/80 via-primary-900/25 to-primary-900/40" aria-hidden="true" />
+      {/* Dark overlay for text readability - darker at TOP where headline/subtitle are, lighter at bottom for background visibility */}
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-primary-900/20 via-primary-900/35 to-primary-900/85" aria-hidden="true" />
 
       <div className="relative flex flex-col justify-center h-full z-10">
         {/* Eyebrow */}
