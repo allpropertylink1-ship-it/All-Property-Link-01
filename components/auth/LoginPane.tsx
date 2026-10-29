@@ -25,16 +25,32 @@ export function LoginPane({ returnUrl }: LoginPaneProps) {
     setShowAgentForgot(false)
   }
 
+  const handleTabKeyDown = (
+    e: React.KeyboardEvent,
+    tab: "user" | "agent"
+  ) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault()
+      handleTabChange(tab)
+    }
+  }
+
   return (
     <div className="space-y-3">
-      <div className="mb-3 grid grid-cols-2 gap-1 rounded-lg bg-surface-secondary p-1" role="tablist" aria-label="Sign in as">
+      <div
+        className="mb-3 grid grid-cols-2 gap-1 rounded-lg bg-surface-secondary p-1"
+        role="tablist"
+        aria-label="Sign in as"
+      >
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
             role="tab"
             aria-selected={activeTab === tab.id}
+            aria-controls={`auth-tab-${tab.id}`}
             onClick={() => handleTabChange(tab.id)}
+            onKeyDown={(e) => handleTabKeyDown(e, tab.id)}
             className={cn(
               "touch-target rounded-md px-3 py-2 text-center text-[13px] transition-all duration-150",
               activeTab === tab.id

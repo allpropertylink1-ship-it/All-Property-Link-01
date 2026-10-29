@@ -14,7 +14,7 @@ type Step = "form" | "otp"
 
 const REGISTER_ROLES = ["PROPERTY_OWNER", "AGENT", "SERVICE_PROVIDER", "CUSTOMER"] as const
 
-export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogin, returnUrl, initialRole }: { referralCode?: string; onSwitchToLogin?: () => void; returnUrl?: string; initialRole?: string }) {
+export function RegisterForm({ referralCode: initialReferralCode, returnUrl, initialRole }: { referralCode?: string; returnUrl?: string; initialRole?: string }) {
   const router = useRouter()
   const { signup, sendOtp, verifyOtp, updateRegistration } = useAuth()
   const [step, setStep] = useState<Step>("form")
@@ -312,12 +312,12 @@ export function RegisterForm({ referralCode: initialReferralCode, onSwitchToLogi
         accountType={accountType}
         error={error} errorField={errorField} loading={loading} acceptedTerms={acceptedTerms} onAcceptedChange={setAcceptedTerms}
         onContactMethodChange={setContactMethod} onPasswordChange={setPassword}
-        onReferralCodeChange={setReferralCode} onBack={onSwitchToLogin ? () => onSwitchToLogin() : undefined}
+        onReferralCodeChange={setReferralCode}
         onFirstNameChange={handleFirstNameChange} onLastNameChange={handleLastNameChange}
         onEmailChange={handleEmailChange} onPhoneChange={handlePhoneChange}
         onRecoveryEmailChange={handleRecoveryEmailChange}
         onAccountTypeChange={setAccountType}
-        onSwitchToLogin={onSwitchToLogin}
+        returnUrl={returnUrl}
       />
     </form>
   )

@@ -36,7 +36,7 @@ export function AuthBrandRail({ view }: { view: "login" | "register" }) {
         "rounded-xl border border-white/10 text-white",
         // Deep-teal brand gradient matching .auth-strip / .profile-hero
         "bg-[linear-gradient(165deg,#0E1E23_0%,#162C31_45%,#1E3A40_100%)]",
-        "bg-[radial-gradient(120%_90%_at_85%_-10%,rgba(226,122,35,0.25),transparent_55%)]",
+        "bg-[radial-gradient(120%_90%_at_85%_-10%,rgba(226,122,35,0.25),transparent_55%)]"
       )}
     >
       <div className="flex flex-col justify-center h-full">
@@ -47,9 +47,9 @@ export function AuthBrandRail({ view }: { view: "login" | "register" }) {
         </span>
 
         {/* Headline */}
-        <h2 className="mt-3 font-heading text-xl font-bold leading-snug tracking-tight text-white">
+        <h1 className="mt-3 font-heading text-2xl font-bold leading-snug tracking-tight text-white">
           {isRegister ? "Create your APL account." : "Kenya&rsquo;s direct property &amp; artisan network."}
-        </h2>
+        </h1>
 
         {/* Subtitle */}
         <p className="mt-1 max-w-xs text-[13px] leading-relaxed text-white/75">

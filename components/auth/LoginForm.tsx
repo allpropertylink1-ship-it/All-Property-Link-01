@@ -11,7 +11,7 @@ import { FormBanner } from "@/components/shared/FormFeedback"
 import { Mail } from "@/components/ui/icons"
 import { resolvePostAuthTarget } from "@/lib/persona"
 
-export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegister?: () => void; returnUrl?: string }) {
+export function LoginForm({ returnUrl }: { returnUrl?: string }) {
   const router = useRouter()
   const { login, sendMagicLink, phoneLogin, verifyOtp } = useAuth()
   const [error, setError] = useState("")
@@ -419,15 +419,12 @@ export function LoginForm({ onSwitchToRegister, returnUrl }: { onSwitchToRegiste
 
       <p className="pt-0.5 text-center text-[13px] text-text-secondary">
         New here?{" "}
-        {onSwitchToRegister ? (
-          <button type="button" onClick={onSwitchToRegister} className="font-semibold text-accent-600 hover:text-accent-700">
-            Create account
-          </button>
-        ) : (
-          <a href="/auth/register" className="font-semibold text-accent-600 hover:text-accent-700">
-            Create account
-          </a>
-        )}
+        <a
+          href={`/auth/register${returnUrl ? `?return=${encodeURIComponent(returnUrl)}` : ""}`}
+          className="font-semibold text-accent-600 hover:text-accent-700"
+        >
+          Create account
+        </a>
       </p>
     </div>
   )

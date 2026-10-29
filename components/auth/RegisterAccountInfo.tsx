@@ -27,22 +27,20 @@ interface Props {
   onAccountTypeChange: (v: string) => void
   onPasswordChange: (v: string) => void
   onReferralCodeChange: (v: string) => void
-  onBack?: () => void
   onFirstNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onLastNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onPhoneChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onRecoveryEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  onSwitchToLogin?: () => void
+  returnUrl?: string
 }
 
 export function RegisterAccountInfo({
   contactMethod, password, referralCode, firstName, lastName, email, phone, recoveryEmail, accountType, error, errorField = null, loading, acceptedTerms, onAcceptedChange,
   onContactMethodChange, onAccountTypeChange, onPasswordChange, onReferralCodeChange,
-  onBack, onFirstNameChange, onLastNameChange, onEmailChange, onPhoneChange, onRecoveryEmailChange,
-  onSwitchToLogin,
+  onFirstNameChange, onLastNameChange, onEmailChange, onPhoneChange, onRecoveryEmailChange,
+  returnUrl,
 }: Props) {
-  const goBack = onBack ?? (onSwitchToLogin ? () => onSwitchToLogin() : undefined)
   const accountOptions = [
     { value: "PROPERTY_OWNER", label: "Property Owner", hint: "List your own property" },
     { value: "AGENT", label: "Agent", hint: "List for owners" },
@@ -51,16 +49,12 @@ export function RegisterAccountInfo({
   ]
   return (
     <div className="space-y-2.5">
-      {goBack && (
-        <button
-          type="button"
-          onClick={goBack}
-          aria-label="Back to sign in"
-          className="flex w-full touch-target items-center justify-center gap-1.5 rounded-lg border border-border bg-surface-secondary px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-surface hover:text-primary"
-        >
-          <ArrowLeft size={14} aria-hidden="true" /> Back to sign in
-        </button>
-      )}
+      <a
+        href={`/auth/login${returnUrl ? `?return=${encodeURIComponent(returnUrl)}` : ""}`}
+        className="flex w-full touch-target items-center justify-center gap-1.5 rounded-lg border border-border bg-surface-secondary px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-surface hover:text-primary"
+      >
+        <ArrowLeft size={14} aria-hidden="true" /> Back to sign in
+      </a>
 
       <div className="space-y-2.5">
         {error && (
