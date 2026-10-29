@@ -9,9 +9,10 @@ import { BadgeCheck } from "@/components/ui/icons"
 
 interface Props {
   onForgotPassword?: () => void
+  returnUrl?: string
 }
 
-export function AgentLoginForm({ onForgotPassword }: Props) {
+export function AgentLoginForm({ onForgotPassword, returnUrl }: Props) {
   const router = useRouter()
   const { agentLogin } = useAuth()
   const [error, setError] = useState("")
@@ -70,7 +71,7 @@ export function AgentLoginForm({ onForgotPassword }: Props) {
       return
     }
 
-    router.push("/dashboard/agent")
+    router.push(returnUrl ?? "/dashboard/agent")
     router.refresh()
   }
 

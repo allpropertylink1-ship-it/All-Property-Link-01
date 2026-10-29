@@ -6,9 +6,15 @@ import { useAuth } from "@/lib/auth-context"
 import { isSafeReturnUrl, resolvePostAuthTarget } from "@/lib/persona"
 import { AuthBrandRail } from "./AuthBrandRail"
 
+const AUTH_BACKGROUND_IMAGES = {
+  login: "/images/auth/signin-bg.jpg",
+  register: "/images/auth/signup-bg.jpg",
+  rep: "/images/auth/reps-signin-bg.jpg",
+} as const
+
 interface AuthShellProps {
   children: React.ReactNode
-  railView: "login" | "register"
+  railView: "login" | "register" | "rep"
 }
 
 export function AuthShell({ children, railView }: AuthShellProps) {
@@ -25,7 +31,6 @@ export function AuthShell({ children, railView }: AuthShellProps) {
   const signedIn = !loading && !!user
   const [sessionChecked, setSessionChecked] = useState<null | "confirmed" | "denied" | "unknown">(null)
   const [verifyRound, setVerifyRound] = useState(0)
-
   useEffect(() => {
     if (!signedIn || sessionChecked) return
     let cancelled = false
@@ -44,7 +49,6 @@ export function AuthShell({ children, railView }: AuthShellProps) {
       clearTimeout(timeout)
     }
   }, [signedIn, sessionChecked, verifyRound, refreshUser])
-
   useEffect(() => {
     if (!signedIn || !sessionChecked) return
     if (sessionChecked === "confirmed" && user) {
@@ -103,6 +107,8 @@ export function AuthShell({ children, railView }: AuthShellProps) {
     )
   }
 
+  const backgroundImage = AUTH_BACKGROUND_IMAGES[railView]
+
   return (
     <div className={`flex min-h-[100dvh] items-center justify-center bg-surface-secondary px-4 py-6 ${isDev ? "pt-14" : ""}`}>
       {isDev && (
@@ -113,7 +119,7 @@ export function AuthShell({ children, railView }: AuthShellProps) {
       <div className="w-full max-w-3xl">
         <div className="relative overflow-hidden rounded-xl border border-border bg-surface shadow-md">
           <div className="grid overflow-hidden rounded-xl border bg-surface shadow-md lg:grid-cols-[minmax(0,42%)_1fr]">
-            <AuthBrandRail view={railView} />
+            <AuthBrandRail view={railView} backgroundImage={backgroundImage} />
             <div className="p-5 sm:p-6 lg:p-8">{children}</div>
           </div>
         </div>
