@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { Handshake, ShieldCheck, ArrowRight } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
 
@@ -49,18 +50,17 @@ export function AuthBrandRail({ view, backgroundImage }: AuthBrandRailProps) {
   }
 
   return (
-    <div
-      className={cn(
-        "relative px-5 py-5 lg:px-6 lg:py-8 min-h-[64dvh]",
-        "rounded-xl border border-white/10 text-white",
-      )}
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
+    <div className={cn("relative px-5 py-5 lg:px-6 lg:py-8 min-h-[64dvh]", "rounded-xl border border-white/10 text-white")}>
+      {/* Background image - using Next.js Image for optimization and priority loading */}
+      <Image
+        src={backgroundImage}
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="absolute inset-0 -z-10 object-cover rounded-xl"
+        aria-hidden="true"
+      />
       {/* Dark overlay for text readability - darker at TOP where headline/subtitle are, lighter at bottom for background visibility */}
       <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-primary-900/20 via-primary-900/35 to-primary-900/85" aria-hidden="true" />
 
