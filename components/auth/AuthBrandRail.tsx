@@ -49,7 +49,7 @@ export function AuthBrandRail({ view }: { view: "login" | "register" }) {
 
         {/* Headline */}
         <h1 className="mt-3 font-heading text-2xl font-bold leading-snug tracking-tight text-white">
-          {isRegister ? "Create your APL account." : "Kenya&rsquo;s direct property &amp; artisan network."}
+          {isRegister ? "Create your APL account." : "Kenya's direct property & artisan network."}
         </h1>
 
         {/* Subtitle */}
