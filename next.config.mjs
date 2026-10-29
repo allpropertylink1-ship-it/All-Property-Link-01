@@ -66,6 +66,12 @@ const nextConfig = {
       // Option B consolidation: /fundis merged into /services (type=FUNDI).
       // Incoming query (?category=&city=&search=&page=) is merged automatically.
       { source: "/fundis", destination: "/services?type=FUNDI", permanent: true },
+      // Auth split: /auth → /auth/login; /auth?view=register or ?ref= → /auth/register;
+      // /auth?tab=agent → /aplreps/sign-in. Query params are merged automatically.
+      { source: "/auth", has: [{ type: "query", key: "tab", value: "agent" }], destination: "/aplreps/sign-in", permanent: true },
+      { source: "/auth", has: [{ type: "query", key: "view", value: "register" }], destination: "/auth/register", permanent: true },
+      { source: "/auth", has: [{ type: "query", key: "ref" }], destination: "/auth/register", permanent: true },
+      { source: "/auth", destination: "/auth/login", permanent: true },
     ];
   },
 };

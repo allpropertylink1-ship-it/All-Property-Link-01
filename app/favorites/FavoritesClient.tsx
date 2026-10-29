@@ -230,7 +230,7 @@ export function FavoritesClient() {
           </div>
           {!isMember && totalCount > 0 && (
             <Link
-              href="/auth"
+              href="/auth/login?return=/favorites"
               className="touch-target inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-600"
             >
               Sign in to sync & get price-drop alerts

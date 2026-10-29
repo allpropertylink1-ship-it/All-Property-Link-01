@@ -321,7 +321,7 @@ export default async function ServicesPage({ searchParams }: Props) {
               </p>
             </div>
             <Link
-              href="/auth"
+              href="/auth/register"
               className="inline-flex min-h-touch shrink-0 items-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-accent-600"
             >
               Register as a Fundi

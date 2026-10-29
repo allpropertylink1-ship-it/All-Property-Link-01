@@ -28,7 +28,7 @@ export function ProviderCTASection({
   propertyCount: number
 }) {
   const { user } = useAuth()
-  const ctaHref = user ? "/dashboard/listings/new" : "/auth/login?next=/dashboard/listings/new"
+  const ctaHref = user ? "/dashboard/listings/new" : "/auth/login?return=/dashboard/listings/new"
 
   const stats = [
     { value: fundiCount, label: "Trade listings" },

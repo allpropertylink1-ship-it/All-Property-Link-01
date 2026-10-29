@@ -70,7 +70,7 @@ function BusinessProfilePageInner() {
     } catch {}
   }
   function redirectToLogin() {
-    setTimeout(() => router.push(`/auth?return=${encodeURIComponent(RETURN_TO)}`), 2500)
+    setTimeout(() => router.push(`/auth/login?return=${encodeURIComponent(RETURN_TO)}`), 2500)
   }
   function authErrorMessage(raw: string): string {
     if (isAccountInactiveError(raw)) {

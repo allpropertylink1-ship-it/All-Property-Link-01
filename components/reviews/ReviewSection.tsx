@@ -104,7 +104,7 @@ export function ReviewSection({
     (user.primaryUserType === "CUSTOMER" || (user.userTypes ?? []).includes("CUSTOMER") || (!user.primaryUserType && (!user.userTypes || user.userTypes.length === 0)));
   const isSeller = !!user && !isCustomer && !!user.primaryUserType;
   const isAgent = !!user && user.authMethod === "agent";
-  const signupUrl = `/auth?type=customer&return=${encodeURIComponent(pathname)}`;
+  const signupUrl = `/auth/register?role=CUSTOMER&return=${encodeURIComponent(pathname)}`;
 
   function startCreate() {
     setEditingId(null);

@@ -101,7 +101,7 @@ export function BottomNav() {
   // notifications inbox (their hub), businesses → dashboard. (Login landing
   // for customers is still "/" per personaHomeTarget.)
   const profileHref: string = !user
-    ? "/auth"
+    ? "/auth/login"
     : user.authMethod === "agent"
       ? "/dashboard/agent"
       : user.primaryUserType === "CUSTOMER"

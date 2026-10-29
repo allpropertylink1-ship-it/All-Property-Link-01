@@ -125,7 +125,7 @@ function ConsentInner() {
         <div className="w-full max-w-md rounded-2xl bg-surface p-6 text-center shadow-sm">
           <h1 className="font-heading text-xl font-bold text-text-primary">Please sign in</h1>
           <p className="mt-2 text-sm text-text-secondary">You need to be signed in to accept the Terms.</p>
-          <Link href="/auth" className="mt-4 inline-flex rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white">Go to Sign In</Link>
+          <Link href="/auth/login" className="mt-4 inline-flex rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white">Go to Sign In</Link>
         </div>
       </div>
     )
@@ -151,7 +151,7 @@ function ConsentInner() {
                 Refresh and re-check
               </button>
               <Link
-                href="/auth"
+                href="/auth/login"
                 onClick={() => { try { sessionStorage.removeItem("apl-consent-visits") } catch {} }}
                 className="touch-target inline-flex min-h-[44px] items-center justify-center rounded-xl border border-border px-6 py-3 text-sm font-medium text-text-secondary"
               >

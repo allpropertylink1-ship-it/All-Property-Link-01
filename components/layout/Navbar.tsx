@@ -163,14 +163,24 @@ export function Navbar() {
             {user ? (
               <ClientProfileButton />
             ) : (
-              <Link
-                href="/auth"
-                className={`hidden min-h-touch items-center rounded px-5 py-2 font-body text-[14px] font-normal tracking-[0.7px] text-white transition-all duration-300 md:inline-flex ${
-                  overlay ? "bg-transparent" : "bg-primary shadow-sm hover:bg-primary-600"
-                }`}
-              >
-                Log in / Join APL
-              </Link>
+              <>
+                <Link
+                  href="/auth/login"
+                  className={`hidden min-h-touch items-center rounded px-5 py-2 font-body text-[14px] font-normal tracking-[0.7px] text-white transition-all duration-300 md:inline-flex ${
+                    overlay ? "text-white/90 ring-1 ring-white/30 hover:bg-white/10" : "text-text-primary hover:bg-surface-secondary"
+                  }`}
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className={`hidden min-h-touch items-center rounded px-5 py-2 font-body text-[14px] font-normal tracking-[0.7px] transition-all duration-300 md:inline-flex ${
+                    overlay ? "bg-white text-primary-900 hover:bg-primary-50" : "bg-accent-500 text-primary-900 hover:bg-accent-400"
+                  }`}
+                >
+                  Join APL
+                </Link>
+              </>
             )}
             {/* Hamburger - visible whenever the desktop link row is hidden */}
             <button
@@ -230,13 +240,22 @@ export function Navbar() {
                   Agent Dashboard
                 </Link>
               ) : (
+              <>
                 <Link
-                  href="/auth"
+                  href="/auth/login"
                   onClick={() => setMobileOpen(false)}
                   className="mt-2 flex items-center justify-center gap-2 rounded bg-primary px-3 py-3 font-body text-[15px] font-bold text-white shadow-sm"
                 >
-                  Log in / Join APL
+                  Log in
                 </Link>
+                <Link
+                  href="/auth/register"
+                  onClick={() => setMobileOpen(false)}
+                  className="mt-2 flex items-center justify-center gap-2 rounded bg-accent-500 px-3 py-3 font-body text-[15px] font-bold text-primary-900 shadow-sm"
+                >
+                  Join APL
+                </Link>
+              </>
               )}
               <Link
                 href="/favorites"

@@ -160,58 +160,6 @@
   }
 }
 
-.auth-panel {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 50%;
-  z-index: 20;
-  overflow: hidden;
-  background:
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.022) 0 2px, transparent 2px 16px),
-    radial-gradient(120% 90% at 82% -5%, rgba(226, 122, 35, 0.22), transparent 55%),
-    radial-gradient(90% 80% at 5% 105%, rgba(10, 25, 21, 0.55), transparent 60%),
-    linear-gradient(165deg, #0E1E23 0%, #162C31 45%, #1E3A40 100%);
-  box-shadow:
-    -12px 0 24px -18px rgba(14, 30, 35, 0.45),
-    12px 0 24px -18px rgba(14, 30, 35, 0.45);
-  transform: translateX(0);
-  transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
-  will-change: transform;
-}
-
-.auth-panel--right {
-  transform: translateX(100%);
-}
-
-.auth-panel-inner {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.auth-panel-page {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  opacity: 1;
-  transition: opacity 0.5s cubic-bezier(0.65, 0, 0.35, 1);
-}
-
-.auth-panel-page.is-covered {
-  opacity: 0;
-}
-
-.auth-panel-page button {
-  pointer-events: auto;
-}
-
 .auth-strip {
   background:
     radial-gradient(120% 90% at 85% -10%, rgba(226, 122, 35, 0.25), transparent 55%),

@@ -29,10 +29,10 @@ const browseLinks = [
 ];
 
 const partnerLinks = [
-  { href: "/auth?view=register&role=PROPERTY_OWNER", label: "List a property" },
-  { href: "/auth?view=register&role=AGENT", label: "Join as a field rep" },
+  { href: "/auth/register?role=PROPERTY_OWNER", label: "List a property" },
+  { href: "/auth/register?role=AGENT", label: "List property as an agent" },
   {
-    href: "/auth?view=register&role=SERVICE_PROVIDER",
+    href: "/auth/register?role=SERVICE_PROVIDER",
     label: "Offer a service (fundi, cleaning, security)",
   },
 ];

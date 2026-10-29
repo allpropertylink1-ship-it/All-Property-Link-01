@@ -21,24 +21,7 @@ export function ProfileButton() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  if (!user) {
-    return (
-      <div className="hidden items-center gap-2 md:flex">
-        <Link
-          href="/auth/login"
-          className="touch-target inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:text-primary"
-        >
-          Log in
-        </Link>
-        <Link
-          href="/auth/register"
-          className="touch-target inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
-        >
-          Register
-        </Link>
-      </div>
-    )
-  }
+  if (!user) return null
 
   const isAgent = user.authMethod === "agent"
   const isCustomer = !isAgent && user.primaryUserType === "CUSTOMER"
