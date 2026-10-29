@@ -95,6 +95,8 @@ export function BottomNav() {
   const favCount = counts.PROPERTY + counts.SERVICE + counts.AGENT;
   const [browseOpen, setBrowseOpen] = useState(false);
 
+  if (pathname.startsWith("/auth")) return null;
+
   const homeActive = pathname === "/";
   const favActive = pathname === "/favorites";
   // Profile tab stays distinct from Home: reps → agent console, customers →
