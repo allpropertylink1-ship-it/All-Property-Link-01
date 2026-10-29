@@ -4,11 +4,14 @@ import { resolvePostAuthTarget } from "@/lib/persona";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { LoginPane } from "@/components/auth/LoginPane";
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ ref?: string; return?: string }> }) {
-  const { return: returnParam } = await searchParams;
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ ref?: string; return?: string; tab?: string }> }) {
+  const { return: returnParam, tab } = await searchParams;
   const session = await getSession();
   if (session?.user) {
     redirect(resolvePostAuthTarget(session.user, returnParam));
+  }
+  if (tab === "agent") {
+    redirect(`/aplreps/sign-in${returnParam ? `?return=${encodeURIComponent(returnParam)}` : ""}`);
   }
 
   return (
