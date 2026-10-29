@@ -34,10 +34,11 @@ export function AuthBrandRail({ view }: { view: "login" | "register" }) {
       className={cn(
         "relative px-5 py-5 lg:px-6 lg:py-8 min-h-[64dvh]",
         "rounded-xl border border-white/10 text-white",
-        // Deep-teal brand gradient matching .auth-strip / .profile-hero
-        // Single bg-* so both gradients compose (Tailwind doesn't allow two bg-* classes)
-        "bg-[linear-gradient(165deg,#0E1E23_0%,#162C31_45%,#1E3A40_100%),radial-gradient(120%_90%_at_85%_-10%,rgba(226,122,35,0.25),transparent_55%)]"
       )}
+      style={{
+        background:
+          "linear-gradient(165deg,#0E1E23 0%,#162C31 45%,#1E3A40 100%),radial-gradient(120% 90% at 85% -10%,rgba(226,122,35,0.25),transparent 55%)",
+      }}
     >
       <div className="flex flex-col justify-center h-full">
         {/* Eyebrow */}
