@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { Handshake, ShieldCheck, ArrowRight } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
 
@@ -31,10 +32,21 @@ interface AuthBrandRailProps {
 }
 
 export function AuthBrandRail({ view, backgroundImage }: AuthBrandRailProps) {
+  const router = useRouter()
   const isRegister = view === "register"
   const isRep = view === "rep"
   const isLoginOrRep = !isRegister
   const points = isRegister ? railPointsRegister : railPoints
+
+  function handleCrossLinkClick() {
+    if (isRegister) {
+      router.push("/auth/login")
+    } else if (isRep) {
+      router.push("/auth/register")
+    } else {
+      router.push("/auth/register")
+    }
+  }
 
   return (
     <div
@@ -96,6 +108,7 @@ export function AuthBrandRail({ view, backgroundImage }: AuthBrandRailProps) {
         {/* Footer cross-link */}
         <button
           type="button"
+          onClick={handleCrossLinkClick}
           className={cn(
             "mt-5 inline-flex touch-target items-center justify-center gap-1.5 rounded-lg border border-white/25 bg-white/10 px-5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-white/20"
           )}
