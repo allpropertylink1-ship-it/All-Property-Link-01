@@ -50,7 +50,7 @@ export function AuthBrandRail({ view, backgroundImage }: AuthBrandRailProps) {
   }
 
   return (
-    <div className={cn("relative px-5 py-5 lg:px-6 lg:py-8 min-h-[64dvh]", "rounded-xl border border-white/10 text-white")}>
+    <div className={cn("relative w-full h-full px-5 py-5 lg:px-6 lg:py-8 min-h-[64dvh]", "rounded-xl border border-white/10 text-white")}>
       {/* Background image - using Next.js Image for optimization and priority loading */}
       <Image
         src={backgroundImage}

@@ -112,7 +112,7 @@ export function AuthShell({ children, railView }: AuthShellProps) {
     <div className="flex min-h-[100dvh] items-center justify-center bg-surface-secondary px-4 py-6">
       <div className="w-full max-w-3xl">
         <div className="relative overflow-hidden rounded-xl border border-border bg-surface shadow-md">
-          <div className="grid overflow-hidden rounded-xl border bg-surface shadow-md lg:grid-cols-[minmax(0,42%)_1fr]">
+          <div className="grid overflow-hidden rounded-xl border bg-surface shadow-md lg:grid-cols-[minmax(320px,42%)_1fr]">
             <AuthBrandRail view={railView} backgroundImage={backgroundImage} />
             <div className="p-5 sm:p-6 lg:p-8">{children}</div>
           </div>
