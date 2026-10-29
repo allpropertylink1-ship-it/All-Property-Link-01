@@ -13,7 +13,7 @@ export const metadata = {
 };
 
 export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ ref?: string; role?: string; return?: string; tab?: string }> }) {
-  const { ref, role, return: returnParam, tab } = await searchParams;
+  const { ref, return: returnParam, tab } = await searchParams;
   const session = await getSession();
   if (session?.user) {
     redirect(resolvePostAuthTarget(session.user, returnParam));
@@ -24,11 +24,10 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
 
   return (
     <AuthShell railView="register">
-      <RegisterForm
-        referralCode={ref}
-        initialRole={role}
-        returnUrl={returnParam}
-      />
+    <RegisterForm
+      referralCode={ref}
+      returnUrl={returnParam}
+    />
     </AuthShell>
   );
 }

@@ -36,7 +36,6 @@ export function AuthBrandRail({ view, backgroundImage }: AuthBrandRailProps) {
   const router = useRouter()
   const isRegister = view === "register"
   const isRep = view === "rep"
-  const isLoginOrRep = !isRegister
   const points = isRegister ? railPointsRegister : railPoints
 
   function handleCrossLinkClick() {
@@ -50,18 +49,23 @@ export function AuthBrandRail({ view, backgroundImage }: AuthBrandRailProps) {
   }
 
   return (
-    <div className={cn("relative w-full h-full px-5 py-5 lg:px-6 lg:py-8 min-h-[64dvh]", "rounded-xl border border-white/10 text-white")}>
-      {/* Background image - using Next.js Image for optimization and priority loading */}
+    <div
+      className={cn(
+        "relative w-full h-full min-h-[36dvh] lg:min-h-[600px] px-5 py-5 lg:px-6 lg:py-8",
+        "rounded-xl bg-gradient-to-t from-primary-900/20 via-primary-900/35 to-primary-900/85 text-white",
+      )}
+    >
+      {/* Background image fills the rounded rail; the outer surface clips it. */}
       <Image
         src={backgroundImage}
         alt=""
         fill
         priority
         sizes="100vw"
-        className="absolute inset-0 z-0 object-cover rounded-xl"
+        className="absolute inset-0 z-0 object-cover"
         aria-hidden="true"
       />
-      {/* Dark overlay for text readability - darker at TOP where headline/subtitle are, lighter at bottom for background visibility */}
+      {/* Readability overlay over the image. */}
       <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-primary-900/20 via-primary-900/35 to-primary-900/85" aria-hidden="true" />
 
       <div className="relative flex flex-col justify-center h-full z-10">
@@ -72,7 +76,7 @@ export function AuthBrandRail({ view, backgroundImage }: AuthBrandRailProps) {
         </span>
 
         {/* Headline */}
-        <h1 className="mt-3 font-heading text-2xl font-bold leading-snug tracking-tight text-white">
+        <h1 className="mt-3 font-heading text-2xl font-bold leading-snug tracking-tight text-white text-balance">
           {isRegister ? "Create your APL account." : isRep ? "APL Representative Sign In" : "Kenya's direct property & artisan network."}
         </h1>
 

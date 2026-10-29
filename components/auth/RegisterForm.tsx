@@ -5,26 +5,27 @@ import { useRouter } from "next/navigation"
 import { useAuth, type OtpResponse } from "@/lib/auth-context"
 import { OtpInput } from "./OtpInput"
 import { RegisterAccountInfo } from "./RegisterAccountInfo"
-import { formatTime, kenyanPhoneError, isDisposableEmailClient, DISPOSABLE_EMAIL_MESSAGE } from "./RegisterForm.utils"
+import { isDisposableEmailClient, DISPOSABLE_EMAIL_MESSAGE, formatTime } from "./RegisterForm.utils"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { resolvePostAuthTarget } from "@/lib/persona"
 
-type ContactMethod = "email" | "phone"
 type Step = "form" | "otp"
 
-const REGISTER_ROLES = ["PROPERTY_OWNER", "AGENT", "SERVICE_PROVIDER", "CUSTOMER"] as const
+// Backend requires a userType; default to CUSTOMER and let the user pick their
+// actual role in onboarding (/dashboard/choose-role) instead of asking at
+// signup — one less pill to fill.
+const DEFAULT_USER_TYPE = "CUSTOMER"
 
-export function RegisterForm({ referralCode: initialReferralCode, returnUrl, initialRole }: { referralCode?: string; returnUrl?: string; initialRole?: string }) {
+export function RegisterForm({
+  referralCode: initialReferralCode,
+  returnUrl,
+}: { referralCode?: string; returnUrl?: string }) {
   const router = useRouter()
-  const { signup, sendOtp, verifyOtp, updateRegistration } = useAuth()
+  const { signup, sendOtp, verifyOtp } = useAuth()
   const [step, setStep] = useState<Step>("form")
   const [error, setError] = useState("")
-  // Which email input a disposable-email error belongs to (highlights it).
-  const [errorField, setErrorField] = useState<"email" | "recoveryEmail" | null>(null)
+  const [errorField, setErrorField] = useState<"email" | null>(null)
   const [loading, setLoading] = useState(false)
-  const [contactMethod, setContactMethod] = useState<ContactMethod>("email")
-  const [password, setPassword] = useState("")
-  const [referralCode, setReferralCode] = useState(initialReferralCode || "")
   const [otpIdentifier, setOtpIdentifier] = useState("")
   const [otpType, setOtpType] = useState<"EMAIL_VERIFICATION" | "PHONE_VERIFICATION">("EMAIL_VERIFICATION")
   const [otpDestination, setOtpDestination] = useState("")
@@ -35,16 +36,12 @@ export function RegisterForm({ referralCode: initialReferralCode, returnUrl, ini
   const otpTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const cooldownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // Preserve form data when navigating between steps
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
-  const [phone, setPhone] = useState("")
-  const [recoveryEmail, setRecoveryEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [referralCode, setReferralCode] = useState(initialReferralCode || "")
   const [acceptedTerms, setAcceptedTerms] = useState(false)
-  const [accountType, setAccountType] = useState<string>(
-    initialRole && (REGISTER_ROLES as readonly string[]).includes(initialRole) ? initialRole : "",
-  )
 
   useEffect(() => {
     return () => {
@@ -89,13 +86,6 @@ export function RegisterForm({ referralCode: initialReferralCode, returnUrl, ini
 
     const form = new FormData(e.currentTarget)
     const confirmPassword = form.get("confirmPassword") as string
-    const phoneRaw = contactMethod === "phone" ? (form.get("phone") as string) : ""
-
-    // Use state values for all fields (preserved across steps)
-    const firstNameValue = firstName
-    const lastNameValue = lastName
-    const emailValue = email
-    const phoneValue = phone
 
     if (password !== confirmPassword) {
       setError("Passwords do not match")
@@ -103,79 +93,43 @@ export function RegisterForm({ referralCode: initialReferralCode, returnUrl, ini
       return
     }
 
-    if (contactMethod === "phone") {
-      const phoneErr = kenyanPhoneError(phoneRaw)
-      if (phoneErr) {
-        setError(phoneErr)
-        setLoading(false)
-        return
-      }
-      if (recoveryEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recoveryEmail.trim())) {
-        setError("Recovery email doesn't look valid — check it or leave it empty.")
-        setLoading(false)
-        return
-      }
-    }
-
-    if (contactMethod === "email") {
-      if (!emailValue) {
-        setError("Email is required")
-        setLoading(false)
-        return
-      }
-      // Instant local check (Option A quick-list) — no request sent.
-      if (isDisposableEmailClient(emailValue)) {
-        setError(DISPOSABLE_EMAIL_MESSAGE)
-        setErrorField("email")
-        setLoading(false)
-        return
-      }
-    }
-
-    if (contactMethod === "phone" && recoveryEmail.trim() && isDisposableEmailClient(recoveryEmail)) {
-      setError(DISPOSABLE_EMAIL_MESSAGE)
-      setErrorField("recoveryEmail")
+    if (!email) {
+      setError("Email is required")
       setLoading(false)
       return
     }
-
-    if (!firstNameValue || !lastNameValue) {
+    if (isDisposableEmailClient(email)) {
+      setError(DISPOSABLE_EMAIL_MESSAGE)
+      setErrorField("email")
+      setLoading(false)
+      return
+    }
+    if (!firstName || !lastName) {
       setError("First name and last name are required")
       setLoading(false)
       return
     }
-
-    if (!accountType) {
-      setError("Please select your account type")
-      setLoading(false)
-      return
-    }
-
     if (!acceptedTerms) {
       setError("Please agree to the Terms of Service and Privacy Policy and confirm you are 18+ years old.")
       setLoading(false)
       return
     }
 
-    let result: { error?: string; code?: string; field?: string; otp?: OtpResponse }
-
-    if (otpIdentifier) {
-      result = await updateRegistration({
-        oldIdentifier: otpIdentifier,
-        ...(emailValue ? { email: emailValue } : {}),
-        ...(phoneValue ? { phone: phoneValue } : {}),
-        firstName: firstNameValue, lastName: lastNameValue,
-      })
-    } else {
-      result = await signup({ firstName: firstNameValue, lastName: lastNameValue, password, userType: accountType, email: emailValue, phone: phoneValue, referralCode: referralCode || undefined, acceptedTerms: true, ageConfirmed: true, recoveryEmail: contactMethod === "phone" && recoveryEmail.trim() ? recoveryEmail.trim() : undefined })
-    }
+    const result: { error?: string; code?: string; field?: string; otp?: OtpResponse } = await signup({
+      firstName,
+      lastName,
+      password,
+      userType: DEFAULT_USER_TYPE,
+      email,
+      referralCode: referralCode || undefined,
+      acceptedTerms: true,
+      ageConfirmed: true,
+    })
 
     if (result.error) {
-      // Backend disposable-email block (400 DISPOSABLE_EMAIL): stay on the
-      // form, show the same banner, highlight the email input — never OTP.
       if (result.code === "DISPOSABLE_EMAIL") {
         setError(DISPOSABLE_EMAIL_MESSAGE)
-        setErrorField(result.field === "recoveryEmail" ? "recoveryEmail" : "email")
+        setErrorField("email")
       } else {
         setError(result.error)
       }
@@ -229,9 +183,11 @@ export function RegisterForm({ referralCode: initialReferralCode, returnUrl, ini
     const { error: sendError } = await sendOtp(otpIdentifier, otpType)
     if (sendError) {
       setError(sendError)
+      setOtpLoading(false)
       return
     }
     startCooldown(60)
+    setOtpLoading(false)
     setOtpValues(["", "", "", "", "", ""])
   }
 
@@ -246,7 +202,9 @@ export function RegisterForm({ referralCode: initialReferralCode, returnUrl, ini
               <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
             </svg>
           </span>
-          <h2 className="mt-2 font-heading text-lg font-bold tracking-tight text-text-primary">Check your {isEmail ? "email" : "phone"}</h2>
+          <h2 className="mt-2 font-heading text-lg font-bold tracking-tight text-text-primary">
+            Check your {isEmail ? "email" : "phone"}
+          </h2>
           <p className="mt-0.5 text-[13px] text-text-secondary">
             Code sent to <strong className="break-all text-text-primary">{otpDestination}</strong>
             <button
@@ -259,9 +217,7 @@ export function RegisterForm({ referralCode: initialReferralCode, returnUrl, ini
           </p>
         </div>
 
-        {error && (
-          <FormBanner variant="error">{error}</FormBanner>
-        )}
+        {error && <FormBanner variant="error">{error}</FormBanner>}
 
         <OtpInput value={otpValues.join("")} onChange={(val) => { const arr = new Array(6).fill(""); val.split("").forEach((d, i) => { if (i < 6) arr[i] = d }); setOtpValues(arr) }} disabled={otpLoading} />
 
@@ -274,7 +230,9 @@ export function RegisterForm({ referralCode: initialReferralCode, returnUrl, ini
           {cooldown > 0 ? (
             <span className="text-text-secondary">Resend in {formatTime(cooldown)}</span>
           ) : (
-            <button type="button" onClick={handleResendOtp} className="font-semibold text-accent-600 hover:text-accent-700">Resend</button>
+            <button type="button" onClick={handleResendOtp} className="font-semibold text-accent-600 hover:text-accent-700">
+              Resend
+            </button>
           )}
         </div>
 
@@ -285,38 +243,37 @@ export function RegisterForm({ referralCode: initialReferralCode, returnUrl, ini
           aria-busy={otpLoading}
           className="touch-target flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary/30 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {otpLoading ? "Verifying..." : "Verify"}
+          {otpLoading ? "Verifying…" : "Verify"}
         </button>
       </div>
     )
   }
 
-  // Wrapper functions to convert ChangeEvent to string for setState
   const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)
   const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value)
     if (errorField === "email") { setErrorField(null); setError("") }
   }
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)
-  const handleRecoveryEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setRecoveryEmail(e.target.value)
-    if (errorField === "recoveryEmail") { setErrorField(null); setError("") }
-  }
 
   return (
     <form onSubmit={handleSubmit}>
       <RegisterAccountInfo
-        contactMethod={contactMethod} password={password} referralCode={referralCode}
-        firstName={firstName} lastName={lastName} email={email} phone={phone} recoveryEmail={recoveryEmail}
-        accountType={accountType}
-        error={error} errorField={errorField} loading={loading} acceptedTerms={acceptedTerms} onAcceptedChange={setAcceptedTerms}
-        onContactMethodChange={setContactMethod} onPasswordChange={setPassword}
+        password={password}
+        referralCode={referralCode}
+        firstName={firstName}
+        lastName={lastName}
+        email={email}
+        error={error}
+        errorField={errorField}
+        loading={loading}
+        acceptedTerms={acceptedTerms}
+        onAcceptedChange={setAcceptedTerms}
+        onPasswordChange={setPassword}
         onReferralCodeChange={setReferralCode}
-        onFirstNameChange={handleFirstNameChange} onLastNameChange={handleLastNameChange}
-        onEmailChange={handleEmailChange} onPhoneChange={handlePhoneChange}
-        onRecoveryEmailChange={handleRecoveryEmailChange}
-        onAccountTypeChange={setAccountType}
+        onFirstNameChange={handleFirstNameChange}
+        onLastNameChange={handleLastNameChange}
+        onEmailChange={handleEmailChange}
         returnUrl={returnUrl}
       />
     </form>

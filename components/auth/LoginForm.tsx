@@ -10,7 +10,7 @@ import { SetPasswordForm } from "./SetPasswordForm"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { Mail } from "@/components/ui/icons"
 import { resolvePostAuthTarget } from "@/lib/persona"
-import { InlineInput } from "./InlineInput"
+import { AuthInput } from "./AuthInput"
 
 export function LoginForm({ returnUrl }: { returnUrl?: string }) {
   const router = useRouter()
@@ -200,8 +200,8 @@ export function LoginForm({ returnUrl }: { returnUrl?: string }) {
           </div>
         )}
 
-        {/* Email or phone - inline */}
-        <InlineInput
+        {/* Email or phone */}
+        <AuthInput
           label="Email or phone"
           required
           id="email"
@@ -216,8 +216,8 @@ export function LoginForm({ returnUrl }: { returnUrl?: string }) {
           leadingIcon={<Mail size={16} />}
         />
 
-        {/* Password - inline */}
-        <InlineInput
+        {/* Password */}
+        <AuthInput
           label="Password"
           required
           id="password"
@@ -314,9 +314,9 @@ export function LoginForm({ returnUrl }: { returnUrl?: string }) {
           type="submit"
           disabled={loading}
           aria-busy={loading}
-          className="touch-target flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary/30 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+          className="touch-target flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary/30 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? "Signing in..." : "Sign in"}
+          {loading ? "Signing in…" : "Sign in"}
         </button>
       </form>
 
@@ -330,7 +330,7 @@ export function LoginForm({ returnUrl }: { returnUrl?: string }) {
           {phoneStep === "phone" ? (
             <>
               {phoneError && <FormBanner variant="error">{phoneError}</FormBanner>}
-              <InlineInput
+              <AuthInput
                 label="Phone"
                 required
                 id="login-phone"
@@ -342,6 +342,7 @@ export function LoginForm({ returnUrl }: { returnUrl?: string }) {
                 onChange={(e) => { setPhone(e.target.value); setPhoneError("") }}
                 placeholder="712345678 or 0112345678"
                 leadingIcon={<span className="text-text-secondary">+254</span>}
+                error={phoneError ? phoneError : undefined}
               />
               <button
                 type="button"
@@ -350,7 +351,7 @@ export function LoginForm({ returnUrl }: { returnUrl?: string }) {
                 aria-busy={phoneLoading}
                 className="touch-target w-full rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary-600 transition-colors hover:bg-primary-50 disabled:opacity-50"
               >
-                {phoneLoading ? "Sending..." : "Send login code"}
+                {phoneLoading ? "Sending…" : "Send login code"}
               </button>
             </>
           ) : (
@@ -375,7 +376,7 @@ export function LoginForm({ returnUrl }: { returnUrl?: string }) {
                 aria-busy={otpLoading}
                 className="touch-target w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {otpLoading ? "Verifying..." : "Verify code"}
+                {otpLoading ? "Verifying…" : "Verify code"}
               </button>
               <div className="text-center">
                 {otpCooldown > 0 ? (

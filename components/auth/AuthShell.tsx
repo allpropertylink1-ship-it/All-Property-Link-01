@@ -67,7 +67,7 @@ export function AuthShell({ children, railView }: AuthShellProps) {
   if (signedIn && sessionChecked !== "denied") {
     if (sessionChecked === "unknown") {
       return (
-        <div className="rounded-xl border border-border bg-surface p-6 text-center shadow-md sm:p-8">
+        <div className="rounded-xl border border-border bg-surface p-6 text-center shadow-sm sm:p-8">
           <h2 className="font-heading text-xl font-bold tracking-tight text-text-primary">
             Still signing you in…
           </h2>
@@ -96,7 +96,7 @@ export function AuthShell({ children, railView }: AuthShellProps) {
     }
     return (
       <div
-        className="flex min-h-[40dvh] flex-col items-center justify-center gap-3 rounded-xl border border-border bg-surface p-6 text-center shadow-md"
+        className="flex min-h-[40dvh] flex-col items-center justify-center gap-3 rounded-xl border border-border bg-surface p-6 text-center shadow-sm"
         role="status"
         aria-label="Signing you in"
       >
@@ -110,11 +110,13 @@ export function AuthShell({ children, railView }: AuthShellProps) {
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-surface-secondary px-4 py-6">
-      <div className="w-full max-w-3xl">
+      <div className="w-full max-w-[720px]">
+        {/* Single rounded surface. Everything inside shares one border/radius
+            so there are no nested overlays or double borders. */}
         <div className="relative overflow-hidden rounded-xl border border-border bg-surface shadow-md">
-          <div className="grid overflow-hidden rounded-xl border bg-surface shadow-md lg:grid-cols-[minmax(320px,42%)_1fr]">
+          <div className="grid overflow-hidden bg-surface lg:grid-cols-[320px_1fr] min-h-[44dvh] lg:min-h-[600px]">
             <AuthBrandRail view={railView} backgroundImage={backgroundImage} />
-            <div className="p-5 sm:p-6 lg:p-8">{children}</div>
+            <div className="p-6 sm:p-8 lg:p-12">{children}</div>
           </div>
         </div>
       </div>

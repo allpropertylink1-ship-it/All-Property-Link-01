@@ -1,78 +1,52 @@
 ﻿"use client"
 
 import { ArrowLeft } from "@/components/ui/icons"
-import { PasswordStrength } from "./PasswordStrength"
 import { PasswordToggle } from "./PasswordToggle"
 import { FormBanner } from "@/components/shared/FormFeedback"
-import { InlineInput } from "./InlineInput"
-import { Select, type SelectOption } from "./Select"
+import { AuthInput } from "./AuthInput"
 import Link from "next/link"
-
-type ContactMethod = "email" | "phone"
+import { cn } from "@/lib/utils"
 
 interface Props {
-  contactMethod: ContactMethod
   password: string
   referralCode: string
   firstName: string
   lastName: string
   email: string
-  phone: string
-  recoveryEmail: string
-  accountType: string
   error: string
-  errorField?: "email" | "recoveryEmail" | null
+  errorField?: "email" | null
   loading: boolean
   acceptedTerms: boolean
   onAcceptedChange: (v: boolean) => void
-  onContactMethodChange: (m: ContactMethod) => void
-  onAccountTypeChange: (v: string) => void
   onPasswordChange: (v: string) => void
   onReferralCodeChange: (v: string) => void
   onFirstNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onLastNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  onPhoneChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  onRecoveryEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   returnUrl?: string
 }
 
-const accountOptions = [
-  { value: "PROPERTY_OWNER", label: "Property Owner", hint: "List your own property" },
-  { value: "AGENT", label: "Agent", hint: "List for owners" },
-  { value: "SERVICE_PROVIDER", label: "Service Provider", hint: "Fundi, cleaning, security & more" },
-  { value: "CUSTOMER", label: "Customer", hint: "Rent, buy & browse" },
-] as const satisfies SelectOption[]
-
 export function RegisterAccountInfo({
-  contactMethod,
   password,
   referralCode,
   firstName,
   lastName,
   email,
-  phone,
-  recoveryEmail,
-  accountType,
   error,
   errorField = null,
   loading,
   acceptedTerms,
   onAcceptedChange,
-  onContactMethodChange,
-  onAccountTypeChange,
   onPasswordChange,
   onReferralCodeChange,
   onFirstNameChange,
   onLastNameChange,
   onEmailChange,
-  onPhoneChange,
-  onRecoveryEmailChange,
   returnUrl,
 }: Props) {
   return (
-    <div className="space-y-4">
-      {/* Back link - simplified to text link */}
+    <div className="space-y-5">
+      {/* Back link */}
       <Link
         href={`/auth/login${returnUrl ? `?return=${encodeURIComponent(returnUrl)}` : ""}`}
         className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors"
@@ -83,9 +57,9 @@ export function RegisterAccountInfo({
 
       {error && <FormBanner variant="error">{error}</FormBanner>}
 
-      {/* First name / Last name - inline */}
+      {/* First name / Last name - inline on wider screens, stacked on mobile */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <InlineInput
+        <AuthInput
           label="First name"
           required
           id="firstName"
@@ -97,7 +71,7 @@ export function RegisterAccountInfo({
           placeholder="Kamau"
           error={errorField === "email" ? error : undefined}
         />
-        <InlineInput
+        <AuthInput
           label="Last name"
           required
           id="lastName"
@@ -110,101 +84,28 @@ export function RegisterAccountInfo({
         />
       </div>
 
-      {/* Account type - dropdown select */}
-      <Select
-        label="I am joining as"
+      {/* Email */}
+      <AuthInput
+        label="Email"
         required
-        options={accountOptions}
-        value={accountType}
-        onChange={onAccountTypeChange}
-        placeholder="Select account type"
-        error={!accountType ? "Please select your account type" : undefined}
+        id="email"
+        name="email"
+        type="email"
+        autoComplete="email"
+        value={email}
+        onChange={onEmailChange}
+        placeholder="you@example.co.ke"
+        error={errorField === "email" ? error : undefined}
+        leadingIcon={
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <path d="m22 6-10 7L2 6" />
+          </svg>
+        }
       />
 
-      {/* Contact method - email/phone toggle */}
-      <div className="space-y-1.5">
-        <label className={cn("block text-xs font-semibold text-text-primary", "text-error-500")}>
-          Sign up with <span className="ml-0.5 text-error-500" aria-hidden="true">*</span>
-        </label>
-        <div className="grid grid-cols-2 gap-1 rounded-lg bg-surface-secondary p-1" role="group" aria-label="Contact method">
-          <button
-            type="button"
-            onClick={() => onContactMethodChange("email")}
-            aria-pressed={contactMethod === "email"}
-            className={cn(
-              "rounded-md px-3 py-1.5 text-xs font-semibold transition-all",
-              contactMethod === "email"
-                ? "bg-surface text-primary shadow-sm"
-                : "text-text-secondary hover:text-text-primary",
-            )}
-          >
-            Email
-          </button>
-          <button
-            type="button"
-            onClick={() => onContactMethodChange("phone")}
-            aria-pressed={contactMethod === "phone"}
-            className={cn(
-              "rounded-md px-3 py-1.5 text-xs font-semibold transition-all",
-              contactMethod === "phone"
-                ? "bg-surface text-primary shadow-sm"
-                : "text-text-secondary hover:text-text-primary",
-            )}
-          >
-            Phone
-          </button>
-        </div>
-      </div>
-
-      {/* Email or Phone fields */}
-      {contactMethod === "email" ? (
-        <InlineInput
-          label="Email"
-          required
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          value={email}
-          onChange={onEmailChange}
-          placeholder="you@example.co.ke"
-          error={errorField === "email" ? error : undefined}
-          leadingIcon={<svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/></svg>}
-        />
-      ) : (
-        <>
-          <InlineInput
-            label="Phone"
-            required
-            id="phone"
-            name="phone"
-            type="tel"
-            inputMode="numeric"
-            maxLength={12}
-            value={phone}
-            onChange={onPhoneChange}
-            placeholder="712345678 or 0112345678"
-            leadingIcon={<span className="text-text-secondary">+254</span>}
-            error={errorField === "recoveryEmail" ? error : undefined}
-          />
-          <InlineInput
-            label="Recovery email"
-            id="recoveryEmail"
-            name="recoveryEmail"
-            type="email"
-            autoComplete="email"
-            value={recoveryEmail}
-            onChange={onRecoveryEmailChange}
-            placeholder="you@example.co.ke"
-            hint="Recommended — your way back in if you lose this number"
-            error={errorField === "recoveryEmail" ? error : undefined}
-            leadingIcon={<svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/></svg>}
-          />
-        </>
-      )}
-
       {/* Password */}
-      <InlineInput
+      <AuthInput
         label="Password"
         required
         id="password"
@@ -226,12 +127,9 @@ export function RegisterAccountInfo({
           />
         }
       />
-      <div className="sm:pl-[152px]">
-        <PasswordStrength password={password} />
-      </div>
 
       {/* Confirm password */}
-      <InlineInput
+      <AuthInput
         label="Confirm password"
         required
         id="confirmPassword"
@@ -250,14 +148,14 @@ export function RegisterAccountInfo({
         }
       />
 
-      {/* Referral code - collapsible */}
+      {/* Referral code - optional, collapsible */}
       <details className="group rounded-lg border border-border bg-surface-secondary/50">
         <summary className="cursor-pointer list-none px-3 py-2 text-xs font-semibold text-text-secondary hover:text-text-primary">
           <span className="group-open:hidden">Have a rep code? <span className="text-primary-600">Add it</span></span>
           <span className="hidden group-open:inline">Hide rep code</span>
         </summary>
         <div className="px-3 pb-3">
-          <InlineInput
+          <AuthInput
             label="Rep code"
             id="referralCode"
             name="referralCode"
@@ -284,10 +182,14 @@ export function RegisterAccountInfo({
         />
         <span className="text-xs leading-snug text-text-secondary">
           I agree to the{" "}
-          <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary underline-offset-2 hover:underline">Terms</a>{" "}
+          <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary-600 underline-offset-2 hover:underline">
+            Terms
+          </a>{" "}
           and{" "}
-          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary underline-offset-2 hover:underline">Privacy Policy</a>
-          {" "}(18+).
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary-600 underline-offset-2 hover:underline">
+            Privacy Policy
+          </a>{" "}
+          (18+).
         </span>
       </label>
 
@@ -295,14 +197,12 @@ export function RegisterAccountInfo({
         type="submit"
         disabled={loading}
         aria-busy={loading}
-        className="touch-target flex w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary/30 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+        className={cn(
+          "touch-target flex w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary/30 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50",
+        )}
       >
-        {loading ? "Creating..." : "Create account"}
+        {loading ? "Creating…" : "Create account"}
       </button>
     </div>
   )
-}
-
-function cn(...classes: (string | undefined | null | false)[]) {
-  return classes.filter(Boolean).join(" ")
 }
