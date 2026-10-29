@@ -13,8 +13,11 @@ import {
   IconChevronLeft,
   IconHeart,
   IconStar,
+  IconEye,
+  IconBriefcase,
+  IconUser,
 } from "@tabler/icons-react"
-import { cn, formatPrice, formatFromPrice } from "@/lib/utils"
+import { cn, formatPrice, formatFromPrice, formatViewsCompact } from "@/lib/utils"
 import { PLACEHOLDER_PROPERTY } from "@/lib/placeholders"
 import { getCoverImage, getGalleryImages, optimizeImageUrl } from "@/lib/images"
 import { slugifyCity } from "@/lib/seo"
@@ -37,6 +40,8 @@ export interface LatestListCardData {
   coverImage?: string | null
   agentPhone?: string | null
   listerKind?: "OWNER" | "AGENT" | null
+  /** SUM(viewCount) across all of the lister's live listings (server-computed). */
+  listerViews?: number | null
   hasMultipleUnits?: boolean
   units?: { price: number | string | null | undefined; listingPurpose?: string | null }[]
   /** Paid-featured placement (unexpired `featuredUntil`). */
@@ -86,6 +91,15 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
   const displayPrice = multiPrice || (item.price != null ? formatPrice(item.price, item.listingPurpose ?? undefined) : null)
   const safeActive = Math.min(active, slides.length - 1)
   const phone = item.agentPhone?.trim() ? item.agentPhone.trim() : null
+  const listerLabel = item.listerKind === "OWNER" ? "Owner" : item.listerKind === "AGENT" ? "Agent" : null
+  const listerViewsText = item.listerViews != null ? formatViewsCompact(item.listerViews) : null
+  const listerAria = item.listerKind
+    ? `Listed by ${item.listerKind === "OWNER" ? "the property owner" : "an agent"}${
+        item.listerViews != null
+          ? ` — ${item.listerViews.toLocaleString()} total views across their listings`
+          : ""
+      }`
+    : null
 
   useEffect(() => {
     setActive(0)
@@ -203,6 +217,31 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
           <span className="rounded bg-surface-secondary px-3 py-1 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em] text-text-primary">
             {item.propertyType || ""}
           </span>
+          {item.listerKind && listerLabel && (
+            <span
+              aria-label={listerAria ?? undefined}
+              className={cn(
+                "inline-flex items-center gap-1 rounded px-3 py-1 font-body text-[12px] font-medium uppercase leading-4 tracking-[0.12em]",
+                item.listerKind === "OWNER" ? "bg-primary text-white" : "bg-surface-secondary text-text-primary"
+              )}
+            >
+              {item.listerKind === "OWNER" ? (
+                <IconUser size={14} stroke={1.5} aria-hidden="true" />
+              ) : (
+                <IconBriefcase size={14} stroke={1.5} aria-hidden="true" />
+              )}
+              {listerLabel}
+              {listerViewsText != null && (
+                <>
+                  <span aria-hidden="true" className="opacity-40">|</span>
+                  <span className="inline-flex items-center gap-1 normal-case tracking-normal tabular-nums">
+                    <IconEye size={14} stroke={1.5} aria-hidden="true" />
+                    {listerViewsText}
+                  </span>
+                </>
+              )}
+            </span>
+          )}
         </div>
         <h3 className="line-clamp-1 font-body text-sm font-semibold leading-5 text-text-primary">
           <Link href={detailHref} className="after:absolute after:inset-0 transition-colors hover:text-primary">
@@ -255,26 +294,11 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
             {item.region && item.region !== item.city ? ` - ${item.region}` : ""}
           </span>
         </p>
-        {item.listerKind && (
-          <p className="sr-only">
-            Listed by {item.listerKind === "OWNER" ? "Owner" : "Agent"}
-          </p>
-        )}
         <div className="mt-auto flex flex-nowrap items-center justify-between gap-1.5 pt-0.5">
           <div className="flex min-w-0 flex-nowrap items-center gap-1.5 overflow-hidden">
             {purpose && (
               <span className="inline-flex h-9 max-w-[110px] shrink-0 items-center justify-center gap-1.5 truncate whitespace-nowrap rounded border border-transparent bg-accent-500 px-2 font-body text-[11px] font-medium leading-4 text-white">
                 {purpose}
-              </span>
-            )}
-            {item.listerKind === "OWNER" && (
-              <span className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded border border-transparent bg-primary px-2 font-body text-[11px] font-medium uppercase leading-4 tracking-[0.12em] text-white">
-                Owner
-              </span>
-            )}
-            {item.listerKind === "AGENT" && (
-              <span className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded border border-border bg-surface-secondary px-2 font-body text-[11px] font-medium uppercase leading-4 tracking-[0.12em] text-text-primary">
-                Agent
               </span>
             )}
           </div>

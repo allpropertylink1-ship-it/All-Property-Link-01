@@ -38,6 +38,13 @@ export interface PropertyCard {
   hasMultipleUnits?: boolean;
   unitMixDescription?: string | null;
   units?: PropertyUnit[];
+  /** List-endpoint card projection of the seller (PROPERTY_CARD_SELECT).
+   * `totalViews` = SUM(viewCount) across all of the seller's live listings. */
+  agent?: {
+    id: string; firstName?: string | null; lastName?: string | null;
+    avatar?: string | null; phone?: string | null; companyName?: string | null;
+    userTypes?: string[] | null; totalViews?: number | null;
+  } | null;
 }
 
 interface PropertyDetailAgent {

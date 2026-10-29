@@ -11,7 +11,7 @@ interface ApiProperty extends LatestListCardData {
   currency: string
   isFeatured: boolean
   createdAt: string | Date
-  agent?: { phone?: string | null; userTypes?: string[] | null } | null
+  agent?: { phone?: string | null; userTypes?: string[] | null; totalViews?: number | null } | null
 }
 
 function listerKindOf(p: ApiProperty): "OWNER" | "AGENT" | null {
@@ -22,7 +22,7 @@ function listerKindOf(p: ApiProperty): "OWNER" | "AGENT" | null {
 }
 
 function withPhone(p: ApiProperty): LatestListCardData {
-  return { ...p, agentPhone: p.agent?.phone ?? null, listerKind: listerKindOf(p) }
+  return { ...p, agentPhone: p.agent?.phone ?? null, listerKind: listerKindOf(p), listerViews: p.agent?.totalViews ?? null }
 }
 
 function isSaleOrRent(p: ApiProperty) {

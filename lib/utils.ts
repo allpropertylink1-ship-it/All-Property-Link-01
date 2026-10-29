@@ -22,6 +22,19 @@ export function fmtKES(value: number | string | null | undefined) {
   return new Intl.NumberFormat("en-KE", { style: "currency", currency: "KES", minimumFractionDigits: 0 }).format(num)
 }
 
+/**
+ * Compact view counter for card pills: 650 → "650", 12,450 → "12.4k".
+ * Whole thousands drop the decimal ("12k", not "12.0k").
+ */
+export function formatViewsCompact(views: number | null | undefined): string {
+  const n = Number(views)
+  if (!Number.isFinite(n) || n < 0) return "0"
+  if (n < 1000) return String(Math.round(n))
+  const k = n / 1000
+  const rounded = k >= 100 ? Math.round(k) : Math.round(k * 10) / 10
+  return `${rounded}k`
+}
+
 export interface UnitPriceInput {
   price?: number | string | null | undefined;
   listingPurpose?: string | null;
