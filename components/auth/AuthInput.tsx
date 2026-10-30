@@ -57,7 +57,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
             {...props}
           />
           {trailingIcon && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none shrink-0">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted shrink-0">
               {trailingIcon}
             </div>
           )}
