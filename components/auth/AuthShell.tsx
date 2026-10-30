@@ -109,14 +109,14 @@ export function AuthShell({ children, railView }: AuthShellProps) {
   const backgroundImage = AUTH_BACKGROUND_IMAGES[railView]
 
   return (
-    <div className="flex min-h-[56dvh] items-center justify-center bg-surface-secondary px-4 py-4">
+    <div className="flex min-h-[44dvh] items-center justify-center bg-surface-secondary px-4 py-2">
       <div className="w-full max-w-[720px]">
         {/* Single rounded surface. Everything inside shares one border/radius
             so there are no nested overlays or double borders. */}
         <div className="relative overflow-hidden rounded-xl border border-border bg-surface shadow-md">
-          <div className="grid overflow-hidden bg-surface lg:grid-cols-[320px_1fr] min-h-[40dvh] lg:min-h-[500px]">
+          <div className="grid overflow-hidden bg-surface lg:grid-cols-[320px_1fr] min-h-[36dvh] lg:min-h-[420px]">
             <AuthBrandRail view={railView} backgroundImage={backgroundImage} />
-            <div className="p-6 sm:p-8 lg:p-12">{children}</div>
+            <div className="p-6 sm:p-8 lg:p-6">{children}</div>
           </div>
         </div>
       </div>
