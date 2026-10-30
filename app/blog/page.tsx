@@ -4,6 +4,7 @@ import { getBlogPosts, getBlogCategories } from "@/lib/services/blog"
 import { siteUrl } from "@/lib/seo"
 import BlogPostCard from "@/components/blog/BlogPostCard"
 import BlogHero from "@/components/blog/BlogHero"
+import { NewsletterSignup } from "@/components/blog/NewsletterSignup"
 
 interface Props {
   searchParams: { [key: string]: string | string[] | undefined }
@@ -52,7 +53,9 @@ export default async function BlogPage({ searchParams }: Props) {
   if (posts.total === 0 && page > 1) notFound()
 
   return (
-    <div className="space-y-10">
+    <>
+      <link rel="alternate" type="application/rss+xml" href={`${siteUrl()}/api/blog/feed`} />
+      <div className="space-y-10">
       <BlogHero
         title="Blog"
         description="Market trends, home buying and selling tips, property news, and community stories from Kenya."
@@ -101,6 +104,9 @@ export default async function BlogPage({ searchParams }: Props) {
           </div>
         )}
       </div>
+
+      <NewsletterSignup />
     </div>
+    </>
   )
 }

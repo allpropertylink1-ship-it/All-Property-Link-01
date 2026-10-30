@@ -13,6 +13,8 @@ import { LatestListCard, type LatestListCardData } from "@/components/home/Lates
 import { SectionHeading } from "@/components/home/SectionHeading"
 import type { PropertyCard as PropertyCardType } from "@/lib/services/property"
 import type { ProfileRow } from "@/components/home/ProfileCard"
+import type { BlogPostCard } from "@/lib/services/blog"
+import BlogPostCardComponent from "@/components/blog/BlogPostCard"
 
 function withPhone(p: PropertyCardType): LatestListCardData {
   const agent = p.agent
@@ -98,6 +100,36 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
   )
 }
 
+function FeaturedBlog({ initialData }: { initialData?: BlogPostCard[] }) {
+  const posts = (initialData || []).slice(0, 6)
+  if (posts.length === 0) return null
+  return (
+    <section aria-labelledby="home-blog-heading" className="bg-surface">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <SectionHeading
+            id="home-blog-heading"
+            eyebrow="From the Blog"
+            title="Featured Stories"
+            subtitle="Market trends, home tips, and community news from Kenya"
+          />
+          <Link
+            href="/blog"
+            className="inline-flex min-h-touch shrink-0 items-center gap-1.5 text-sm font-bold text-primary transition-colors hover:text-accent-600"
+          >
+            View All Posts
+            <ArrowRight size={18} aria-hidden="true" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {posts.map((post) => (
+            <BlogPostCardComponent key={post.id} post={post} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
 export function HomePageClient({
   featured,
   latest,
@@ -105,6 +137,7 @@ export function HomePageClient({
   land,
   fundis,
   providers,
+  featuredBlog,
   fundiCount,
   providerCount,
   propertyCount,
@@ -115,6 +148,7 @@ export function HomePageClient({
   land: PropertyCardType[];
   fundis: ProfileRow[];
   providers: ProfileRow[];
+  featuredBlog: BlogPostCard[];
   fundiCount: number;
   providerCount: number;
   propertyCount: number;
@@ -128,6 +162,7 @@ export function HomePageClient({
       <FeaturedLand initialData={land} />
       <FeaturedProviders initialData={providers} />
       <FeaturedFundis initialData={fundis} />
+      <FeaturedBlog initialData={featuredBlog} />
       <ProviderCTASection
         fundiCount={fundiCount}
         providerCount={providerCount}

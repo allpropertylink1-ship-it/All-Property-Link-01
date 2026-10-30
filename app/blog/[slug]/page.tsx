@@ -1,9 +1,13 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { getBlogPostBySlug, getBlogPosts } from "@/lib/services/blog"
+import { getBlogPostBySlug, getBlogPosts, getBlogPostComments } from "@/lib/services/blog"
 import { siteUrl } from "@/lib/seo"
 import { resolveImageUrl } from "@/lib/images"
 import BlogPostCard from "@/components/blog/BlogPostCard"
+import { ShareButtons } from "@/components/shared/ShareButtons"
+import { NewsletterSignup } from "@/components/blog/NewsletterSignup"
+import { BlogCommentsSection } from "@/components/blog/BlogCommentsSection"
+import { BlogViewBeacon } from "@/components/blog/BlogViewBeacon"
 
 interface Props {
   params: { slug: string }
@@ -48,18 +52,74 @@ export default async function BlogPostPage({ params }: Props) {
   const post = await getBlogPostBySlug(params.slug)
   if (!post) notFound()
 
-  const related = await getBlogPosts({ pageSize: 3 })
+  const [related, comments] = await Promise.all([
+    getBlogPosts({ pageSize: 3 }),
+    getBlogPostComments(params.slug),
+  ])
+
+  const coverUrl = post.coverImage ? resolveImageUrl(post.coverImage) ?? post.coverImage : null
+  const canonical = `${siteUrl()}/blog/${post.slug}`
+  const articleBody = stripHtml(post.content)
+
+  const blogPostingJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.seoTitle || post.title,
+    "description": post.seoDescription || post.excerpt || articleBody.slice(0, 160),
+    "image": coverUrl ? [{ "@type": "ImageObject", "url": coverUrl }] : undefined,
+    "author": {
+      "@type": "Person",
+      "name": post.authorName,
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "All Property Link",
+      "url": siteUrl(),
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${siteUrl()}/logo.svg`,
+      },
+    },
+    "datePublished": post.publishedAt?.toISOString(),
+    "dateModified": post.updatedAt.toISOString(),
+    "url": canonical,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": canonical,
+    },
+    ...(articleBody ? { "articleBody": articleBody } : {}),
+    ...(post.category ? { "articleSection": post.category.name } : {}),
+  }
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": `${siteUrl()}/` },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": `${siteUrl()}/blog` },
+      ...(post.category ? [{ "@type": "ListItem", "position": 3, "name": post.category.name, "item": `${siteUrl()}/blog?category=${post.category.slug}` }] : []),
+      { "@type": "ListItem", "position": post.category ? 4 : 3, "name": post.title, "item": canonical },
+    ],
+  }
 
   return (
-    <div className="space-y-0">
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <div className="space-y-0">
       <BlogPostHero post={post} />
       <BlogPostContent post={post} />
+      <ShareButtons title={post.title} />
+      <NewsletterSignup />
       <BlogRelatedPosts
         currentSlug={post.slug}
         categoryId={post.category?.id}
         allPosts={related.posts}
       />
+      <BlogCommentsSection slug={post.slug} comments={comments} />
+      <BlogViewBeacon slug={post.slug} />
     </div>
+    </>
   )
 }
 

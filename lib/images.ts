@@ -88,7 +88,7 @@ export function getGalleryImages(p: { coverImage?: string | null; images?: unkno
 
 export function toThumbUrl(url: string, fallbackWidth = 400): string {
   if (!url) return url
-  if (url.startsWith("/uploads/properties/") || url.startsWith("/uploads/services/")) {
+  if (url.startsWith("/uploads/properties/") || url.startsWith("/uploads/services/") || url.startsWith("/uploads/blogs/")) {
     // /uploads/properties/uuid-name.jpg -> /uploads/properties/uuid-name-thumb.jpg
     // If already a thumb, return as-is.
     if (url.includes("-thumb.")) return url

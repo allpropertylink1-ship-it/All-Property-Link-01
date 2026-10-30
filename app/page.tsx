@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { HomePageClient } from "./HomePageClient"
 import { getProperties } from "@/lib/services/property"
 import { getServiceListings, type ServiceListingCard } from "@/lib/services/service"
+import { getBlogPosts } from "@/lib/services/blog"
 import type { ProfileRow } from "@/components/home/ProfileCard"
 
 export const revalidate = 60
@@ -19,7 +20,7 @@ function toProfileRows(services: ServiceListingCard[]): ProfileRow[] {
 export default async function HomePage() {
   // Server-side fetches cached by ISR (revalidate: 60) — embedded in HTML so
   // the browser renders cards immediately instead of a client-side waterfall.
-  const [latest, airbnbs, land, featured, fundis, providers] = await Promise.all([
+  const [latest, airbnbs, land, featured, fundis, providers, featuredBlog] = await Promise.all([
     // Newest across ALL property types. The shelf's own `isSaleOrRent` filter
     // drops LAND (~12% of stock) and short-term stays, so roughly 72% of a page
     // survives — 24 rows reliably fills the 6 slots. This used to be narrowed to
@@ -35,6 +36,7 @@ export default async function HomePage() {
     getProperties({ featured: true, pageSize: 6 }),
     getServiceListings({ type: "FUNDI", limit: "6" }),
     getServiceListings({ type: "SERVICE_PROVIDER", limit: "6" }),
+    getBlogPosts({ featured: true, pageSize: 6 }),
   ])
 
   const fundiRows = toProfileRows(fundis.services);
@@ -51,6 +53,7 @@ export default async function HomePage() {
       land={land.properties}
       fundis={fundiRows}
       providers={providerRows}
+      featuredBlog={featuredBlog.posts}
       fundiCount={fundis.total}
       providerCount={providers.total}
       // `latest` is the unfiltered query, so its total IS the platform-wide

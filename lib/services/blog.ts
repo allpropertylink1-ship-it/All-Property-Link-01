@@ -11,6 +11,17 @@ export interface BlogCategory {
   _count?: { posts: number }
 }
 
+export interface BlogComment {
+  id: string
+  authorName: string
+  authorEmail: string | null
+  content: string
+  status: string
+  parentId: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
 export interface BlogPostCard {
   id: string
   slug: string
@@ -67,6 +78,7 @@ const fetchApi = cache(async <T>(path: string): Promise<T | null> => {
 export const getBlogPosts = cache(async (filters: {
   category?: string
   search?: string
+  featured?: boolean
   page?: number
   pageSize?: number
 } = {}): Promise<{
@@ -79,6 +91,7 @@ export const getBlogPosts = cache(async (filters: {
   const params = new URLSearchParams()
   if (filters.category) params.set("category", filters.category)
   if (filters.search) params.set("search", filters.search)
+  if (filters.featured === true) params.set("featured", "true")
   if (filters.page) params.set("page", String(filters.page))
   if (filters.pageSize) params.set("limit", String(filters.pageSize))
 
@@ -115,4 +128,9 @@ export const getBlogCategories = cache(async (): Promise<BlogCategory[]> => {
     color: c.color ?? null,
     _count: c._count,
   }))
+})
+
+export const getBlogPostComments = cache(async (slug: string): Promise<BlogComment[]> => {
+  const data = await fetchApi<{ comments: BlogComment[] }>(`/api/blog/posts/${encodeURIComponent(slug)}/comments`)
+  return data?.comments || []
 })
