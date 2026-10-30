@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "@/components/ui/icons";
+import { Eye, EyeOff, Loader2 } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
 interface ConfirmDialogProps {
@@ -52,7 +52,6 @@ export function ConfirmDialog({
   onConfirmWithInput,
   requiresPassword = false,
   passwordLabel = "Current password",
-  passwordPlaceholder = "••••••••",
   isLoading = false,
   error,
   open: openProp,
@@ -61,6 +60,7 @@ export function ConfirmDialog({
   const [internalOpen, setInternalOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const isControlled = openProp !== undefined;
   const dialogOpen = isControlled ? openProp! : internalOpen;
 
@@ -110,17 +110,38 @@ export function ConfirmDialog({
                   isInputInvalid || error ? "border-error-500" : undefined,
                 )}
               />
+              {requiresInput && requiredInputValue && !isInputInvalid && !error && (
+                <p className="text-xs text-success-600" role="status">
+                  Matches "{requiredInputValue}"
+                </p>
+              )}
+              {requiresInput && requiredInputValue && isInputInvalid && !error && (
+                <p className="text-xs text-error-600" role="alert">
+                  Does not match "{requiredInputValue}" (case-sensitive)
+                </p>
+              )}
             </>
           )}
           {requiresPassword && (
             <>
-              <Label htmlFor="confirm-password">{passwordLabel}</Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="confirm-password">{passwordLabel}</Label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="ml-auto p-1 text-text-secondary hover:text-text-primary"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              </div>
               <Input
                 id="confirm-password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={passwordValue}
                 onChange={(e) => setPasswordValue(e.target.value)}
-                placeholder={passwordPlaceholder}
+                placeholder="Enter your current password"
+                autoComplete="current-password"
                 aria-invalid={isPasswordInvalid || error ? true : undefined}
                 aria-describedby={(error || isInputInvalid || isPasswordInvalid) ? "confirm-input-error" : undefined}
                 className={cn(
@@ -134,7 +155,7 @@ export function ConfirmDialog({
             <p id="confirm-input-error" className="text-xs text-error-600" role="alert">
               {error ||
                 (isInputInvalid
-                  ? `Please type "${requiredInputValue}" exactly to confirm.`
+                  ? `Please type "${requiredInputValue}" exactly to confirm (case-sensitive).`
                   : isPasswordInvalid
                     ? "Please enter your current password."
                     : "")}

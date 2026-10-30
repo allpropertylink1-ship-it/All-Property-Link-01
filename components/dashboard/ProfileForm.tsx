@@ -511,8 +511,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
           title="Deactivate account"
           description={
             <div className="space-y-3">
-              <p>This will deactivate your account and hide your listings, services, KYC documents, reviews, and files from public view. You have <strong>30 days</strong> to reactivate by contacting support. After 30 days, all data is permanently deleted and cannot be recovered. Your email address will be freed up so you can register again in the future.</p>
-              <p className="text-sm text-text-secondary">Type <strong>delete-account</strong> to confirm:</p>
+              <p>This will deactivate your account and hide your listings, services, KYC documents, reviews, and files from public view. You have <strong>30 days</strong> to reactivate by contacting support. After 30 days, all data is <strong>permanently deleted</strong> and <strong>cannot be recovered</strong>. Your email address will be freed up so you can register again in the future.</p>
+              <p className="text-sm text-text-secondary">Type <strong>delete-account</strong> <span className="text-xs text-text-secondary">(case-sensitive)</span> to confirm:</p>
             </div>
           }
           confirmLabel="Deactivate my account"
@@ -524,7 +524,6 @@ export function ProfileForm({ user }: ProfileFormProps) {
           inputType="text"
           requiresPassword
           passwordLabel="Current password"
-          passwordPlaceholder="••••••••"
           isLoading={isDeleting}
           error={deleteError}
           onConfirmWithInput={handleDeleteAccount}
