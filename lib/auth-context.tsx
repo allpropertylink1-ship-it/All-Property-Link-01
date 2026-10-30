@@ -203,7 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }, [])
 
-  const signup = useCallback(async (data: { email: string; password: string; firstName: string; lastName: string; userType: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string; recoveryEmail?: string }) => {
+  const signup = useCallback(async (data: { email: string; password: string; firstName: string; lastName: string; userType?: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string; recoveryEmail?: string }) => {
     const payload = { ...data, termsVersion: data.termsVersion || CURRENT_TERMS_VERSION }
     // Pass code/field through: the register form needs DISPOSABLE_EMAIL +
     // the offending field to highlight the right input.

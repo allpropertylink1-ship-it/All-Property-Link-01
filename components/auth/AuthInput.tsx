@@ -53,6 +53,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
             )}
             style={{ fontSize: "16px", ...style }}
             aria-invalid={!!error}
+            aria-required={required}
             aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
             {...props}
           />

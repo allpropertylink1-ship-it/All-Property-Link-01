@@ -186,7 +186,9 @@ export function LoginForm({ returnUrl }: { returnUrl?: string }) {
   return (
     <div className="space-y-4">
       <form onSubmit={handleSubmit} className="space-y-4">
-        {error && <FormBanner variant="error">{error}</FormBanner>}
+        {/* Single error region: banner only for form-level errors (no field target).
+            Field-specific errors render inline under their input via AuthInput. */}
+        {error && !errorField && <FormBanner variant="error">{error}</FormBanner>}
 
         {resetRequired && (
           <div className="rounded-lg border border-accent-500/40 bg-accent-50 p-3 text-sm text-text-primary" role="status">
@@ -209,10 +211,10 @@ export function LoginForm({ returnUrl }: { returnUrl?: string }) {
           name="email"
           type="text"
           inputMode="email"
-          autoComplete="username"
+          autoComplete="email"
           value={identifier}
           onChange={(e) => { setIdentifier(e.target.value); if (errorField === "email") { setErrorField(null); setError("") } }}
-          placeholder="you@example.co.ke or 712345678"
+          placeholder="you@example.co.ke or 0712345678"
           error={errorField === "email" ? error : undefined}
           leadingIcon={<Mail size={16} />}
         />
@@ -242,8 +244,8 @@ export function LoginForm({ returnUrl }: { returnUrl?: string }) {
           }
         />
 
-        {/* Remember me + Magic link */}
-        <div className="flex items-center justify-between gap-2">
+        {/* Remember me */}
+        <div className="flex items-center gap-2">
           <label className="flex cursor-pointer items-center gap-1.5" htmlFor="remember-me">
             <input
               id="remember-me"
@@ -254,62 +256,59 @@ export function LoginForm({ returnUrl }: { returnUrl?: string }) {
             />
             <span className="text-sm text-text-secondary">Remember me</span>
           </label>
-          <button
-            type="button"
-            onClick={() => {
-              if (magicSent) { setMagicSent(false); setMagicEmail(""); setMagicError("") }
-              setShowMagicLink(!showMagicLink)
-            }}
-            className="text-sm font-semibold text-primary-600 hover:text-primary-700"
-          >
-            {showMagicLink ? "Hide email link" : "Email me a link"}
-          </button>
         </div>
 
+        {/* Demoted magic-link option: secondary link, not equal-weight action */}
+        <button
+          type="button"
+          onClick={() => {
+            if (magicSent) { setMagicSent(false); setMagicEmail(""); setMagicError("") }
+            setShowMagicLink(!showMagicLink)
+          }}
+          className="text-sm text-text-secondary hover:text-primary-600 underline underline-offset-4 hover:underline"
+        >
+          {showMagicLink ? "Hide email link" : "Email me a sign-in link instead"}
+        </button>
+
         {showMagicLink && (
-          <details className="group rounded-lg border border-border bg-surface-secondary/50">
-            <summary className="cursor-pointer list-none px-3 py-2 text-sm font-semibold text-primary-600 hover:text-primary-700">
-              <span className="group-open:hidden">Email magic link</span>
-              <span className="hidden group-open:inline">Hide email link</span>
-            </summary>
-            <div className="px-3 pb-3 space-y-2">
-              {magicSent ? (
-                <>
-                  <FormBanner variant="success">Link sent — check your inbox.</FormBanner>
+          <div className="group rounded-lg border border-border bg-surface-secondary/50 p-3">
+            {magicSent ? (
+              <>
+                <FormBanner variant="success">Link sent — check your inbox.</FormBanner>
+                <button
+                  type="button"
+                  onClick={() => { setMagicSent(false); setMagicEmail(""); setMagicError("") }}
+                  className="touch-target w-full rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary-600 transition-colors hover:bg-primary-50"
+                >
+                  Send again
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    value={magicEmail}
+                    onChange={(e) => setMagicEmail(e.target.value)}
+                    placeholder="you@email.com"
+                    aria-label="Email for magic link"
+                    style={{ fontSize: "16px" }}
+                    className="block min-w-0 flex-1 rounded-lg border border-border bg-surface-secondary px-3 py-2.5 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
                   <button
                     type="button"
-                    onClick={() => { setMagicSent(false); setMagicEmail(""); setMagicError("") }}
-                    className="touch-target w-full rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary-600 transition-colors hover:bg-primary-50"
+                    onClick={handleMagicLink}
+                    disabled={!magicEmail}
+                    aria-busy={!!magicError}
+                    className="touch-target rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary-600 transition-colors hover:bg-primary-50 disabled:opacity-50"
                   >
-                    Send again
+                    Send
                   </button>
-                </>
-              ) : (
-                <>
-                  <div className="flex gap-2">
-                    <input
-                      type="email"
-                      value={magicEmail}
-                      onChange={(e) => setMagicEmail(e.target.value)}
-                      placeholder="you@email.com"
-                      aria-label="Email for magic link"
-                      style={{ fontSize: "16px" }}
-                      className="block min-w-0 flex-1 rounded-lg border border-border bg-surface-secondary px-3 py-2.5 text-sm text-text-primary placeholder:text-text-secondary focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleMagicLink}
-                      disabled={!magicEmail}
-                      className="touch-target rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary-600 transition-colors hover:bg-primary-50 disabled:opacity-50"
-                    >
-                      Send
-                    </button>
-                  </div>
-                  {magicError && <p className="text-xs text-error-500" role="alert">{magicError}</p>}
-                </>
-              )}
-            </div>
-          </details>
+                </div>
+                {magicError && <p className="mt-1 text-xs text-error-500" role="alert">{magicError}</p>}
+              </>
+            )}
+          </div>
         )}
 
         <button
@@ -322,7 +321,7 @@ export function LoginForm({ returnUrl }: { returnUrl?: string }) {
         </button>
       </form>
 
-      {/* Phone sign-in */}
+      {/* Phone sign-in — visually subordinate, progressive disclosure */}
       <details className="group rounded-lg border border-border bg-surface-secondary/50">
         <summary className="cursor-pointer list-none px-3 py-2.5 text-center text-sm font-semibold text-primary-600 hover:text-primary-700">
           <span className="group-open:hidden">Or continue with phone</span>
