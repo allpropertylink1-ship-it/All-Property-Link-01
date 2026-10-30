@@ -230,7 +230,24 @@ export function Navbar() {
                   </Link>
                 );
               })}
-              {isAgent ? (
+              {!user ? (
+                <>
+                  <Link
+                    href="/auth/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="mt-2 flex items-center justify-center gap-2 rounded bg-primary px-3 py-3 font-body text-[15px] font-bold text-white shadow-sm"
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    href="/auth/register"
+                    onClick={() => setMobileOpen(false)}
+                    className="mt-2 flex items-center justify-center gap-2 rounded bg-accent-500 px-3 py-3 font-body text-[15px] font-bold text-primary-900 shadow-sm"
+                  >
+                    Join APL
+                  </Link>
+                </>
+              ) : isAgent ? (
                 <Link
                   href="/dashboard/agent"
                   onClick={() => setMobileOpen(false)}
@@ -240,22 +257,7 @@ export function Navbar() {
                   Agent Dashboard
                 </Link>
               ) : (
-              <>
-                <Link
-                  href="/auth/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="mt-2 flex items-center justify-center gap-2 rounded bg-primary px-3 py-3 font-body text-[15px] font-bold text-white shadow-sm"
-                >
-                  Log in
-                </Link>
-                <Link
-                  href="/auth/register"
-                  onClick={() => setMobileOpen(false)}
-                  className="mt-2 flex items-center justify-center gap-2 rounded bg-accent-500 px-3 py-3 font-body text-[15px] font-bold text-primary-900 shadow-sm"
-                >
-                  Join APL
-                </Link>
-              </>
+                <ClientProfileButton />
               )}
               <Link
                 href="/favorites"
