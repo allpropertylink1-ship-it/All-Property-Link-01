@@ -1,5 +1,6 @@
 import { getProperties } from "@/lib/services/property";
 import { getServiceListings } from "@/lib/services/service";
+import { getBlogPosts, getBlogCategories } from "@/lib/services/blog";
 import { siteUrl, slugifyCity } from "@/lib/seo";
 import { isHiddenRep } from "@/lib/reps";
 import type { MetadataRoute } from "next";
@@ -184,6 +185,54 @@ async function profilePages(base: string): Promise<MetadataRoute.Sitemap> {
   }
 }
 
+async function blogPages(base: string): Promise<MetadataRoute.Sitemap> {
+  try {
+    const entries: MetadataRoute.Sitemap = [
+      {
+        url: `${base}/blog`,
+        lastModified: new Date(),
+        changeFrequency: "weekly",
+        priority: 0.6,
+      },
+    ];
+
+    const first = await getBlogPosts({ page: 1, pageSize: 50 });
+    const pageCount = Math.max(1, first.totalPages || 1);
+    const rest = pageCount > 1
+      ? await Promise.all(
+          Array.from({ length: pageCount - 1 }, (_, i) => getBlogPosts({ page: i + 2, pageSize: 50 }))
+        )
+      : [];
+    const allPages = [first, ...rest];
+
+    for (const { posts } of allPages) {
+      for (const post of posts) {
+        entries.push({
+          url: `${base}/blog/${post.slug}`,
+          lastModified: post.updatedAt ? new Date(post.updatedAt) : new Date(),
+          changeFrequency: "weekly",
+          priority: 0.5,
+        });
+      }
+    }
+
+    // Category pages
+    const categories = await getBlogCategories();
+    for (const cat of categories) {
+      entries.push({
+        url: `${base}/blog?category=${cat.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly",
+        priority: 0.4,
+      });
+    }
+
+    return entries;
+  } catch {
+    return [];
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
   return [
@@ -192,5 +241,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...(await servicePages(base)),
     ...(await agentPages(base)),
     ...(await profilePages(base)),
+    ...(await blogPages(base)),
   ];
 }

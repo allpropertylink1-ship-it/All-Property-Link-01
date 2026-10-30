@@ -13,7 +13,13 @@ import dynamic from "next/dynamic"
 
 const ClientProfileButton = dynamic(() => import("./ProfileButton").then(mod => mod.ProfileButton), { ssr: false })
 
-const navLinks = [
+type NavLink = {
+  href: string
+  label: string
+  children?: { href: string; label: string }[]
+}
+
+const navLinks: NavLink[] = [
   { href: "/", label: "HOME" },
   { href: "/properties", label: "PROPERTIES" },
   { href: "/airbnbs", label: "AIRBNBS" },
@@ -21,7 +27,11 @@ const navLinks = [
   { href: "/services?type=FUNDI", label: "FUNDIS" },
   { href: "/services", label: "SERVICES" },
   { href: "/aplreps", label: "REPS" },
-  { href: "/about", label: "ABOUT" },
+  {
+    href: "/about",
+    label: "ABOUT",
+    children: [{ href: "/blog", label: "BLOG" }],
+  },
 ]
 
 export function Navbar() {
@@ -33,6 +43,7 @@ export function Navbar() {
   const isAgent = user?.authMethod === "agent"
   const isDashboard = pathname.startsWith("/dashboard")
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [mobileSubmenu, setMobileSubmenu] = useState<string | null>(null)
   const [unread, setUnread] = useState(0)
   const favCount = counts.PROPERTY + counts.SERVICE + counts.AGENT
   // Transparent overlay at the very top of the homepage; solid white once scrolled.
@@ -104,6 +115,43 @@ export function Navbar() {
           <div className="hidden items-center gap-4 font-body xl:flex xl:gap-6">
             {navLinks.map((link) => {
               const active = isActive(link.href);
+              if (link.children && link.children.length > 0) {
+                return (
+                  <div
+                    key={link.label}
+                    className="relative group"
+                  >
+                    <Link
+                      href={link.href}
+                      aria-current={active ? "page" : undefined}
+                      className={active
+                        ? "border-b-2 border-primary py-1 text-[14px] font-bold tracking-[2.1px] text-primary transition-colors"
+                        : overlay
+                          ? "py-1 text-[14px] font-normal tracking-[2.1px] text-white transition-colors hover:text-white/75"
+                          : "py-1 text-[14px] font-normal tracking-[2.1px] text-text-secondary transition-colors hover:text-text-primary"}
+                    >
+                      {link.label}
+                    </Link>
+                    <div className="absolute left-0 top-full mt-1 hidden group-hover:block bg-card border border-border rounded-xl shadow-lg py-2 z-50 min-w-[160px]">
+                      {link.children.map((child) => {
+                        const childActive = isActive(child.href);
+                        return (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            aria-current={childActive ? "page" : undefined}
+                            className={childActive
+                              ? "block px-4 py-2 text-sm font-semibold text-primary bg-primary-50"
+                              : "block px-4 py-2 text-sm font-normal text-foreground hover:bg-surface-secondary hover:text-text-primary"}
+                          >
+                            {child.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              }
               return (
                 <Link
                   key={link.label}
@@ -203,7 +251,7 @@ export function Navbar() {
       {/* Mobile navigation - compact dropdown, translucent */}
       {!isDashboard && mobileOpen && (
         <div className="fixed inset-0 z-[60] xl:hidden">
-          <button type="button" aria-label="Close menu" className="absolute inset-0 bg-black/20" onClick={() => setMobileOpen(false)} />
+              <button type="button" aria-label="Close menu" className="absolute inset-0 bg-black/20" onClick={() => { setMobileOpen(false); setMobileSubmenu(null); }} />
           <div className="absolute right-4 top-[calc(4rem+env(safe-area-inset-top))] max-h-[calc(100dvh-5rem)] w-full max-w-[85vw] sm:w-64 overflow-y-auto rounded-2xl bg-white border border-border shadow-2xl">
             <div className="flex h-12 items-center justify-between px-4 border-b border-border">
               <span className="text-[15px] font-bold tracking-tight text-text-primary">Navigation</span>
@@ -219,6 +267,40 @@ export function Navbar() {
             <nav className="p-3 space-y-1">
               {navLinks.map((link) => {
                 const active = isActive(link.href);
+                const subOpen = mobileSubmenu === link.label;
+                if (link.children && link.children.length > 0) {
+                  return (
+                    <div key={link.label} className="space-y-0.5">
+                      <button
+                        onClick={() => setMobileSubmenu(subOpen ? null : link.label)}
+                        className={`flex items-center justify-between w-full rounded-xl px-3 py-3 text-[15px] font-semibold text-foreground transition-colors hover:bg-surface-secondary ${active ? "bg-primary-50 text-primary font-bold" : ""}`}
+                      >
+                        {link.label}
+                        <span className="text-xs">{subOpen ? "▲" : "▼"}</span>
+                      </button>
+                      {subOpen && (
+                        <div className="ml-2 space-y-0.5">
+                          {link.children.map((child) => {
+                            const childActive = isActive(child.href);
+                            return (
+                              <Link
+                                key={child.href}
+                                href={child.href}
+              onClick={() => { setMobileOpen(false); setMobileSubmenu(null); }}
+                                aria-current={childActive ? "page" : undefined}
+                                className={childActive
+                                  ? "flex items-center gap-3 rounded-xl px-4 py-2 text-[14px] font-bold text-primary bg-primary-50"
+                                  : "flex items-center gap-3 rounded-xl px-4 py-2 text-[14px] font-medium text-foreground hover:bg-surface-secondary"}
+                              >
+                                {child.label}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
                 return (
                   <Link
                     key={link.label}
