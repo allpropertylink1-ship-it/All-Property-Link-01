@@ -94,7 +94,7 @@ export function AgentLoginForm({ onForgotPassword, returnUrl }: Props) {
               required
               autoComplete="username"
               aria-invalid={errorField === "agentCode"}
-              aria-describedby={errorField === "agentCode" ? "agent-code-error" : undefined}
+              aria-describedby={errorField === "agentCode" ? "agent-code-error" : "agent-code-hint"}
               onChange={() => { if (errorField === "agentCode") { setErrorField(null); setError("") } }}
               className={stitchInputWithIconClass}
               style={{ fontSize: "16px" }}
@@ -103,6 +103,11 @@ export function AgentLoginForm({ onForgotPassword, returnUrl }: Props) {
           </div>
           {errorField === "agentCode" && error && (
             <p id="agent-code-error" className="mt-1 text-xs text-error-500" role="alert">{error}</p>
+          )}
+          {!errorField && (
+            <p className="mt-1 text-xs text-text-muted" id="agent-code-hint">
+              Example: REP-NAI-4028 or you@example.co.ke
+            </p>
           )}
         </div>
         <div>
@@ -137,15 +142,13 @@ export function AgentLoginForm({ onForgotPassword, returnUrl }: Props) {
             />
             <span className="text-[13px] text-text-secondary">Remember me</span>
           </label>
-          {onForgotPassword && (
-            <button
-              type="button"
-              onClick={onForgotPassword}
-              className="text-[13px] font-semibold text-accent-600 transition-colors hover:text-accent-700"
-            >
-              Forgot password?
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => { if (onForgotPassword) onForgotPassword(); else router.push("/auth/forgot-password") }}
+            className="text-[13px] font-semibold text-accent-600 transition-colors hover:text-accent-700"
+          >
+            Forgot password?
+          </button>
         </div>
 
         <AuthSubmitButton loading={loading} label="Sign in" loadingLabel="Signing in..." />
