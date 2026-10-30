@@ -104,20 +104,25 @@ export function ConfirmDialog({
                 placeholder={inputPlaceholder}
                 autoFocus
                 aria-invalid={isInputInvalid || error ? true : undefined}
-                aria-describedby={(error || isInputInvalid || isPasswordInvalid) ? "confirm-input-error" : undefined}
+                aria-describedby={error ? "confirm-input-error" : undefined}
                 className={cn(
                   "border-border",
                   isInputInvalid || error ? "border-error-500" : undefined,
                 )}
               />
-              {requiresInput && requiredInputValue && !isInputInvalid && !error && (
-                <p className="text-xs text-success-600" role="status">
-                  Matches "{requiredInputValue}"
-                </p>
-              )}
-              {requiresInput && requiredInputValue && isInputInvalid && !error && (
-                <p className="text-xs text-error-600" role="alert">
-                  Does not match "{requiredInputValue}" (case-sensitive)
+              {requiresInput && requiredInputValue && inputValue.length > 0 && !error && (
+                <p
+                  className={cn(
+                    "text-xs",
+                    inputValue === requiredInputValue
+                      ? "text-success-600"
+                      : "text-error-600",
+                  )}
+                  role={inputValue === requiredInputValue ? "status" : "alert"}
+                >
+                  {inputValue === requiredInputValue
+                    ? `Matches "${requiredInputValue}"`
+                    : `Does not match "${requiredInputValue}" (case-sensitive)`}
                 </p>
               )}
             </>
@@ -143,7 +148,7 @@ export function ConfirmDialog({
                 placeholder="Enter your current password"
                 autoComplete="current-password"
                 aria-invalid={isPasswordInvalid || error ? true : undefined}
-                aria-describedby={(error || isInputInvalid || isPasswordInvalid) ? "confirm-input-error" : undefined}
+                aria-describedby={error ? "confirm-input-error" : undefined}
                 className={cn(
                   "border-border",
                   isPasswordInvalid || error ? "border-error-500" : undefined,
@@ -151,14 +156,9 @@ export function ConfirmDialog({
               />
             </>
           )}
-          {(error || isInputInvalid || isPasswordInvalid) && (
+          {error && (
             <p id="confirm-input-error" className="text-xs text-error-600" role="alert">
-              {error ||
-                (isInputInvalid
-                  ? `Please type "${requiredInputValue}" exactly to confirm (case-sensitive).`
-                  : isPasswordInvalid
-                    ? "Please enter your current password."
-                    : "")}
+              {error}
             </p>
           )}
         </div>
