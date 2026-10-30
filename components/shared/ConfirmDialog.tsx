@@ -95,7 +95,9 @@ export function ConfirmDialog({
         <div className="space-y-2 px-6">
           {requiresInput && (
             <>
-              <Label htmlFor="confirm-input">{inputLabel}</Label>
+              <Label htmlFor="confirm-input" className="text-white font-medium">
+                {inputLabel}
+              </Label>
               <Input
                 id="confirm-input"
                 type={inputType}
@@ -106,17 +108,18 @@ export function ConfirmDialog({
                 aria-invalid={isInputInvalid || error ? true : undefined}
                 aria-describedby={error ? "confirm-input-error" : undefined}
                 className={cn(
-                  "border-border",
+                  "bg-primary-800 text-white placeholder-white/40 border-white/20",
                   isInputInvalid || error ? "border-error-500" : undefined,
+                  "focus:border-white focus:ring-white/30 focus:ring-1",
                 )}
               />
               {requiresInput && requiredInputValue && inputValue.length > 0 && !error && (
                 <p
                   className={cn(
-                    "text-xs",
+                    "text-xs font-medium",
                     inputValue === requiredInputValue
-                      ? "text-success-600"
-                      : "text-error-600",
+                      ? "text-success-400"
+                      : "text-error-400",
                   )}
                   role={inputValue === requiredInputValue ? "status" : "alert"}
                 >
@@ -130,11 +133,13 @@ export function ConfirmDialog({
           {requiresPassword && (
             <>
               <div className="flex items-center gap-2">
-                <Label htmlFor="confirm-password">{passwordLabel}</Label>
+                <Label htmlFor="confirm-password" className="text-white font-medium">
+                  {passwordLabel}
+                </Label>
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="ml-auto p-1 text-text-secondary hover:text-text-primary"
+                  className="ml-auto p-1 text-white/70 hover:text-white"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -150,23 +155,31 @@ export function ConfirmDialog({
                 aria-invalid={isPasswordInvalid || error ? true : undefined}
                 aria-describedby={error ? "confirm-input-error" : undefined}
                 className={cn(
-                  "border-border",
+                  "bg-primary-800 text-white placeholder-white/40 border-white/20",
                   isPasswordInvalid || error ? "border-error-500" : undefined,
+                  "focus:border-white focus:ring-white/30 focus:ring-1",
                 )}
               />
             </>
           )}
           {error && (
-            <p id="confirm-input-error" className="text-xs text-error-600" role="alert">
+            <p id="confirm-input-error" className="text-xs font-medium text-error-400" role="alert">
               {error}
             </p>
           )}
         </div>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => { setDialogOpen(false); }}>
+          <AlertDialogCancel
+            className="text-white border-white/30 hover:bg-white/10 hover:text-white"
+            onClick={() => { setDialogOpen(false); }}
+          >
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
+            className={confirmVariant === "destructive"
+              ? "bg-error-600 text-white hover:bg-error-500 disabled:opacity-50"
+              : "bg-primary-500 text-white hover:bg-primary-400 disabled:opacity-50"
+            }
             variant={confirmVariant === "destructive" ? "destructive" : "primary"}
             onClick={handleConfirm}
             disabled={
