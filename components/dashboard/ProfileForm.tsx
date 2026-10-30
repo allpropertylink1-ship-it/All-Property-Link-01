@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { api } from "@/lib/api-client";
 import { uploadImage, IMAGE_PRESETS, HEIC_HINT, isHeicFile } from "@/lib/image-client";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
@@ -9,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { Camera, Save, Key, Trash2, Shield, CheckCircle, Clock, XCircle, Loader2 } from "@/components/ui/icons";
+import { Camera, Save, Key, Trash2, Shield, CheckCircle, Clock, XCircle, Loader2, Download } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { resolveImageUrl } from "@/lib/images";
 import ImageCropDialog from "@/components/shared/ImageCropDialog";
@@ -48,6 +49,10 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const [isProfileDirty, setIsProfileDirty] = useState(false);
   const [isPasswordDirty, setIsPasswordDirty] = useState(false);
   const [accountDeleted, setAccountDeleted] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   function handlePassportSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -185,27 +190,53 @@ export function ProfileForm({ user }: ProfileFormProps) {
     }
   }
 
-  async function handleDeleteAccount(confirmText: string) {
+  async function handleDataExport() {
+    setIsExporting(true);
     try {
-      const res = await fetch("/api/user/account", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ confirmText }),
+      const res = await fetch("/api/user/data-export", {
+        method: "GET",
+        credentials: "include",
       });
-
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to delete account");
+        throw new Error("Failed to export data");
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `apl-data-export-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      setMessage({
+        type: "error",
+        text: err instanceof Error ? err.message : "Data export failed",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
+  async function handleDeleteAccount(confirmText: string, currentPassword?: string) {
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      const res = await api.delete("/api/user/account", { confirmText, currentPassword });
+
+      if (res.error) {
+        throw new Error(res.error || "Failed to delete account");
       }
 
+      setDeleteOpen(false);
       await logout();
       setAccountDeleted(true);
       setTimeout(() => router.push("/"), 3500);
     } catch (err) {
-      setMessage({
-        type: "error",
-        text: err instanceof Error ? err.message : "Something went wrong",
-      });
+      setDeleteError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -443,35 +474,59 @@ export function ProfileForm({ user }: ProfileFormProps) {
       </section>
 
       {/* Stitch section: danger zone */}
-      <section aria-labelledby="profile-danger-heading" className="rounded-xl border border-error-200 bg-surface p-5 sm:p-6">
-        <h3 id="profile-danger-heading" className="font-heading text-base font-semibold text-text-primary">
+      <section aria-labelledby="profile-danger-heading" className="rounded-xl border border-error-300 bg-error-50 p-5 sm:p-6">
+        <h3 id="profile-danger-heading" className="font-heading text-base font-semibold text-error-700 flex items-center gap-2">
+          <XCircle size={18} className="shrink-0" />
           Danger Zone
         </h3>
-        <p className="mb-4 mt-0.5 text-sm text-text-secondary">
+        <p className="mb-4 mt-0.5 text-sm text-error-600">
           Irreversible actions on your account
         </p>
 
+        {/* GDPR data export */}
+        <div className="mb-6 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleDataExport}
+            disabled={isExporting}
+            className="touch-target inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text-primary transition-colors hover:bg-surface-secondary disabled:opacity-50"
+          >
+            {isExporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={16} />}
+            {isExporting ? "Preparing export…" : "Download my data"}
+          </button>
+          <p className="text-xs text-text-secondary">
+            GDPR export of your profile, listings, services, KYC documents, reviews, and saved data as JSON.
+          </p>
+        </div>
+
         <ConfirmDialog
+          open={deleteOpen}
+          onOpenChange={setDeleteOpen}
           trigger={
-            <Button type="button" variant="destructive">
+            <Button type="button" variant="destructive" disabled={isDeleting}>
               <Trash2 size={16} className="mr-2" />
-              Delete account
+              Deactivate account
             </Button>
           }
-          title="Delete account"
+          title="Deactivate account"
           description={
             <div className="space-y-3">
-              <p>This will permanently delete your account and everything linked to you — listings, services, KYC documents, reviews, and files. Nothing is kept and this cannot be undone. Your email address will be freed up so you can register again in the future.</p>
+              <p>This will deactivate your account and hide your listings, services, KYC documents, reviews, and files from public view. You have <strong>30 days</strong> to reactivate by contacting support. After 30 days, all data is permanently deleted and cannot be recovered. Your email address will be freed up so you can register again in the future.</p>
               <p className="text-sm text-text-secondary">Type <strong>delete-account</strong> to confirm:</p>
             </div>
           }
-          confirmLabel="Delete my account"
+          confirmLabel="Deactivate my account"
           confirmVariant="destructive"
           requiresInput
           requiredInputValue="delete-account"
           inputLabel="Confirmation"
           inputPlaceholder="Type delete-account"
           inputType="text"
+          requiresPassword
+          passwordLabel="Current password"
+          passwordPlaceholder="••••••••"
+          isLoading={isDeleting}
+          error={deleteError}
           onConfirmWithInput={handleDeleteAccount}
         />
       </section>

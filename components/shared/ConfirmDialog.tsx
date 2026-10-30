@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Loader2 } from "@/components/ui/icons";
+import { cn } from "@/lib/utils";
 
 interface ConfirmDialogProps {
   trigger: ReactElement;
@@ -25,7 +27,14 @@ interface ConfirmDialogProps {
   inputLabel?: string;
   inputPlaceholder?: string;
   inputType?: string;
-  onConfirmWithInput?: (input: string) => void;
+  onConfirmWithInput?: (input: string, password?: string) => void;
+  requiresPassword?: boolean;
+  passwordLabel?: string;
+  passwordPlaceholder?: string;
+  isLoading?: boolean;
+  error?: string | null;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function ConfirmDialog({
@@ -41,49 +50,118 @@ export function ConfirmDialog({
   inputPlaceholder = "",
   inputType = "text",
   onConfirmWithInput,
+  requiresPassword = false,
+  passwordLabel = "Current password",
+  passwordPlaceholder = "••••••••",
+  isLoading = false,
+  error,
+  open: openProp,
+  onOpenChange,
 }: ConfirmDialogProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [passwordValue, setPasswordValue] = useState("");
+  const isControlled = openProp !== undefined;
+  const dialogOpen = isControlled ? openProp! : internalOpen;
 
-  function handleConfirm() {
-    setOpen(false);
-    if (requiresInput && onConfirmWithInput) {
-      onConfirmWithInput(inputValue);
-      setInputValue("");
-    } else if (onConfirm) {
-      onConfirm();
-    }
+  function setDialogOpen(val: boolean) {
+    if (!isControlled) setInternalOpen(val);
+    onOpenChange?.(val);
   }
 
+  function handleConfirm() {
+    if (requiresInput && onConfirmWithInput) {
+      onConfirmWithInput(inputValue, requiresPassword ? passwordValue : undefined);
+      setInputValue("");
+      setPasswordValue("");
+      if (!isControlled) setDialogOpen(false);
+      return;
+    }
+    if (onConfirm) onConfirm();
+    setDialogOpen(false);
+  }
+
+  const isInputInvalid = requiresInput && requiredInputValue && inputValue !== requiredInputValue;
+  const isPasswordInvalid = requiresPassword && !passwordValue.trim();
+
   return (
-    <AlertDialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setInputValue(""); }}>
+    <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <AlertDialogTrigger render={trigger} />
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
-        {requiresInput && (
-          <div className="space-y-2 px-6">
-            <Label htmlFor="confirm-input">{inputLabel}</Label>
-            <Input
-              id="confirm-input"
-              type={inputType}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder={inputPlaceholder}
-              autoFocus
-            />
-          </div>
-        )}
+        <div className="space-y-2 px-6">
+          {requiresInput && (
+            <>
+              <Label htmlFor="confirm-input">{inputLabel}</Label>
+              <Input
+                id="confirm-input"
+                type={inputType}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder={inputPlaceholder}
+                autoFocus
+                aria-invalid={isInputInvalid || error ? true : undefined}
+                aria-describedby={(error || isInputInvalid || isPasswordInvalid) ? "confirm-input-error" : undefined}
+                className={cn(
+                  "border-border",
+                  isInputInvalid || error ? "border-error-500" : undefined,
+                )}
+              />
+            </>
+          )}
+          {requiresPassword && (
+            <>
+              <Label htmlFor="confirm-password">{passwordLabel}</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={passwordValue}
+                onChange={(e) => setPasswordValue(e.target.value)}
+                placeholder={passwordPlaceholder}
+                aria-invalid={isPasswordInvalid || error ? true : undefined}
+                aria-describedby={(error || isInputInvalid || isPasswordInvalid) ? "confirm-input-error" : undefined}
+                className={cn(
+                  "border-border",
+                  isPasswordInvalid || error ? "border-error-500" : undefined,
+                )}
+              />
+            </>
+          )}
+          {(error || isInputInvalid || isPasswordInvalid) && (
+            <p id="confirm-input-error" className="text-xs text-error-600" role="alert">
+              {error ||
+                (isInputInvalid
+                  ? `Please type "${requiredInputValue}" exactly to confirm.`
+                  : isPasswordInvalid
+                    ? "Please enter your current password."
+                    : "")}
+            </p>
+          )}
+        </div>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => { setDialogOpen(false); }}>
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction
             variant={confirmVariant === "destructive" ? "destructive" : "primary"}
             onClick={handleConfirm}
-            disabled={requiresInput && (requiredInputValue ? inputValue !== requiredInputValue : !inputValue.trim())}
+            disabled={
+              isLoading ||
+              (requiresInput && requiredInputValue ? inputValue !== requiredInputValue : false) ||
+              (requiresPassword && !passwordValue.trim())
+            }
           >
-            {confirmLabel}
+            {isLoading ? (
+              <>
+                <Loader2 size={14} className="mr-2 animate-spin" />
+                Deleting…
+              </>
+            ) : (
+              confirmLabel
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
