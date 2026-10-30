@@ -31,6 +31,7 @@ export function Navbar() {
   const isActive = (href: string) => !href.includes("?") && pathname === href
   const isHome = pathname === "/"
   const isAgent = user?.authMethod === "agent"
+  const isDashboard = pathname.startsWith("/dashboard")
   const [mobileOpen, setMobileOpen] = useState(false)
   const [unread, setUnread] = useState(0)
   const favCount = counts.PROPERTY + counts.SERVICE + counts.AGENT
@@ -183,7 +184,8 @@ export function Navbar() {
               </>
             )}
             {/* Hamburger - visible whenever the desktop link row is hidden */}
-            <button
+            {!isDashboard && (
+              <button
                 type="button"
                 className={`touch-target flex h-11 w-11 items-center justify-center rounded-lg border border-transparent transition-colors xl:hidden ${
                   overlay ? "text-white hover:bg-white/10" : "hover:bg-surface-secondary"
@@ -194,11 +196,12 @@ export function Navbar() {
               >
                 {mobileOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
+            )}
           </div>
         </div>
       </nav>
       {/* Mobile navigation - compact dropdown, translucent */}
-      {mobileOpen && (
+      {!isDashboard && mobileOpen && (
         <div className="fixed inset-0 z-[60] xl:hidden">
           <button type="button" aria-label="Close menu" className="absolute inset-0 bg-black/20" onClick={() => setMobileOpen(false)} />
           <div className="absolute right-4 top-[calc(4rem+env(safe-area-inset-top))] max-h-[calc(100dvh-5rem)] w-full max-w-[85vw] sm:w-64 overflow-y-auto rounded-2xl bg-white border border-border shadow-2xl">
