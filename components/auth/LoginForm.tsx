@@ -19,6 +19,7 @@ export function LoginForm({ returnUrl }: { returnUrl?: string }) {
   const [errorField, setErrorField] = useState<"email" | "password" | null>(null)
   const [loading, setLoading] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
+  const [identifier, setIdentifier] = useState("")
   const [magicEmail, setMagicEmail] = useState("")
   const [magicSent, setMagicSent] = useState(false)
   const [showMagicLink, setShowMagicLink] = useState(false)
@@ -209,8 +210,8 @@ export function LoginForm({ returnUrl }: { returnUrl?: string }) {
           type="text"
           inputMode="email"
           autoComplete="username"
-          value=""
-          onChange={() => { if (errorField === "email") { setErrorField(null); setError("") } }}
+          value={identifier}
+          onChange={(e) => { setIdentifier(e.target.value); if (errorField === "email") { setErrorField(null); setError("") } }}
           placeholder="you@example.co.ke or 712345678"
           error={errorField === "email" ? error : undefined}
           leadingIcon={<Mail size={16} />}
