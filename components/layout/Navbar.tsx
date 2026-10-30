@@ -247,15 +247,6 @@ export function Navbar() {
                     Join APL
                   </Link>
                 </>
-              ) : isAgent ? (
-                <Link
-                  href="/dashboard/agent"
-                  onClick={() => setMobileOpen(false)}
-                  className="mt-2 flex items-center gap-2 rounded-xl bg-primary-600 px-3 py-3 text-[15px] font-semibold text-white shadow-sm"
-                >
-                  <Briefcase size={18} />
-                  Agent Dashboard
-                </Link>
               ) : (
                 <ClientProfileButton />
               )}
