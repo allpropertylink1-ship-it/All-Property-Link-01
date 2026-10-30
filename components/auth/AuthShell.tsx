@@ -114,7 +114,7 @@ export function AuthShell({ children, railView }: AuthShellProps) {
         {/* Single rounded surface. Everything inside shares one border/radius
             so there are no nested overlays or double borders. */}
         <div className="relative overflow-hidden rounded-xl border border-border bg-surface shadow-md">
-          <div className="grid overflow-hidden bg-surface lg:grid-cols-[320px_1fr] min-h-[36dvh] lg:min-h-[420px]">
+          <div className="grid overflow-hidden bg-surface lg:grid-cols-[320px_1fr]">
             <AuthBrandRail view={railView} backgroundImage={backgroundImage} />
             <div className="p-6 sm:p-8 lg:p-6">{children}</div>
           </div>
