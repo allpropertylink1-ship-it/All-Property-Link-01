@@ -53,7 +53,7 @@ interface AuthContextType {
   login: (emailOrPhone: string, password: string, rememberMe?: boolean) => Promise<{ error?: string; code?: string; field?: string; user?: User }>
   logout: () => Promise<void>
   phoneLogin: (phone: string) => Promise<{ error?: string; code?: string; field?: string; data?: { expiresIn: number; retryAfter: number } }>
-  signup: (data: { email: string; password: string; firstName: string; lastName: string; userType: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string; recoveryEmail?: string }) => Promise<{ error?: string; code?: string; field?: string; otp?: OtpResponse }>
+  signup: (data: { email: string; password: string; firstName: string; lastName: string; userType?: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string; recoveryEmail?: string }) => Promise<{ error?: string; code?: string; field?: string; otp?: OtpResponse }>
   sendOtp: (identifier: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION") => Promise<{ error?: string; data?: { expiresIn: number; retryAfter: number } }>
   verifyOtp: (identifier: string, token: string, type: "EMAIL_VERIFICATION" | "PHONE_VERIFICATION", rememberMe?: boolean) => Promise<{ error?: string; code?: string; user?: User }>
   updateRegistration: (data: { oldIdentifier: string; email?: string; phone?: string; firstName?: string; lastName?: string }) => Promise<{ error?: string; code?: string; field?: string; otp?: OtpResponse }>

@@ -11,10 +11,8 @@ import { resolvePostAuthTarget } from "@/lib/persona"
 
 type Step = "form" | "otp"
 
-// Backend requires a userType; default to CUSTOMER and let the user pick their
-// actual role in onboarding (/dashboard/choose-role) instead of asking at
-// signup — one less pill to fill.
-const DEFAULT_USER_TYPE = "CUSTOMER"
+// Registration does not set an account type. Users pick their real role at
+// /dashboard/choose-role after OTP verification and consent.
 
 export function RegisterForm({
   referralCode: initialReferralCode,
@@ -119,7 +117,6 @@ export function RegisterForm({
       firstName,
       lastName,
       password,
-      userType: DEFAULT_USER_TYPE,
       email,
       referralCode: referralCode || undefined,
       acceptedTerms: true,
