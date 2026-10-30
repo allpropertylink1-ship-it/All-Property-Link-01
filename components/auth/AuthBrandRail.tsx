@@ -40,7 +40,7 @@ export function AuthBrandRail({ view, backgroundImage }: AuthBrandRailProps) {
   return (
     <div
       className={cn(
-        "relative w-full h-full min-h-[36dvh] lg:min-h-[600px] px-5 py-5 lg:px-6 lg:py-8",
+        "relative w-full h-full min-h-[36dvh] lg:min-h-[500px] px-5 py-5 lg:px-6 lg:py-8",
         "rounded-xl bg-gradient-to-t from-primary-900/20 via-primary-900/35 to-primary-900/85 text-white",
       )}
     >
@@ -57,7 +57,7 @@ export function AuthBrandRail({ view, backgroundImage }: AuthBrandRailProps) {
       {/* Readability overlay over the image. */}
       <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-primary-900/20 via-primary-900/35 to-primary-900/85" aria-hidden="true" />
 
-      <div className="relative flex flex-col justify-center h-full z-10">
+      <div className="relative flex flex-col justify-start h-full pt-8 z-10">
         {!isRep && (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-0.5 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-accent-200 ring-1 ring-white/15">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-400" aria-hidden="true" />
