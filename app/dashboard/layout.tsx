@@ -26,17 +26,26 @@ export default async function DashboardLayout({
     ageConfirmed?: boolean;
   };
 
+  const pathname = (await headers()).get("x-pathname") || "";
+  const isTypeless =
+    !user.primaryUserType && (!user.userTypes || user.userTypes.length === 0);
+
   if (!user.acceptedTermsAt || user.termsVersion !== CURRENT_TERMS_VERSION) {
     // Keep the deep link so accepting the Terms lands the user where they
     // were headed (e.g. Business Profile) instead of stranding them at the
     // persona home and feeling like a bounce loop. x-pathname is set by
     // middleware on every request.
-    const pathname = (await headers()).get("x-pathname");
     redirect(
       pathname && pathname.startsWith("/dashboard")
         ? `/auth/consent?return=${encodeURIComponent(pathname)}`
         : "/auth/consent"
     );
+  }
+
+  // Brand-new accounts must pick an account type on /dashboard/choose-role
+  // before they can reach any other dashboard page (including /dashboard/profile).
+  if (isTypeless && !pathname.includes("/choose-role")) {
+    redirect("/dashboard/choose-role");
   }
 
   return (

@@ -4,10 +4,22 @@ import { ProfileForm } from "@/components/dashboard/ProfileForm";
 
 export default async function ProfilePage() {
   const session = await requireAuth();
-  const me = session.user as { authMethod?: string };
+  const me = session.user as {
+    authMethod?: string;
+    primaryUserType?: string | null;
+    userTypes?: string[];
+  };
   // Reps have their own settings surface; customers keep this page.
   if (me.authMethod === "agent") {
     redirect("/dashboard/agent");
+  }
+
+  // Brand-new accounts must pick an account type on /dashboard/choose-role
+  // before they can reach the profile page.
+  const isTypeless =
+    !me.primaryUserType && (!me.userTypes || me.userTypes.length === 0);
+  if (isTypeless) {
+    redirect("/dashboard/choose-role");
   }
 
   const res = await serverFetch("/api/user/profile");
