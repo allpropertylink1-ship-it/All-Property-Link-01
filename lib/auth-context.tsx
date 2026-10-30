@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react"
+import { useRouter } from "next/navigation"
 import { api } from "./api-client"
 import { CURRENT_TERMS_VERSION } from "./persona"
 
@@ -198,10 +199,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error || "Login failed", code, field }
   }, [fetchUser])
 
+  const router = useRouter()
+
   const logout = useCallback(async () => {
     await api.post("/api/auth/logout")
     setUser(null)
-  }, [])
+    router.push("/")
+  }, [router])
 
   const signup = useCallback(async (data: { email: string; password: string; firstName: string; lastName: string; userType?: string; phone?: string; referralCode?: string; acceptedTerms: boolean; ageConfirmed: boolean; termsVersion?: string; recoveryEmail?: string }) => {
     const payload = { ...data, termsVersion: data.termsVersion || CURRENT_TERMS_VERSION }

@@ -2,12 +2,10 @@
 
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 
 export function ProfileButton() {
   const { user, logout } = useAuth()
-  const router = useRouter()
   const [open, setOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -148,7 +146,7 @@ export function ProfileButton() {
 
             <button
               type="button"
-              onClick={() => { setOpen(false); logout(); router.refresh(); }}
+              onClick={() => { setOpen(false); logout(); }}
               className="touch-target flex w-full items-center gap-3 px-4 py-2.5 text-sm text-error-500 transition-colors hover:bg-surface-secondary"
             >
               <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
