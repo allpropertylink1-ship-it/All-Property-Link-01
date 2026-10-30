@@ -12,7 +12,7 @@ import { Mail } from "@/components/ui/icons"
 import { resolvePostAuthTarget } from "@/lib/persona"
 import { AuthInput } from "./AuthInput"
 
-export function LoginForm({ returnUrl }: { returnUrl?: string }) {
+export function LoginForm({ returnUrl, showRepLink }: { returnUrl?: string; showRepLink?: boolean }) {
   const router = useRouter()
   const { login, sendMagicLink, phoneLogin, verifyOtp } = useAuth()
   const [error, setError] = useState("")
@@ -185,6 +185,16 @@ export function LoginForm({ returnUrl }: { returnUrl?: string }) {
 
   return (
     <div className="space-y-4">
+      {showRepLink && (
+        <div className="pb-2 text-center">
+          <a
+            href={`/aplreps/sign-in${returnUrl ? `?return=${encodeURIComponent(returnUrl)}` : ""}`}
+            className="inline-block touch-target rounded-lg border border-transparent px-4 py-2 text-sm font-semibold text-accent-600 hover:text-accent-700 hover:bg-surface-secondary transition-colors underline underline-offset-4 hover:underline"
+          >
+            APL Representative? Sign in as Rep
+          </a>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Single error region: banner only for form-level errors (no field target).
             Field-specific errors render inline under their input via AuthInput. */}

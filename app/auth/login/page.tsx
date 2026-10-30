@@ -24,7 +24,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
 
   return (
     <AuthShell railView="login">
-      <LoginPane returnUrl={returnParam} />
+      <LoginPane returnUrl={returnParam} showRepLink={true} />
     </AuthShell>
   );
 }
