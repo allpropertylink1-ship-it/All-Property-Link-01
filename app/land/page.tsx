@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { PropertiesPageClient } from "@/components/property/PropertiesPageClient"
 import { FAQSchema } from "@/components/faq/FAQSchema"
 
@@ -10,46 +11,27 @@ export const metadata: Metadata = {
   alternates: { canonical: "/land" },
 }
 
-const LAND_CONTENT = {
-  title: "Land & Plots for Sale in Kenya",
-  intro: "Buying land in Kenya is a popular investment strategy. From residential plots in Nairobi's satellite towns to agricultural land in the countryside, All Property Link helps you find titled land with verified ownership.",
-  sections: [
-    {
-      heading: "Types of Land Available",
-      content: "We list residential plots for building homes, agricultural land for farming, commercial plots for business development, and empty plots in gated communities. Each listing includes location, plot size, title deed type, and asking price.",
-    },
-    {
-      heading: "Popular Land Locations",
-      content: "Nairobi's satellite towns (Ruaka, Kamakis, Kangundo Road) offer residential plots. Kiambu, Machakos, and Kajiado have agricultural land. Coastal areas like Kilifi and Malindi have beachfront plots. All listings include GPS coordinates and survey maps where available.",
-    },
-    {
-      heading: "Due Diligence Checklist",
-      content: "Before buying land: conduct a land search at the Ministry of Lands, verify the title deed is genuine, check for encumbrances or caveats, confirm the seller's identity, and ensure rates and land rent are paid up to date. Always involve a lawyer in land transactions.",
-    },
-  ],
-}
-
 export default function LandPage() {
   return (
     <>
       <section className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
         <div className="mb-8">
           <h1 className="font-display text-3xl font-bold tracking-h1 text-text-primary sm:text-4xl">
-            {LAND_CONTENT.title}
+            Land & Plots for Sale in Kenya
           </h1>
           <p className="mt-4 text-lg text-text-secondary leading-relaxed max-w-2xl">
-            {LAND_CONTENT.intro}
+            Browse titled land and plots across Kenya — residential, agricultural, commercial, and gated-community plots with verified ownership.
           </p>
-        </div>
-        <div className="space-y-6">
-          {LAND_CONTENT.sections.map((section, i) => (
-            <div key={i} className="rounded-lg border border-border bg-surface p-6">
-              <h2 className="font-heading text-xl font-semibold text-text-primary mb-3">
-                {section.heading}
-              </h2>
-              <p className="text-text-secondary leading-relaxed">{section.content}</p>
-            </div>
-          ))}
+          <p className="mt-3 text-text-secondary">
+            Need help before buying? Read our{" "}
+            <Link
+              href="/land/guide"
+              className="text-teal-600 hover:underline font-medium"
+            >
+              buying land in Kenya guide & due diligence checklist
+            </Link>
+            .
+          </p>
         </div>
       </section>
       <PropertiesPageClient
