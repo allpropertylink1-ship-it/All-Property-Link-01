@@ -33,6 +33,19 @@ async function readMaintenanceState(origin: string): Promise<{ on: boolean } | n
 export default async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
 
+  // --- Markdown content negotiation for agents ---
+  // Serve text/markdown for the homepage and 404s when an agent requests it.
+  // Browsers always send text/html; only agents/curl send text/markdown, so
+  // intercepting these is safe for real users.
+  const accept = request.headers.get("accept") || ""
+  const wantsMarkdown = accept.includes("text/markdown")
+  if (wantsMarkdown && !pathname.startsWith("/api/")) {
+    if (pathname === "/") {
+      return NextResponse.rewrite(new URL("/api/markdown?type=homepage", request.url))
+    }
+    return NextResponse.rewrite(new URL("/api/markdown?type=404", request.url))
+  }
+
   // Redirect old land URL to new dedicated page
   if (pathname === "/properties" && searchParams.get("type") === "LAND") {
     const url = new URL("/land", request.url)

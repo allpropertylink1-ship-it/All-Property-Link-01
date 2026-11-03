@@ -43,6 +43,7 @@ const companyLinks = [
   { href: "/contact", label: "Contact" },
   { href: "/aplreps", label: "APL Reps" },
   { href: "/faq", label: "FAQ" },
+  { href: "https://github.com/allpropertylink1-ship-it", label: "GitHub", external: true },
 ];
 
 const legalLinks = [
@@ -74,7 +75,7 @@ function Column({
   section,
 }: {
   title: string;
-  links: { href: string; label: string }[];
+  links: { href: string; label: string; external?: boolean }[];
   section: string;
 }) {
   return (
@@ -85,12 +86,23 @@ function Column({
       <ul className="space-y-3 text-base text-text-secondary">
         {links.map((link) => (
           <li key={link.href + link.label}>
-            <Link
-              href={link.href}
-              className="touch-target inline-block py-1.5 transition-colors hover:text-primary"
-            >
-              {link.label}
-            </Link>
+            {link.external ? (
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="touch-target inline-block py-1.5 transition-colors hover:text-primary"
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                href={link.href}
+                className="touch-target inline-block py-1.5 transition-colors hover:text-primary"
+              >
+                {link.label}
+              </Link>
+            )}
           </li>
         ))}
       </ul>

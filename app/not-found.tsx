@@ -10,6 +10,16 @@ export default function NotFound() {
       <p className="mb-8 text-text-secondary">
         The page you&apos;re looking for doesn&apos;t exist or has been moved.
       </p>
+      <p className="mb-6 text-sm text-text-secondary">
+        <span className="font-semibold text-text-primary">Explore:</span>{" "}
+        <Link href="/" className="text-primary hover:underline">Home</Link>{" "}
+        |{" "}
+        <Link href="/properties" className="text-primary hover:underline">Properties</Link>{" "}
+        |{" "}
+        <Link href="/sitemap.xml" className="text-primary hover:underline">Sitemap</Link>{" "}
+        |{" "}
+        <Link href="/docs" className="text-primary hover:underline">API Docs</Link>
+      </p>
       <Link
         href="/"
         className="touch-target inline-flex items-center gap-2 rounded-lg bg-primary-600 px-8 py-4 font-medium text-text-onPrimary hover:bg-primary-700"

@@ -27,6 +27,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function LandCityPage({ params, searchParams }: Props) {
-  return <LandCityPageClient city={params.city} searchParams={searchParams} />;
+export default async function LandCityPage({ params, searchParams }: Props) {
+  const cities = await getCities();
+  const match = (cities || []).find(
+    (c) => slugifyCity(c.city) === slugifyCity(params.city)
+  );
+  return (
+    <>
+      {match && (
+        <section aria-labelledby="land-about-heading" className="max-w-3xl mx-auto px-4 py-8 sm:px-6 lg:py-12 lg:px-8">
+          <h2 id="land-about-heading" className="font-display text-3xl font-bold tracking-h2 text-text-primary mb-4">
+            Land & Plots for Sale in {match.city}
+          </h2>
+          <p className="text-text-secondary leading-relaxed text-lg max-w-2xl">
+            Browse {match._count.city} verified land and plot listings for sale in {match.city}, Kenya. Find titled
+            plots ready to build, farm, or hold, listed by owners and verified agents. Contact sellers directly by
+            phone, SMS, or WhatsApp.
+          </p>
+        </section>
+      )}
+      <LandCityPageClient city={params.city} searchParams={searchParams} />
+    </>
+  );
 }

@@ -133,6 +133,17 @@ export default async function RootLayout({
                 "https://www.facebook.com/profile.php?id=61593598572272",
                 "https://www.instagram.com/allproperty.link/",
               ],
+              knowsAbout: [
+                "property marketplace",
+                "buy sell rent property",
+                "real estate Kenya",
+                "land plots for sale",
+                "short term stays",
+                "airbnb Kenya",
+                "fundis",
+                "service providers",
+                "verified listings",
+              ],
             }),
           }}
         />

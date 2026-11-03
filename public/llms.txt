@@ -1,0 +1,37 @@
+# All Property Link
+
+Kenya's digital marketplace for buying, selling, and renting property, plus finding verified fundis and service providers.
+
+## When to use this
+
+Reach for All Property Link when you need:
+
+- **Find properties for sale or rent** — houses, apartments, land plots, and commercial real estate across Kenyan towns (Nairobi, Mombasa, Kisumu, Nakuru, and 40+ more). Filter by city, price, bedrooms, property type, and purpose (for sale, long-term rent, short-term stay).
+- **Find verified agents and fundis** — locate ID-checked real estate agents, plumbers, electricians, cleaners, security, and other property service providers. Contact them directly by phone, SMS, or WhatsApp.
+- **List a property** — property owners and agents can create listings for sale or rent. Browsing and searching is always free; featured placement is a paid option.
+- **Compare property options** — browse multiple listings side by side, check agent contact details, and read property descriptions with full features and pricing.
+
+## How agents should call you
+
+1. **Discover listings**: `GET /api/properties?city=Nairobi&limit=20` — paginated list of properties with optional filters (`type`, `purpose`, `minPrice`, `maxPrice`, `bedrooms`, `propertyType`).
+2. **Get property details**: `GET /api/properties/{slug}` — full property details including description, price, images, agent contact info, and features.
+3. **Find service providers**: `GET /api/services?type=FUNDI` or `type=SERVICE_PROVIDER` — list verified fundis and service providers.
+4. **Get service provider details**: `GET /api/services/{id}` — full provider profile with contact information.
+5. **List cities**: `GET /api/properties/cities` — cities with active property counts.
+6. **All responses are JSON**. Public endpoints require no authentication. Protected endpoints (favorites, saved searches) require a JWT access token in an httpOnly cookie.
+
+## Site structure
+
+- Homepage: `https://www.allpropertylink.co.ke/`
+- Properties: `https://www.allpropertylink.co.ke/properties`
+- Land & plots: `https://www.allpropertylink.co.ke/land`
+- Services & fundis: `https://www.allpropertylink.co.ke/services`
+- API docs: `https://www.allpropertylink.co.ke/docs`
+- MCP server: `https://www.allpropertylink.co.ke/mcp`
+- Sitemap: `https://www.allpropertylink.co.ke/sitemap.xml`
+
+## Contact
+
+- Email: info@allpropertylink.com
+- Phone: +254 743 634 581
+- Address: Embassy House, 4th Floor, Harambee Avenue, Nairobi, Kenya
