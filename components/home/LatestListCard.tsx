@@ -143,8 +143,8 @@ export function LatestListCard({
           if (dx <= -40) goNext()
           else if (dx >= 40) goPrev()
         }}
-        onMouseEnter={() => onCoverEnter?.(cover)}
-        onMouseLeave={onCoverLeave}
+        onPointerEnter={() => onCoverEnter?.(cover)}
+        onPointerLeave={onCoverLeave}
       >
         {slides.map((src, i) => (
           <img

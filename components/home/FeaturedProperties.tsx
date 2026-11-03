@@ -68,15 +68,15 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
     <section aria-labelledby="home-latest-heading" className="relative bg-surface">
       {prevCover && (
         <div
-          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ease-out opacity-0"
-          style={{ backgroundImage: `url(${prevCover})` }}
+          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ease-out opacity-0 blur-[60px] saturate-50 will-change-[opacity]"
+          style={{ backgroundImage: `url(${prevCover})`, filter: 'blur(60px) saturate(0.5)' }}
           aria-hidden="true"
         />
       )}
       {activeCover && (
         <div
-          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ease-out opacity-100"
-          style={{ backgroundImage: `url(${activeCover})` }}
+          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ease-out opacity-100 blur-[60px] saturate-50 will-change-[opacity]"
+          style={{ backgroundImage: `url(${activeCover})`, filter: 'blur(60px) saturate(0.5)' }}
           aria-hidden="true"
         />
       )}
