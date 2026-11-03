@@ -68,19 +68,19 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
     <section aria-labelledby="home-latest-heading" className="relative bg-surface">
       {prevCover && (
         <div
-          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ease-out opacity-0 blur-[60px] saturate-50 will-change-[opacity]"
-          style={{ backgroundImage: `url(${prevCover})`, filter: 'blur(60px) saturate(0.5)' }}
+          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ease-out opacity-0 will-change-[opacity]"
+          style={{ backgroundImage: `url(${prevCover})`, filter: 'blur(40px) saturate(0.75)' }}
           aria-hidden="true"
         />
       )}
       {activeCover && (
         <div
-          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ease-out opacity-100 blur-[60px] saturate-50 will-change-[opacity]"
-          style={{ backgroundImage: `url(${activeCover})`, filter: 'blur(60px) saturate(0.5)' }}
+          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ease-out opacity-100 will-change-[opacity]"
+          style={{ backgroundImage: `url(${activeCover})`, filter: 'blur(40px) saturate(0.75)' }}
           aria-hidden="true"
         />
       )}
-      <div className="absolute inset-0 z-10 bg-black/20 backdrop-blur-sm" aria-hidden="true" />
+      <div className="absolute inset-0 z-10 bg-black/5" aria-hidden="true" />
       <div className="relative z-20 mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <SectionHeading
