@@ -145,6 +145,7 @@ export function LatestListCard({
         }}
         onPointerEnter={() => onCoverEnter?.(cover)}
         onPointerLeave={onCoverLeave}
+        onPointerDown={() => onCoverEnter?.(cover)}
       >
         {slides.map((src, i) => (
           <img
