@@ -478,43 +478,38 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews, isA
             </section>
           )}
 
-          {/* Architectural overview */}
-          {property.description && (
-            <section aria-labelledby="overview-heading" className="rounded-xl border border-border bg-surface p-5 shadow-sm sm:p-6">
-              <h2 id="overview-heading" className="font-heading text-lg font-bold text-text-primary">Architectural Overview</h2>
-              <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-text-secondary">
-                {property.description}
-              </p>
-              <dl className="mt-5 grid grid-cols-2 gap-3 rounded-lg bg-surface-secondary p-4 md:grid-cols-3">
-                <div className="min-w-0">
-                  <dt className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Location</dt>
-                  <dd className="mt-0.5 truncate text-sm font-semibold text-text-primary">{property.city}</dd>
-                </div>
-                <div className="min-w-0">
-                  <dt className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Region</dt>
-                  <dd className="mt-0.5 truncate text-sm font-semibold text-text-primary">{property.region || "—"}</dd>
-                </div>
-                <div className="min-w-0">
-                  <dt className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Country</dt>
-                  <dd className="mt-0.5 truncate text-sm font-semibold text-text-primary">{property.country}</dd>
-                </div>
-                <div className="min-w-0">
-                  <dt className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Property Type</dt>
-                  <dd className="mt-0.5 truncate text-sm font-semibold capitalize text-text-primary">{property.propertyType.toLowerCase()}</dd>
-                </div>
-                <div className="min-w-0">
-                  <dt className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Listing Purpose</dt>
-                  <dd className="mt-0.5 truncate text-sm font-semibold text-text-primary">{purposeLabel(property.listingPurpose)}</dd>
-                </div>
-                {hasPrice && (
-                <div className="min-w-0">
-                  <dt className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Price</dt>
-                  <dd className="mt-0.5 truncate text-sm font-semibold text-text-primary">{priceLabel}</dd>
-                </div>
-                )}
-              </dl>
-            </section>
-          )}
+          {/* Key facts */}
+          <section aria-labelledby="overview-heading" className="rounded-xl border border-border bg-surface p-5 shadow-sm sm:p-6">
+            <h2 id="overview-heading" className="font-heading text-lg font-bold text-text-primary">Description</h2>
+            <dl className="mt-5 grid grid-cols-2 gap-3 rounded-lg bg-surface-secondary p-4 md:grid-cols-3">
+              <div className="min-w-0">
+                <dt className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Location</dt>
+                <dd className="mt-0.5 truncate text-sm font-semibold text-text-primary">{property.city}</dd>
+              </div>
+              <div className="min-w-0">
+                <dt className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Region</dt>
+                <dd className="mt-0.5 truncate text-sm font-semibold text-text-primary">{property.region || "—"}</dd>
+              </div>
+              <div className="min-w-0">
+                <dt className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Country</dt>
+                <dd className="mt-0.5 truncate text-sm font-semibold text-text-primary">{property.country}</dd>
+              </div>
+              <div className="min-w-0">
+                <dt className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Property Type</dt>
+                <dd className="mt-0.5 truncate text-sm font-semibold capitalize text-text-primary">{property.propertyType.toLowerCase()}</dd>
+              </div>
+              <div className="min-w-0">
+                <dt className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Listing Purpose</dt>
+                <dd className="mt-0.5 truncate text-sm font-semibold text-text-primary">{purposeLabel(property.listingPurpose)}</dd>
+              </div>
+              {hasPrice && (
+              <div className="min-w-0">
+                <dt className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">Price</dt>
+                <dd className="mt-0.5 truncate text-sm font-semibold text-text-primary">{priceLabel}</dd>
+              </div>
+              )}
+            </dl>
+          </section>
 
           {/* Amenities & features */}
           {property.features.length > 0 && (

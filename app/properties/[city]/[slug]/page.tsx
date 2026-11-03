@@ -183,14 +183,6 @@ export default async function PropertyDetailPage({ params }: Props) {
         pageUrl={canonical}
       />
       <PropertyBreadcrumbs city={property.city} title={property.title} />
-      {property.description && (
-        <section aria-labelledby="property-description-heading" className="max-w-3xl mx-auto px-4 py-8 sm:px-6 lg:py-12 lg:px-8">
-          <h3 id="property-description-heading" className="font-display text-2xl font-bold tracking-h2 text-text-primary mb-4">
-            Description
-          </h3>
-          <p className="text-text-secondary leading-relaxed text-lg">{property.description}</p>
-        </section>
-      )}
       <PropertyDetailClient slug={params.slug} initial={property} sellerReviews={sellerReviews} isArchived={isArchived} />
     </>
   );
