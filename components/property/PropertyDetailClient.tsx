@@ -632,6 +632,14 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews, isA
                   </a>
                 )}
               </div>
+
+              {/* Mobile share */}
+              <div className="mt-4">
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-text-secondary">
+                  Share this listing
+                </p>
+                <ShareButtons title={property.title} />
+              </div>
             </section>
           )}
 
@@ -909,9 +917,10 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews, isA
                 variant="compact"
               />
             ))}
-          </div>
-        </section>
-      )}
+              </div>
+
+            </section>
+          )}
 
       {/* ─── Mobile persistent action bar (Stitch mobile) ─── */}
       {!isArchived && property.agent && (property.agent.phone || property.agent.email) && (
