@@ -28,14 +28,21 @@ function withPhone(p: ApiProperty): LatestListCardData {
 export function FeaturedAirbnbs({ initialData, error: initialError }: { initialData?: ApiProperty[]; error?: string | null }) {
   const properties = (initialData || []).slice(0, 6)
   const error = initialError ?? null
-  const { activeImage, onImageEnter, onImageLeave } = useCoverBackdrop()
+  const { activeImage, prevImage, onImageEnter, onImageLeave } = useCoverBackdrop()
 
   return (
     <section aria-labelledby="home-airbnb-heading" className="relative">
-      {!activeImage && <div className="absolute inset-0 z-0 bg-surface" />}
+      {!activeImage && !prevImage && <div className="absolute inset-0 z-0 bg-surface" />}
+      {prevImage && (
+        <div
+          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-500 ease-out opacity-0"
+          style={{ backgroundImage: `url(${prevImage})`, filter: 'blur(24px) saturate(0.85)' }}
+          aria-hidden="true"
+        />
+      )}
       {activeImage && (
         <div
-          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-500 ease-out"
+          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-500 ease-out opacity-100"
           style={{ backgroundImage: `url(${activeImage})`, filter: 'blur(24px) saturate(0.85)' }}
           aria-hidden="true"
         />

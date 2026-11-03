@@ -32,14 +32,21 @@ function withPhone(p: PropertyCardType): LatestListCardData {
  */
 function FeaturedStrip({ initialData }: { initialData?: PropertyCardType[] }) {
   const properties = (initialData || []).filter((p) => p.isFeatured).slice(0, 6)
-  const { activeImage, onImageEnter, onImageLeave } = useCoverBackdrop()
+  const { activeImage, prevImage, onImageEnter, onImageLeave } = useCoverBackdrop()
   if (properties.length === 0) return null
   return (
     <section aria-labelledby="home-featured-heading" className="relative">
-      {!activeImage && <div className="absolute inset-0 z-0 bg-surface" />}
+      {!activeImage && !prevImage && <div className="absolute inset-0 z-0 bg-surface" />}
+      {prevImage && (
+        <div
+          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-500 ease-out opacity-0"
+          style={{ backgroundImage: `url(${prevImage})`, filter: 'blur(24px) saturate(0.85)' }}
+          aria-hidden="true"
+        />
+      )}
       {activeImage && (
         <div
-          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-500 ease-out"
+          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-500 ease-out opacity-100"
           style={{ backgroundImage: `url(${activeImage})`, filter: 'blur(24px) saturate(0.85)' }}
           aria-hidden="true"
         />
@@ -73,14 +80,21 @@ function FeaturedStrip({ initialData }: { initialData?: PropertyCardType[] }) {
 
 function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
   const properties = (initialData || []).slice(0, 6)
-  const { activeImage, onImageEnter, onImageLeave } = useCoverBackdrop()
+  const { activeImage, prevImage, onImageEnter, onImageLeave } = useCoverBackdrop()
   if (properties.length === 0) return null
   return (
     <section aria-labelledby="home-land-heading" className="relative">
-      {!activeImage && <div className="absolute inset-0 z-0 bg-surface" />}
+      {!activeImage && !prevImage && <div className="absolute inset-0 z-0 bg-surface" />}
+      {prevImage && (
+        <div
+          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-500 ease-out opacity-0"
+          style={{ backgroundImage: `url(${prevImage})`, filter: 'blur(24px) saturate(0.85)' }}
+          aria-hidden="true"
+        />
+      )}
       {activeImage && (
         <div
-          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-500 ease-out"
+          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-500 ease-out opacity-100"
           style={{ backgroundImage: `url(${activeImage})`, filter: 'blur(24px) saturate(0.85)' }}
           aria-hidden="true"
         />
