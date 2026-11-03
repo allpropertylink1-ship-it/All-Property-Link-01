@@ -65,22 +65,23 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
   }, [initialData])
 
   return (
-    <section aria-labelledby="home-latest-heading" className="relative bg-surface">
+    <section aria-labelledby="home-latest-heading" className="relative">
+      {!activeCover && <div className="absolute inset-0 z-0 bg-surface" />}
       {prevCover && (
         <div
           className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ease-out opacity-0 will-change-[opacity]"
-          style={{ backgroundImage: `url(${prevCover})`, filter: 'blur(40px) saturate(0.75)' }}
+          style={{ backgroundImage: `url(${prevCover})`, filter: 'blur(20px) saturate(0.9)' }}
           aria-hidden="true"
         />
       )}
       {activeCover && (
         <div
           className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ease-out opacity-100 will-change-[opacity]"
-          style={{ backgroundImage: `url(${activeCover})`, filter: 'blur(40px) saturate(0.75)' }}
+          style={{ backgroundImage: `url(${activeCover})`, filter: 'blur(20px) saturate(0.9)' }}
           aria-hidden="true"
         />
       )}
-      <div className="absolute inset-0 z-10 bg-black/5" aria-hidden="true" />
+      <div className="absolute inset-0 z-10 bg-black/10" aria-hidden="true" />
       <div className="relative z-20 mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <SectionHeading
