@@ -14,6 +14,13 @@ export const metadata: Metadata = {
 export default function LandPage() {
   return (
     <>
+      <PropertiesPageClient
+        basePath="/land"
+        searchParams={{
+          propertyType: "LAND",
+          limit: "20",
+        }}
+      />
       <section className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
         <div className="mb-8">
           <h1 className="font-display text-3xl font-bold tracking-h1 text-text-primary sm:text-4xl">
@@ -34,13 +41,6 @@ export default function LandPage() {
           </p>
         </div>
       </section>
-      <PropertiesPageClient
-        basePath="/land"
-        searchParams={{
-          propertyType: "LAND",
-          limit: "20",
-        }}
-      />
       <FAQSchema
         faqs={[
           {
