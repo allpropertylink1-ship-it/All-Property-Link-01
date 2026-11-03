@@ -12,6 +12,8 @@ import { ProviderCTASection } from "@/components/home/ProviderCTASection"
 import { LatestListCard, type LatestListCardData } from "@/components/home/LatestListCard"
 import { SectionHeading } from "@/components/home/SectionHeading"
 import { useCoverBackdrop } from "@/components/home/useCoverBackdrop"
+import { useRailScrollBackdrop } from "@/components/home/useRailScrollBackdrop"
+import { getCoverImage } from "@/lib/images"
 import type { PropertyCard as PropertyCardType } from "@/lib/services/property"
 import type { ProfileRow } from "@/components/home/ProfileCard"
 import type { BlogPostCard } from "@/lib/services/blog"
@@ -33,7 +35,15 @@ function withPhone(p: PropertyCardType): LatestListCardData {
 function FeaturedStrip({ initialData }: { initialData?: PropertyCardType[] }) {
   const properties = (initialData || []).filter((p) => p.isFeatured).slice(0, 6)
   const { activeImage, prevImage, onImageEnter, onImageLeave } = useCoverBackdrop()
+
+  const coverImages = properties
+    .map((p) => getCoverImage({ coverImage: p.coverImage, images: p.images }))
+    .filter((u): u is string => !!u)
+
+  const railRef = useRailScrollBackdrop(coverImages, onImageEnter)
+
   if (properties.length === 0) return null
+
   return (
     <section aria-labelledby="home-featured-heading" className="relative">
       {!activeImage && !prevImage && <div className="absolute inset-0 z-0 bg-surface" />}
@@ -59,15 +69,15 @@ function FeaturedStrip({ initialData }: { initialData?: PropertyCardType[] }) {
           title="Featured Listings"
           subtitle="Premium placements selected by the All Property Link team"
         />
-        {/* Mobile + tablet rail: one full card per viewport snap */}
-        <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:hidden">
+        {/* Mobile rail: scroll drives the backdrop automatically */}
+        <div ref={railRef} className="-mx-4 mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:hidden">
           {properties.map((p, i) => (
             <div key={p.slug} className="w-full shrink-0 snap-start snap-always sm:w-[calc(50%-8px)]">
               <LatestListCard item={withPhone(p)} priority={i === 0} onImageEnter={onImageEnter} onImageLeave={onImageLeave} />
             </div>
           ))}
         </div>
-        {/* Desktop: 2 columns x 3 rows */}
+        {/* Desktop grid: hover drives the backdrop */}
         <div className="mt-4 hidden gap-4 lg:grid lg:grid-cols-2">
           {properties.map((p, i) => (
             <LatestListCard key={p.slug} item={withPhone(p)} priority={i === 0} onImageEnter={onImageEnter} onImageLeave={onImageLeave} />
@@ -81,7 +91,15 @@ function FeaturedStrip({ initialData }: { initialData?: PropertyCardType[] }) {
 function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
   const properties = (initialData || []).slice(0, 6)
   const { activeImage, prevImage, onImageEnter, onImageLeave } = useCoverBackdrop()
+
+  const coverImages = properties
+    .map((p) => getCoverImage({ coverImage: p.coverImage, images: p.images }))
+    .filter((u): u is string => !!u)
+
+  const railRef = useRailScrollBackdrop(coverImages, onImageEnter)
+
   if (properties.length === 0) return null
+
   return (
     <section aria-labelledby="home-land-heading" className="relative">
       {!activeImage && !prevImage && <div className="absolute inset-0 z-0 bg-surface" />}
@@ -116,15 +134,15 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
             <ArrowRight size={18} aria-hidden="true" />
           </Link>
         </div>
-        {/* Mobile + tablet rail: one full card per viewport snap */}
-        <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:hidden">
+        {/* Mobile rail: scroll drives the backdrop automatically */}
+        <div ref={railRef} className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:hidden">
           {properties.map((p, i) => (
                 <div key={p.slug} className="w-full shrink-0 snap-start snap-always sm:w-[calc(50%-8px)]">
                   <LatestListCard item={withPhone(p)} priority={i === 0} onImageEnter={onImageEnter} onImageLeave={onImageLeave} />
                 </div>
           ))}
         </div>
-            {/* Desktop: 2 columns x 3 rows */}
+            {/* Desktop grid: hover drives the backdrop */}
             <div className="hidden gap-4 lg:grid lg:grid-cols-2">
               {properties.map((p, i) => (
                 <LatestListCard key={p.slug} item={withPhone(p)} priority={i === 0} onImageEnter={onImageEnter} onImageLeave={onImageLeave} />

@@ -6,6 +6,8 @@ import { FormBanner } from "@/components/shared/FormFeedback"
 import { LatestListCard, type LatestListCardData } from "@/components/home/LatestListCard"
 import { SectionHeading } from "@/components/home/SectionHeading"
 import { useCoverBackdrop } from "@/components/home/useCoverBackdrop"
+import { useRailScrollBackdrop } from "@/components/home/useRailScrollBackdrop"
+import { getCoverImage } from "@/lib/images"
 
 interface ApiProperty extends LatestListCardData {
   currency: string
@@ -29,6 +31,12 @@ export function FeaturedAirbnbs({ initialData, error: initialError }: { initialD
   const properties = (initialData || []).slice(0, 6)
   const error = initialError ?? null
   const { activeImage, prevImage, onImageEnter, onImageLeave } = useCoverBackdrop()
+
+  const coverImages = properties
+    .map((p) => getCoverImage({ coverImage: p.coverImage, images: p.images }))
+    .filter((u): u is string => !!u)
+
+  const railRef = useRailScrollBackdrop(coverImages, onImageEnter)
 
   return (
     <section aria-labelledby="home-airbnb-heading" className="relative">
@@ -72,7 +80,8 @@ export function FeaturedAirbnbs({ initialData, error: initialError }: { initialD
           </p>
         ) : (
           <>
-            <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:hidden">
+            {/* Mobile rail: scroll drives the backdrop automatically */}
+            <div ref={railRef} className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:hidden">
               {properties.map((p, i) => (
                 <div key={p.slug} className="w-full shrink-0 snap-start snap-always sm:w-[calc(50%-8px)]">
                   <LatestListCard
@@ -84,6 +93,7 @@ export function FeaturedAirbnbs({ initialData, error: initialError }: { initialD
                 </div>
               ))}
             </div>
+            {/* Desktop grid: hover drives the backdrop */}
             <div className="hidden gap-4 lg:grid lg:grid-cols-2">
               {properties.map((p, i) => (
                 <LatestListCard

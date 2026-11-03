@@ -7,6 +7,8 @@ import { FormBanner } from "@/components/shared/FormFeedback"
 import { LatestListCard, type LatestListCardData } from "@/components/home/LatestListCard"
 import { SectionHeading } from "@/components/home/SectionHeading"
 import { useCoverBackdrop } from "@/components/home/useCoverBackdrop"
+import { useRailScrollBackdrop } from "@/components/home/useRailScrollBackdrop"
+import { getCoverImage } from "@/lib/images"
 
 interface ApiProperty extends LatestListCardData {
   currency: string
@@ -49,7 +51,15 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
   )
   const [loading, setLoading] = useState(!initialData)
   const [error, setError] = useState<string | null>(null)
-  const { activeImage, onImageEnter, onImageLeave } = useCoverBackdrop()
+  const { activeImage, prevImage, onImageEnter, onImageLeave } = useCoverBackdrop()
+
+  // Cover images for the backdrop (one per property). Used by the mobile rail
+  // scroll tracker so the backdrop follows the snapped card as the user swipes.
+  const coverImages = properties
+    .map((p) => getCoverImage({ coverImage: p.coverImage, images: p.images }))
+    .filter((u): u is string => !!u)
+
+  const railRef = useRailScrollBackdrop(coverImages, onImageEnter)
 
   useEffect(() => {
     if (initialData) return
@@ -64,10 +74,17 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
 
   return (
     <section aria-labelledby="home-latest-heading" className="relative">
-      {!activeImage && <div className="absolute inset-0 z-0 bg-surface" />}
+      {!activeImage && !prevImage && <div className="absolute inset-0 z-0 bg-surface" />}
+      {prevImage && (
+        <div
+          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-500 ease-out opacity-0"
+          style={{ backgroundImage: `url(${prevImage})`, filter: 'blur(24px) saturate(0.85)' }}
+          aria-hidden="true"
+        />
+      )}
       {activeImage && (
         <div
-          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-500 ease-out"
+          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-500 ease-out opacity-100"
           style={{ backgroundImage: `url(${activeImage})`, filter: 'blur(24px) saturate(0.85)' }}
           aria-hidden="true"
         />
@@ -112,7 +129,8 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
           </p>
         ) : (
           <>
-            <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:hidden">
+            {/* Mobile rail: scroll drives the backdrop automatically */}
+            <div ref={railRef} className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:hidden">
               {properties.map((p, i) => (
                 <div key={p.slug} className="w-full shrink-0 snap-start snap-always sm:w-[calc(50%-8px)]">
                   <LatestListCard
@@ -124,6 +142,7 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
                 </div>
               ))}
             </div>
+            {/* Desktop grid: hover drives the backdrop */}
             <div className="hidden gap-4 lg:grid lg:grid-cols-2">
               {properties.map((p, i) => (
                 <LatestListCard
