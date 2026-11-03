@@ -5,6 +5,7 @@ import { Search, Shield, Clock, Briefcase, ArrowRight } from "@/components/ui/ic
 import { cn } from "@/lib/utils";
 import { siteUrl } from "@/lib/seo";
 import { ServiceCardCompact } from "@/components/browse/ServiceCardCompact";
+import { FAQSchema } from "@/components/faq/FAQSchema";
 
 export const revalidate = 60;
 
@@ -60,7 +61,8 @@ export default async function ServicesPage({ searchParams }: Props) {
   };
 
   return (
-    <div className="bg-surface">
+    <>
+      <div className="bg-surface">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
 
       {/* ─── Directory header (Stitch: eyebrow, H1, trust chips) ─── */}
@@ -324,5 +326,28 @@ export default async function ServicesPage({ searchParams }: Props) {
         </div>
       </section>
     </div>
+    <FAQSchema
+      faqs={[
+        {
+          question: "What types of services can I find?",
+          answer: "We list plumbers, electricians, carpenters, cleaners, security guards, property managers, painters, and 50+ other skilled trades and property services across Kenya.",
+        },
+        {
+          question: "How do I find a verified fundi?",
+          answer: "Browse our Services directory, filter by category (plumbing, electrical, carpentry, etc.) and location, then contact providers directly via phone or WhatsApp.",
+        },
+        {
+          question: "Can I register as a service provider?",
+          answer: "Yes. Register your profile for free at /auth/register. No commissions are taken on your labor — you keep 100% of what you charge clients.",
+        },
+        {
+          question: "How do I contact a service provider?",
+          answer: "Each provider profile shows their phone number and WhatsApp contact. You can call or message them directly to discuss your needs and get a quote.",
+        },
+      ]}
+      pageTitle="Services & Fundis FAQ"
+      pageUrl="https://www.allpropertylink.co.ke/services"
+    />
+    </>
   );
 }

@@ -16,6 +16,7 @@ import {
   purgeProperty as purgePropertyService,
   publishProperty as publishPropertyService,
   rejectProperty as rejectPropertyService,
+  markPropertyNoLongerAvailable as markPropertyNoLongerAvailableService,
 } from "@/lib/services/property";
 
 function parseForm(formData: FormData) {
@@ -162,5 +163,22 @@ export async function rejectProperty(id: string, reason: string) {
   } catch (err) {
     if (isRedirect(err)) throw err;
     return fail(err instanceof Error ? err.message : "Failed to reject listing");
+  }
+}
+
+export async function markPropertyNoLongerAvailable(id: string) {
+  try {
+    await requireAuth();
+
+    const result = await markPropertyNoLongerAvailableService(id);
+    if (!result.success) return result;
+
+    revalidatePath("/properties");
+    revalidatePath("/dashboard/listings");
+    revalidatePath("/dashboard");
+    return ok();
+  } catch (err) {
+    if (isRedirect(err)) throw err;
+    return fail(err instanceof Error ? err.message : "Failed to mark listing as no longer available");
   }
 }

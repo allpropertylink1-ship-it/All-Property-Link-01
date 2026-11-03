@@ -244,3 +244,15 @@ export async function publishProperty(id: string): Promise<MutateResult> {
     return { success: true };
   } catch (e) { return { success: false, error: String(e) }; }
 }
+
+export async function markPropertyNoLongerAvailable(id: string): Promise<MutateResult> {
+  try {
+    const { serverFetch } = await import("@/lib/auth-utils");
+    const res = await serverFetch(`/api/properties/${encodeURIComponent(id)}/status`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "NO_LONGER_AVAILABLE" }),
+    });
+    if (!res.ok) return { success: false, error: `API returned ${res.status}` };
+    return { success: true };
+  } catch (e) { return { success: false, error: String(e) }; }
+}

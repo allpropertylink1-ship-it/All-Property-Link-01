@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign in | All Property Link</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-heading { font-family: 'Inter', sans-serif; }
+    .touch-target { min-height: 44px; }
+  </style>
+</head>
+<body class="bg-[#f5efe4] min-h-[100dvh] flex items-center justify-center px-4 py-6 text-[#111827]">
+
+  <div class="w-full max-w-[720px]">
+    <div class="relative overflow-hidden rounded-xl border border-[#e2d8cb] bg-[#ffffff] shadow-md">
+      <div class="grid overflow-hidden bg-[#ffffff] lg:grid-cols-[320px_1fr] min-h-[44dvh] lg:min-h-[600px]">
+
+        <!-- LEFT RAIL -->
+        <div class="relative w-full h-full min-h-[36dvh] lg:min-h-[600px] px-5 py-5 lg:px-6 lg:py-8 rounded-xl bg-gradient-to-t from-[#1e3a2a]/20 via-[#1e3a2a]/35 to-[#1e3a2a]/85 text-white">
+          <img src="/images/auth/signin-bg.jpg" alt="" class="absolute inset-0 z-0 w-full h-full object-cover" />
+          <div class="absolute inset-0 rounded-xl bg-gradient-to-t from-[#1e3a2a]/20 via-[#1e3a2a]/35 to-[#1e3a2a]/85" aria-hidden="true"></div>
+
+          <div class="relative flex flex-col justify-center h-full z-10">
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-0.5 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-[#8fd8a6] ring-1 ring-white/15">
+              <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-[#6ee7b7]" aria-hidden="true"></span>
+              Welcome back
+            </span>
+
+            <h1 class="mt-3 font-heading text-2xl font-bold leading-snug tracking-tight text-white text-balance">
+              Kenya's direct property & artisan network.
+            </h1>
+
+            <p class="mt-1 max-w-xs text-[13px] leading-relaxed text-white/75">
+              Sign in to your dashboard.
+            </p>
+
+            <div class="mt-5 w-full space-y-2">
+              <div class="flex items-center gap-2.5 rounded-lg bg-white/5 px-2.5 py-2 ring-1 ring-white/10">
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#6ee7b7]/20 text-[#6ee7b7]">&#10003;</span>
+                <span class="text-left">
+                  <span class="block text-[13px] font-semibold text-white">Direct deals</span>
+                  <span class="block text-[11px] leading-snug text-white/65">Verified owners & agents across Kenya.</span>
+                </span>
+              </div>
+              <div class="flex items-center gap-2.5 rounded-lg bg-white/5 px-2.5 py-2 ring-1 ring-white/10">
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#6ee7b7]/20 text-[#6ee7b7]">&#10003;</span>
+                <span class="text-left">
+                  <span class="block text-[13px] font-semibold text-white">ID-vetted fundis</span>
+                  <span class="block text-[11px] leading-snug text-white/65">Trade pros checked before they reach you.</span>
+                </span>
+              </div>
+            </div>
+
+            <button class="mt-5 inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/25 bg-white/10 px-5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-white/20">
+              New here? Create an account
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" class="text-[#8fd8a6]"><path d="M5 12h7M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT PANEL: LOGIN FORM -->
+        <div class="p-6 sm:p-8 lg:p-12 space-y-4">
+          <form class="space-y-4" id="loginForm">
+
+            <div id="login-error" class="hidden rounded-lg border border-[#fca5a5] bg-[#fef2f2] p-3 text-sm text-[#991b1b]" role="alert">
+              Enter your email address or phone number
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-[#374151] mb-1">Email or phone</label>
+              <input type="text" id="email" name="email" placeholder="you@example.co.ke or 712345678"
+                class="w-full rounded-lg border border-[#d1c5b5] bg-[#ffffff] px-3 py-2.5 text-sm text-[#111827] placeholder:text-[#6b7280] focus:border-[#1e3a2a] focus:outline-none focus:ring-2 focus:ring-[#1e3a2a]/30" />
+            </div>
+
+            <div class="relative">
+              <label class="block text-sm font-medium text-[#374151] mb-1">Password</label>
+              <input type="password" id="password" name="password" placeholder="Your password"
+                class="w-full rounded-lg border border-[#d1c5b5] bg-[#ffffff] px-3 py-2.5 text-sm text-[#111827] placeholder:text-[#6b7280] focus:border-[#1e3a2a] focus:outline-none focus:ring-2 focus:ring-[#1e3a2a]/30 pr-10" />
+              <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#1e3a2a] text-sm">&#128065;</button>
+            </div>
+
+            <div class="flex items-center justify-between gap-2">
+              <label class="flex cursor-pointer items-center gap-1.5">
+                <input type="checkbox" id="remember-me" checked
+                  class="h-4 w-4 rounded border border-[#d1c5b5] bg-[#ffffff] text-[#1e3a2a] focus:ring-2 focus:ring-[#1e3a2a]" />
+                <span class="text-sm text-[#6b7280]">Remember me</span>
+              </label>
+              <button type="button" class="text-sm font-semibold text-[#1e3a2a] hover:text-[#2d5a3e]">Email me a link</button>
+            </div>
+
+            <button type="submit" class="touch-target flex w-full items-center justify-center gap-2 rounded-lg bg-[#1e3a2a] px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-[#2d5a3e] active:scale-[0.99]">
+              Sign in
+            </button>
+
+          </form>
+
+          <details class="group rounded-lg border border-[#d1c5b5] bg-[#f9f5f0]/50">
+            <summary class="cursor-pointer list-none px-3 py-2.5 text-center text-sm font-semibold text-[#1e3a2a] hover:text-[#2d5a3e]">
+              Or continue with phone
+            </summary>
+            <div class="space-y-3 px-3 pb-3">
+              <div>
+                <label class="block text-sm font-medium text-[#374151] mb-1">Phone</label>
+                <div class="flex gap-2">
+                  <span class="inline-flex items-center rounded-l-lg border border-[#d1c5b5] bg-[#ffffff] px-3 py-2.5 text-sm text-[#6b7280]">+254</span>
+                  <input type="tel" placeholder="712345678 or 0112345678"
+                    class="flex-1 rounded-r-lg border border-[#d1c5b5] bg-[#ffffff] px-3 py-2.5 text-sm text-[#111827] focus:border-[#1e3a2a] focus:outline-none focus:ring-2 focus:ring-[#1e3a2a]/30" />
+                </div>
+              </div>
+              <button type="button" class="touch-target w-full rounded-lg border border-[#1e3a2a] px-4 py-2 text-sm font-semibold text-[#1e3a2a] hover:bg-[#1e3a2a]/10">Send login code</button>
+            </div>
+          </details>
+
+          <p class="pt-0.5 text-center text-sm text-[#6b7280]">
+            New here? <a href="/auth/register" class="font-semibold text-[#1e3a2a] hover:text-[#2d5a3e]">Create account</a>
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

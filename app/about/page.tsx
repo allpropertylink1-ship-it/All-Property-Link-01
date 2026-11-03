@@ -1,4 +1,5 @@
 ﻿import Link from "next/link";
+import { FAQSchema } from "@/components/faq/FAQSchema";
 
 export const revalidate = 3600;
 
@@ -174,6 +175,28 @@ export default function AboutPage() {
           </section>
         </section>
       </div>
+      <FAQSchema
+        faqs={[
+          {
+            question: "What is All Property Link?",
+            answer: "All Property Link is Kenya's digital marketplace for buying, selling, and renting property, plus finding verified fundis and service providers.",
+          },
+          {
+            question: "Are listings verified?",
+            answer: "Yes. APL representatives check listings and identity documents before anything goes live on the platform.",
+          },
+          {
+            question: "Which towns does All Property Link cover?",
+            answer: "We cover Nairobi, Mombasa, Kisumu, Nakuru, and 40+ towns across Kenya. Properties are listed in all major Kenyan towns and counties.",
+          },
+          {
+            question: "How do I become an APL Representative?",
+            answer: "Register as an agent, submit your EARB license and ID for verification, and start listing properties once approved by our team.",
+          },
+        ]}
+        pageTitle="About All Property Link — FAQ"
+        pageUrl="https://www.allpropertylink.co.ke/about"
+      />
     </>
   );
 }

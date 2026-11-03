@@ -14,6 +14,7 @@ import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 import { PWARegister } from "@/components/pwa/PWARegister";
 import OfflineBadge from "@/components/shared/OfflineBadge";
 import { AnalyticsProvider } from "@/components/shared/AnalyticsProvider";
+import { Ga4Provider } from "@/components/shared/Ga4Provider";
 import { FooterTracking } from "@/components/layout/FooterTracking";
 import "./globals.css";
 
@@ -86,7 +87,8 @@ export default async function RootLayout({
         <OfflineBadge />
         <PWARegister />
         <AnalyticsProvider />
-        <AuthProvider>
+        <Ga4Provider>
+          <AuthProvider>
           <FavoritesProvider>
             <Navbar />
             <main className="min-w-0 max-w-full flex-1 overflow-x-clip pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6">{inMaintenance ? <MaintenanceNotice title={status?.maintenanceTitle} message={status?.maintenanceMessage} /> : children}</main>
@@ -100,6 +102,7 @@ export default async function RootLayout({
           )}
           </FavoritesProvider>
         </AuthProvider>
+        </Ga4Provider>
         <PWAInstallPrompt />
         <script
           type="application/ld+json"

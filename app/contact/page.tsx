@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ContactForm from "@/components/contact/ContactForm";
+import { FAQSchema } from "@/components/faq/FAQSchema";
 
 export const revalidate = 300;
 
@@ -104,6 +105,28 @@ export default function ContactPage() {
           </div>
         </section>
       </div>
+      <FAQSchema
+        faqs={[
+          {
+            question: "How can I contact All Property Link support?",
+            answer: "Email support@allpropertylink.com, call +254 700 000 000, or WhatsApp us directly. Typical response time is 2-4 hours during business hours.",
+          },
+          {
+            question: "What are your office hours?",
+            answer: "Our office is open Monday to Friday, 8:00 AM to 6:00 PM, and Saturday 9:00 AM to 1:00 PM. We are closed on Sundays and public holidays.",
+          },
+          {
+            question: "Where is your office located?",
+            answer: "All Property Link Headquarters, 1451 Argwings Kodhek Rd, Kilimani, Nairobi, Kenya.",
+          },
+          {
+            question: "Can I report a fraudulent listing?",
+            answer: "Yes. Click 'Report' on any listing or agent profile, or email support@allpropertylink.com with details. Our team investigates within 24 hours.",
+          },
+        ]}
+        pageTitle="Contact All Property Link — FAQ"
+        pageUrl="https://www.allpropertylink.co.ke/contact"
+      />
     </>
   );
 }

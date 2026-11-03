@@ -6,6 +6,7 @@ import { getPropertyBySlug } from "@/lib/services/property";
 import { getUserReviews } from "@/lib/services/review";
 import { siteUrl, slugifyCity } from "@/lib/seo";
 import { getCoverImage } from "@/lib/images";
+import { FAQSchema } from "@/components/faq/FAQSchema";
 
 interface Props {
   params: { city: string; slug: string };
@@ -139,6 +140,28 @@ export default async function PropertyDetailPage({ params }: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(listingJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <FAQSchema
+        faqs={[
+          {
+            question: "Can I schedule a viewing of this property?",
+            answer: "Yes. Click 'Contact Agent' on the listing to request a viewing. Many agents offer virtual tours via video call or in-person viewings. Available viewing slots are shown on the listing when provided by the agent.",
+          },
+          {
+            question: "Is the price negotiable?",
+            answer: "Property prices are often negotiable. Contact the listing agent directly to discuss price and terms. The agent's contact details are shown on the listing page.",
+          },
+          {
+            question: "What documents do I need to buy or rent this property?",
+            answer: "For buying: valid ID, KRA PIN, and proof of funds. For renting: valid ID, proof of income, and references. Agents can guide you through the specific requirements for each property.",
+          },
+          {
+            question: "Are there additional costs beyond the listed price?",
+            answer: "Yes. Buyers should budget for stamp duty (4% urban / 2% rural), legal fees (~1-2%), and valuation fees. Renters should budget for a deposit (typically 1-2 months' rent) and possibly agency fees.",
+          },
+        ]}
+        pageTitle={property.title + " — FAQ"}
+        pageUrl={canonical}
+      />
       <PropertyBreadcrumbs city={property.city} title={property.title} />
       <PropertyDetailClient slug={params.slug} initial={property} sellerReviews={sellerReviews} isArchived={isArchived} />
     </>

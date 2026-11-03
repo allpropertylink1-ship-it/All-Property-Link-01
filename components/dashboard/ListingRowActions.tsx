@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { deleteProperty, restoreProperty, purgeProperty } from "@/app/actions/properties";
+import { deleteProperty, restoreProperty, purgeProperty, markPropertyNoLongerAvailable } from "@/app/actions/properties";
 import { deleteService, restoreService, purgeService } from "@/app/actions/services";
 
 interface ListingRowActionsProps {
@@ -11,16 +11,18 @@ interface ListingRowActionsProps {
   id: string;
   title: string;
   deleted: boolean;
+  status?: string;
 }
 
 const KIND_LABEL = { property: "listing", service: "service" } as const;
 
-export function ListingRowActions({ kind, id, title, deleted }: ListingRowActionsProps) {
+export function ListingRowActions({ kind, id, title, deleted, status }: ListingRowActionsProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
 
   const label = KIND_LABEL[kind];
+  const isAvailable = status === "AVAILABLE";
 
   function run(fn: () => Promise<{ success: boolean; error?: string }>) {
     setError("");
@@ -38,9 +40,33 @@ export function ListingRowActions({ kind, id, title, deleted }: ListingRowAction
   const onRestore = () => run(() => (kind === "property" ? restoreProperty(id) : restoreService(id)));
   const onPurge = (confirmTitle: string) =>
     run(() => (kind === "property" ? purgeProperty(id, confirmTitle) : purgeService(id, confirmTitle)));
+  const onMarkNoLongerAvailable = () => run(() => markPropertyNoLongerAvailable(id));
 
   return (
     <span className="inline-flex flex-wrap items-center gap-1">
+      {!deleted && kind === "property" && isAvailable ? (
+        <ConfirmDialog
+          trigger={
+            <button
+              type="button"
+              disabled={pending}
+              className="touch-target inline-flex items-center rounded-lg px-3 py-2 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-50 disabled:opacity-50"
+            >
+              {pending ? "Working…" : "Mark as No Longer Available"}
+            </button>
+          }
+          title={`Mark "${title}" as no longer available?`}
+          description={
+            <>
+              This will mark the listing as <strong>{title.includes("Rent") || title.includes("rent") ? "Rented" : "Sold"}</strong> and remove it from public search.
+              The listing will move to your archive. Users who favorited it will be notified.
+            </>
+          }
+          confirmLabel="Mark as No Longer Available"
+          confirmVariant="default"
+          onConfirm={onMarkNoLongerAvailable}
+        />
+      ) : null}
       {!deleted ? (
         <ConfirmDialog
           trigger={

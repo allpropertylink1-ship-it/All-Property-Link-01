@@ -154,7 +154,7 @@ export default async function ListingsPage({ searchParams }: { searchParams?: { 
                 >
                   Manage <ArrowRight size={12} />
                 </Link>
-                <ListingRowActions kind="property" id={listing.id} title={listing.title} deleted={inBin} />
+                <ListingRowActions kind="property" id={listing.id} title={listing.title} deleted={inBin} status={listing.status} />
               </span>
             </div>
           </li>
@@ -211,7 +211,7 @@ export default async function ListingsPage({ searchParams }: { searchParams?: { 
                       >
                         Edit
                       </Link>
-                      <ListingRowActions kind="property" id={listing.id} title={listing.title} deleted={inBin} />
+<ListingRowActions kind="property" id={listing.id} title={listing.title} deleted={inBin} status={listing.status} />
                     </span>
                   </td>
                 </tr>
