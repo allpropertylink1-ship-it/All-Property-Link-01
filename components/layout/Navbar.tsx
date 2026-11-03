@@ -20,7 +20,6 @@ type NavLink = {
 }
 
 const navLinks: NavLink[] = [
-  { href: "/", label: "HOME" },
   { href: "/properties", label: "PROPERTIES" },
   { href: "/airbnbs", label: "AIRBNBS" },
   { href: "/land", label: "PLOTS & LAND" },

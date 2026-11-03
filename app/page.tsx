@@ -58,23 +58,6 @@ export default async function HomePage() {
 
   return (
     <>
-      <section aria-labelledby="home-about-heading" className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:py-12 lg:px-8">
-        <h2 id="home-about-heading" className="font-display text-3xl font-bold tracking-h2 text-text-primary mb-4">
-          About All Property Link
-        </h2>
-        <p className="text-text-secondary leading-relaxed text-lg mb-6 max-w-3xl">
-          All Property Link is Kenya's digital marketplace for buying, selling, and renting property, plus finding
-          verified fundis and service providers. Browse houses, apartments, land plots, commercial properties, and
-          short-term stays listed by owners and verified agents across Nairobi, Mombasa, Kisumu, Nakuru, and 40+ towns.
-          Every listing is checked by an APL representative before it goes live. Contact owners and agents directly by
-          phone, SMS, or WhatsApp — no middlemen, no gatekeeping.
-        </p>
-        <p className="text-text-secondary leading-relaxed text-lg max-w-3xl">
-          Create a free account to save searches, get alerts for new listings, save favorites, and manage your own
-          listings from your dashboard. Property owners and agents pay for featured placement and premium listing
-          options; browsing and searching is always free.
-        </p>
-      </section>
       <HomePageClient
         featured={featured.properties}
         latest={latest.properties}
@@ -88,10 +71,6 @@ export default async function HomePage() {
       />
       <FAQSchema
         faqs={[
-          {
-            question: "What is All Property Link?",
-            answer: "All Property Link is Kenya's digital marketplace for buying, selling, and renting property, plus finding verified fundis and service providers.",
-          },
           {
             question: "How do I search for properties in a specific area?",
             answer: "Use the search bar on the homepage or properties page. Filter by location, property type, price range, bedrooms, and purpose. Land and plots have their own dedicated section at /land.",

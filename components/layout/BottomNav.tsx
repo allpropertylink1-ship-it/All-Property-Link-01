@@ -72,14 +72,6 @@ const categories = [
   { href: "/services", label: "Services", icon: ServiceIcon },
 ];
 
-const HomeIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
-    <path d="M3 10l9-8 9 8v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
-    <rect x="9" y="14" width="6" height="6" />
-    <rect x="11" y="15" width="2" height="3" fill={GOLD} stroke="none" rx="0.5" />
-  </svg>
-);
-
 const UserIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
     <circle cx="12" cy="8" r="5" />
@@ -97,7 +89,6 @@ export function BottomNav() {
 
   if (pathname.startsWith("/auth")) return null;
 
-  const homeActive = pathname === "/";
   const favActive = pathname === "/favorites";
   // Profile tab stays distinct from Home: reps → agent console, customers →
   // notifications inbox (their hub), businesses → dashboard. (Login landing
@@ -115,19 +106,6 @@ export function BottomNav() {
     <>
       <nav className="fixed inset-x-0 bottom-0 z-50 h-[calc(var(--nav-h)+env(safe-area-inset-bottom))] border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] md:hidden" role="navigation" aria-label="Bottom navigation">
         <div className="flex h-full items-stretch justify-around">
-          <Link
-            href="/"
-            className="touch-target flex flex-1 flex-col items-center justify-center gap-0.5"
-            aria-current={homeActive ? "page" : undefined}
-          >
-            <div className={`flex h-7 w-7 items-center justify-center ${homeActive ? "text-primary-600" : "text-text-secondary"}`}>
-              <HomeIcon />
-            </div>
-            <span className={`text-[10px] font-medium ${homeActive ? "text-primary-600" : "text-text-secondary"}`}>
-              Home
-            </span>
-          </Link>
-
           <button
             type="button"
             onClick={() => setBrowseOpen(true)}

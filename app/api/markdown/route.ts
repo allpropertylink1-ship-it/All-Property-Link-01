@@ -13,8 +13,6 @@ All Property Link — Kenya's marketplace for properties, land, short stays, fun
 
 const MARKDOWN_HOMEPAGE = `# All Property Link
 
-Kenya's digital marketplace for buying, selling, and renting property, plus finding verified fundis and service providers.
-
 ## What you can do here
 
 - **Buy or sell property** — houses, apartments, land plots, and commercial real estate listed by owners and verified agents.

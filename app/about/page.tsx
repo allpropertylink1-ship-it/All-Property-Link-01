@@ -178,10 +178,6 @@ export default function AboutPage() {
       <FAQSchema
         faqs={[
           {
-            question: "What is All Property Link?",
-            answer: "All Property Link is Kenya's digital marketplace for buying, selling, and renting property, plus finding verified fundis and service providers.",
-          },
-          {
             question: "Are listings verified?",
             answer: "Yes. APL representatives check listings and identity documents before anything goes live on the platform.",
           },
