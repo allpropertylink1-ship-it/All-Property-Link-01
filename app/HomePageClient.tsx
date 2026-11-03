@@ -32,26 +32,19 @@ function withPhone(p: PropertyCardType): LatestListCardData {
  */
 function FeaturedStrip({ initialData }: { initialData?: PropertyCardType[] }) {
   const properties = (initialData || []).filter((p) => p.isFeatured).slice(0, 6)
-  const { activeCover, prevCover, onCoverEnter, onCoverLeave } = useCoverBackdrop()
+  const { activeImage, onImageEnter, onImageLeave } = useCoverBackdrop()
   if (properties.length === 0) return null
   return (
-    <section aria-labelledby="home-featured-heading" className="relative bg-surface">
-      {!activeCover && <div className="absolute inset-0 z-0 bg-surface" />}
-      {prevCover && (
+    <section aria-labelledby="home-featured-heading" className="relative">
+      {!activeImage && <div className="absolute inset-0 z-0 bg-surface" />}
+      {activeImage && (
         <div
-          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ease-out opacity-0 will-change-[opacity]"
-          style={{ backgroundImage: `url(${prevCover})`, filter: 'blur(20px) saturate(0.9)' }}
+          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-500 ease-out"
+          style={{ backgroundImage: `url(${activeImage})`, filter: 'blur(24px) saturate(0.85)' }}
           aria-hidden="true"
         />
       )}
-      {activeCover && (
-        <div
-          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ease-out opacity-100 will-change-[opacity]"
-          style={{ backgroundImage: `url(${activeCover})`, filter: 'blur(20px) saturate(0.9)' }}
-          aria-hidden="true"
-        />
-      )}
-      <div className="absolute inset-0 z-10 bg-black/10" aria-hidden="true" />
+      <div className="absolute inset-0 z-10 bg-black/15" aria-hidden="true" />
       <div className="relative z-20 mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         <SectionHeading
           id="home-featured-heading"
@@ -63,14 +56,14 @@ function FeaturedStrip({ initialData }: { initialData?: PropertyCardType[] }) {
         <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:hidden">
           {properties.map((p, i) => (
             <div key={p.slug} className="w-full shrink-0 snap-start snap-always sm:w-[calc(50%-8px)]">
-              <LatestListCard item={withPhone(p)} priority={i === 0} onCoverEnter={onCoverEnter} onCoverLeave={onCoverLeave} />
+              <LatestListCard item={withPhone(p)} priority={i === 0} onImageEnter={onImageEnter} onImageLeave={onImageLeave} />
             </div>
           ))}
         </div>
         {/* Desktop: 2 columns x 3 rows */}
         <div className="mt-4 hidden gap-4 lg:grid lg:grid-cols-2">
           {properties.map((p, i) => (
-            <LatestListCard key={p.slug} item={withPhone(p)} priority={i === 0} onCoverEnter={onCoverEnter} onCoverLeave={onCoverLeave} />
+            <LatestListCard key={p.slug} item={withPhone(p)} priority={i === 0} onImageEnter={onImageEnter} onImageLeave={onImageLeave} />
           ))}
         </div>
       </div>
@@ -80,26 +73,19 @@ function FeaturedStrip({ initialData }: { initialData?: PropertyCardType[] }) {
 
 function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
   const properties = (initialData || []).slice(0, 6)
-  const { activeCover, prevCover, onCoverEnter, onCoverLeave } = useCoverBackdrop()
+  const { activeImage, onImageEnter, onImageLeave } = useCoverBackdrop()
   if (properties.length === 0) return null
   return (
-    <section aria-labelledby="home-land-heading" className="relative bg-surface">
-      {!activeCover && <div className="absolute inset-0 z-0 bg-surface" />}
-      {prevCover && (
+    <section aria-labelledby="home-land-heading" className="relative">
+      {!activeImage && <div className="absolute inset-0 z-0 bg-surface" />}
+      {activeImage && (
         <div
-          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ease-out opacity-0 will-change-[opacity]"
-          style={{ backgroundImage: `url(${prevCover})`, filter: 'blur(20px) saturate(0.9)' }}
+          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-500 ease-out"
+          style={{ backgroundImage: `url(${activeImage})`, filter: 'blur(24px) saturate(0.85)' }}
           aria-hidden="true"
         />
       )}
-      {activeCover && (
-        <div
-          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ease-out opacity-100 will-change-[opacity]"
-          style={{ backgroundImage: `url(${activeCover})`, filter: 'blur(20px) saturate(0.9)' }}
-          aria-hidden="true"
-        />
-      )}
-      <div className="absolute inset-0 z-10 bg-black/10" aria-hidden="true" />
+      <div className="absolute inset-0 z-10 bg-black/15" aria-hidden="true" />
       <div className="relative z-20 mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <SectionHeading
@@ -120,14 +106,14 @@ function FeaturedLand({ initialData }: { initialData?: PropertyCardType[] }) {
         <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:hidden">
           {properties.map((p, i) => (
                 <div key={p.slug} className="w-full shrink-0 snap-start snap-always sm:w-[calc(50%-8px)]">
-                  <LatestListCard item={withPhone(p)} priority={i === 0} onCoverEnter={onCoverEnter} onCoverLeave={onCoverLeave} />
+                  <LatestListCard item={withPhone(p)} priority={i === 0} onImageEnter={onImageEnter} onImageLeave={onImageLeave} />
                 </div>
           ))}
         </div>
             {/* Desktop: 2 columns x 3 rows */}
             <div className="hidden gap-4 lg:grid lg:grid-cols-2">
               {properties.map((p, i) => (
-                <LatestListCard key={p.slug} item={withPhone(p)} priority={i === 0} onCoverEnter={onCoverEnter} onCoverLeave={onCoverLeave} />
+                <LatestListCard key={p.slug} item={withPhone(p)} priority={i === 0} onImageEnter={onImageEnter} onImageLeave={onImageLeave} />
               ))}
             </div>
       </div>

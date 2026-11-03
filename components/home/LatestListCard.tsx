@@ -63,13 +63,13 @@ function purposeLabel(purpose: string | null | undefined): string | null {
 export function LatestListCard({
   item,
   priority = false,
-  onCoverEnter,
-  onCoverLeave,
+  onImageEnter,
+  onImageLeave,
 }: {
   item: LatestListCardData
   priority?: boolean
-  onCoverEnter?: (src: string | null) => void
-  onCoverLeave?: () => void
+  onImageEnter?: (src: string | null) => void
+  onImageLeave?: () => void
 }) {
   const gallery = getGalleryImages({ coverImage: item.coverImage, images: item.images }).slice(0, 5)
   const cover = getCoverImage({ coverImage: item.coverImage, images: item.images })
@@ -128,7 +128,11 @@ export function LatestListCard({
   }
 
   return (
-    <div className="relative flex flex-col overflow-hidden rounded-lg border border-border bg-surface font-body transition-all duration-300 hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 lg:flex-row">
+    <div
+      className="relative flex flex-col overflow-hidden rounded-lg border border-border bg-surface font-body transition-all duration-300 hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 lg:flex-row"
+      onPointerEnter={() => onImageEnter?.(slides[0] ?? null)}
+      onPointerLeave={onImageLeave}
+    >
       {/* Image carousel */}
       <div
         className="relative h-[168px] w-full shrink-0 overflow-hidden bg-surface-secondary lg:h-[190px] lg:w-[200px]"
@@ -143,9 +147,6 @@ export function LatestListCard({
           if (dx <= -40) goNext()
           else if (dx >= 40) goPrev()
         }}
-        onPointerEnter={() => onCoverEnter?.(slides[0] ?? null)}
-        onPointerLeave={onCoverLeave}
-        onPointerDown={() => onCoverEnter?.(slides[0] ?? null)}
       >
         {slides.map((src, i) => (
           <img
