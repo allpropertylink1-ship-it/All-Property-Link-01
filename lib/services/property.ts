@@ -6,6 +6,7 @@ export interface PropertyFilters {
   city?: string;
   propertyType?: string;
   purpose?: string;
+  section?: "PROPERTIES" | "AIRBNB" | "LAND";
   minPrice?: number;
   maxPrice?: number;
   bedrooms?: number;
@@ -100,6 +101,7 @@ export const getProperties = cache(async (filters: PropertyFilters = {}): Promis
   if (filters.city) params.set("city", filters.city);
   if (filters.propertyType) params.set("type", filters.propertyType);
   if (filters.purpose) params.set("purpose", filters.purpose);
+  if (filters.section) params.set("section", filters.section);
   if (filters.minPrice) params.set("minPrice", String(filters.minPrice));
   if (filters.maxPrice) params.set("maxPrice", String(filters.maxPrice));
   if (filters.bedrooms) params.set("bedrooms", String(filters.bedrooms));

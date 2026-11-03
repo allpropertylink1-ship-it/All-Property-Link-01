@@ -62,12 +62,13 @@ export default function LandCityPageClient({
 
     const params = new URLSearchParams();
     params.set("type", "LAND");
+    params.set("section", "LAND");
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
     if (page) params.set("page", page);
     params.set("limit", "20");
 
-    fetchCityCounts("LAND")
+    fetchCityCounts("LAND", "LAND")
       .then(async (cityCounts) => {
         const match = (cityCounts || []).find(
           (c) => slugifyCity(c.city) === slugifyCity(city)

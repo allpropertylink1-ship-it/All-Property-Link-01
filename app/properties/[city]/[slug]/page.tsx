@@ -20,12 +20,28 @@ function excerpt(text: string): string {
   return text.replace(/\s+/g, " ").trim().slice(0, 158);
 }
 
+/** Section discriminator from the listing's own fields. */
+function sectionOf(p: { propertyType: string; listingPurpose: string | null }): "PROPERTIES" | "AIRBNB" | "LAND" {
+  if (p.propertyType === "LAND") return "LAND";
+  if (p.listingPurpose === "FOR_RENT_SHORT_TERM") return "AIRBNB";
+  return "PROPERTIES";
+}
+
+function sectionBase(section: string): string {
+  if (section === "AIRBNB") return "/airbnbs";
+  if (section === "LAND") return "/land";
+  return "/properties";
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const property = await getPropertyBySlug(params.slug);
   if (!property) return {};
 
+  const section = sectionOf(property);
+  const canonicalCity = slugifyCity(property.city);
+  const base = sectionBase(section);
+  const canonical = `${siteUrl()}${base}/${canonicalCity}/${property.slug}`;
   const isArchived = property.status === "SOLD" || property.status === "RENTED";
-  const canonical = `${siteUrl()}/properties/${slugifyCity(property.city)}/${property.slug}`;
   const mixSuffix = property.hasMultipleUnits && property.unitMixDescription
     ? ` Units: ${property.unitMixDescription}.`
     : "";
@@ -36,7 +52,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: property.title,
     description,
     alternates: { canonical },
-    // De-index unavailable listings so search engines stop surfacing sold/rented homes.
     ...(isArchived ? { robots: { index: false, follow: false } } : {}),
     openGraph: {
       title: `${property.title} — All Property Link`,
@@ -59,43 +74,48 @@ export default async function PropertyDetailPage({ params }: Props) {
   const property = await getPropertyBySlug(params.slug);
   if (!property) notFound();
 
+  const section = sectionOf(property);
   const canonicalCity = slugifyCity(property.city);
-  // Land has its own section — consolidate old /properties land URLs there.
-  if (property.propertyType === "LAND") {
-    permanentRedirect(`/land/${canonicalCity}/${property.slug}`);
-  }
-  if (params.city.toLowerCase() !== canonicalCity || slugifyCity(params.city) !== canonicalCity) {
-    redirect(`/properties/${canonicalCity}/${property.slug}`);
+  const base = sectionBase(section);
+
+  // Canonical-section enforcement: a listing reached via the wrong section
+  // URL 308s to its canonical section (LAND → /land, AirBnB → /airbnbs).
+  if (base !== "/properties" && params.city.toLowerCase() === canonicalCity) {
+    permanentRedirect(`${base}/${canonicalCity}/${property.slug}`);
   }
 
-  const canonical = `${siteUrl()}/properties/${canonicalCity}/${property.slug}`;
+  // City slug canonicalisation within the section.
+  if (params.city.toLowerCase() !== canonicalCity || slugifyCity(params.city) !== canonicalCity) {
+    redirect(`${base}/${canonicalCity}/${property.slug}`);
+  }
+
+  const canonical = `${siteUrl()}${base}/${canonicalCity}/${property.slug}`;
   const coverForLd = getCoverImage(property as { coverImage?: string | null; images?: unknown });
 
   const isArchived = property.status === "SOLD" || property.status === "RENTED";
 
-  // Seller review summary (ISR-cached) for sidebar badge + top-3 block
   const sellerReviews = property.agent?.id ? await getUserReviews(property.agent.id) : undefined;
 
+  // JSON-LD: LodgingBusiness for short-term stays, RealEstateListing otherwise.
   const listingJsonLd = {
     "@context": "https://schema.org",
-    "@type": "RealEstateListing",
+    "@type": section === "AIRBNB" ? "LodgingBusiness" : "RealEstateListing",
     name: property.title,
     description: property.description,
     url: canonical,
     image: coverForLd || undefined,
     datePosted: property.createdAt instanceof Date ? property.createdAt.toISOString() : undefined,
-    offers: {
-      "@type": "Offer",
-      price: property.price == null ? undefined : Number(property.price),
-      priceCurrency: property.currency,
-      // Sold/rented listings are no longer available to purchase.
-      availability: isArchived ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
-    },
+    ...(section !== "AIRBNB" ? {
+      offers: {
+        "@type": "Offer",
+        price: property.price == null ? undefined : Number(property.price),
+        priceCurrency: property.currency,
+        availability: isArchived ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+      },
+    } : {}),
     ...(property.bedrooms ? { numberOfBedrooms: property.bedrooms } : {}),
     ...(property.bathrooms ? { numberOfBathrooms: property.bathrooms } : {}),
     ...(property.area ? { floorSize: { "@type": "QuantitativeValue", value: property.area, unitCode: "SQFT" } } : {}),
-    // Multi-unit buildings: one canonical URL, units as contained places —
-    // Google sees every configuration, no per-unit URLs are emitted.
     ...((property.hasMultipleUnits && property.units && property.units.length > 0) ? {
       numberOfAvailableAccommodationUnits: property.units.length,
       containsPlace: property.units.map((u: {
@@ -130,8 +150,8 @@ export default async function PropertyDetailPage({ params }: Props) {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: `${siteUrl()}/` },
-      { "@type": "ListItem", position: 2, name: "Properties", item: `${siteUrl()}/properties` },
-      { "@type": "ListItem", position: 3, name: property.city, item: `${siteUrl()}/properties/${canonicalCity}` },
+      { "@type": "ListItem", position: 2, name: section === "AIRBNB" ? "Airbnbs" : section === "LAND" ? "Land" : "Properties", item: `${siteUrl()}${base}` },
+      { "@type": "ListItem", position: 3, name: property.city, item: `${siteUrl()}${base}/${canonicalCity}` },
       { "@type": "ListItem", position: 4, name: property.title, item: canonical },
     ],
   };

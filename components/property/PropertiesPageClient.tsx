@@ -36,15 +36,16 @@ interface Props {
   searchParams: Record<string, string | undefined>
   /** Canonical section path — keeps filters, hotspots + pagination inside the section (e.g. "/airbnbs", "/land"). */
   basePath?: string
+  /** Section discriminator: PROPERTIES / AIRBNB / LAND. Defaults by basePath when omitted. */
+  section?: "PROPERTIES" | "AIRBNB" | "LAND"
 }
 
-function catalogTitle(total: number | undefined, purpose?: string, propertyType?: string): string {
+function catalogTitle(total: number | undefined, section: string, purpose?: string): string {
   const count = total ?? "…"
-  const isLand = propertyType === "LAND"
-  if (purpose === "FOR_RENT_SHORT_TERM") {
+  if (section === "AIRBNB") {
     return `${count} ${total === 1 ? "Airbnb" : "Airbnbs"} Available`
   }
-  if (isLand) {
+  if (section === "LAND") {
     return `${count} ${total === 1 ? "Plot" : "Plots"} Available`
   }
   if (purpose === "FOR_SALE") {
@@ -56,11 +57,11 @@ function catalogTitle(total: number | undefined, purpose?: string, propertyType?
   return `${count} ${total === 1 ? "Property" : "Properties"} Available`
 }
 
-function catalogSubtitle(purpose?: string, propertyType?: string): string {
-  if (purpose === "FOR_RENT_SHORT_TERM") {
+function catalogSubtitle(section: string, purpose?: string): string {
+  if (section === "AIRBNB") {
     return "Verified short-term stays and vacation rentals across Kenya — book by the night."
   }
-  if (propertyType === "LAND") {
+  if (section === "LAND") {
     return "Verified plots and land for sale across Kenya."
   }
   if (purpose === "FOR_SALE") {
@@ -72,7 +73,7 @@ function catalogSubtitle(purpose?: string, propertyType?: string): string {
   return "Verified houses and apartments for sale, rent, and short stays across Kenya."
 }
 
-export function PropertiesPageClient({ searchParams, basePath = "/properties" }: Props) {
+export function PropertiesPageClient({ searchParams, basePath = "/properties", section: sectionProp }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const [data, setData] = useState<{ properties: Prop[]; total: number; page: number; totalPages: number } | null>(null)
@@ -81,6 +82,7 @@ export function PropertiesPageClient({ searchParams, basePath = "/properties" }:
   const [layout, setLayout] = useState<CatalogLayout>("grid")
 
   const { city, propertyType, purpose, minPrice, maxPrice, bedrooms, page, search } = searchParams
+  const section = sectionProp ?? (basePath === "/airbnbs" ? "AIRBNB" : basePath === "/land" ? "LAND" : "PROPERTIES")
   const sort: CatalogSortKey = parseCatalogSort(searchParams.sort)
 
   useEffect(() => {
@@ -88,6 +90,7 @@ export function PropertiesPageClient({ searchParams, basePath = "/properties" }:
     if (city) params.set("city", city)
     if (propertyType) params.set("type", propertyType)
     if (purpose) params.set("purpose", purpose)
+    if (section) params.set("section", section)
     if (minPrice) params.set("minPrice", minPrice)
     if (maxPrice) params.set("maxPrice", maxPrice)
     if (bedrooms) params.set("bedrooms", bedrooms)
@@ -103,12 +106,12 @@ export function PropertiesPageClient({ searchParams, basePath = "/properties" }:
     setError(null)
     Promise.all([
       fetch(`/api/properties?${params}`).then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json() }),
-      fetchCityCounts(propertyType === "LAND" ? "LAND" : undefined),
+      fetchCityCounts(propertyType === "LAND" ? "LAND" : undefined, section, purpose),
     ]).then(([propData, cityCounts]) => {
       setData(propData)
       setCities((cityCounts || []).map((c: { city: string; count: number }) => ({ city: c.city, _count: { city: c.count } })))
     }).catch(e => setError(e.message))
-  }, [city, propertyType, purpose, minPrice, maxPrice, bedrooms, page, search, sort])
+  }, [city, propertyType, purpose, section, minPrice, maxPrice, bedrooms, page, search, sort])
 
   const hotspots: Hotspot[] = useMemo(() => {
     const top = [...cities].sort((a, b) => b._count.city - a._count.city).slice(0, 5)
@@ -161,8 +164,8 @@ export function PropertiesPageClient({ searchParams, basePath = "/properties" }:
 
           <main className="flex flex-col gap-6 lg:col-span-8 xl:col-span-9">
             <ResultsHeader
-              title={catalogTitle(data?.total, purpose, propertyType)}
-              subtitle={catalogSubtitle(purpose, propertyType)}
+              title={catalogTitle(data?.total, section, purpose)}
+              subtitle={catalogSubtitle(section, purpose)}
               sort={sort}
               onSortChange={pushSort}
               layout={layout}

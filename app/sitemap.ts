@@ -27,67 +27,54 @@ function isTestListing(title: string): boolean {
 
 async function propertyPages(base: string): Promise<MetadataRoute.Sitemap> {
   try {
-    const first = await getProperties({ page: 1, pageSize: 50 });
-    const pageCount = Math.max(1, first.totalPages || 1);
-    const rest = pageCount > 1
-      ? await Promise.all(
-          Array.from({ length: pageCount - 1 }, (_, i) => getProperties({ page: i + 2, pageSize: 50 }))
-        )
-      : [];
-    const pages = [first, ...rest];
+    const harvest = async (section: "PROPERTIES" | "AIRBNB" | "LAND", sectionBase: string): Promise<{ entries: MetadataRoute.Sitemap; cityDates: Map<string, Date> }> => {
+      const first = await getProperties({ page: 1, pageSize: 50, section });
+      const pageCount = Math.max(1, first.totalPages || 1);
+      const rest = pageCount > 1
+        ? await Promise.all(
+            Array.from({ length: pageCount - 1 }, (_, i) => getProperties({ page: i + 2, pageSize: 50, section }))
+          )
+        : [];
+      const pages = [first, ...rest];
 
-    // Land is excluded from default queries — harvest it explicitly.
-    const landFirst = await getProperties({ page: 1, pageSize: 50, propertyType: "LAND" });
-    const landPageCount = Math.max(1, landFirst.totalPages || 1);
-    const landRest = landPageCount > 1
-      ? await Promise.all(
-          Array.from({ length: landPageCount - 1 }, (_, i) => getProperties({ page: i + 2, pageSize: 50, propertyType: "LAND" }))
-        )
-      : [];
-    const allPages = [...pages, landFirst, ...landRest];
+      const seen = new Set<string>();
+      const entries: MetadataRoute.Sitemap = [];
+      const cityDates = new Map<string, Date>();
 
-    const seen = new Set<string>();
-    const entries: MetadataRoute.Sitemap = [];
-    const cityDates = new Map<string, Date>();
-    const landCityDates = new Map<string, Date>();
-
-    for (const { properties } of allPages) {
-      for (const prop of properties) {
-        if (isTestListing(prop.title)) continue;
-        const city = slugifyCity(prop.city);
-        // Land has its own section — keep /properties/* land-free.
-        const isLand = (prop.propertyType || "").toUpperCase() === "LAND";
-        const url = isLand
-          ? `${base}/land/${city}/${prop.slug}`
-          : `${base}/properties/${city}/${prop.slug}`;
-        if (seen.has(url)) continue;
-        seen.add(url);
-        if (!isLand) cityDates.set(city, prop.createdAt);
-        else landCityDates.set(city, prop.createdAt);
-        entries.push({
-          url,
-          lastModified: prop.createdAt,
-          changeFrequency: "weekly",
-          priority: 0.7,
-        });
+      for (const { properties } of pages) {
+        for (const prop of properties) {
+          if (isTestListing(prop.title)) continue;
+          const city = slugifyCity(prop.city);
+          const url = `${base}${sectionBase}/${city}/${prop.slug}`;
+          if (seen.has(url)) continue;
+          seen.add(url);
+          cityDates.set(city, prop.createdAt);
+          entries.push({
+            url,
+            lastModified: prop.createdAt,
+            changeFrequency: "weekly",
+            priority: 0.7,
+          });
+        }
       }
-    }
 
-    const cities: MetadataRoute.Sitemap = Array.from(cityDates.entries()).map(([city, lastModified]) => ({
-      url: `${base}/properties/${city}`,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    }));
+      const cities: MetadataRoute.Sitemap = Array.from(cityDates.entries()).map(([city, lastModified]) => ({
+        url: `${base}${sectionBase}/${city}`,
+        lastModified,
+        changeFrequency: "weekly",
+        priority: 0.8,
+      }));
 
-    const landCities: MetadataRoute.Sitemap = Array.from(landCityDates.entries()).map(([city, lastModified]) => ({
-      url: `${base}/land/${city}`,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    }));
+      return { entries: [...cities, ...entries], cityDates };
+    };
 
-    return [...cities, ...landCities, ...entries];
+    const [props, airbnbs, land] = await Promise.all([
+      harvest("PROPERTIES", "/properties"),
+      harvest("AIRBNB", "/airbnbs"),
+      harvest("LAND", "/land"),
+    ]);
+
+    return [...props.entries, ...airbnbs.entries, ...land.entries];
   } catch {
     return [];
   }

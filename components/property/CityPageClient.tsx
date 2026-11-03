@@ -95,7 +95,8 @@ export default function CityPageClient({
   const [error, setError] = useState<string | null>(null);
   const [layout, setLayout] = useState<CatalogLayout>("grid");
 
-  const { propertyType, purpose, minPrice, maxPrice, bedrooms, page, search } = searchParams;
+  const { propertyType, purpose, section: sectionParam, minPrice, maxPrice, bedrooms, page, search } = searchParams;
+  const section = sectionParam || "PROPERTIES";
   const sort: CatalogSortKey = parseCatalogSort(searchParams.sort);
 
   useEffect(() => {
@@ -106,6 +107,7 @@ export default function CityPageClient({
     const params = new URLSearchParams();
     if (propertyType) params.set("type", propertyType);
     if (purpose) params.set("purpose", purpose);
+    params.set("section", section);
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
     if (bedrooms) params.set("bedrooms", bedrooms);
@@ -117,7 +119,7 @@ export default function CityPageClient({
     params.set("limit", "20");
     params.set("featuredFirst", "1");
 
-    fetchCityCounts()
+    fetchCityCounts(undefined, section, purpose)
       .then(async (cityCounts) => {
         const match = (cityCounts || []).find(
           (c) => slugifyCity(c.city) === slugifyCity(city)
@@ -142,7 +144,7 @@ export default function CityPageClient({
       })
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false));
-  }, [city, propertyType, purpose, minPrice, maxPrice, bedrooms, page, search, sort]);
+  }, [city, propertyType, purpose, section, minPrice, maxPrice, bedrooms, page, search, sort]);
 
   const hotspots: Hotspot[] = useMemo(() => {
     const top = [...cities]
