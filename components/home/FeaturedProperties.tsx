@@ -6,6 +6,7 @@ import { ArrowRight } from "@/components/ui/icons"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { LatestListCard, type LatestListCardData } from "@/components/home/LatestListCard"
 import { SectionHeading } from "@/components/home/SectionHeading"
+import { useCoverBackdrop } from "@/components/home/useCoverBackdrop"
 
 interface ApiProperty extends LatestListCardData {
   currency: string
@@ -48,6 +49,7 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
   )
   const [loading, setLoading] = useState(!initialData)
   const [error, setError] = useState<string | null>(null)
+  const { activeCover, prevCover, onCoverEnter, onCoverLeave } = useCoverBackdrop()
 
   useEffect(() => {
     if (initialData) return
@@ -63,8 +65,23 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
   }, [initialData])
 
   return (
-    <section aria-labelledby="home-latest-heading" className="bg-surface">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+    <section aria-labelledby="home-latest-heading" className="relative bg-surface">
+      {prevCover && (
+        <div
+          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ease-out opacity-0"
+          style={{ backgroundImage: `url(${prevCover})` }}
+          aria-hidden="true"
+        />
+      )}
+      {activeCover && (
+        <div
+          className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ease-out opacity-100"
+          style={{ backgroundImage: `url(${activeCover})` }}
+          aria-hidden="true"
+        />
+      )}
+      <div className="absolute inset-0 z-10 bg-black/20 backdrop-blur-sm" aria-hidden="true" />
+      <div className="relative z-20 mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <SectionHeading
             id="home-latest-heading"
@@ -107,7 +124,7 @@ export function FeaturedProperties({ initialData }: { initialData?: ApiProperty[
             <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:hidden">
               {properties.map((p, i) => (
                 <div key={p.slug} className="w-full shrink-0 snap-start snap-always sm:w-[calc(50%-8px)]">
-                  <LatestListCard item={withPhone(p)} priority={i === 0} />
+                  <LatestListCard item={withPhone(p)} priority={i === 0} onCoverEnter={onCoverEnter} onCoverLeave={onCoverLeave} />
                 </div>
               ))}
             </div>

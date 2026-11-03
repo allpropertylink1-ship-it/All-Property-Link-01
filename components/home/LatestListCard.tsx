@@ -60,7 +60,17 @@ function purposeLabel(purpose: string | null | undefined): string | null {
  * desktop, vertical (image top) on mobile rails. Cover photo first, arrows +
  * dots + counter carousel, KES-only price, no agent row.
  */
-export function LatestListCard({ item, priority = false }: { item: LatestListCardData; priority?: boolean }) {
+export function LatestListCard({
+  item,
+  priority = false,
+  onCoverEnter,
+  onCoverLeave,
+}: {
+  item: LatestListCardData
+  priority?: boolean
+  onCoverEnter?: (src: string | null) => void
+  onCoverLeave?: () => void
+}) {
   const gallery = getGalleryImages({ coverImage: item.coverImage, images: item.images }).slice(0, 5)
   const cover = getCoverImage({ coverImage: item.coverImage, images: item.images })
   const slides = (gallery.length > 0 ? gallery : cover ? [cover] : [PLACEHOLDER_PROPERTY]).slice(0, 5)
@@ -133,6 +143,8 @@ export function LatestListCard({ item, priority = false }: { item: LatestListCar
           if (dx <= -40) goNext()
           else if (dx >= 40) goPrev()
         }}
+        onMouseEnter={() => onCoverEnter?.(cover)}
+        onMouseLeave={onCoverLeave}
       >
         {slides.map((src, i) => (
           <img
