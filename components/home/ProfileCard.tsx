@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link"
-import { Wrench, Briefcase, ArrowUpRight, BadgeCheck } from "@/components/ui/icons"
+import { Wrench, Briefcase, ArrowUpRight } from "@/components/ui/icons"
 import { AVATAR_POOL } from "@/lib/placeholders"
 import { optimizeImageUrl, resolveImageUrl } from "@/lib/images"
 import { getTradeLabel } from "@/lib/trade-label"
@@ -155,13 +155,7 @@ export function ProfileCard({
         {displayName}
       </h3>
 
-      {/* Real KYC only — no badge unless the backend confirms VERIFIED. */}
-      {item.user.kycStatus === "VERIFIED" && (
-        <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary">
-          <BadgeCheck size={12} aria-hidden="true" />
-          ID-checked
-        </span>
-      )}
+
 
       {/* Subtitle (company owner name) */}
       {subtitle && (

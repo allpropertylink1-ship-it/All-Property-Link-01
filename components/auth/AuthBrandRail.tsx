@@ -13,8 +13,8 @@ const railPoints = [
   },
   {
     icon: ShieldCheck,
-    title: "ID-vetted fundis",
-    body: "Trade pros checked before they reach you.",
+    title: "Fundis & trade pros",
+    body: "Skilled pros for every job, near you.",
   },
 ]
 

@@ -59,7 +59,7 @@ const SLIDES: HeroSlide[] = [
   {
     eyebrow: "HIRE A FUNDI",
     title: "NEAR YOU",
-    subtitle: "Plumber, electrician, mason, carpenter, painter — ID-checked. Call or WhatsApp direct, zero markup.",
+    subtitle: "Plumber, electrician, mason, carpenter, painter — call or WhatsApp direct, zero markup.",
     desktop: "/hero/desktop/hire-fundi.jpg",
     mobile: "/hero/mobile/hire-fundi.jpg",
     alt: "Hire a fundi near you",

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { resolveImageUrl } from "@/lib/images";
 import { PLACEHOLDER_SERVICE } from "@/lib/placeholders";
 import { fmtKES } from "@/lib/utils";
-import { BadgeCheck, MessageCircle, Phone, Star } from "@/components/ui/icons";
+import { MessageCircle, Phone, Star } from "@/components/ui/icons";
 import { FavoriteButton } from "@/components/shared/FavoriteButton";
 
 interface ServiceCardCompactProps {
@@ -120,12 +120,6 @@ export function ServiceCardCompact({
               {user ? initialsOf(user.firstName, user.lastName) : "S"}
             </div>
           )}
-          <span
-            aria-hidden
-            className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent-500 text-white"
-          >
-            <BadgeCheck size={13} />
-          </span>
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">

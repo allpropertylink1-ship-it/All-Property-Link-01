@@ -84,13 +84,6 @@ export default async function ServicesPage({ searchParams }: Props) {
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-3">
               <div className="flex items-center gap-2.5 rounded-xl bg-surface-secondary px-4 py-2.5">
-                <Shield size={20} className="text-primary-600" />
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-text-primary">100% ID-Vetted</span>
-                  <span className="text-xs text-text-secondary">Background checked</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2.5 rounded-xl bg-surface-secondary px-4 py-2.5">
                 <Clock size={20} className="text-accent-600" />
                 <div className="flex flex-col">
                   <span className="text-sm font-bold text-text-primary">Direct Contact</span>

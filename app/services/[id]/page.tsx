@@ -11,7 +11,7 @@ import { PropertyGallery } from "@/components/shared/PropertyGallery";
 import { ShareButtons } from "@/components/shared/ShareButtons";
 import { GatedContact } from "@/components/services/GatedContact";
 import { FavoriteButton } from "@/components/shared/FavoriteButton";
-import { Globe, Sparkles, Star, Briefcase, BadgeCheck } from "@/components/ui/icons";
+import { Globe, Sparkles, Star, Briefcase } from "@/components/ui/icons";
 
 interface Props {
   params: { id: string };
@@ -151,12 +151,7 @@ export default async function ServiceDetailPage({ params }: Props) {
                   <span className="min-w-0 truncate">
                     {service.user.companyName || `${service.user.firstName} ${service.user.lastName}`}
                   </span>
-                  {service.isKycVerified && (
-                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary">
-                      <BadgeCheck size={12} aria-hidden="true" />
-                      ID-checked
-                    </span>
-                  )}
+
                 </p>
                 {service.user.companyName && (
                   <p className="truncate text-xs text-text-secondary">
@@ -299,12 +294,7 @@ export default async function ServiceDetailPage({ params }: Props) {
                     <span className="min-w-0 truncate">
                       {service.user.companyName || `${service.user.firstName} ${service.user.lastName}`}
                     </span>
-                    {service.isKycVerified && (
-                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary">
-                        <BadgeCheck size={12} aria-hidden="true" />
-                        ID-checked
-                      </span>
-                    )}
+
                   </p>
                   {shelves.length > 0 && (
                     <span className="text-xs text-primary-600">{shelves.map((s) => s.name).join(" · ")}</span>
