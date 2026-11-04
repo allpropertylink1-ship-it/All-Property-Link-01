@@ -52,6 +52,10 @@ function ChooseRoleInner() {
   // double-guard here for direct navigation.
   useEffect(() => {
     if (loading || !user) return;
+    if (user.authMethod === "agent") {
+      router.replace("/dashboard/agent");
+      return;
+    }
     if (user.primaryUserType === "CUSTOMER") {
       router.replace("/");
       return;

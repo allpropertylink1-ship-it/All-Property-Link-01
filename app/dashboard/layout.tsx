@@ -27,8 +27,14 @@ export default async function DashboardLayout({
   };
 
   const pathname = (await headers()).get("x-pathname") || "";
+
+  // APL Representatives are staff (authMethod "agent"): they go to
+  // /dashboard/agent, never to choose-role. A missing primaryUserType /
+  // userTypes must not make them look "typeless".
   const isTypeless =
-    !user.primaryUserType && (!user.userTypes || user.userTypes.length === 0);
+    user.authMethod !== "agent" &&
+    !user.primaryUserType &&
+    (!user.userTypes || user.userTypes.length === 0);
 
   if (!user.acceptedTermsAt || user.termsVersion !== CURRENT_TERMS_VERSION) {
     // Keep the deep link so accepting the Terms lands the user where they
