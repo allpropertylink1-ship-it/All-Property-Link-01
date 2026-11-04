@@ -15,6 +15,7 @@ import {
   Settings,
   Menu,
   X,
+  Activity,
 } from "@/components/ui/icons"
 import { cn } from "@/lib/utils"
 import { canListProperties, canListServices } from "@/lib/persona"
@@ -34,6 +35,7 @@ function getSecondaryNav(canProperties: boolean, canServices: boolean): NavLink[
   return [
     ...(canProperties ? [{ href: "/dashboard/listings", label: "My Listings", icon: Building2 }] : []),
     ...(canServices ? [{ href: "/dashboard/services", label: "My Services", icon: Building2 }] : []),
+    { href: "/dashboard/analytics", label: "Analytics", icon: Activity },
     { href: "/dashboard/saved-searches", label: "Saved Searches", icon: Search },
     { href: "/dashboard/notification-preferences", label: "Notification Preferences", icon: Settings },
     { href: "/dashboard/reviews", label: "Reviews", icon: Star },

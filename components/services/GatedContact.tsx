@@ -6,6 +6,19 @@ import { useAuth } from "@/lib/auth-context"
 import { api } from "@/lib/api-client"
 import { MessageCircle, Phone, Mail, Lock } from "@/components/ui/icons"
 
+async function trackClick(targetId: string, targetType: "PROPERTY" | "SERVICE", clickType: string) {
+  try {
+    await fetch(`/api/${targetType.toLowerCase() === "property" ? "properties" : "services"}/${targetId}/click`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clickType }),
+      credentials: "include",
+    })
+  } catch {
+    // best-effort — never break UX
+  }
+}
+
 /** wa.me needs full international digits; 0-prefixed Kenyan numbers become 254…. */
 function whatsappDigits(phone: string): string | null {
   const digits = phone.replace(/\D/g, "")
@@ -128,6 +141,7 @@ export function GatedContact({
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`WhatsApp about ${title}`}
+            onClick={() => trackClick(serviceId, "SERVICE", "WHATSAPP")}
             className="flex min-h-touch items-center gap-1.5 rounded-lg bg-whatsapp px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-whatsapp-dark"
           >
             <MessageCircle size={14} aria-hidden="true" />
@@ -138,6 +152,7 @@ export function GatedContact({
           <a
             href={`tel:${phone}`}
             aria-label={`Call about ${title}`}
+            onClick={() => trackClick(serviceId, "SERVICE", "PHONE")}
             className="flex min-h-touch items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
           >
             <Phone size={14} aria-hidden="true" />
@@ -147,6 +162,7 @@ export function GatedContact({
         {email && (
           <a
             href={`mailto:${email}`}
+            onClick={() => trackClick(serviceId, "SERVICE", "EMAIL")}
             className="flex min-h-touch items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
           >
             <Mail size={14} aria-hidden="true" />
@@ -164,6 +180,7 @@ export function GatedContact({
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`WhatsApp about ${title}`}
+          onClick={() => trackClick(serviceId, "SERVICE", "WHATSAPP")}
           className="flex min-h-touch w-full items-center justify-center gap-2 rounded-lg bg-whatsapp px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-whatsapp-dark"
         >
           <MessageCircle size={16} aria-hidden="true" />
@@ -174,6 +191,7 @@ export function GatedContact({
         <a
           href={`tel:${phone}`}
           aria-label={`Call about ${title}`}
+          onClick={() => trackClick(serviceId, "SERVICE", "PHONE")}
           className="flex min-h-touch w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
         >
           <Phone size={16} className="shrink-0" aria-hidden="true" />
@@ -183,6 +201,7 @@ export function GatedContact({
       {email && (
         <a
           href={`mailto:${email}`}
+          onClick={() => trackClick(serviceId, "SERVICE", "EMAIL")}
           className="flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
         >
           <Mail size={16} className="shrink-0" aria-hidden="true" />

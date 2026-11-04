@@ -38,6 +38,19 @@ import { ReviewSection } from "@/components/reviews/ReviewSection";
 import type { ReviewItem } from "@/lib/services/review";
 import { resolveImageUrl } from "@/lib/images";
 
+async function trackClick(targetId: string, targetType: "PROPERTY" | "SERVICE", clickType: string) {
+  try {
+    await fetch(`/api/${targetType.toLowerCase() === "property" ? "properties" : "services"}/${targetId}/click`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clickType }),
+      credentials: "include",
+    })
+  } catch {
+    // best-effort — never break UX
+  }
+}
+
 interface SellerReviewsData {
   reviews: ReviewItem[];
   total: number;
@@ -600,6 +613,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews, isA
                 {property.agent.phone && (
                   <a
                     href={`tel:${property.agent.phone}`}
+                    onClick={() => trackClick(property.id, "PROPERTY", "PHONE")}
                     className="touch-target flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-3 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
                   >
                     <Phone size={16} className="shrink-0" aria-hidden />
@@ -611,6 +625,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews, isA
                     href={`https://wa.me/${agentWhatsApp}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => trackClick(property.id, "PROPERTY", "WHATSAPP")}
                     className="touch-target flex w-full items-center justify-center gap-2 rounded-lg bg-whatsapp px-3 py-3 text-sm font-semibold text-white transition-colors hover:bg-whatsapp-dark"
                   >
                     <MessageCircle size={16} aria-hidden />
@@ -620,6 +635,7 @@ export default function PropertyDetailClient({ slug, initial, sellerReviews, isA
                 {property.agent.email && (
                   <a
                     href={`mailto:${property.agent.email}`}
+                    onClick={() => trackClick(property.id, "PROPERTY", "EMAIL")}
                     className="touch-target flex w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-border px-3 py-3 text-sm font-semibold text-text-primary transition-colors [overflow-wrap:anywhere] hover:bg-surface-secondary"
                   >
                     <Mail size={16} className="shrink-0" aria-hidden />
