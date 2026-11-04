@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { api } from "@/lib/api-client"
-import { Loader2, AlertCircle, Plus, CheckCircle, XCircle, Clock } from "@/components/ui/icons"
+import { Loader2, AlertCircle, Plus, CheckCircle, XCircle, Clock, Check } from "@/components/ui/icons"
 import { FormBanner } from "@/components/shared/FormFeedback"
 import { AgentGuard } from "@/components/dashboard/AgentGuard"
 import { StatusPill } from "@/components/shared/StatusPill"
@@ -27,6 +27,20 @@ interface Referral {
   userTypes: string[]
 }
 
+interface Listing {
+  id: string
+  title: string
+  slug: string
+  price: number | null
+  currency: string
+  propertyType: string
+  city: string
+  status: string
+  moderationStatus: string
+  images: unknown
+  createdAt: string
+}
+
 interface Claim {
   id: string
   referredUser: { id: string; firstName: string; lastName: string; phone: string | null } | null
@@ -41,6 +55,7 @@ interface Claim {
   reviewedAt: string | null
   paidAt: string | null
   createdAt: string
+  claimListings?: { property: Listing }[]
 }
 
 const statuses = ["", "PENDING", "AWAITING_AGENT_ACCEPTANCE", "PAID", "REJECTED"] as const
@@ -63,6 +78,8 @@ export default function AgentClaimsPage() {
   const [showForm, setShowForm] = useState(false)
   const [referrals, setReferrals] = useState<Referral[]>([])
   const [selectedReferral, setSelectedReferral] = useState("")
+  const [listings, setListings] = useState<Listing[]>([])
+  const [selectedListingIds, setSelectedListingIds] = useState<Set<string>>(new Set())
   const [claimType, setClaimType] = useState<(typeof CLAIM_TYPES)[number] | null>(null)
   const [formAmount, setFormAmount] = useState("")
   const [formNotes, setFormNotes] = useState("")
@@ -97,20 +114,15 @@ export default function AgentClaimsPage() {
 
   useEffect(() => { fetchReferrals() }, [fetchReferrals])
 
-  const suggestedForType = (t: string) => CLAIM_TYPES.find((c) => c.value === t)?.suggested
-
-  async function openForm() {
-    setShowForm(true)
-    setSelectedReferral("")
-    setClaimType(null)
-    setFormAmount("")
-    setFormNotes("")
-    setClaimError("")
-    setClaimSuccess("")
-  }
+  const fetchReferralDetails = useCallback(async (id: string) => {
+    const { data } = await api.get<{ referral: { properties: Listing[] } }>(`/api/referral-partner/referrals/${id}`)
+    if (data) {
+      setListings(data.referral.properties)
+      setSelectedListingIds(new Set())
+    }
+  }, [])
 
   const typeForReferral = (r: Referral) => {
-    // Heuristic: agent-role users default to AGENT, others to OWNER; agent can override.
     const types = r.userTypes
     if (types.includes("AGENT")) return "AGENT"
     if (types.includes("SERVICE_PROVIDER")) return "SERVICE_PROVIDER"
@@ -118,20 +130,63 @@ export default function AgentClaimsPage() {
     return "OWNER"
   }
 
+  const handleReferralChange = (id: string) => {
+    setSelectedReferral(id)
+    setSelectedListingIds(new Set())
+    setFormAmount("")
+    const r = referrals.find((x) => x.id === id)
+    if (r) {
+      const t = CLAIM_TYPES.find((c) => c.value === typeForReferral(r))
+      if (t) { setClaimType(t); setFormAmount(String(t.suggested)) }
+    }
+    fetchReferralDetails(id)
+  }
+
+  const isListingSelected = (id: string) => selectedListingIds.has(id)
+
+  const toggleListing = (id: string) => {
+    setSelectedListingIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  async function openForm() {
+    setShowForm(true)
+    setSelectedReferral("")
+    setListings([])
+    setSelectedListingIds(new Set())
+    setClaimType(null)
+    setFormAmount("")
+    setFormNotes("")
+    setClaimError("")
+    setClaimSuccess("")
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!selectedReferral || !claimType) return
-    const amount = formAmount === "" ? undefined : parseFloat(formAmount)
-    if (amount !== undefined && (!amount || amount <= 0)) return
+    if (selectedListingIds.size === 0) {
+      setClaimError("Select at least one listing to claim.")
+      return
+    }
+    const amount = parseFloat(formAmount)
+    if (!amount || amount <= 0) {
+      setClaimError("Enter a valid total amount.")
+      return
+    }
     setSubmitting(true)
     setClaimError("")
     setClaimSuccess("")
-    const body: { referredUserId: string; claimType: string; amount?: number; agentNotes?: string | null } = {
+    const body = {
       referredUserId: selectedReferral,
       claimType: claimType.value,
+      propertyIds: Array.from(selectedListingIds),
+      amount,
       agentNotes: formNotes || null,
     }
-    if (amount !== undefined) body.amount = amount
     const { data, error } = await api.post("/api/claims", body)
     if (data) {
       setShowForm(false)
@@ -218,6 +273,9 @@ export default function AgentClaimsPage() {
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-text-primary truncate">{c.referredUser ? `${c.referredUser.firstName} ${c.referredUser.lastName}` : "-"}</p>
                     <p className="text-xs text-text-secondary">{c.claimType.replace(/_/g, " ")} &middot; {new Date(c.createdAt).toLocaleDateString()}</p>
+                    {c.claimListings?.length && (
+                      <p className="mt-0.5 text-xs text-text-secondary truncate">{c.claimListings.map((cl) => cl.property.title).join(", ")}</p>
+                    )}
                   </div>
                   <StatusPill
                     status={c.status}
@@ -250,6 +308,7 @@ export default function AgentClaimsPage() {
             <thead className="bg-surface-secondary text-text-secondary">
               <tr>
                 <th className="px-4 py-3 font-medium">Claimed for</th>
+                <th className="px-4 py-3 font-medium">Listings</th>
                 <th className="px-4 py-3 font-medium">Type</th>
                 <th className="px-4 py-3 font-medium">Amount</th>
                 <th className="px-4 py-3 font-medium">Status</th>
@@ -262,6 +321,7 @@ export default function AgentClaimsPage() {
               {claims.map((c) => (
                 <tr key={c.id} className="bg-surface hover:bg-surface-secondary">
                   <td className="px-4 py-3 font-medium text-text-primary truncate">{c.referredUser ? `${c.referredUser.firstName} ${c.referredUser.lastName}` : "-"}</td>
+                  <td className="px-4 py-3 text-text-secondary truncate max-w-[220px]">{c.claimListings?.map((cl) => cl.property.title).join(", ") || "—"}</td>
                   <td className="px-4 py-3 text-text-secondary">{c.claimType.replace(/_/g, " ")}</td>
                   <td className="px-4 py-3 text-text-primary">
                     {c.adminModifiedAmount ? (
@@ -308,16 +368,7 @@ export default function AgentClaimsPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="claim-referral" className="mb-1 block text-sm font-medium text-text-primary">Claimed for (your referral) *</label>
-              <select id="claim-referral" value={selectedReferral} onChange={(e) => {
-                setSelectedReferral(e.target.value)
-                if (!claimType) {
-                  const r = referrals.find((x) => x.id === e.target.value)
-                  if (r) {
-                    setClaimType(CLAIM_TYPES.find((c) => c.value === typeForReferral(r)) || null)
-                    setFormAmount(String(suggestedForType(typeForReferral(r))))
-                  }
-                }
-              }}
+              <select id="claim-referral" value={selectedReferral} onChange={(e) => handleReferralChange(e.target.value)}
                 className="w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-sm focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15"
               >
                 <option value="">Select a referred user</option>
@@ -327,35 +378,69 @@ export default function AgentClaimsPage() {
                 {referrals.length === 0 && <option value="" disabled>No active referrals yet</option>}
               </select>
             </div>
-            <div>
-              <label htmlFor="claim-type" className="mb-1 block text-sm font-medium text-text-primary">Claim type *</label>
-              <select id="claim-type" value={claimType?.value ?? ""} onChange={(e) => {
-                const t = CLAIM_TYPES.find((c) => c.value === e.target.value)
-                if (t) { setClaimType(t); setFormAmount(String(t.suggested)) }
-              }}
-                className="w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-sm focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15"
-              >
-                <option value="">Select claim type</option>
-                {CLAIM_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
-                ))}
-              </select>
-              {claimType && (
-                <p className="mt-1 text-xs text-text-secondary">{claimType.hint} &middot; Suggested: {fmtKES(claimType.suggested)}</p>
-              )}
-            </div>
-            <div>
-              <label htmlFor="claim-amount" className="mb-1 block text-sm font-medium text-text-primary">Amount (KES)</label>
-              <p className="mt-0.5 text-xs text-text-secondary">Leave blank to use the standard rate for this type.</p>
-              <input id="claim-amount" type="number" min="1" step="0.01" value={formAmount} onChange={(e) => setFormAmount(e.target.value)}
-                className="w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-sm placeholder:text-muted/60 focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15" placeholder={claimType ? fmtKES(claimType.suggested) : "e.g. 500"} />
-            </div>
-            <div>
-              <label htmlFor="claim-notes" className="mb-1 block text-sm font-medium text-text-primary">Notes</label>
-              <textarea id="claim-notes" value={formNotes} onChange={(e) => setFormNotes(e.target.value)} rows={3} placeholder="Reason for claim..."
-                className="w-full resize-none rounded-lg border border-border bg-surface px-4 py-2.5 text-sm placeholder:text-muted/60 focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15" />
-            </div>
-            <button type="submit" disabled={submitting || !selectedReferral || !claimType} aria-busy={submitting}
+
+            {selectedReferral && (
+              <>
+                <div>
+                  <label htmlFor="claim-listings" className="mb-1 block text-sm font-medium text-text-primary">Select listings to claim *</label>
+                  <p className="mt-0.5 text-xs text-text-secondary">Choose one or more of this user's approved listings. One total amount covers all selected listings.</p>
+                  <div id="claim-listings" className="mt-2 max-h-64 overflow-y-auto rounded-lg border border-border bg-surface p-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {listings.length === 0 ? (
+                      <p className="col-span-full text-xs text-text-secondary text-center">Loading listings…</p>
+                    ) : listings.map((l) => (
+                      <label key={l.id} className="flex items-center gap-2 rounded-lg border px-3 py-2 cursor-pointer hover:bg-surface-secondary transition-colors touch-target"
+                        onClick={() => toggleListing(l.id)}
+                      >
+                        <input type="checkbox" checked={isListingSelected(l.id)} onChange={() => toggleListing(l.id)}
+                          className="w-4 h-4 rounded border-border text-primary-600 focus:ring-primary-600" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-text-primary truncate">{l.title}</p>
+                          <p className="text-xs text-text-secondary truncate">{l.city} &middot; {l.propertyType}</p>
+                          {l.price != null && <p className="text-xs font-medium text-text-primary">{fmtKES(Number(l.price))}</p>}
+                        </div>
+                        {isListingSelected(l.id) && <Check size={14} className="text-primary-600" />}
+                      </label>
+                    ))}
+                  </div>
+                  {selectedListingIds.size > 0 && (
+                    <p className="mt-1 text-xs text-success-600">{selectedListingIds.size} listing{selectedListingIds.size !== 1 ? "s" : ""} selected</p>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="claim-type" className="mb-1 block text-sm font-medium text-text-primary">Claim type *</label>
+                  <select id="claim-type" value={claimType?.value ?? ""} onChange={(e) => {
+                    const t = CLAIM_TYPES.find((c) => c.value === e.target.value)
+                    if (t) { setClaimType(t); if (!formAmount) setFormAmount(String(t.suggested)) }
+                  }}
+                    className="w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-sm focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15"
+                  >
+                    <option value="">Select claim type</option>
+                    {CLAIM_TYPES.map((t) => (
+                      <option key={t.value} value={t.value}>{t.label}</option>
+                    ))}
+                  </select>
+                  {claimType && (
+                    <p className="mt-1 text-xs text-text-secondary">{claimType.hint} &middot; Suggested total: {fmtKES(claimType.suggested)}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="claim-amount" className="mb-1 block text-sm font-medium text-text-primary">Total amount (KES) *</label>
+                  <p className="mt-0.5 text-xs text-text-secondary">One amount for all selected listings together.</p>
+                  <input id="claim-amount" type="number" min="1" step="0.01" value={formAmount} onChange={(e) => setFormAmount(e.target.value)}
+                    className="w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-sm placeholder:text-muted/60 focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15" placeholder={claimType ? fmtKES(claimType.suggested) : "e.g. 1000"} />
+                </div>
+
+                <div>
+                  <label htmlFor="claim-notes" className="mb-1 block text-sm font-medium text-text-primary">Notes</label>
+                  <textarea id="claim-notes" value={formNotes} onChange={(e) => setFormNotes(e.target.value)} rows={3} placeholder="Reason for claim..."
+                    className="w-full resize-none rounded-lg border border-border bg-surface px-4 py-2.5 text-sm placeholder:text-muted/60 focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/15" />
+                </div>
+              </>
+            )}
+
+            <button type="submit" disabled={submitting || !selectedReferral || !claimType || selectedListingIds.size === 0 || !formAmount || parseFloat(formAmount) <= 0} aria-busy={submitting}
               className="touch-target inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-primary-700 disabled:opacity-50"
             >{submitting ? <Loader2 size={16} className="animate-spin" /> : null}{submitting ? "Submitting..." : "Submit Claim"}</button>
           </form>
